@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meserete Hiwot ERP - Office Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+Ethiopic:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .amharic { font-family: 'Noto Sans Ethiopic', sans-serif; }
+
+        .ambient-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, rgba(0,0,0,0) 70%); top: -200px; left: -200px; z-index: -1; pointer-events: none; }
+        .ambient-glow-2 { position: absolute; width: 800px; height: 800px; background: radial-gradient(circle, rgba(56,189,248,0.03) 0%, rgba(0,0,0,0) 70%); bottom: -200px; right: -200px; z-index: -1; pointer-events: none; }
+
+        .glass-panel-gold {
+            background: linear-gradient(155deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,215,0,0.14);
+            box-shadow: 0 8px 30px -10px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+            transition: all .35s cubic-bezier(.4,0,.2,1);
+        }
+        .glass-panel-gold:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255,215,0,0.45);
+            box-shadow: 0 22px 45px -14px rgba(255,215,0,0.18), inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .row-in { animation: cardIn .35s cubic-bezier(.22,1,.36,1) both; }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .gold-ring { border: 2px solid rgba(255,215,0,0.55); box-shadow: 0 6px 18px -4px rgba(255,215,0,0.25); }
+        .icon-btn { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; transition: all .25s cubic-bezier(.4,0,.2,1); }
+        .icon-btn:hover { transform: translateY(-3px) scale(1.08); }
+        .id-chip { background: linear-gradient(120deg, rgba(255,215,0,0.16), rgba(255,215,0,0.04)); border: 1px solid rgba(255,215,0,0.3); }
+
+        .tab-btn { transition: all .25s ease; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: #FFD700; border-bottom-color: #FFD700; }
+        .tab-btn:hover:not(.active) { color: #e5e7eb; }
+
+        .status-pill { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+        .status-yellow { background: rgba(234,179,8,0.15); color: #facc15; border: 1px solid rgba(234,179,8,0.35); }
+        .status-blue   { background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.35); }
+        .status-green  { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.35); }
+        .status-red    { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.35); }
+
+        .modal-overlay { transition: opacity .28s ease; }
+        .modal-panel { transition: transform .32s cubic-bezier(.34,1.4,.64,1), opacity .28s ease; }
+        .modal-hidden-state { opacity: 0; pointer-events: none; }
+        .modal-hidden-state .modal-panel { transform: scale(.94) translateY(14px); opacity: 0; }
+        .luxury-modal { background: linear-gradient(160deg, #131c2e, #0c1322); border: 1px solid rgba(255,215,0,0.22); box-shadow: 0 25px 60px -15px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,215,0,0.05); }
+        .section-title { display: flex; align-items: center; gap: 8px; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: #FFD700; font-weight: 700; }
+        .lux-input { transition: all .2s ease; }
+        .lux-input:focus { border-color: #FFD700 !important; box-shadow: 0 0 0 3px rgba(255,215,0,0.12); }
+
+        .file-drop { transition: all .25s ease; }
+        .file-drop:hover { border-color: #FFD700; background: rgba(255,215,0,0.06); }
+        .file-mini-btn { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: all .2s; }
+
+        .toast { animation: toastIn .3s cubic-bezier(.22,1,.36,1) both, toastOut .3s ease 2.4s forwards; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastOut { to { opacity: 0; transform: translateY(-8px); } }
+
+        /* Mobile responsiveness */
+        .lang-btn { transition: all .2s ease; }
+        .lang-btn.active { background: #FFD700; color: #000; }
+        @media (max-width: 768px) {
+            header.glass-panel { flex-direction: column; align-items: stretch; gap: 1rem; padding: 1.25rem; }
+            header.glass-panel .flex.items-center.gap-6 { gap: 1rem; }
+            header.glass-panel img { width: 48px; height: 48px; }
+            header.glass-panel h1 { font-size: 1.35rem; line-height: 1.5rem; }
+            header.glass-panel .flex.items-center.gap-4.mb-2 { width: 100%; justify-content: space-between; margin-bottom: 0; flex-wrap: wrap; gap: .5rem; }
+            main.flex-1.p-10 { padding: 1rem; }
+            .grid.grid-cols-1.md\:grid-cols-4 { gap: .75rem; }
+            .glass-panel-gold.p-6 { padding: 1rem; border-radius: 1.25rem; }
+            .glass-panel-gold h3 { font-size: 1.75rem; }
+            .tab-btn { font-size: .78rem; padding-bottom: .5rem; }
+            table.w-full.text-sm th, table.w-full.text-sm td { padding: .6rem .5rem; white-space: nowrap; }
+            .modal-panel { width: 95%; margin: 1rem auto; }
+            #letterModal .grid.grid-cols-2 { grid-template-columns: 1fr; }
+            .flex.flex-col.md\:flex-row.justify-between button { width: 100%; }
+            .flex.justify-end.gap-3.mb-6 { flex-direction: column; }
+            .flex.justify-end.gap-3.mb-6 button { width: 100%; }
+        }
+        @media (max-width: 480px) {
+            header.glass-panel h1 { font-size: 1.1rem; }
+            .glass-panel-gold h3 { font-size: 1.4rem; }
+        }
+        #printArea { display: none; }
+        @media print {
+            body { background: white; color: black; }
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { display: block; position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 0; }
+            @page { size: A4 landscape; margin: 10mm; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 10px; color: #111827; }
+            .print-table th, .print-table td { border: 1px solid #999; padding: 5px 7px; text-align: left; }
+            .print-table th { background: #f3d97a; color: #111; }
+            .print-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+            .print-header img { width: 36px; height: 36px; }
+            .print-header h2 { margin: 0; font-size: 16px; }
+            .print-header p { margin: 0; font-size: 11px; color: #555; }
+        }
+    </style>
+
+<style id="light-dashboard-office-theme">
+:root{
+    --bg:#F7F8FA;
+    --surface:#FFFFFF;
+    --surface-soft:#F1F3F5;
+    --text:#172033;
+    --text-muted:#596579;
+    --primary:#B8922E;
+    --primary-bright:#D4AF37;
+    --border:#E2E6EC;
+    --primary-rgb:184,146,46;
+}
+html,body{background:var(--bg)!important;color:var(--text)!important;}
+body{
+    min-width:0;
+    width:100%;
+    overflow-x:hidden!important;
+}
+*,*::before,*::after{box-sizing:border-box;}
+img,svg,canvas{max-width:100%;}
+main{min-width:0;max-width:100%;width:100%;}
+header.main-header{
+    position:sticky;
+    top:0;
+    z-index:30;
+    height:64px;
+    min-height:64px;
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:.75rem;
+    padding:0 .85rem!important;
+    background:var(--surface)!important;
+    color:var(--text)!important;
+    border-bottom:1px solid var(--border)!important;
+    box-shadow:0 1px 8px rgba(23,32,51,.04);
+    backdrop-filter:none!important;
+}
+@media (min-width:1024px){
+    header.main-header{padding:0 1.5rem!important;}
+}
+.mh-logo{
+    width:36px!important;
+    height:36px!important;
+    flex:0 0 36px!important;
+    border-radius:11px!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    background:linear-gradient(145deg,var(--primary-bright),var(--primary))!important;
+    box-shadow:0 6px 18px rgba(var(--primary-rgb),.18)!important;
+    padding:0!important;
+    border:0!important;
+}
+.mh-logo img{
+    width:100%!important;
+    height:100%!important;
+    object-fit:contain!important;
+    border-radius:inherit!important;
+    display:block!important;
+}
+.header-left,.header-right,.header-center,.brand,.brand-text{min-width:0;}
+.header-left{display:flex;align-items:center;gap:.6rem;flex:0 1 auto;}
+.header-left .brand{display:flex;align-items:center;gap:.6rem;min-width:0;}
+.brand-name{
+    display:block!important;
+    color:var(--text)!important;
+    font-size:.8rem!important;
+    font-weight:700!important;
+    letter-spacing:.06em!important;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.brand-sub{
+    display:block!important;
+    color:var(--text-muted)!important;
+    font-size:.66rem!important;
+    white-space:nowrap;
+}
+.header-center{
+    flex:1;
+    display:flex!important;
+    justify-content:center;
+    min-width:0;
+}
+.office-page-title{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-width:0;
+    text-align:center;
+}
+.office-page-kicker{
+    color:var(--primary)!important;
+    font-size:.62rem;
+    font-weight:800;
+    letter-spacing:.12em;
+    line-height:1.1;
+}
+.office-page-name{
+    color:var(--text)!important;
+    font-size:.82rem;
+    font-weight:600;
+    margin-top:.15rem;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.header-right{
+    display:flex!important;
+    align-items:center;
+    gap:.3rem!important;
+    margin-left:auto;
+    flex:0 0 auto;
+}
+.office-date{text-align:right;margin-right:.35rem;min-width:0;}
+.office-date p:first-child{margin:0;color:var(--text-muted)!important;font-size:.68rem;}
+.office-date p:last-child{margin:.15rem 0 0;color:var(--text)!important;font-size:.78rem;font-weight:600;}
+.office-lang{
+    border:1px solid var(--border)!important;
+    background:var(--surface)!important;
+}
+.office-lang .lang-btn{
+    min-height:36px;
+    padding:0 .6rem!important;
+    background:transparent!important;
+    color:var(--text-muted)!important;
+    border:0!important;
+}
+.office-lang .lang-btn:hover{background:var(--surface-soft)!important;color:var(--text)!important;}
+.office-lang .lang-btn.active{
+    background:var(--primary)!important;
+    color:#fff!important;
+}
+.office-home{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:.35rem;
+    min-height:40px;
+    padding:.3rem .75rem;
+    border-radius:10px;
+    background:transparent!important;
+    color:var(--text)!important;
+    border:1px solid var(--border)!important;
+    text-decoration:none;
+    font-size:.78rem;
+    font-weight:700;
+    white-space:nowrap;
+}
+.office-home:hover{background:var(--surface-soft)!important;border-color:rgba(var(--primary-rgb),.45)!important;}
+
+.glass-panel{
+    background:var(--surface)!important;
+    color:var(--text)!important;
+    border-color:var(--border)!important;
+    box-shadow:0 8px 24px rgba(23,32,51,.05);
+    backdrop-filter:none!important;
+}
+.glass-panel-gold{
+    background:var(--surface)!important;
+    color:var(--text)!important;
+    border-color:var(--border)!important;
+    box-shadow:0 8px 24px rgba(23,32,51,.07)!important;
+    backdrop-filter:none!important;
+}
+.glass-panel-gold:hover{
+    border-color:rgba(var(--primary-rgb),.45)!important;
+    box-shadow:0 16px 32px rgba(23,32,51,.10)!important;
+}
+body .text-white{color:var(--text)!important;}
+body .text-gray-200{color:#344054!important;}
+body .text-gray-300{color:#475467!important;}
+body .text-gray-400{color:var(--text-muted)!important;}
+body .text-gray-500{color:#667085!important;}
+body .text-gray-600{color:#475467!important;}
+body .text-yellow-400,body .text-yellow-500{color:var(--primary)!important;}
+body .text-blue-400{color:#2563eb!important;}
+body .text-green-400{color:#187A54!important;}
+body .text-red-400{color:#B33440!important;}
+
+body .bg-white\/5{background:var(--surface-soft)!important;}
+body .bg-white\/10{background:#E9EDF2!important;}
+body .bg-black\/50{background:#F1F3F5!important;}
+body .bg-\[\#1e293b\]{background:var(--surface)!important;}
+body .border-white\/5,
+body .border-white\/10,
+body .border-white\/20{border-color:var(--border)!important;}
+body .hover\:bg-white\/5:hover{background:var(--surface-soft)!important;}
+body .hover\:bg-white\/10:hover{background:#E9EDF2!important;}
+
+.tab-btn{color:var(--text-muted)!important;}
+.tab-btn.active{color:var(--primary)!important;border-bottom-color:var(--primary)!important;}
+.tab-btn:hover:not(.active){color:var(--text)!important;}
+.lux-input{
+    background:var(--surface)!important;
+    color:var(--text)!important;
+    border-color:var(--border)!important;
+}
+.lux-input:focus{border-color:var(--primary)!important;box-shadow:0 0 0 3px rgba(var(--primary-rgb),.12)!important;}
+.lux-input option{background:var(--surface);color:var(--text);}
+.id-chip{
+    background:rgba(var(--primary-rgb),.10)!important;
+    border-color:rgba(var(--primary-rgb),.28)!important;
+    color:var(--primary)!important;
+}
+.section-title{color:var(--primary)!important;}
+.file-drop{background:var(--surface-soft)!important;border-color:var(--border)!important;}
+.file-drop:hover{border-color:var(--primary)!important;background:rgba(var(--primary-rgb),.06)!important;}
+.luxury-modal{
+    background:var(--surface)!important;
+    color:var(--text)!important;
+    border-color:rgba(var(--primary-rgb),.28)!important;
+    box-shadow:0 25px 60px rgba(23,32,51,.18)!important;
+}
+.modal-panel{color:var(--text)!important;}
+#letterModal,#viewModal{background:rgba(23,32,51,.45)!important;}
+.status-yellow{background:rgba(138,93,7,.10)!important;color:#8A5D07!important;border-color:rgba(138,93,7,.25)!important;}
+.status-blue{background:rgba(37,99,235,.09)!important;color:#2563eb!important;border-color:rgba(37,99,235,.22)!important;}
+.status-green{background:rgba(24,122,84,.09)!important;color:#187A54!important;border-color:rgba(24,122,84,.22)!important;}
+.status-red{background:rgba(179,52,64,.09)!important;color:#B33440!important;border-color:rgba(179,52,64,.22)!important;}
+.toast{box-shadow:0 12px 30px rgba(23,32,51,.12)!important;}
+
+body .bg-yellow-500{background:var(--primary)!important;}
+body .hover\:bg-yellow-400:hover{background:var(--primary-bright)!important;}
+body .shadow-yellow-500\/20{box-shadow:0 8px 20px rgba(var(--primary-rgb),.18)!important;}
+body .shadow-yellow-500\/10{box-shadow:0 6px 18px rgba(var(--primary-rgb),.12)!important;}
+
+.ambient-glow{background:radial-gradient(circle,rgba(var(--primary-rgb),.055) 0%,rgba(0,0,0,0) 70%)!important;}
+.ambient-glow-2{background:radial-gradient(circle,rgba(37,99,235,.025) 0%,rgba(0,0,0,0) 70%)!important;}
+
+main.flex-1.p-10{padding:1.5rem!important;}
+table{width:100%!important;max-width:100%!important;table-layout:fixed;}
+table th,table td{
+    white-space:normal!important;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    color:inherit;
+}
+table thead{background:var(--surface-soft)!important;color:var(--text-muted)!important;}
+table tbody tr{border-color:var(--border)!important;}
+table tbody tr:hover{background:var(--surface-soft)!important;}
+table .truncate{white-space:normal!important;overflow:hidden;text-overflow:ellipsis;}
+.icon-btn{color:var(--text-muted)!important;}
+.icon-btn:hover{background:var(--surface-soft)!important;color:var(--text)!important;}
+
+@media (max-width:1023px){
+    header.main-header{
+        height:60px;
+        min-height:60px;
+        padding:0 .55rem!important;
+        gap:.35rem;
+    }
+    .header-left{gap:.3rem;}
+    .header-left .brand{gap:.45rem;}
+    .header-left .mh-logo{
+        width:34px!important;
+        height:34px!important;
+        flex-basis:34px!important;
+        border-radius:9px!important;
+    }
+    .brand-name{font-size:.72rem!important;letter-spacing:.04em!important;}
+    .brand-sub{display:none!important;}
+    .header-center{display:none!important;}
+    .office-date{display:none!important;}
+    .office-header-right{margin-left:auto;}
+    .office-home{min-height:38px;padding:.3rem .55rem;font-size:.72rem;}
+    .office-home span{display:none;}
+    .office-lang .lang-btn{min-height:36px;padding:0 .48rem!important;font-size:.68rem;}
+    main.flex-1.p-10{padding:1rem!important;}
+    .grid.grid-cols-1.md\\:grid-cols-4{gap:.75rem;}
+    .glass-panel-gold.p-6{padding:1rem!important;border-radius:1rem!important;}
+    .glass-panel-gold h3{font-size:1.65rem!important;}
+    .tab-btn{font-size:.75rem;padding:.55rem .15rem!important;}
+    .flex.items-center.gap-6.border-b{
+        flex-wrap:wrap!important;
+        gap:.25rem .7rem!important;
+        overflow-x:visible!important;
+    }
+    .flex.flex-col.md\\:flex-row.justify-between{align-items:stretch!important;}
+    .flex.flex-col.md\\:flex-row.justify-between > .flex.items-center{width:100%;gap:.5rem!important;}
+    .flex.flex-col.md\\:flex-row.justify-between > button{width:100%;max-width:none;}
+    input.w-56,select{max-width:100%;}
+    .flex.items-center.gap-3.flex-wrap input.w-56{width:100%!important;}
+    .flex.items-center.gap-3.flex-wrap select{flex:1 1 140px;min-width:0;}
+    .glass-panel.rounded-3xl.overflow-x-auto{
+        overflow-x:hidden!important;
+        width:100%;
+        max-width:100%;
+    }
+    table.w-full.text-sm th,table.w-full.text-sm td{
+        padding:.5rem .35rem!important;
+        font-size:.68rem!important;
+    }
+    table .icon-btn{
+        width:28px!important;
+        height:28px!important;
+        border-radius:8px!important;
+        transform:none!important;
+    }
+    table .flex.justify-center.gap-2{gap:.2rem!important;flex-wrap:wrap;}
+    .modal-panel{width:calc(100% - 1rem)!important;max-width:none!important;margin:.5rem auto!important;}
+    #letterModal .grid.grid-cols-2{grid-template-columns:1fr!important;}
+    .flex.justify-end.gap-3.mb-6{flex-direction:column!important;}
+    .flex.justify-end.gap-3.mb-6 button{width:100%!important;}
+    .toast{left:.75rem!important;right:.75rem!important;bottom:.75rem!important;}
+}
+@media (max-width:480px){
+    header.main-header{padding:0 .4rem!important;}
+    .header-left .mh-logo{width:34px!important;height:34px!important;flex-basis:34px!important;}
+    .brand-name{font-size:.66rem!important;}
+    .office-lang .lang-btn{padding:0 .35rem!important;font-size:.64rem;}
+    .office-home{padding:.25rem .45rem;}
+    main.flex-1.p-10{padding:.75rem!important;}
+    .glass-panel-gold h3{font-size:1.35rem!important;}
+    .tab-btn{font-size:.68rem!important;}
+    table.w-full.text-sm th,table.w-full.text-sm td{padding:.4rem .25rem!important;font-size:.62rem!important;}
+    table .icon-btn{width:26px!important;height:26px!important;font-size:11px;}
+    .modal-panel{width:calc(100% - .75rem)!important;}
+}
+</style>
+
+<style id="office-modern-responsive-theme">
+html{background:var(--bg)!important;overflow-x:hidden!important}
+body{min-width:0!important;width:100%!important;max-width:100vw!important;overflow-x:hidden!important;background:var(--bg)!important;color:var(--text)!important}
+body[data-theme="dark"],html[data-theme="dark"] body{background:#0F172A!important;color:#F8FAFC!important}
+html[data-theme="dark"]{--bg:#0F172A;--surface:#111C2E;--surface-soft:#182338;--text:#F8FAFC;--text-muted:#AAB5C7;--primary:#D4AF37;--primary-bright:#F1D36A;--border:#29364A;--primary-rgb:212,175,55}
+
+/* Dashboard-style header controls */
+.theme-toggle{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.35rem;padding:0 .65rem;border:1px solid var(--border)!important;border-radius:10px;background:var(--surface)!important;color:var(--text-muted)!important;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.18s ease}
+.theme-toggle:hover{background:var(--surface-soft)!important;color:var(--text)!important;border-color:rgba(var(--primary-rgb),.4)!important}
+.theme-toggle span:first-child{font-size:1rem;line-height:1}
+html[data-theme="dark"] .theme-toggle{background:#162136!important;color:#F8FAFC!important}
+
+/* Clean, modern top statistics */
+.glass-panel-gold{background:var(--surface)!important;border:1px solid var(--border)!important;box-shadow:0 10px 30px rgba(23,32,51,.055)!important;backdrop-filter:none!important;transform:none!important}
+.glass-panel-gold:hover{transform:translateY(-2px)!important;border-color:rgba(var(--primary-rgb),.38)!important;box-shadow:0 16px 34px rgba(23,32,51,.09)!important}
+.glass-panel-gold p{color:var(--text-muted)!important}
+.glass-panel-gold h3{color:var(--text)!important;letter-spacing:-.04em}
+.glass-panel-gold:before{content:"";display:block;width:36px;height:3px;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--primary-bright));margin-bottom:.85rem}
+
+/* Luxury professional dialogs */
+.modal-overlay{background:rgba(23,32,51,.42)!important;backdrop-filter:blur(8px)!important;padding:1rem!important;overscroll-behavior:contain}
+.modal-panel{width:min(720px,100%)!important;max-width:720px!important;max-height:min(92vh,900px)!important;margin:auto!important;border-radius:20px!important;overflow:hidden!important}
+#viewModal .modal-panel{width:min(620px,100%)!important;max-width:620px!important}
+.luxury-modal{background:var(--surface)!important;color:var(--text)!important;border:1px solid rgba(var(--primary-rgb),.28)!important;box-shadow:0 30px 80px rgba(23,32,51,.20),0 0 0 1px rgba(var(--primary-rgb),.05)!important}
+.modal-panel>div:first-child{background:var(--surface-soft)!important;border-bottom:1px solid var(--border)!important}
+.modal-panel form,.modal-panel #viewModalBody{background:var(--surface)!important;color:var(--text)!important}
+.modal-panel .border-white\/10,.modal-panel .border-yellow-500\/15{border-color:var(--border)!important}
+.modal-panel .bg-white\/5{background:var(--surface-soft)!important}
+.modal-panel .text-gray-400{color:var(--text-muted)!important}
+.modal-panel .text-gray-300{color:#475467!important}
+.modal-panel .text-gray-200{color:var(--text)!important}
+.modal-panel .lux-input{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
+.modal-panel select.lux-input option{background:var(--surface);color:var(--text)}
+.modal-panel .bg-black\/50{background:var(--surface-soft)!important;color:var(--text)!important}
+.modal-panel .file-drop{background:var(--surface-soft)!important;border-color:var(--border)!important}
+#viewModalBody p{margin:0;padding:.65rem .75rem;border:1px solid var(--border);border-radius:12px;background:var(--surface-soft);overflow-wrap:anywhere}
+#viewModalBody .section-title{margin-top:.25rem}
+#viewModalBody img{max-width:100%;height:auto;max-height:320px;object-fit:contain}
+
+/* Never let tables create a page-level horizontal scrollbar */
+main,.glass-panel,section,article,.modal-panel,.modal-panel form,#viewModalBody{min-width:0;max-width:100%}
+.overflow-x-auto{overflow-x:hidden!important}
+table{width:100%!important;max-width:100%!important;table-layout:fixed!important}
+table th,table td{white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important}
+
+/* Chart area */
+#reportsTab .glass-panel{background:var(--surface)!important;border:1px solid var(--border)!important;box-shadow:0 10px 30px rgba(23,32,51,.05)!important}
+#reportsTab canvas{max-width:100%!important}
+
+@media (max-width:768px){
+  header.main-header{position:sticky!important;top:0!important}
+  .office-header-right{gap:.25rem!important}
+  .theme-toggle{width:38px;padding:0!important}
+  .theme-toggle-label{display:none}
+  main.flex-1.p-10{padding:.8rem!important}
+  .grid.grid-cols-1.md\\:grid-cols-4{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:.65rem!important}
+  .glass-panel-gold.p-6{padding:.85rem!important;border-radius:15px!important}
+  .glass-panel-gold h3{font-size:1.65rem!important}
+  .glass-panel-gold p{font-size:.68rem!important}
+
+  /* Mobile table -> clean cards, no horizontal scrolling */
+  table,table thead,table tbody,table tr,table th,table td{display:block!important;width:100%!important;max-width:100%!important}
+  table thead{display:none!important}
+  table tbody tr{margin:0 0 .75rem;border:1px solid var(--border)!important;border-radius:14px;background:var(--surface)!important;padding:.35rem 0;box-shadow:0 5px 16px rgba(23,32,51,.045)}
+  table tbody td{display:flex!important;align-items:flex-start;justify-content:space-between;gap:.75rem;padding:.55rem .75rem!important;border:0!important;border-bottom:1px solid var(--border)!important;font-size:.72rem!important;min-width:0}
+  table tbody td:last-child{border-bottom:0!important}
+  table tbody td:before{content:"";flex:0 0 34%;max-width:34%;color:var(--text-muted);font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  #incomingTableBody td:nth-child(1):before{content:"Ref"}#incomingTableBody td:nth-child(2):before{content:"From"}#incomingTableBody td:nth-child(3):before{content:"Date"}#incomingTableBody td:nth-child(4):before{content:"Summary"}#incomingTableBody td:nth-child(5):before{content:"Category"}#incomingTableBody td:nth-child(6):before{content:"Status"}#incomingTableBody td:nth-child(7):before{content:"Actions"}
+  #outgoingTableBody td:nth-child(1):before{content:"Ref"}#outgoingTableBody td:nth-child(2):before{content:"To"}#outgoingTableBody td:nth-child(3):before{content:"Subject"}#outgoingTableBody td:nth-child(4):before{content:"Date"}#outgoingTableBody td:nth-child(5):before{content:"Author"}#outgoingTableBody td:nth-child(6):before{content:"Category"}#outgoingTableBody td:nth-child(7):before{content:"Status"}#outgoingTableBody td:nth-child(8):before{content:"Actions"}
+  table tbody td:last-child>div{justify-content:flex-end!important;flex-wrap:wrap!important;gap:.2rem!important}
+
+  .modal-overlay{padding:.5rem!important;align-items:flex-start!important}
+  .modal-panel,#viewModal .modal-panel{width:100%!important;max-width:100%!important;max-height:calc(100vh - 1rem)!important;margin:.5rem 0!important;border-radius:16px!important}
+  .modal-panel form{padding:1rem!important;overflow-x:hidden!important}
+  .modal-panel .grid.grid-cols-2{grid-template-columns:1fr!important}
+  .modal-panel .grid.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .modal-panel input,.modal-panel select,.modal-panel textarea{max-width:100%!important;min-width:0!important}
+  .modal-panel .flex.justify-end{flex-direction:column!important}
+  .modal-panel .flex.justify-end button{width:100%!important}
+  #viewModalBody{padding:1rem!important;overflow-x:hidden!important}
+  #viewModalBody .flex.justify-between{align-items:flex-start!important;flex-wrap:wrap!important;gap:.5rem!important}
+  .toast{left:.6rem!important;right:.6rem!important;bottom:.6rem!important}
+}
+@media (max-width:430px){
+  .grid.grid-cols-1.md\\:grid-cols-4{grid-template-columns:1fr 1fr!important}
+  .office-lang .lang-btn{padding:0 .38rem!important}
+  .office-home{min-width:38px!important}
+  .office-page-name{font-size:.72rem!important}
+  .modal-panel .grid.grid-cols-3{gap:.25rem!important}
+}
+
+html[data-theme="dark"] .glass-panel-gold,html[data-theme="dark"] #reportsTab .glass-panel{box-shadow:0 10px 30px rgba(0,0,0,.22)!important}
+html[data-theme="dark"] .modal-overlay{background:rgba(2,6,23,.66)!important}
+html[data-theme="dark"] .modal-panel .text-gray-300{color:#CBD5E1!important}
+html[data-theme="dark"] #viewModalBody p{background:#182338!important;border-color:#29364A!important}
+</style>
+
+<style id="no-page-vertical-scroll-fix">
+html,body{
+    width:100%;
+    max-width:100%;
+    height:100%;
+    min-height:100%;
+    margin:0;
+    overflow:hidden!important;
+    overscroll-behavior:none;
+}
+body{
+    position:fixed;
+    inset:0;
+}
+main,main.flex-1,.main-content,.app-body{
+    min-width:0!important;
+    max-width:100%!important;
+    min-height:0!important;
+}
+header.main-header{flex-shrink:0!important;}
+
+@media (max-width:1023px){
+    html,body{overflow:hidden!important;}
+    main,main.flex-1,.main-content{
+        min-height:0!important;
+        max-height:calc(100dvh - 60px)!important;
+        overflow-y:auto!important;
+        overflow-x:hidden!important;
+        -webkit-overflow-scrolling:touch;
+    }
+    .luxury-modal,#letterModal,#viewModal{
+        overflow:hidden!important;
+    }
+    .luxury-modal .modal-panel,
+    #letterModal .modal-panel,
+    #viewModal .modal-panel{
+        max-height:calc(100dvh - 1rem)!important;
+        overflow-y:auto!important;
+        overflow-x:hidden!important;
+        -webkit-overflow-scrolling:touch;
+    }
+}
+
+@media (min-width:1024px){
+    main,main.flex-1,.main-content{
+        max-height:calc(100dvh - 64px)!important;
+        overflow-y:auto!important;
+        overflow-x:hidden!important;
+    }
+}
+</style>
+
+
+<style id="student-header-match">
+/* Match students.html header layout exactly; page content is untouched. */
+header.app-header { position:sticky; top:0; z-index:30; }
+.header-controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.lang-switch { display:flex; align-items:center; background:var(--glass-bg, var(--surface-soft)); border:1px solid var(--glass-border, var(--border)); border-radius:999px; padding:3px; gap:2px; }
+.lang-switch button { border:none; background:transparent; font-size:12px; font-weight:700; letter-spacing:.03em; padding:6px 12px; border-radius:999px; color:var(--text-muted); cursor:pointer; transition:all .25s ease; }
+.lang-switch button.active { background:var(--primary, #B8922E); color:#fff; box-shadow:0 4px 12px -3px rgba(255,215,0,.4); }
+.theme-toggle { position:relative; width:52px; height:30px; border-radius:999px; border:1px solid var(--glass-border, var(--border)); background:var(--glass-bg, var(--surface-soft)); cursor:pointer; padding:0; flex-shrink:0; }
+.theme-toggle .knob { position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%; background:var(--primary-bright, #D4AF37); display:flex; align-items:center; justify-content:center; transition:transform .35s cubic-bezier(.4,0,.2,1); box-shadow:0 2px 6px rgba(0,0,0,.3); }
+html[data-theme="light"] .theme-toggle .knob { transform:translateX(22px); }
+.theme-toggle .knob svg { width:14px; height:14px; }
+.theme-toggle .theme-toggle-label { display:none; }
+.back-dash-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 16px; border-radius:12px; font-size:13px; font-weight:700; background:var(--glass-bg, var(--surface)); border:1px solid var(--glass-border, var(--border)); color:var(--text-main, var(--text)); transition:all .2s ease; text-decoration:none; }
+.back-dash-btn:hover { background:var(--hover-bg, var(--surface-soft)); transform:translateY(-2px); }
+@media (min-width:769px) {
+  header.app-header { flex-wrap:nowrap !important; align-items:center !important; justify-content:space-between !important; gap:28px !important; min-height:104px; }
+  header.app-header > div:first-child { flex:1 1 auto; min-width:0; }
+  header.app-header > .header-controls { flex:0 0 auto; width:auto !important; max-width:none !important; flex-wrap:nowrap !important; align-items:center !important; justify-content:flex-end !important; gap:10px !important; white-space:nowrap; }
+  header.app-header > div:first-child > div { min-width:0; }
+  header.app-header h1 { white-space:nowrap !important; overflow:hidden; text-overflow:ellipsis; }
+  header.app-header .text-right { flex:0 0 auto; min-width:155px; margin-right:2px !important; }
+  header.app-header .lang-switch, header.app-header .theme-toggle, header.app-header .back-dash-btn { flex:0 0 auto !important; }
+  header.app-header .back-dash-btn { white-space:nowrap !important; }
+}
+@media (max-width:768px) {
+  header.app-header { padding:1rem !important; flex-wrap:wrap; gap:12px; }
+}
+@media (max-width:640px) {
+  header.app-header { padding:14px 16px !important; align-items:center !important; }
+  header.app-header h1 { font-size:1.05rem !important; line-height:1.2 !important; }
+  header.app-header p { font-size:.68rem !important; }
+  .header-controls { width:100%; justify-content:space-between; gap:7px; }
+  .lang-switch button { padding:6px 9px; }
+  .back-dash-btn { padding:9px !important; }
+  .back-dash-btn span.label { display:none; }
+}
+@media (max-width:480px) {
+  header.app-header h1 { font-size:1.05rem !important; }
+  header.app-header img { width:44px !important; height:44px !important; }
+}
+</style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <div class="ambient-glow no-print"></div>
+    <div class="ambient-glow-2 no-print"></div>
+
+    <!-- HEADER -->
+<header id="mainHeader" class="app-header glass-panel w-full p-6 md:p-8 flex flex-wrap justify-between items-center md:items-end gap-4 border-b border-white/5 z-10 no-print">
+    <div class="flex items-center gap-4 md:gap-6 min-w-0">
+        <img src="logo.png" alt="Logo" class="w-12 h-12 md:w-20 md:h-20 rounded-2xl bg-white/5 p-2 border border-white/10 shadow-xl shadow-yellow-500/10 flex-shrink-0">
+        <div class="min-w-0">
+            <h1 class="text-xl md:text-4xl font-bold tracking-tight truncate">
+                <span class="lang-en">Meserete Hiwot ERP System</span>
+                <span class="lang-am">መሰረተ ህይወት ኢ.አር.ፒ ሲስተም</span>
+            </h1>
+            <p class="text-yellow-500 font-medium mt-1 text-xs md:text-base">
+                <span class="lang-en">Office Management System <span class="amharic text-sm ml-2">(የቢሮ አስተዳደር ስርዓት)</span></span>
+                <span class="lang-am">የቢሮ አስተዳደር ስርዓት</span>
+            </p>
+        </div>
+    </div>
+    <div class="header-controls">
+        <div class="text-right mr-2 hidden lg:block">
+            <p class="text-sm text-gray-400" id="dateDisplay">Loading date...</p>
+            <p class="text-lg font-semibold" id="adminLabel"><span class="lang-en">Admin Dashboard</span><span class="lang-am">አድሚን ዳሽቦርድ</span></p>
+        </div>
+        <button id="themeToggle" type="button" class="theme-toggle no-print" onclick="toggleTheme()" aria-label="Toggle light and dark theme" title="Toggle light and dark theme"><span id="themeToggleIcon" class="knob">☾</span><span class="theme-toggle-label">Dark</span></button>
+        <div class="lang-switch" role="group" aria-label="Language switcher">
+            <button id="langBtnEn" type="button" onclick="setLanguage('en')">EN</button>
+            <button id="langBtnAm" type="button" onclick="setLanguage('am')" class="amharic">አማ</button>
+        </div>
+        <a href="dashboard.html" id="homeBtn" class="back-dash-btn">🏠 <span class="label"><span class="lang-en">Back to Dashboard</span><span class="lang-am">ወደ ዳሽቦርድ ተመለስ</span></span></a>
+    </div>
+</header>
+
+    <main class="flex-1 p-10 z-10">
+
+        <!-- Alerts banner -->
+        <div id="alertBanner" class="hidden mb-6 no-print"></div>
+
+        <!-- Dashboard Widgets -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 no-print">
+            <div class="glass-panel-gold p-6 rounded-3xl border border-blue-500/20">
+                <p class="text-gray-400 text-sm" id="statIncomingLabel">📥 Total Incoming <span class="amharic block text-[10px]">ጠቅላላ ገቢ</span></p>
+                <h3 id="statIncoming" class="text-4xl font-bold mt-2 text-blue-400">0</h3>
+            </div>
+            <div class="glass-panel-gold p-6 rounded-3xl border border-green-500/20">
+                <p class="text-gray-400 text-sm" id="statOutgoingLabel">📤 Total Outgoing <span class="amharic block text-[10px]">ጠቅላላ ወጪ</span></p>
+                <h3 id="statOutgoing" class="text-4xl font-bold mt-2 text-green-400">0</h3>
+            </div>
+            <div class="glass-panel-gold p-6 rounded-3xl border border-yellow-500/20">
+                <p class="text-gray-400 text-sm" id="statPendingLabel">⏳ Pending <span class="amharic block text-[10px]">በሂደት ላይ</span></p>
+                <h3 id="statPending" class="text-4xl font-bold mt-2 text-yellow-400">0</h3>
+            </div>
+            <div class="glass-panel-gold p-6 rounded-3xl border border-red-500/20">
+                <p class="text-gray-400 text-sm" id="statUrgentLabel">🚨 Urgent <span class="amharic block text-[10px]">አስቸኳይ</span></p>
+                <h3 id="statUrgent" class="text-4xl font-bold mt-2 text-red-400">0</h3>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex items-center gap-6 border-b border-white/10 mb-6 no-print overflow-x-auto">
+            <button id="tabIncoming" onclick="switchTab('incoming')" class="tab-btn active px-2 pb-3 text-sm font-semibold whitespace-nowrap"><span id="tabIncomingLabel">📥 Incoming Letters</span> <span class="amharic">ገቢ ደብዳቤዎች</span></button>
+            <button id="tabOutgoing" onclick="switchTab('outgoing')" class="tab-btn px-2 pb-3 text-sm font-semibold whitespace-nowrap"><span id="tabOutgoingLabel">📤 Outgoing Letters</span> <span class="amharic">ወጪ ደብዳቤዎች</span></button>
+            <button id="tabReports" onclick="switchTab('reports')" class="tab-btn px-2 pb-3 text-sm font-semibold whitespace-nowrap"><span id="tabReportsLabel">📊 Reports &amp; Analytics</span> <span class="amharic">ሪፖርት እና ትንተና</span></button>
+        </div>
+
+        <!-- ============ INCOMING TAB ============ -->
+        <div id="incomingTab">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-5 gap-3 no-print">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <input type="text" id="incSearch" placeholder="🔍 Search Ref #, Sender..." onkeyup="renderIncoming()" class="glass-panel bg-transparent px-4 py-2 rounded-xl focus:outline-none focus:border-yellow-500 w-56">
+                    <select id="incCategoryFilter" onchange="renderIncoming()" class="lux-input bg-[#1e293b] border border-white/10 rounded-xl px-3 py-2 text-sm"></select>
+                    <select id="incStatusFilter" onchange="renderIncoming()" class="lux-input bg-[#1e293b] border border-white/10 rounded-xl px-3 py-2 text-sm">
+                        <option value="" id="incStatusAll">All Status</option>
+                        <option value="pending" id="incStatusPending">Pending</option>
+                        <option value="reviewed" id="incStatusReviewed">Reviewed</option>
+                        <option value="replied" id="incStatusReplied">Replied</option>
+                        <option value="urgent" id="incStatusUrgent">Urgent</option>
+                    </select>
+                </div>
+                <button onclick="openLetterModal('incoming')" id="btnRegisterIncoming" class="px-5 py-2.5 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition shadow-lg shadow-yellow-500/20 whitespace-nowrap">+ Register Incoming Letter</button>
+            </div>
+
+            <div class="glass-panel rounded-3xl overflow-x-auto no-print">
+                <table class="w-full text-sm">
+                    <thead class="bg-white/5 text-gray-400 uppercase text-xs">
+                        <tr>
+                            <th class="p-4 text-left" id="thIncRef">የገቢ መለያ ቁጥር</th>
+                            <th class="p-4 text-left" id="thIncSender">ከማን የመጣ</th>
+                            <th class="p-4 text-left" id="thIncDate">ቀን</th>
+                            <th class="p-4 text-left" id="thIncSummary">ማጠቃለያ</th>
+                            <th class="p-4 text-left" id="thIncCategory">ምድብ</th>
+                            <th class="p-4 text-center" id="thIncStatus">ሁኔታ</th>
+                            <th class="p-4 text-center" id="thIncActions">ድርጊቶች</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incomingTableBody"></tbody>
+                </table>
+                <p id="incomingEmptyMsg" class="hidden text-center text-gray-500 py-16">No incoming letters found.</p>
+            </div>
+        </div>
+
+        <!-- ============ OUTGOING TAB ============ -->
+        <div id="outgoingTab" class="hidden">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-5 gap-3 no-print">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <input type="text" id="outSearch" placeholder="🔍 Search Dispatch #, Recipient..." onkeyup="renderOutgoing()" class="glass-panel bg-transparent px-4 py-2 rounded-xl focus:outline-none focus:border-yellow-500 w-56">
+                    <select id="outCategoryFilter" onchange="renderOutgoing()" class="lux-input bg-[#1e293b] border border-white/10 rounded-xl px-3 py-2 text-sm"></select>
+                    <select id="outStatusFilter" onchange="renderOutgoing()" class="lux-input bg-[#1e293b] border border-white/10 rounded-xl px-3 py-2 text-sm">
+                        <option value="" id="outStatusAll">All Status</option>
+                        <option value="completed" id="outStatusCompleted">Completed</option>
+                        <option value="pending" id="outStatusPending">Pending</option>
+                        <option value="urgent" id="outStatusUrgent">Urgent</option>
+                    </select>
+                </div>
+                <button onclick="openLetterModal('outgoing')" id="btnRegisterOutgoing" class="px-5 py-2.5 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition shadow-lg shadow-yellow-500/20 whitespace-nowrap">+ Register Outgoing Letter</button>
+            </div>
+
+            <div class="glass-panel rounded-3xl overflow-x-auto no-print">
+                <table class="w-full text-sm">
+                    <thead class="bg-white/5 text-gray-400 uppercase text-xs">
+                        <tr>
+                            <th class="p-4 text-left" id="thOutRef">የወጪ መለያ ቁጥር</th>
+                            <th class="p-4 text-left" id="thOutRecipient">ለማን የተላከ</th>
+                            <th class="p-4 text-left" id="thOutSubject">ርዕሰ ጉዳይ</th>
+                            <th class="p-4 text-left" id="thOutDate">ቀን</th>
+                            <th class="p-4 text-left" id="thOutAuthor">ኃላፊ</th>
+                            <th class="p-4 text-left" id="thOutCategory">ምድብ</th>
+                            <th class="p-4 text-center" id="thOutStatus">ሁኔታ</th>
+                            <th class="p-4 text-center" id="thOutActions">ድርጊቶች</th>
+                        </tr>
+                    </thead>
+                    <tbody id="outgoingTableBody"></tbody>
+                </table>
+                <p id="outgoingEmptyMsg" class="hidden text-center text-gray-500 py-16">No outgoing letters found.</p>
+            </div>
+        </div>
+
+        <!-- ============ REPORTS TAB ============ -->
+        <div id="reportsTab" class="hidden">
+            <div class="flex justify-end gap-3 mb-6 no-print">
+                <button onclick="exportIncomingPdf()" id="btnIncomingPdf" class="px-5 py-2.5 glass-panel rounded-xl hover:bg-white/10 transition font-semibold text-sm">📥 Incoming Letter PDF</button>
+                <button onclick="exportOutgoingPdf()" id="btnOutgoingPdf" class="px-5 py-2.5 glass-panel rounded-xl hover:bg-white/10 transition font-semibold text-sm">📤 Outgoing Letter PDF</button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 no-print">
+                <div class="glass-panel p-6 rounded-3xl">
+                    <p class="text-gray-400 text-sm mb-4" id="chartFlowTitle">📈 Letter Flow (last 14 days) <span class="amharic">የደብዳቤ ፍሰት</span></p>
+                    <div class="chart-canvas-wrap"><canvas id="flowChart"></canvas></div>
+                </div>
+                <div class="glass-panel p-6 rounded-3xl">
+                    <p class="text-gray-400 text-sm mb-4" id="chartStatusTitle">🥧 Status Breakdown <span class="amharic">የሁኔታ ማጠቃለያ</span></p>
+                    <div class="chart-canvas-wrap chart-doughnut"><canvas id="statusChart"></canvas></div>
+                </div>
+            </div>
+            <div class="glass-panel p-6 rounded-3xl no-print">
+                <p class="text-gray-400 text-sm mb-4" id="chartCategoryTitle">📊 Category Distribution <span class="amharic">የምድብ ትንተና</span></p>
+                <div class="chart-canvas-wrap chart-category"><canvas id="categoryChart"></canvas></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- REGISTER LETTER MODAL -->
+    <div id="letterModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto no-print">
+        <div class="modal-panel luxury-modal w-11/12 max-w-2xl rounded-2xl relative overflow-hidden my-8 max-h-[90vh] flex flex-col">
+            <div class="p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5 flex-shrink-0">
+                <h2 class="text-lg font-bold flex items-center gap-2">
+                    <span class="bg-yellow-500 text-black p-1.5 rounded-lg text-xs">✉️</span>
+                    <span id="letterModalTitle">Register Letter</span>
+                </h2>
+                <button onclick="closeLetterModal()" id="letterModalCloseBtn" class="text-gray-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">&times;</button>
+            </div>
+
+            <form id="letterForm" class="p-6 overflow-y-auto flex flex-col gap-5" onsubmit="return false;">
+                <input type="hidden" id="letterType">
+                <input type="hidden" id="letterEditId">
+
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1" id="refNumberLabel">Ref Number</label>
+                    <input type="text" id="lRefNumber" readonly class="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-yellow-500 font-mono text-sm outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div id="senderField">
+                        <label class="block text-xs text-gray-400 mb-1 amharic">ከማን የመጣ (Sender)</label>
+                        <input type="text" id="lParty" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none" required>
+                    </div>
+                    <div id="authorField" class="hidden">
+                        <label class="block text-xs text-gray-400 mb-1 amharic">ኃላፊ (Author)</label>
+                        <input type="text" id="lAuthor" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1" id="dateFieldLabel">Date Received (EC)</label>
+                        <div class="grid grid-cols-3 gap-1">
+                            <select id="lDateECDay" onchange="onEcDatePartChange()" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-xs outline-none"></select>
+                            <select id="lDateECMonth" onchange="onEcDatePartChange()" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-xs outline-none"></select>
+                            <input type="number" id="lDateECYear" onchange="onEcDatePartChange()" min="1" max="9999" placeholder="ዓ.ም" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1 amharic">ምድብ (Category)</label>
+                        <select id="lCategory" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
+                            <option value="ፋይናንስ">ፋይናንስ (Finance)</option>
+                            <option value="ስብሰባ">ስብሰባ (Meeting)</option>
+                            <option value="አስተዳደር">አስተዳደር (Administration)</option>
+                            <option value="ሌላ">ሌላ (Other)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Status</label>
+                        <select id="lStatus" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1 amharic" id="dueDateLabel">Reply Due Date (optional) — EC</label>
+                        <div class="grid grid-cols-3 gap-1">
+                            <select id="lDueECDay" onchange="onDueEcDatePartChange()" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none"></select>
+                            <select id="lDueECMonth" onchange="onDueEcDatePartChange()" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none"></select>
+                            <input type="number" id="lDueECYear" onchange="onDueEcDatePartChange()" min="1" max="9999" placeholder="ዓ.ም" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none">
+                        </div>
+                        <input type="hidden" id="lDueDate">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1" id="summaryFieldLabel">Summary</label>
+                    <textarea id="lSummary" rows="3" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none" required></textarea>
+                </div>
+
+                <!-- Attachment -->
+                <div>
+                    <p class="section-title mb-2" id="attachmentSectionTitle">📎 አባሪ (Attachment - PDF/Image)</p>
+                    <input type="file" id="fileInput" accept="application/pdf,image/*" class="hidden">
+                    <div id="fileDrop" class="file-drop w-full rounded-xl border-2 border-dashed border-white/20 flex items-center justify-center bg-white/5 cursor-pointer p-6 gap-3 relative">
+                        <div id="filePlaceholder" class="flex flex-col items-center justify-center gap-1 pointer-events-none">
+                            <span class="text-2xl">📁</span>
+                            <span class="text-xs text-gray-400" id="filePlaceholderText">Click to attach scanned letter (PDF or Image)</span>
+                        </div>
+                        <div id="filePreviewBox" class="hidden items-center gap-3 w-full">
+                            <span class="text-3xl">📄</span>
+                            <span id="fileNameLabel" class="text-sm text-gray-200 truncate flex-1"></span>
+                        </div>
+                    </div>
+                    <div id="fileActions" class="hidden gap-2 mt-2">
+                        <button type="button" onclick="triggerFileInput()" class="file-mini-btn bg-white/10 hover:bg-white/20" title="Replace">🔄</button>
+                        <button type="button" onclick="removeFile()" class="file-mini-btn bg-red-500/10 text-red-400 hover:bg-red-500/20" title="Remove">🗑️</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2 border-t border-white/10">
+                    <button type="button" onclick="closeLetterModal()" id="btnCancelLetter" class="px-5 py-2.5 glass-panel rounded-xl hover:bg-white/10 transition">Cancel</button>
+                    <button type="button" onclick="saveLetter()" id="btnSaveLetter" class="px-6 py-2.5 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition">Save Letter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- VIEW LETTER MODAL -->
+    <div id="viewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto no-print">
+        <div class="modal-panel luxury-modal w-11/12 max-w-lg rounded-2xl relative overflow-hidden my-8 max-h-[90vh] flex flex-col">
+            <div class="p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5 flex-shrink-0">
+                <h2 class="text-lg font-bold flex items-center gap-2">
+                    <span class="bg-yellow-500 text-black p-1.5 rounded-lg text-xs">👁️</span>
+                    <span id="viewModalTitle">Letter Details</span>
+                </h2>
+                <button onclick="closeViewModal()" class="text-gray-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">&times;</button>
+            </div>
+            <div id="viewModalBody" class="p-6 overflow-y-auto flex flex-col gap-3 text-sm"></div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[60] flex flex-col gap-2 no-print"></div>
+
+    <!-- Hidden printable report sheet -->
+    <div id="printArea"></div>
+
+    <!-- SUPABASE MODULE INITIALIZATION -->
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        const supabaseUrl = 'https://miugvibogwwvkmbhocnw.supabase.co'
+        const supabaseKey = 'sb_publishable_VFsiy0GqQFzBuTamr5-dCg_a85ypcnM'
+        window.supabase = createClient(supabaseUrl, supabaseKey)
+    </script>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 1. Ethiopian Calendar Conversion
+        const etMonths = ['መስከረም','ጥቅምት','ህዳር','ታህሳስ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜ'];
+        const etMonthsEn = ['Meskerem','Tikimt','Hidar','Tahsas','Tir','Yekatit','Megabit','Miyazya','Ginbot','Sene','Hamle','Nehase','Pagume'];
+        const ETHIOPIC_JDN_EPOCH = 1724221;
+
+        function gregorianToJDN(year, month, day) {
+            const a = Math.floor((14 - month) / 12);
+            const y = year + 4800 - a;
+            const m = month + 12 * a - 3;
+            return day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+        }
+        function jdnToGregorian(jdn) {
+            const a = jdn + 32044;
+            const b = Math.floor((4 * a + 3) / 146097);
+            const c = a - Math.floor((146097 * b) / 4);
+            const d = Math.floor((4 * c + 3) / 1461);
+            const e = c - Math.floor((1461 * d) / 4);
+            const m = Math.floor((5 * e + 2) / 153);
+            const day = e - Math.floor((153 * m + 2) / 5) + 1;
+            const month = m + 3 - 12 * Math.floor(m / 10);
+            const year = 100 * b + d - 4800 + Math.floor(m / 10);
+            return { year, month, day };
+        }
+        function isEthiopianLeap(etYear) { return ((etYear % 4) === 3); }
+        function daysInEthiopianMonth(month, etYear) { return month <= 12 ? 30 : (isEthiopianLeap(etYear) ? 6 : 5); }
+        function ethiopianToJDN(year, month, day) {
+            return ETHIOPIC_JDN_EPOCH + 365 * (year - 1) + Math.floor(year / 4) + 30 * (month - 1) + (day - 1);
+        }
+        function jdnToEthiopian(jdn) {
+            const r = jdn - ETHIOPIC_JDN_EPOCH;
+            const year = Math.floor((4 * r + 1463) / 1461);
+            const dayOfYear = r - (365 * (year - 1) + Math.floor(year / 4));
+            const month = Math.floor(dayOfYear / 30) + 1;
+            const day = dayOfYear - 30 * (month - 1) + 1;
+            return { year, month, day };
+        }
+        function gcDateToEthiopian(gDate) {
+            const jdn = gregorianToJDN(gDate.getFullYear(), gDate.getMonth() + 1, gDate.getDate());
+            return jdnToEthiopian(jdn);
+        }
+        function gcIsoToEthiopian(iso) {
+            if (!iso) return gcDateToEthiopian(new Date());
+            const [y, m, d] = iso.split('-').map(Number);
+            return jdnToEthiopian(gregorianToJDN(y, m, d));
+        }
+        function ethiopianToGcIso(eYear, eMonth, eDay) {
+            const jdn = ethiopianToJDN(eYear, eMonth, eDay);
+            const g = jdnToGregorian(jdn);
+            return `${g.year}-${String(g.month).padStart(2, '0')}-${String(g.day).padStart(2, '0')}`;
+        }
+        function formatEc(e) { return `${String(e.day).padStart(2, '0')}/${String(e.month).padStart(2, '0')}/${e.year}`; }
+        function ecDisplayFromIso(iso) {
+            if (!iso) return '';
+            return formatEc(gcIsoToEthiopian(iso)) + ' EC';
+        }
+
+        function initHeaderDate() {
+            const gc = new Date();
+            const e = gcDateToEthiopian(gc);
+            const monthName = currentLang === 'am' ? etMonths[e.month - 1] : etMonthsEn[e.month - 1];
+            document.getElementById('dateDisplay').textContent =
+                gc.toLocaleDateString(currentLang === 'am' ? 'am-ET' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) +
+                ` | ${monthName} ${e.day}, ${e.year} EC`;
+        }
+
+        // 2. Language State & Translations
+        const LANG_KEY = 'mh_office_lang';
+        let currentLang = localStorage.getItem(LANG_KEY) || 'en';
+
+        const I18N = {
+            headerSubtitle: { en: 'Office Management System <span class="amharic text-sm ml-2">(የጽሕፈት ቤት አስተዳደር)</span>', am: 'የጽሕፈት ቤት አስተዳደር ስርዓት <span class="amharic text-sm ml-2">(Office Management)</span>' },
+            adminLabel: { en: 'Admin Dashboard', am: 'የአስተዳዳሪ ዳሽቦርድ' },
+            homeBtn: { en: '🏠 Home', am: '🏠 መነሻ' },
+            statIncomingLabel: { en: '📥 Total Incoming <span class="amharic block text-[10px]">ጠቅላላ ገቢ</span>', am: '📥 ጠቅላላ ገቢ ደብዳቤዎች <span class="amharic block text-[10px]">Total Incoming</span>' },
+            statOutgoingLabel: { en: '📤 Total Outgoing <span class="amharic block text-[10px]">ጠቅላላ ወጪ</span>', am: '📤 ጠቅላላ ወጪ ደብዳቤዎች <span class="amharic block text-[10px]">Total Outgoing</span>' },
+            statPendingLabel: { en: '⏳ Pending <span class="amharic block text-[10px]">በሂደት ላይ</span>', am: '⏳ በሂደት ላይ <span class="amharic block text-[10px]">Pending</span>' },
+            statUrgentLabel: { en: '🚨 Urgent <span class="amharic block text-[10px]">አስቸኳይ</span>', am: '🚨 አስቸኳይ <span class="amharic block text-[10px]">Urgent</span>' },
+            tabIncomingLabel: { en: '📥 Incoming Letters', am: '📥 ገቢ ደብዳቤዎች' },
+            tabOutgoingLabel: { en: '📤 Outgoing Letters', am: '📤 ወጪ ደብዳቤዎች' },
+            tabReportsLabel: { en: '📊 Reports &amp; Analytics', am: '📊 ሪፖርት እና ትንተና' },
+            incSearch: { en: '🔍 Search Ref #, Sender...', am: '🔍 ቁጥር ወይም ላኪ ይፈልጉ...' },
+            outSearch: { en: '🔍 Search Dispatch #, Recipient...', am: '🔍 ቁጥር ወይም ተቀባይ ይፈልጉ...' },
+            incStatusAll: { en: 'All Status', am: 'ሁሉም ሁኔታ' },
+            incStatusPending: { en: 'Pending', am: 'በሂደት ላይ' },
+            incStatusReviewed: { en: 'Reviewed', am: 'ታይቷል' },
+            incStatusReplied: { en: 'Replied', am: 'ምላሽ ተሰጥቷል' },
+            incStatusUrgent: { en: 'Urgent', am: 'አስቸኳይ' },
+            outStatusAll: { en: 'All Status', am: 'ሁሉም ሁኔታ' },
+            outStatusCompleted: { en: 'Completed', am: 'ተጠናቋል' },
+            outStatusPending: { en: 'Pending', am: 'በሂደት ላይ' },
+            outStatusUrgent: { en: 'Urgent', am: 'አስቸኳይ' },
+            btnRegisterIncoming: { en: '+ Register Incoming Letter', am: '+ ገቢ ደብዳቤ ይመዝግቡ' },
+            btnRegisterOutgoing: { en: '+ Register Outgoing Letter', am: '+ ወጪ ደብዳቤ ይመዝግቡ' },
+            
+            thIncRef: { en: 'Incoming Ref #', am: 'የገቢ መለያ ቁጥር' },
+            thOutRef: { en: 'Outgoing Ref #', am: 'የወጪ መለያ ቁጥር' },
+            refNumberLabelIncoming: { en: 'Incoming Ref Number', am: 'የገቢ መለያ ቁጥር (Incoming Ref)' },
+            refNumberLabelOutgoing: { en: 'Outgoing Ref Number', am: 'የወጪ መለያ ቁጥር (Outgoing Ref)' },
+            
+            thIncSender: { en: 'Sender', am: 'ከማን የመጣ' },
+            thIncDate: { en: 'Date', am: 'ቀን' },
+            thIncSummary: { en: 'Summary', am: 'ማጠቃለያ' },
+            thIncCategory: { en: 'Category', am: 'ምድብ' },
+            thIncStatus: { en: 'Status', am: 'ሁኔታ' },
+            thIncActions: { en: 'Actions', am: 'ድርጊቶች' },
+            thOutRecipient: { en: 'Recipient', am: 'ለማን የተላከ' },
+            thOutSubject: { en: 'Subject', am: 'ርዕሰ ጉዳይ' },
+            thOutDate: { en: 'Date', am: 'ቀን' },
+            thOutAuthor: { en: 'Author', am: 'ኃላፊ' },
+            thOutCategory: { en: 'Category', am: 'ምድብ' },
+            thOutStatus: { en: 'Status', am: 'ሁኔታ' },
+            thOutActions: { en: 'Actions', am: 'ድርጊቶች' },
+            incomingEmptyMsg: { en: 'No incoming letters found.', am: 'ምንም ገቢ ደብዳቤ አልተገኘም።' },
+            outgoingEmptyMsg: { en: 'No outgoing letters found.', am: 'ምንም ወጪ ደብዳቤ አልተገኘም።' },
+            btnIncomingPdf: { en: '📥 Incoming Letter PDF', am: '📥 የገቢ ደብዳቤ ሪፖርት PDF' },
+            btnOutgoingPdf: { en: '📤 Outgoing Letter PDF', am: '📤 የወጪ ደብዳቤ ሪፖርት PDF' },
+            chartFlowTitle: { en: '📈 Letter Flow (last 14 days)', am: '📈 የደብዳቤ ፍሰት (ያለፉት 14 ቀናት)' },
+            chartStatusTitle: { en: '🥧 Status Breakdown', am: '🥧 የሁኔታ ማጠቃለያ' },
+            chartCategoryTitle: { en: '📊 Category Distribution', am: '📊 የምድብ ትንተና' },
+            dateFieldLabelIncoming: { en: 'Date Received (EC)', am: 'ቀን (Date Received)' },
+            dateFieldLabelOutgoing: { en: 'Date Sent (EC)', am: 'የተላከበት ቀን (Date Sent)' },
+            senderFieldIncoming: { en: 'Sender', am: 'ከማን የመጣ' },
+            senderFieldOutgoing: { en: 'Recipient', am: 'ለማን የተላከ' },
+            authorField: { en: 'Author', am: 'ኃላፊ' },
+            categoryField: { en: 'Category', am: 'ምድብ' },
+            statusField: { en: 'Status', am: 'ሁኔታ' },
+            dueDateLabel: { en: 'Reply Due Date (optional) — EC', am: 'የምላሽ ገደብ ቀን (አማራጭ) — ዓ.ም.' },
+            summaryFieldLabelIncoming: { en: 'Summary', am: 'አጭር ማጠቃለያ (Summary)' },
+            summaryFieldLabelOutgoing: { en: 'Subject', am: 'ርዕሰ ጉዳይ (Subject)' },
+            attachmentSectionTitle: { en: '📎 Attachment (PDF/Image)', am: '📎 አባሪ (Attachment - PDF/Image)' },
+            filePlaceholderText: { en: 'Click to attach scanned letter (PDF or Image)', am: 'የተቃኘውን ደብዳቤ ለማያያዝ ይጫኑ (PDF ወይም ምስል)' },
+            btnCancelLetter: { en: 'Cancel', am: 'ይቅር' },
+            btnSaveLetter: { en: 'Save Letter', am: 'ደብዳቤ አስቀምጥ' },
+            viewModalTitle: { en: 'Letter Details', am: 'የደብዳቤ ዝርዝር' },
+            letterModalTitleRegisterIncoming: { en: 'Register Incoming Letter', am: 'ገቢ ደብዳቤ ይመዝግቡ' },
+            letterModalTitleRegisterOutgoing: { en: 'Register Outgoing Letter', am: 'ወጪ ደብዳቤ ይመዝግቡ' },
+            letterModalTitleEditIncoming: { en: 'Edit Incoming Letter', am: 'ገቢ ደብዳቤ አርትዕ' },
+            letterModalTitleEditOutgoing: { en: 'Edit Outgoing Letter', am: 'ወጪ ደብዳቤ አርትዕ' },
+            toastFillRequired: { en: 'Please fill all required fields.', am: 'እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ።' },
+            toastLetterUpdated: { en: 'Letter updated.', am: 'ደብዳቤው ተስተካክሏል።' },
+            toastLetterRegistered: { en: 'Letter registered.', am: 'ደብዳቤው ተመዝግቧል።' },
+            toastLetterDeleted: { en: 'Letter deleted.', am: 'ደብዳቤው ተሰርዟል።' },
+            toastFileTooLarge: { en: 'File too large (max 3MB).', am: 'ፋይሉ በጣም ትልቅ ነው (ከፍተኛ 3MB)።' },
+            confirmDeleteLetter: { en: 'Delete this letter record?', am: 'ይህን ደብዳቤ መዝገብ መሰረዝ ይፈልጋሉ?' },
+            viewLabelFrom: { en: 'From', am: 'ከማን የመጣ' },
+            viewLabelTo: { en: 'To', am: 'ለማን የተላከ' },
+            viewLabelAuthor: { en: 'Author', am: 'ኃላፊ' },
+            viewLabelDate: { en: 'Date', am: 'ቀን' },
+            viewLabelCategory: { en: 'Category', am: 'ምድብ' },
+            viewLabelDueDate: { en: 'Reply Due', am: 'የምላሽ ገደብ' },
+            viewLabelOverdue: { en: 'Overdue ⚠️', am: 'ጊዜው አልፏል ⚠️' },
+            viewLabelSummary: { en: 'Summary', am: 'ማጠቃለያ' },
+            viewLabelSubject: { en: 'Subject', am: 'ርዕሰ ጉዳይ' },
+            viewLabelAttachment: { en: '📎 Attachment', am: '📎 አባሪ' },
+            viewLabelNoAttachment: { en: 'No attachment.', am: 'ምንም አባሪ የለም።' },
+            viewBtnDownload: { en: '⬇️ Download', am: '⬇️ አውርድ' },
+            alertOverdueSuffix: { en: 'letter(s) have passed their reply due date and need attention.', am: 'ደብዳቤ(ዎች) የምላሽ ገደባቸው አልፏል እና ትኩረት ይፈልጋሉ።' }
+        };
+        function t(key) { return (I18N[key] && I18N[key][currentLang]) || key; }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem(LANG_KEY, lang);
+            applyLanguage();
+        }
+        function applyLanguage() {
+            document.documentElement.lang = currentLang;
+            document.getElementById('langBtnEn').classList.toggle('active', currentLang === 'en');
+            document.getElementById('langBtnAm').classList.toggle('active', currentLang === 'am');
+            Object.keys(I18N).forEach(id => {
+                if (['dateFieldLabelIncoming','dateFieldLabelOutgoing','senderFieldIncoming','senderFieldOutgoing',
+                     'summaryFieldLabelIncoming','summaryFieldLabelOutgoing','refNumberLabelIncoming','refNumberLabelOutgoing',
+                     'letterModalTitleRegisterIncoming','letterModalTitleRegisterOutgoing','letterModalTitleEditIncoming','letterModalTitleEditOutgoing',
+                     'authorField','categoryField','statusField'].includes(id)) return;
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = t(id);
+            });
+            document.getElementById('incSearch').placeholder = t('incSearch');
+            document.getElementById('outSearch').placeholder = t('outSearch');
+            initHeaderDate();
+            populateCategoryFilters();
+            
+            renderDashboard();
+            if (currentTab === 'incoming') renderIncoming();
+            else if (currentTab === 'outgoing') renderOutgoing();
+            else if (currentTab === 'reports') renderCharts();
+        }
+
+        // 3. Status / Category metadata
+        const STATUS_META = {
+            pending:   { label: 'Pending',   am: 'በሂደት ላይ',   color: 'yellow' },
+            reviewed:  { label: 'Reviewed',  am: 'ታይቷል',       color: 'blue' },
+            replied:   { label: 'Replied',   am: 'ምላሽ ተሰጥቷል', color: 'green' },
+            completed: { label: 'Completed', am: 'ተጠናቋል',     color: 'green' },
+            urgent:    { label: 'Urgent',    am: 'አስቸኳይ',     color: 'red' }
+        };
+        function statusLabel(status) {
+            const meta = STATUS_META[status] || STATUS_META.pending;
+            return currentLang === 'am' ? meta.am : meta.label;
+        }
+        const CATEGORIES = ['ፋይናንስ', 'ስብሰባ', 'አስተዳደር', 'ሌላ'];
+        const CATEGORY_LABELS_EN = { 'ፋይናንስ': 'Finance', 'ስብሰባ': 'Meeting', 'አስተዳደር': 'Administration', 'ሌላ': 'Other' };
+        const CATEGORY_LABELS = { 'ፋይናንስ': 'ፋይናንስ (Finance)', 'ስብሰባ': 'ስብሰባ (Meeting)', 'አስተዳደር': 'አስተዳደር (Admin)', 'ሌላ': 'ሌላ (Other)' };
+        function categoryLabel(cat) {
+            return currentLang === 'am' ? (cat || '') : (CATEGORY_LABELS_EN[cat] || cat || '');
+        }
+
+        // 4. Database Fetching Logic
+        let letters = [];
+
+        async function loadLetters() {
+            try {
+                const { data, error } = await window.supabase
+                    .from('office_letters')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                letters = data || [];
+                
+                renderDashboard();
+                if (currentTab === 'incoming') renderIncoming();
+                else if (currentTab === 'outgoing') renderOutgoing();
+                else if (currentTab === 'reports') renderCharts();
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                showToast("Failed to load records from database", "error");
+            }
+        }
+        
+        let currentTab = 'incoming';
+        let currentAttachment = null;
+        let flowChartInstance = null, statusChartInstance = null, categoryChartInstance = null;
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        function showToast(msg, type) {
+            const box = document.getElementById('toastContainer');
+            const colors = { success: 'border-green-500/40 text-green-300', error: 'border-red-500/40 text-red-300', info: 'border-yellow-500/40 text-yellow-300' };
+            const div = document.createElement('div');
+            div.className = `toast glass-panel border ${colors[type] || colors.info} px-4 py-3 rounded-xl text-sm font-medium shadow-lg`;
+            div.textContent = msg;
+            box.appendChild(div);
+            setTimeout(() => div.remove(), 3200);
+        }
+        function statusPill(status) {
+            const meta = STATUS_META[status] || STATUS_META.pending;
+            return `<span class="status-pill status-${meta.color}">${statusLabel(status)}</span>`;
+        }
+        function isOverdue(letter) {
+            if (!letter.due_date) return false;
+            if (letter.status === 'replied' || letter.status === 'completed') return false;
+            return new Date(letter.due_date + 'T00:00:00') < new Date(new Date().toDateString());
+        }
+
+        // 5. Tabs
+        function switchTab(tab) {
+            currentTab = tab;
+            ['incoming', 'outgoing', 'reports'].forEach(t => {
+                document.getElementById(t + 'Tab').classList.toggle('hidden', t !== tab);
+                document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+            });
+            if (tab === 'incoming') renderIncoming();
+            if (tab === 'outgoing') renderOutgoing();
+            if (tab === 'reports') renderCharts();
+        }
+
+        // 6. Dashboard Metrics
+        function renderDashboard() {
+            const incoming = letters.filter(l => l.type === 'incoming');
+            const outgoing = letters.filter(l => l.type === 'outgoing');
+            const pending = letters.filter(l => l.status === 'pending').length;
+            const urgent = letters.filter(l => l.status === 'urgent' || isOverdue(l)).length;
+
+            document.getElementById('statIncoming').textContent = incoming.length;
+            document.getElementById('statOutgoing').textContent = outgoing.length;
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statUrgent').textContent = urgent;
+
+            const overdueOnes = letters.filter(isOverdue);
+            const banner = document.getElementById('alertBanner');
+            if (overdueOnes.length > 0) {
+                banner.classList.remove('hidden');
+                banner.innerHTML = `<div class="glass-panel border border-red-500/30 rounded-2xl p-4 flex items-center gap-3">
+                    <span class="text-2xl">⚠️</span>
+                    <p class="text-sm"><b class="text-red-400">${overdueOnes.length}</b> ${t('alertOverdueSuffix')}</p>
+                </div>`;
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        function populateCategoryFilters() {
+            const allLabel = currentLang === 'am' ? 'ሁሉም ምድቦች' : 'All Categories';
+            ['incCategoryFilter', 'outCategoryFilter'].forEach(id => {
+                const sel = document.getElementById(id);
+                const prev = sel.value;
+                sel.innerHTML = `<option value="">${allLabel}</option>` + CATEGORIES.map(c => `<option value="${c}">${categoryLabel(c)}</option>`).join('');
+                sel.value = prev;
+            });
+        }
+
+        // 7. Render Tables
+        function renderIncoming() {
+            renderDashboard();
+            const search = (document.getElementById('incSearch').value || '').toLowerCase();
+            const catFilter = document.getElementById('incCategoryFilter').value;
+            const statusFilter = document.getElementById('incStatusFilter').value;
+
+            const rows = letters.filter(l => l.type === 'incoming').filter(l =>
+                ((l.ref_number || '').toLowerCase().includes(search) || (l.party || '').toLowerCase().includes(search) || (l.summary || '').toLowerCase().includes(search)) &&
+                (!catFilter || l.category === catFilter) &&
+                (!statusFilter || l.status === statusFilter)
+            ).sort((a, b) => (b.letter_date || '').localeCompare(a.letter_date || ''));
+
+            const tbody = document.getElementById('incomingTableBody');
+            document.getElementById('incomingEmptyMsg').textContent = t('incomingEmptyMsg');
+            document.getElementById('incomingEmptyMsg').classList.toggle('hidden', rows.length > 0);
+            tbody.innerHTML = rows.map(l => `
+                <tr class="row-in border-t border-white/5 hover:bg-white/5 transition">
+                    <td class="p-4"><span class="id-chip text-yellow-400 font-mono text-xs px-2 py-0.5 rounded-full">${escapeHtml(l.ref_number)}</span></td>
+                    <td class="p-4 amharic">${escapeHtml(l.party)}</td>
+                    <td class="p-4 text-gray-400">${escapeHtml(ecDisplayFromIso(l.letter_date))}</td>
+                    <td class="p-4 text-gray-300 max-w-[220px] truncate">${escapeHtml(l.summary)}</td>
+                    <td class="p-4 text-gray-400 text-xs amharic">${escapeHtml(categoryLabel(l.category))}</td>
+                    <td class="p-4 text-center">${isOverdue(l) ? '<span class="mr-1">⚠️</span>' : ''}${statusPill(l.status)}</td>
+                    <td class="p-4">
+                        <div class="flex justify-center gap-2">
+                            <button class="icon-btn bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20" title="View" onclick="viewLetter('${l.id}')">👁️</button>
+                            <button class="icon-btn bg-blue-500/10 text-blue-400 hover:bg-blue-500/20" title="Edit" onclick="editLetter('${l.id}')">✏️</button>
+                            <button class="icon-btn bg-green-500/10 text-green-400 hover:bg-green-500/20" title="Download" onclick="downloadLetter('${l.id}')">⬇️</button>
+                            <button class="icon-btn bg-red-500/10 text-red-400 hover:bg-red-500/20" title="Delete" onclick="deleteLetter('${l.id}')">🗑️</button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        }
+
+        function renderOutgoing() {
+            renderDashboard();
+            const search = (document.getElementById('outSearch').value || '').toLowerCase();
+            const catFilter = document.getElementById('outCategoryFilter').value;
+            const statusFilter = document.getElementById('outStatusFilter').value;
+
+            const rows = letters.filter(l => l.type === 'outgoing').filter(l =>
+                ((l.ref_number || '').toLowerCase().includes(search) || (l.party || '').toLowerCase().includes(search) || (l.subject || '').toLowerCase().includes(search)) &&
+                (!catFilter || l.category === catFilter) &&
+                (!statusFilter || l.status === statusFilter)
+            ).sort((a, b) => (b.letter_date || '').localeCompare(a.letter_date || ''));
+
+            const tbody = document.getElementById('outgoingTableBody');
+            document.getElementById('outgoingEmptyMsg').textContent = t('outgoingEmptyMsg');
+            document.getElementById('outgoingEmptyMsg').classList.toggle('hidden', rows.length > 0);
+            tbody.innerHTML = rows.map(l => `
+                <tr class="row-in border-t border-white/5 hover:bg-white/5 transition">
+                    <td class="p-4"><span class="id-chip text-yellow-400 font-mono text-xs px-2 py-0.5 rounded-full">${escapeHtml(l.ref_number)}</span></td>
+                    <td class="p-4 amharic">${escapeHtml(l.party)}</td>
+                    <td class="p-4 text-gray-300 max-w-[200px] truncate">${escapeHtml(l.subject)}</td>
+                    <td class="p-4 text-gray-400">${escapeHtml(ecDisplayFromIso(l.letter_date))}</td>
+                    <td class="p-4 amharic text-gray-300">${escapeHtml(l.author || '-')}</td>
+                    <td class="p-4 text-gray-400 text-xs amharic">${escapeHtml(categoryLabel(l.category))}</td>
+                    <td class="p-4 text-center">${isOverdue(l) ? '<span class="mr-1">⚠️</span>' : ''}${statusPill(l.status)}</td>
+                    <td class="p-4">
+                        <div class="flex justify-center gap-2">
+                            <button class="icon-btn bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20" title="View" onclick="viewLetter('${l.id}')">👁️</button>
+                            <button class="icon-btn bg-blue-500/10 text-blue-400 hover:bg-blue-500/20" title="Edit" onclick="editLetter('${l.id}')">✏️</button>
+                            <button class="icon-btn bg-green-500/10 text-green-400 hover:bg-green-500/20" title="Download" onclick="downloadLetter('${l.id}')">⬇️</button>
+                            <button class="icon-btn bg-red-500/10 text-red-400 hover:bg-red-500/20" title="Delete" onclick="deleteLetter('${l.id}')">🗑️</button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        }
+
+        // 8. Add/Edit Letter Operations
+        function openLetterModal(type, editId) {
+            document.getElementById('letterType').value = type;
+            document.getElementById('letterEditId').value = editId || '';
+            document.getElementById('letterForm').reset();
+            removeFile();
+
+            const isIncoming = type === 'incoming';
+            document.getElementById('letterModalTitle').textContent = editId
+                ? t(isIncoming ? 'letterModalTitleEditIncoming' : 'letterModalTitleEditOutgoing')
+                : t(isIncoming ? 'letterModalTitleRegisterIncoming' : 'letterModalTitleRegisterOutgoing');
+            document.getElementById('refNumberLabel').textContent = t(isIncoming ? 'refNumberLabelIncoming' : 'refNumberLabelOutgoing');
+            document.getElementById('dateFieldLabel').textContent = t(isIncoming ? 'dateFieldLabelIncoming' : 'dateFieldLabelOutgoing');
+            document.getElementById('summaryFieldLabel').textContent = t(isIncoming ? 'summaryFieldLabelIncoming' : 'summaryFieldLabelOutgoing');
+            document.querySelector('#senderField label').textContent = t(isIncoming ? 'senderFieldIncoming' : 'senderFieldOutgoing');
+            document.getElementById('authorField').classList.toggle('hidden', isIncoming);
+            document.getElementById('dueDateLabel').textContent = t('dueDateLabel');
+            document.getElementById('attachmentSectionTitle').textContent = t('attachmentSectionTitle');
+            document.getElementById('filePlaceholderText').textContent = t('filePlaceholderText');
+            document.getElementById('btnCancelLetter').textContent = t('btnCancelLetter');
+            document.getElementById('btnSaveLetter').textContent = t('btnSaveLetter');
+
+            const statusSel = document.getElementById('lStatus');
+            const statusOptions = isIncoming
+                ? ['pending', 'reviewed', 'replied', 'urgent']
+                : ['completed', 'pending', 'urgent'];
+            statusSel.innerHTML = statusOptions.map(s => `<option value="${s}">${STATUS_META[s].label} (${STATUS_META[s].am})</option>`).join('');
+
+            populateEcMonthSelect();
+            populateDueEcMonthSelect();
+            clearDueEcDate();
+
+            if (editId) {
+                const l = letters.find(x => x.id === editId);
+                document.getElementById('lRefNumber').value = l.ref_number;
+                document.getElementById('lParty').value = l.party;
+                document.getElementById('lAuthor').value = l.author || '';
+                if(l.letter_date) setEcDateSelects(gcIsoToEthiopian(l.letter_date));
+                document.getElementById('lCategory').value = l.category;
+                document.getElementById('lStatus').value = l.status;
+                if (l.due_date) setDueEcDateSelects(gcIsoToEthiopian(l.due_date));
+                document.getElementById('lSummary').value = isIncoming ? l.summary : l.subject;
+                if (l.attachment) {
+                    currentAttachment = l.attachment;
+                    showFilePreview(l.attachment.name);
+                }
+            } else {
+                // Generate next sequence number for preview
+                const sameTypeLetters = letters.filter(l => l.type === type);
+                let maxNum = 0;
+                sameTypeLetters.forEach(l => {
+                    if (l.ref_number) {
+                        const parts = l.ref_number.split('/');
+                        const lastPart = parseInt(parts[parts.length - 1], 10);
+                        if (!isNaN(lastPart) && lastPart > maxNum) {
+                            maxNum = lastPart;
+                        }
+                    }
+                });
+                const nextNum = maxNum + 1;
+                const prefix = type === 'incoming' ? 'መ/ሕ/ገ/' : 'መ/ሕ/ወ/';
+                document.getElementById('lRefNumber').value = prefix + String(nextNum).padStart(3, '0');
+                setEcDateSelects(gcDateToEthiopian(new Date()));
+            }
+
+            document.getElementById('letterModal').classList.remove('hidden');
+            requestAnimationFrame(() => document.getElementById('letterModal').classList.remove('modal-hidden-state'));
+        }
+
+        function populateEcMonthSelect() {
+            const sel = document.getElementById('lDateECMonth');
+            const names = currentLang === 'am' ? etMonths : etMonthsEn;
+            const prev = sel.value;
+            sel.innerHTML = names.map((n, i) => `<option value="${i + 1}">${n}</option>`).join('');
+            if (prev) sel.value = prev;
+        }
+        function populateEcDaySelect() {
+            const daySel = document.getElementById('lDateECDay');
+            const month = parseInt(document.getElementById('lDateECMonth').value, 10) || 1;
+            const year = parseInt(document.getElementById('lDateECYear').value, 10) || gcDateToEthiopian(new Date()).year;
+            const maxDay = daysInEthiopianMonth(month, year);
+            const prev = parseInt(daySel.value, 10);
+            daySel.innerHTML = Array.from({ length: maxDay }, (_, i) => i + 1).map(d => `<option value="${d}">${d}</option>`).join('');
+            daySel.value = (prev && prev <= maxDay) ? prev : Math.min(prev || 1, maxDay);
+        }
+        function onEcDatePartChange() { populateEcDaySelect(); }
+        function setEcDateSelects(e) {
+            populateEcMonthSelect();
+            document.getElementById('lDateECMonth').value = e.month;
+            document.getElementById('lDateECYear').value = e.year;
+            populateEcDaySelect();
+            document.getElementById('lDateECDay').value = e.day;
+        }
+        function getEcDateFromSelects() {
+            const day = parseInt(document.getElementById('lDateECDay').value, 10);
+            const month = parseInt(document.getElementById('lDateECMonth').value, 10);
+            const year = parseInt(document.getElementById('lDateECYear').value, 10);
+            return { day, month, year };
+        }
+        function populateDueEcMonthSelect() {
+            const sel = document.getElementById('lDueECMonth');
+            if (!sel) return;
+            const names = currentLang === 'am' ? etMonths : etMonthsEn;
+            const prev = sel.value;
+            sel.innerHTML = names.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('');
+            if (prev) sel.value = prev;
+        }
+        function populateDueEcDaySelect() {
+            const daySel=document.getElementById('lDueECDay'); if(!daySel) return;
+            const month=parseInt(document.getElementById('lDueECMonth').value,10)||1;
+            const year=parseInt(document.getElementById('lDueECYear').value,10)||gcDateToEthiopian(new Date()).year;
+            const maxDay=daysInEthiopianMonth(month,year); const prev=parseInt(daySel.value,10);
+            daySel.innerHTML=Array.from({length:maxDay},(_,i)=>i+1).map(d=>`<option value="${d}">${d}</option>`).join('');
+            daySel.value=(prev&&prev<=maxDay)?prev:Math.min(prev||1,maxDay);
+        }
+        function onDueEcDatePartChange(){ populateDueEcDaySelect(); updateDueIsoHidden(); }
+        function setDueEcDateSelects(e){
+            populateDueEcMonthSelect();
+            document.getElementById('lDueECMonth').value=e.month;
+            document.getElementById('lDueECYear').value=e.year;
+            populateDueEcDaySelect();
+            document.getElementById('lDueECDay').value=e.day;
+            updateDueIsoHidden();
+        }
+        function clearDueEcDate(){
+            const d=document.getElementById('lDueECDay'),m=document.getElementById('lDueECMonth'),y=document.getElementById('lDueECYear');
+            if(d)d.value=''; if(m)m.value='1'; if(y)y.value='';
+            const hidden=document.getElementById('lDueDate'); if(hidden)hidden.value='';
+        }
+        function updateDueIsoHidden(){
+            const d=parseInt(document.getElementById('lDueECDay')?.value,10);
+            const m=parseInt(document.getElementById('lDueECMonth')?.value,10);
+            const y=parseInt(document.getElementById('lDueECYear')?.value,10);
+            const hidden=document.getElementById('lDueDate'); if(!hidden)return;
+            hidden.value=(d&&m&&y)?ethiopianToGcIso(y,m,d):'';
+        }
+
+        function closeLetterModal() {
+            const modal = document.getElementById('letterModal');
+            modal.classList.add('modal-hidden-state');
+            setTimeout(() => modal.classList.add('hidden'), 280);
+        }
+
+        async function saveLetter() {
+            const type = document.getElementById('letterType').value;
+            const editId = document.getElementById('letterEditId').value;
+            const party = document.getElementById('lParty').value.trim();
+            const ecDate = getEcDateFromSelects();
+            const text = document.getElementById('lSummary').value.trim();
+            updateDueIsoHidden();
+
+            if (!party || !ecDate.day || !ecDate.month || !ecDate.year || !text) { 
+                showToast(t('toastFillRequired'), 'error'); 
+                return; 
+            }
+
+            const date = ethiopianToGcIso(ecDate.year, ecDate.month, ecDate.day); 
+
+            let refNumber = '';
+            if (editId) {
+                const existing = letters.find(x => x.id === editId);
+                refNumber = existing ? existing.ref_number : '';
+            } else {
+                const sameTypeLetters = letters.filter(l => l.type === type);
+                let maxNum = 0;
+                sameTypeLetters.forEach(l => {
+                    if (l.ref_number) {
+                        const parts = l.ref_number.split('/');
+                        const lastPart = parseInt(parts[parts.length - 1], 10);
+                        if (!isNaN(lastPart) && lastPart > maxNum) {
+                            maxNum = lastPart;
+                        }
+                    }
+                });
+                const nextNum = maxNum + 1;
+                const prefix = type === 'incoming' ? 'መ/ሕ/ገ/' : 'መ/ሕ/ወ/';
+                refNumber = prefix + String(nextNum).padStart(3, '0');
+            }
+
+            const payload = {
+                type,
+                ref_number: refNumber,
+                party,
+                letter_date: date,
+                category: document.getElementById('lCategory').value,
+                status: document.getElementById('lStatus').value,
+                due_date: document.getElementById('lDueDate').value || null,
+                attachment: currentAttachment
+            };
+
+            if (type === 'incoming') { 
+                payload.summary = text; 
+                payload.subject = null;
+                payload.author = null;
+            } else { 
+                payload.subject = text; 
+                payload.summary = null;
+                payload.author = document.getElementById('lAuthor').value.trim(); 
+            }
+
+            const btnSave = document.getElementById('btnSaveLetter');
+            btnSave.disabled = true;
+            btnSave.textContent = 'Saving...';
+
+            try {
+                if (editId) {
+                    const { error } = await window.supabase.from('office_letters').update(payload).eq('id', editId);
+                    if (error) throw error;
+                    showToast(t('toastLetterUpdated'), 'success');
+                } else {
+                    const { error } = await window.supabase.from('office_letters').insert([payload]);
+                    if (error) throw error;
+                    showToast(t('toastLetterRegistered'), 'success');
+                }
+                closeLetterModal();
+                await loadLetters();
+            } catch (err) {
+                console.error("Save Error:", err);
+                showToast(err.message || "Failed to save letter record", "error");
+            } finally {
+                btnSave.disabled = false;
+                btnSave.textContent = t('btnSaveLetter');
+            }
+        }
+
+        function editLetter(id) {
+            const l = letters.find(x => x.id === id);
+            openLetterModal(l.type, id);
+        }
+        
+        async function deleteLetter(id) {
+            if (!confirm(t('confirmDeleteLetter'))) return;
+            try {
+                const { error } = await window.supabase.from('office_letters').delete().eq('id', id);
+                if (error) throw error;
+                showToast(t('toastLetterDeleted'), 'info');
+                await loadLetters();
+            } catch (err) {
+                console.error("Delete Error:", err);
+                showToast("Failed to delete record", "error");
+            }
+        }
+
+        // 9. View / Download Details
+        function viewLetter(id) {
+            const l = letters.find(x => x.id === id);
+            const isIncoming = l.type === 'incoming';
+            const body = document.getElementById('viewModalBody');
+            body.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="id-chip text-yellow-400 font-mono text-sm px-3 py-1 rounded-full">${escapeHtml(l.ref_number)}</span>
+                    ${statusPill(l.status)}
+                </div>
+                <p><b class="text-gray-400 amharic">${t(isIncoming ? 'viewLabelFrom' : 'viewLabelTo')}:</b> ${escapeHtml(l.party)}</p>
+                ${!isIncoming ? `<p><b class="text-gray-400 amharic">${t('viewLabelAuthor')}:</b> ${escapeHtml(l.author || '-')}</p>` : ''}
+                <p><b class="text-gray-400 amharic">${t('viewLabelDate')}:</b> ${escapeHtml(ecDisplayFromIso(l.letter_date))}</p>
+                <p><b class="text-gray-400 amharic">${t('viewLabelCategory')}:</b> ${escapeHtml(categoryLabel(l.category))}</p>
+                ${l.due_date ? `<p><b class="text-gray-400 amharic">${t('viewLabelDueDate')}:</b> ${escapeHtml(ecDisplayFromIso(l.due_date))} ${isOverdue(l) ? `<span class="text-red-400 font-bold">(${t('viewLabelOverdue')})</span>` : ''}</p>` : ''}
+                <p><b class="text-gray-400 amharic">${t(isIncoming ? 'viewLabelSummary' : 'viewLabelSubject')}:</b> ${escapeHtml(isIncoming ? l.summary : l.subject)}</p>
+                ${l.attachment ? `
+                    <div class="mt-2 pt-3 border-t border-white/10">
+                        <p class="section-title mb-2">${t('viewLabelAttachment')}</p>
+                        ${l.attachment.isImage ? `<img src="${l.attachment.dataUrl}" class="w-full max-h-64 object-contain rounded-lg border border-white/10">` : `<p class="text-sm text-gray-300">📄 ${escapeHtml(l.attachment.name)}</p>`}
+                        <button onclick="downloadLetter('${l.id}')" class="mt-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-lg text-xs hover:bg-yellow-400 transition">${t('viewBtnDownload')}</button>
+                    </div>` : `<p class="text-xs text-gray-500 mt-2">${t('viewLabelNoAttachment')}</p>`}
+            `;
+            document.getElementById('viewModalTitle').textContent = t('viewModalTitle');
+            document.getElementById('viewModal').classList.remove('hidden');
+            requestAnimationFrame(() => document.getElementById('viewModal').classList.remove('modal-hidden-state'));
+        }
+        function closeViewModal() {
+            const modal = document.getElementById('viewModal');
+            modal.classList.add('modal-hidden-state');
+            setTimeout(() => modal.classList.add('hidden'), 280);
+        }
+
+        function downloadLetter(id) {
+            const l = letters.find(x => x.id === id);
+            if (l.attachment) {
+                const a = document.createElement('a');
+                a.href = l.attachment.dataUrl;
+                a.download = l.attachment.name;
+                a.click();
+                return;
+            }
+            const isIncoming = l.type === 'incoming';
+            const text = `Meserete Hiwot ERP - Office Management\n${l.ref_number}\n${t(isIncoming ? 'viewLabelFrom' : 'viewLabelTo')}: ${l.party}\n${t('viewLabelDate')}: ${ecDisplayFromIso(l.letter_date)}\n${t('categoryField')}: ${categoryLabel(l.category)}\n${t('statusField')}: ${statusLabel(l.status)}\n${t(isIncoming ? 'viewLabelSummary' : 'viewLabelSubject')}: ${isIncoming ? l.summary : l.subject}\n`;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${l.ref_number}.txt`;
+            a.click();
+        }
+
+        // 10. File attachment handling
+        document.getElementById('fileDrop').addEventListener('click', triggerFileInput);
+        function triggerFileInput() { document.getElementById('fileInput').click(); }
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 3 * 1024 * 1024) { showToast(t('toastFileTooLarge'), 'error'); return; }
+            const reader = new FileReader();
+            reader.onload = () => {
+                currentAttachment = { name: file.name, dataUrl: reader.result, isImage: file.type.startsWith('image/') };
+                showFilePreview(file.name);
+            };
+            reader.readAsDataURL(file);
+        });
+        function showFilePreview(name) {
+            document.getElementById('filePlaceholder').classList.add('hidden');
+            document.getElementById('filePreviewBox').classList.remove('hidden');
+            document.getElementById('filePreviewBox').classList.add('flex');
+            document.getElementById('fileNameLabel').textContent = name;
+            document.getElementById('fileActions').classList.remove('hidden');
+            document.getElementById('fileActions').classList.add('flex');
+        }
+        function removeFile() {
+            currentAttachment = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('filePlaceholder').classList.remove('hidden');
+            document.getElementById('filePreviewBox').classList.add('hidden');
+            document.getElementById('filePreviewBox').classList.remove('flex');
+            document.getElementById('fileActions').classList.add('hidden');
+            document.getElementById('fileActions').classList.remove('flex');
+        }
+
+        // 11. Reports & Charts
+        function renderCharts() {
+            const styles = getComputedStyle(document.documentElement);
+            const text = styles.getPropertyValue('--text').trim() || '#172033';
+            const muted = styles.getPropertyValue('--text-muted').trim() || '#596579';
+            const border = styles.getPropertyValue('--border').trim() || '#E2E6EC';
+            const primary = styles.getPropertyValue('--primary').trim() || '#B8922E';
+            const bright = styles.getPropertyValue('--primary-bright').trim() || '#D4AF37';
+            const primaryRgb = styles.getPropertyValue('--primary-rgb').trim() || '184,146,46';
+            const grid = `rgba(${primaryRgb},.08)`;
+            const soft = `rgba(${primaryRgb},.12)`;
+            const dates = [];
+            for (let i = 13; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i); dates.push(d.toISOString().slice(0,10));
+            }
+            const incomingCounts = dates.map(d => letters.filter(l => l.type === 'incoming' && l.letter_date === d).length);
+            const outgoingCounts = dates.map(d => letters.filter(l => l.type === 'outgoing' && l.letter_date === d).length);
+            const baseScale = { ticks:{color:muted,font:{size:10}}, grid:{color:grid}, border:{color:border} };
+
+            const flowCtx=document.getElementById('flowChart');
+            if(flowChartInstance) flowChartInstance.destroy();
+            flowChartInstance=new Chart(flowCtx,{type:'line',data:{labels:dates.map(d=>d.slice(5)),datasets:[
+                {label:'Incoming',data:incomingCounts,borderColor:primary,backgroundColor:`rgba(${primaryRgb},.08)`,fill:true,tension:.38,pointRadius:2,pointHoverRadius:4,borderWidth:2},
+                {label:'Outgoing',data:outgoingCounts,borderColor:bright,backgroundColor:`rgba(${primaryRgb},.035)`,fill:true,tension:.38,pointRadius:2,pointHoverRadius:4,borderWidth:2}
+            ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',align:'end',labels:{color:text,usePointStyle:true,boxWidth:8,font:{size:10,weight:'600'}}},tooltip:{backgroundColor:'#172033',padding:10,cornerRadius:10,titleFont:{size:11},bodyFont:{size:11}}},scales:{y:{...baseScale,beginAtZero:true,ticks:{...baseScale.ticks,stepSize:1},grid:{color:grid}},x:{...baseScale,grid:{display:false}}}}});
+
+            const statusCounts={}; Object.keys(STATUS_META).forEach(k=>statusCounts[k]=0); letters.forEach(l=>statusCounts[l.status]=(statusCounts[l.status]||0)+1);
+            const statusKeys=Object.keys(statusCounts).filter(k=>statusCounts[k]>0);
+            const palette=[primary,bright,'#5B8DEF','#42A879','#D96C6C'];
+            const statusCtx=document.getElementById('statusChart'); if(statusChartInstance) statusChartInstance.destroy();
+            statusChartInstance=new Chart(statusCtx,{type:'doughnut',data:{labels:statusKeys.map(k=>STATUS_META[k].label),datasets:[{data:statusKeys.map(k=>statusCounts[k]),backgroundColor:statusKeys.map((_,i)=>palette[i%palette.length]),borderColor:styles.getPropertyValue('--surface').trim(),borderWidth:3,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{color:text,usePointStyle:true,boxWidth:8,padding:12,font:{size:10}}},tooltip:{backgroundColor:'#172033',padding:10,cornerRadius:10}}}});
+
+            const categoryCounts=CATEGORIES.map(c=>letters.filter(l=>l.category===c).length);
+            const catCtx=document.getElementById('categoryChart'); if(categoryChartInstance) categoryChartInstance.destroy();
+            categoryChartInstance=new Chart(catCtx,{type:'bar',data:{labels:CATEGORIES.map(c=>CATEGORY_LABELS[c]),datasets:[{label:'Letters',data:categoryCounts,backgroundColor:`rgba(${primaryRgb},.78)`,borderColor:primary,borderWidth:1,borderRadius:8,maxBarThickness:34}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#172033',padding:10,cornerRadius:10}},scales:{y:{...baseScale,beginAtZero:true,ticks:{...baseScale.ticks,stepSize:1}},x:{...baseScale,grid:{display:false}}}}});
+        }
+
+        // 12. Printable Reports
+        function exportIncomingPdf() {
+            const rows = letters.filter(l => l.type === 'incoming').slice().sort((a, b) => (b.letter_date || '').localeCompare(a.letter_date || '')).map(l => `
+                <tr>
+                    <td>${escapeHtml(l.ref_number)}</td>
+                    <td class="amharic">${escapeHtml(l.party)}</td>
+                    <td>${escapeHtml(ecDisplayFromIso(l.letter_date))}</td>
+                    <td>${escapeHtml(l.summary || '')}</td>
+                    <td class="amharic">${escapeHtml(categoryLabel(l.category))}</td>
+                    <td>${escapeHtml(statusLabel(l.status))}</td>
+                    <td>-</td>
+                </tr>`).join('');
+
+            document.getElementById('printArea').innerHTML = `
+                <div class="print-header">
+                    <img src="logo.png" onerror="this.style.display='none'">
+                    <div><h2>Incoming Letter Report</h2><p>Meserete Hiwot Office System — Generated ${new Date().toLocaleDateString()}</p></div>
+                </div>
+                <table class="print-table">
+                    <thead><tr><th>የገቢ መለያ ቁጥር</th><th>ከማን የመጣ</th><th>ቀን</th><th>ማጠቃለያ</th><th>ምድብ</th><th>ሁኔታ</th><th>ድርጊቶች</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
+            setTimeout(() => window.print(), 150);
+        }
+
+        function exportOutgoingPdf() {
+            const rows = letters.filter(l => l.type === 'outgoing').slice().sort((a, b) => (b.letter_date || '').localeCompare(a.letter_date || '')).map(l => `
+                <tr>
+                    <td>${escapeHtml(l.ref_number)}</td>
+                    <td class="amharic">${escapeHtml(l.party)}</td>
+                    <td class="amharic">${escapeHtml(l.subject || '')}</td>
+                    <td>${escapeHtml(ecDisplayFromIso(l.letter_date))}</td>
+                    <td class="amharic">${escapeHtml(l.author || '')}</td>
+                    <td class="amharic">${escapeHtml(categoryLabel(l.category))}</td>
+                    <td>${escapeHtml(statusLabel(l.status))}</td>
+                    <td>-</td>
+                </tr>`).join('');
+
+            document.getElementById('printArea').innerHTML = `
+                <div class="print-header">
+                    <img src="logo.png" onerror="this.style.display='none'">
+                    <div><h2>Outgoing Letter Report</h2><p>Meserete Hiwot Office System — Generated ${new Date().toLocaleDateString()}</p></div>
+                </div>
+                <table class="print-table">
+                    <thead><tr><th>የወጪ መለያ ቁጥር</th><th>ለማን የተላከ</th><th>ርዕሰ ጉዳይ</th><th>ቀን</th><th>ኃላፊ</th><th>ምድብ</th><th>ሁኔታ</th><th>ድርጊቶች</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
+            setTimeout(() => window.print(), 150);
+        }
+
+        // Theme: light is the default; remember the user's choice.
+        function applyOfficeTheme(theme) {
+            const safeTheme = theme === 'dark' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', safeTheme);
+            document.body.setAttribute('data-theme', safeTheme);
+            localStorage.setItem('officeTheme', safeTheme);
+            const icon=document.getElementById('themeToggleIcon');
+            const label=document.querySelector('.theme-toggle-label');
+            if(icon) icon.textContent=safeTheme==='light'?'☾':'☀';
+            if(label) label.textContent=safeTheme==='light'?'Dark':'Light';
+            if(typeof renderCharts==='function' && currentTab==='reports' && typeof Chart!=='undefined') renderCharts();
+        }
+        function toggleOfficeTheme(){ applyOfficeTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'); }
+        document.getElementById('themeToggle')?.addEventListener('click',toggleOfficeTheme);
+        applyOfficeTheme(localStorage.getItem('officeTheme') || 'light');
+
+        // 13. Initialize App Logic
+        populateCategoryFilters();
+        applyLanguage();
+
+        function initApp() {
+            if (window.supabase) {
+                loadLetters();
+            } else {
+                setTimeout(initApp, 50);
+            }
+        }
+        
+        initApp();
+    </script>
+</body>
+</html>

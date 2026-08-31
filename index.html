@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#05070c" />
+    <title>MHSS ERP SYSTEM | Secure Access</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@300;400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #030509;
+            --surface: rgba(8, 11, 18, .74);
+            --surface-strong: rgba(10, 14, 23, .92);
+            --text: #f7f4ec;
+            --text-soft: rgba(247,244,236,.68);
+            --text-muted: rgba(247,244,236,.43);
+            --gold: #d4af37;
+            --gold-bright: #f5d76e;
+            --gold-deep: #8a6819;
+            --blue: #003bff;
+            --border: rgba(212,175,55,.22);
+            --input: rgba(255,255,255,.055);
+            --shadow: rgba(0,0,0,.58);
+            --mx: 50%;
+            --my: 50%;
+        }
+
+        body.light-mode {
+            --bg: #eef1f5;
+            --surface: rgba(255,255,255,.78);
+            --surface-strong: rgba(255,255,255,.94);
+            --text: #101827;
+            --text-soft: #4b5563;
+            --text-muted: #697386;
+            --border: rgba(122,91,20,.20);
+            --input: rgba(255,255,255,.88);
+            --shadow: rgba(25,35,50,.20);
+        }
+
+        * { box-sizing: border-box; }
+        html, body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        body {
+            min-width: 0;
+        }
+        img, svg, video, canvas {
+            max-width: 100%;
+        }
+        html { min-height: 100%; }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            transition: background .35s ease, color .35s ease;
+        }
+        button, input { font: inherit; }
+        button { -webkit-tap-highlight-color: transparent; }
+        .amharic, .amharic * { font-family: 'Noto Sans Ethiopic', sans-serif; }
+        .serif { font-family: 'Cormorant Garamond', serif; }
+        ::selection { background: var(--gold); color: #111; }
+
+        :focus-visible {
+            outline: 2px solid var(--gold-bright);
+            outline-offset: 3px;
+        }
+
+        /* Background */
+        .background {
+            position: fixed;
+            inset: 0;
+            z-index: -20;
+            overflow: hidden;
+            background: var(--bg);
+        }
+        .church-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center center;
+            filter: contrast(1.12) saturate(.82) brightness(.48);
+            transform: scale(1.055);
+            transition: filter .6s ease, transform 1s ease;
+            will-change: transform;
+        }
+        body.light-mode .church-image {
+            filter: contrast(1.03) saturate(.70) brightness(.82);
+        }
+        .background::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse at 50% 45%, transparent 0 28%, rgba(0,0,0,.12) 58%, rgba(0,0,0,.48) 100%),
+                linear-gradient(135deg, rgba(212,175,55,.06), transparent 32%, rgba(0,59,255,.07) 72%, transparent);
+        }
+        body.light-mode .background::after {
+            background:
+                radial-gradient(ellipse at 50% 45%, transparent 0 28%, rgba(255,255,255,.05) 58%, rgba(255,255,255,.25) 100%),
+                linear-gradient(135deg, rgba(212,175,55,.08), transparent 34%, rgba(0,59,255,.04) 72%, transparent);
+        }
+
+        .background-overlay {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(700px 520px at var(--mx) var(--my), rgba(245,215,110,.16), transparent 62%),
+                linear-gradient(90deg, rgba(2,3,8,.88) 0%, rgba(2,3,8,.58) 43%, rgba(2,3,8,.67) 100%),
+                linear-gradient(180deg, rgba(2,3,8,.52) 0%, rgba(2,3,8,.10) 38%, rgba(2,3,8,.84) 100%);
+            transition: background .35s ease;
+        }
+        body.light-mode .background-overlay {
+            background:
+                radial-gradient(700px 520px at var(--mx) var(--my), rgba(245,215,110,.24), transparent 62%),
+                linear-gradient(90deg, rgba(247,249,252,.90) 0%, rgba(247,249,252,.60) 44%, rgba(247,249,252,.70) 100%),
+                linear-gradient(180deg, rgba(255,255,255,.46) 0%, rgba(255,255,255,.16) 40%, rgba(232,235,240,.78) 100%);
+        }
+
+        .light-beam {
+            position: absolute;
+            width: 65vw;
+            height: 65vw;
+            max-width: 900px;
+            max-height: 900px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(245,215,110,.09), transparent 65%);
+            animation: breathe 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes breathe {
+            0%,100% { opacity: .55; transform: translate(-50%,-50%) scale(.94); }
+            50% { opacity: 1; transform: translate(-50%,-50%) scale(1.04); }
+        }
+
+        .particles { position: absolute; inset: 0; pointer-events: none; }
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--gold-bright);
+            box-shadow: 0 0 12px rgba(245,215,110,.7);
+            opacity: 0;
+            animation: floatUp 15s linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(20vh) scale(.6); opacity: 0; }
+            10% { opacity: .48; }
+            80% { opacity: .24; }
+            100% { transform: translateY(-110vh) scale(1.05); opacity: 0; }
+        }
+
+        /* Header */
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            padding: 18px clamp(16px, 4vw, 48px);
+            background: linear-gradient(180deg, rgba(2,3,8,.76), rgba(2,3,8,.22));
+            border-bottom: 1px solid rgba(212,175,55,.13);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+        body.light-mode .topbar {
+            background: linear-gradient(180deg, rgba(255,255,255,.90), rgba(255,255,255,.62));
+            border-bottom-color: rgba(122,91,20,.14);
+        }
+        .topbar-inner {
+            width: min(1320px, 100%);
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .brand-logo {
+            width: 46px;
+            height: 46px;
+            object-fit: contain;
+            padding: 5px;
+            border-radius: 13px;
+            background: rgba(255,255,255,.055);
+            border: 1px solid var(--border);
+            box-shadow: 0 0 24px rgba(212,175,55,.12);
+        }
+        .brand-name {
+            font-size: clamp(14px, 1.8vw, 18px);
+            font-weight: 800;
+            letter-spacing: .06em;
+            white-space: nowrap;
+        }
+        .brand-sub {
+            margin-top: 2px;
+            color: var(--text-soft);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        .online-dot {
+            display: inline-block;
+            width: 7px; height: 7px;
+            margin-left: 5px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 9px #34d399;
+            animation: pulse 2.2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .45; transform: scale(.78); }
+        }
+
+        .controls { display: flex; align-items: center; gap: 8px; }
+        .lang-switch, .theme-button {
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.055);
+            color: var(--text-soft);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        body.light-mode .lang-switch,
+        body.light-mode .theme-button {
+            background: rgba(255,255,255,.86);
+            color: #4b5563;
+        }
+        .lang-switch {
+            display: flex;
+            gap: 3px;
+            padding: 4px;
+            border-radius: 999px;
+        }
+        .lang-button {
+            border: 0;
+            cursor: pointer;
+            min-width: 42px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: transparent;
+            color: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            transition: .25s ease;
+        }
+        .lang-button:hover { color: var(--text); }
+        .lang-button.active {
+            color: #171100;
+            background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+            box-shadow: 0 5px 18px rgba(212,175,55,.18);
+        }
+        .theme-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: transform .2s ease, background .25s ease;
+        }
+        .theme-button:hover { transform: translateY(-1px); }
+
+        /* Live Ethiopia time strip */
+        .time-strip {
+            position: fixed;
+            top: 82px;
+            left: 0;
+            right: 0;
+            z-index: 45;
+            padding: 8px clamp(16px, 4vw, 48px);
+            pointer-events: none;
+        }
+        .time-strip-inner {
+            width: min(1320px, 100%);
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 9px 13px;
+            border: 1px solid rgba(212,175,55,.15);
+            border-radius: 14px;
+            background: rgba(4,7,13,.42);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 10px 35px rgba(0,0,0,.12);
+        }
+        body.light-mode .time-strip-inner {
+            background: rgba(255,255,255,.72);
+            border-color: rgba(122,91,20,.15);
+            box-shadow: 0 10px 30px rgba(31,41,55,.08);
+        }
+        .clock-block, .calendar-block {
+            display: flex;
+            align-items: center;
+        }
+        .clock-block { gap: 10px; }
+        .clock-icon {
+            display: grid;
+            place-items: center;
+            width: 31px;
+            height: 31px;
+            border-radius: 9px;
+            color: var(--gold-bright);
+            border: 1px solid var(--border);
+            background: rgba(212,175,55,.08);
+            font-size: 17px;
+        }
+        .live-time {
+            font-variant-numeric: tabular-nums;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: .09em;
+        }
+        .ethiopian-period {
+            margin-top: 1px;
+            color: var(--gold-bright);
+            font-size: 7px;
+            letter-spacing: .16em;
+            font-weight: 800;
+        }
+        .time-zone-label {
+            margin-top: 1px;
+            color: var(--text-muted);
+            font-size: 7px;
+            letter-spacing: .18em;
+            font-weight: 700;
+        }
+        .calendar-block {
+            gap: 14px;
+            text-align: right;
+        }
+        .calendar-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .calendar-label {
+            color: var(--text-muted);
+            font-size: 7px;
+            letter-spacing: .14em;
+            font-weight: 700;
+        }
+        .calendar-item strong {
+            color: var(--text-soft);
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .calendar-item:last-child strong { color: var(--gold-bright); }
+        .calendar-divider {
+            width: 1px;
+            height: 27px;
+            background: var(--border);
+        }
+
+        /* Main */
+        .page {
+            min-height: 100vh;
+            width: min(1320px, 100%);
+            margin: auto;
+            padding: 158px clamp(16px, 4vw, 48px) 42px;
+            display: grid;
+            grid-template-columns: 1.02fr .98fr;
+            align-items: center;
+            gap: clamp(42px, 7vw, 110px);
+        }
+        .hero { padding: 25px 0; }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 14px;
+            border: 1px solid rgba(212,175,55,.28);
+            border-radius: 999px;
+            background: rgba(0,0,0,.18);
+            color: var(--text-soft);
+            font-size: 11px;
+            letter-spacing: .04em;
+            backdrop-filter: blur(10px);
+        }
+        body.light-mode .hero-badge { background: rgba(255,255,255,.56); }
+        .hero-badge i {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--gold-bright);
+            box-shadow: 0 0 10px var(--gold);
+        }
+        .hero h1 {
+            max-width: 650px;
+            margin: 24px 0 0;
+            font-size: clamp(48px, 6vw, 80px);
+            line-height: .98;
+            font-weight: 600;
+            letter-spacing: -.025em;
+            text-shadow: 0 8px 34px rgba(0,0,0,.55);
+        }
+        body.light-mode .hero h1 { text-shadow: 0 5px 24px rgba(255,255,255,.55); }
+        .gold { color: var(--gold-bright); }
+        .hero p {
+            max-width: 600px;
+            margin: 24px 0 0;
+            color: var(--text-soft);
+            font-size: 15px;
+            line-height: 1.9;
+            text-shadow: 0 3px 18px rgba(0,0,0,.45);
+        }
+        body.light-mode .hero p { text-shadow: none; }
+        .hero-footer {
+            margin-top: 42px;
+            color: var(--text-muted);
+            font-size: 10px;
+            letter-spacing: .24em;
+        }
+        .hero-footer strong { color: var(--gold-bright); font-weight: 600; }
+
+        /* Login */
+        .login-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            perspective: 1400px;
+        }
+        .halo {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 650px;
+            height: 650px;
+            transform: translate(-50%,-50%);
+            border-radius: 50%;
+            border: 1px solid rgba(212,175,55,.17);
+            pointer-events: none;
+            animation: spin 80s linear infinite;
+        }
+        .halo::before {
+            content: "";
+            position: absolute;
+            inset: 45px;
+            border: 1px dashed rgba(0,59,255,.14);
+            border-radius: 50%;
+        }
+        @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+        .login-card {
+            position: relative;
+            z-index: 2;
+            padding: 1px;
+            border-radius: 30px;
+            background: linear-gradient(145deg, rgba(245,215,110,.62), rgba(212,175,55,.08) 35%, rgba(0,59,255,.18));
+            box-shadow: 0 40px 110px var(--shadow);
+            transform: translateY(24px);
+            opacity: 0;
+            animation: cardIn .9s cubic-bezier(.2,.8,.2,1) .45s forwards;
+        }
+        @keyframes cardIn { to { transform: translateY(0); opacity: 1; } }
+
+        .login-inner {
+            position: relative;
+            overflow: hidden;
+            padding: clamp(25px, 4vw, 40px);
+            border-radius: 29px;
+            background: linear-gradient(165deg, var(--surface-strong), var(--surface));
+            border: 1px solid rgba(255,255,255,.08);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+        }
+        .login-inner::before {
+            content: "";
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            right: -130px;
+            top: -150px;
+            border-radius: 50%;
+            background: rgba(0,59,255,.10);
+            filter: blur(20px);
+            pointer-events: none;
+        }
+        .sheen {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(115deg, rgba(255,255,255,.07), transparent 28%);
+        }
+        body.light-mode .sheen { background: linear-gradient(115deg, rgba(255,255,255,.52), transparent 30%); }
+
+        .logo-orb {
+            position: relative;
+            width: 96px; height: 96px;
+            margin: 0 auto;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 35% 28%, rgba(255,255,255,.22), transparent 18%),
+                radial-gradient(circle, rgba(212,175,55,.22) 0 34%, rgba(212,175,55,.08) 58%, transparent 72%);
+            border: 1px solid rgba(245,215,110,.42);
+            box-shadow: 0 0 0 7px rgba(212,175,55,.055), 0 0 0 12px rgba(212,175,55,.025), 0 16px 38px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.22);
+            animation: logoFloat 5s ease-in-out infinite;
+        }
+        .logo-orb::before {
+            content: "";
+            position: absolute;
+            inset: -9px;
+            border: 1px solid rgba(212,175,55,.28);
+            border-radius: 50%;
+            box-shadow: 0 0 22px rgba(212,175,55,.10);
+        }
+        .logo-orb::after {
+            content: "";
+            position: absolute;
+            inset: 5px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,.10);
+            pointer-events: none;
+        }
+        .logo-orb img {
+            width: 66px; height: 66px;
+            max-width: 72%;
+            max-height: 72%;
+            object-fit: contain;
+            border-radius: 50%;
+            filter: drop-shadow(0 0 15px rgba(212,175,55,.38));
+        }
+        @keyframes logoFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+        .eyebrow {
+            margin-top: 16px;
+            text-align: center;
+            color: var(--gold-bright);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .25em;
+        }
+        .gateway {
+            margin-top: 5px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 9px;
+            letter-spacing: .18em;
+        }
+        .login-title {
+            margin: 17px 0 0;
+            text-align: center;
+            font-size: clamp(34px, 4vw, 46px);
+            line-height: 1;
+            font-weight: 600;
+        }
+        .login-subtitle {
+            margin: 10px auto 0;
+            max-width: 330px;
+            text-align: center;
+            color: var(--text-soft);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .status-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-top: 18px;
+        }
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.035);
+            color: var(--text-soft);
+            font-size: 9px;
+            letter-spacing: .03em;
+        }
+
+        .form {
+            position: relative;
+            z-index: 3;
+            margin-top: 27px;
+        }
+        .field { margin-top: 17px; }
+        .field:first-child { margin-top: 0; }
+        .field label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-soft);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .04em;
+        }
+        .input-shell {
+            display: flex;
+            align-items: center;
+            min-height: 54px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            background: var(--input);
+            transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease, background .25s ease;
+        }
+        .input-shell:focus-within {
+            transform: translateY(-1px);
+            border-color: var(--gold);
+            background: rgba(255,255,255,.08);
+            box-shadow: 0 0 0 4px rgba(212,175,55,.11), 0 12px 26px rgba(212,175,55,.08);
+        }
+        body.light-mode .input-shell:focus-within { background: #fff; }
+        .input-shell input {
+            min-width: 0;
+            width: 100%;
+            height: 52px;
+            padding: 0 14px;
+            border: 0;
+            outline: 0;
+            color: var(--text);
+            background: transparent;
+            font-size: 14px;
+        }
+        .input-shell input::placeholder { color: var(--text-muted); }
+        .input-icon {
+            flex: 0 0 auto;
+            padding-right: 14px;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+        .password-toggle {
+            flex: 0 0 auto;
+            border: 0;
+            padding: 10px 14px 10px 5px;
+            cursor: pointer;
+            color: var(--text-muted);
+            background: transparent;
+            transition: color .2s ease;
+        }
+        .password-toggle:hover { color: var(--gold-bright); }
+
+        .form-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .remember {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-soft);
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .remember input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--gold);
+        }
+        .secure-label {
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+
+        .error {
+            display: flex;
+            gap: 9px;
+            align-items: flex-start;
+            margin-top: 15px;
+            padding: 11px 13px;
+            border-radius: 13px;
+            border: 1px solid rgba(248,113,113,.28);
+            background: rgba(239,68,68,.10);
+            color: #fecaca;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+        body.light-mode .error { color: #991b1b; background: rgba(254,226,226,.82); }
+
+        .submit {
+            position: relative;
+            width: 100%;
+            min-height: 56px;
+            margin-top: 20px;
+            overflow: hidden;
+            border: 0;
+            border-radius: 16px;
+            cursor: pointer;
+            color: #1b1402;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: .035em;
+            background: linear-gradient(135deg, var(--gold-bright), var(--gold) 52%, var(--gold-deep));
+            box-shadow: 0 16px 34px rgba(212,175,55,.22);
+            transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+        }
+        .submit::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,.58) 50%, transparent 75%);
+            transform: translateX(-130%);
+            transition: transform .75s ease;
+        }
+        .submit:hover::before { transform: translateX(130%); }
+        .submit:hover { transform: translateY(-2px); box-shadow: 0 20px 42px rgba(212,175,55,.30); }
+        .submit:active { transform: translateY(0); }
+        .submit:disabled { cursor: progress; filter: saturate(.72); }
+        .submit.success {
+            color: #062b1d;
+            background: linear-gradient(135deg, #b7f2cf, #34d399, #0f9d68);
+            box-shadow: 0 16px 34px rgba(52,211,153,.24);
+        }
+        .dots { display: inline-flex; gap: 4px; margin-right: 8px; vertical-align: middle; }
+        .dots i {
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: #1b1402;
+            animation: dot 1s infinite ease-in-out;
+        }
+        .dots i:nth-child(2) { animation-delay: .15s; }
+        .dots i:nth-child(3) { animation-delay: .3s; }
+        @keyframes dot { 0%,80%,100% { transform: translateY(0); opacity:.45; } 40% { transform: translateY(-4px); opacity:1; } }
+
+        .security {
+            margin-top: 22px;
+            padding-top: 17px;
+            border-top: 1px solid rgba(255,255,255,.09);
+        }
+        body.light-mode .security { border-top-color: rgba(17,24,39,.10); }
+        .security-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--text-soft);
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .security-list {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+        .security-list span::before { content: "✓"; margin-right: 5px; color: #34d399; font-weight: 800; }
+
+        .card-footer {
+            margin-top: 19px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,.07);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 9px;
+            line-height: 1.7;
+        }
+        body.light-mode .card-footer { border-top-color: rgba(17,24,39,.09); }
+
+        /* Entrance animation */
+        .hero {
+            opacity: 0;
+            animation: heroIn .9s cubic-bezier(.2,.8,.2,1) .15s forwards;
+        }
+        .topbar { opacity: 0; animation: topIn .7s ease .05s forwards; }
+        @keyframes heroIn { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes topIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+
+        /* Tablet / mobile */
+        @media (max-width: 1023px) {
+            .page {
+                grid-template-columns: 1fr;
+                max-width: 680px;
+                padding-top: 154px;
+                gap: 24px;
+            }
+            .hero {
+                text-align: center;
+                padding: 5px 0;
+            }
+            .hero-badge { justify-content: center; }
+            .hero h1 { margin-left: auto; margin-right: auto; font-size: clamp(43px, 8vw, 64px); }
+            .hero p { margin-left: auto; margin-right: auto; }
+            .hero-footer { margin-top: 22px; }
+            .login-wrap { margin: auto; }
+            .halo { width: 580px; height: 580px; }
+        }
+
+        @media (max-width: 640px) {
+            .time-strip,
+            .time-strip-inner,
+            .topbar,
+            .topbar-inner,
+            .page,
+            .login-wrap,
+            .login-card,
+            .login-inner,
+            .calendar-block,
+            .calendar-item,
+            .form,
+            .field,
+            .input-shell {
+                min-width: 0;
+                max-width: 100%;
+            }
+            .time-strip { top: 64px; padding: 4px 8px; }
+            .time-strip-inner { min-width: 0; padding: 6px 8px; gap: 7px; border-radius: 12px; }
+            .clock-block { min-width: 0; flex: 0 1 auto; gap: 7px; }
+            .clock-icon { width: 25px; height: 25px; flex: 0 0 25px; font-size: 13px; }
+            .live-time { font-size: 11px; letter-spacing: .035em; }
+            .time-zone-label { font-size: 5px; letter-spacing: .055em; white-space: nowrap; }
+            .ethiopian-period { font-size: 5px; letter-spacing: .08em; }
+            .calendar-block { min-width: 0; flex: 1 1 auto; justify-content: flex-end; gap: 6px; }
+            .calendar-item { min-width: 0; }
+            .calendar-label { font-size: 5px; letter-spacing: .045em; }
+            .calendar-item strong { max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: 7px; }
+            .calendar-divider { height: 22px; }
+
+            .topbar { padding: 10px 10px; }
+            .topbar-inner { gap: 6px; }
+            .brand { gap: 8px; min-width: 0; }
+            .brand-logo { width: 42px; height: 42px; border-radius: 50%; padding: 4px; flex: 0 0 36px; }
+            .brand-name { max-width: 150px; overflow: hidden; text-overflow: ellipsis; font-size: 11px; letter-spacing: .035em; }
+            .brand-sub { display: none; }
+            .controls { gap: 4px; flex: 0 0 auto; }
+            .lang-switch { padding: 2px; }
+            .lang-button { min-width: 34px; padding: 6px 7px; font-size: 9px; }
+            .theme-button { width: 34px; height: 34px; }
+
+            .page { width: 100%; min-height: 100svh; padding: 128px 10px max(18px, env(safe-area-inset-bottom)); gap: 8px; }
+            .hero { display: none; }
+            .login-wrap { width: 100%; max-width: 430px; margin: auto; }
+            .halo { width: min(88vw, 430px); height: min(88vw, 430px); opacity: .58; }
+            .login-card { width: 100%; border-radius: 22px; }
+            .login-inner { border-radius: 21px; padding: 20px 15px 17px; }
+            .logo-orb { width: 82px; height: 82px; }
+            .logo-orb img { width: 56px; height: 56px; }
+            .eyebrow { margin-top: 13px; font-size: 8px; letter-spacing: .20em; }
+            .gateway { font-size: 7px; letter-spacing: .10em; }
+            .login-title { margin-top: 14px; font-size: clamp(29px, 8vw, 35px); }
+            .login-subtitle { max-width: 300px; margin-top: 8px; font-size: 11px; }
+            .status-row { margin-top: 13px; gap: 5px; }
+            .status { font-size: 7px; padding: 5px 7px; }
+            .form { margin-top: 21px; }
+            .field { margin-top: 13px; }
+            .field label { margin-bottom: 6px; font-size: 10px; }
+            .input-shell { min-height: 50px; border-radius: 13px; }
+            .input-shell input { height: 48px; font-size: 16px; padding: 0 12px; }
+            .input-icon { padding-right: 11px; }
+            .password-toggle { padding-right: 11px; }
+            .form-meta { margin-top: 11px; }
+            .remember { font-size: 10px; }
+            .secure-label { display: none; }
+            .submit { min-height: 52px; margin-top: 15px; border-radius: 14px; font-size: 12px; }
+            .security { margin-top: 16px; padding-top: 13px; }
+            .security-list { gap: 6px 10px; margin-top: 6px; font-size: 8px; }
+            .card-footer { margin-top: 12px; padding-top: 11px; font-size: 8px; }
+        }
+
+        @media (max-width: 640px) and (max-height: 760px) {
+            .time-strip { top: 58px; }
+            .page { padding-top: 116px; }
+            .login-inner { padding-top: 15px; padding-bottom: 13px; }
+            .logo-orb { width: 68px; height: 68px; }
+            .logo-orb img { width: 47px; height: 47px; }
+            .eyebrow { margin-top: 9px; }
+            .login-title { margin-top: 10px; }
+            .login-subtitle { margin-top: 6px; }
+            .status-row { margin-top: 9px; }
+            .form { margin-top: 14px; }
+            .field { margin-top: 10px; }
+            .submit { min-height: 48px; margin-top: 12px; }
+            .security { margin-top: 11px; padding-top: 9px; }
+            .card-footer { margin-top: 9px; padding-top: 8px; }
+        }
+
+        @media (max-width: 640px) and (orientation: landscape) {
+            .page { padding-top: 112px; align-items: start; }
+            .login-wrap { max-width: 520px; }
+            .hero { display: none; }
+        }
+
+        @media (max-width: 380px) {
+            .brand-name { font-size: 10px; max-width: 125px; }
+            .lang-button { min-width: 32px; padding-left: 5px; padding-right: 5px; }
+            .theme-button { width: 32px; height: 32px; }
+            .time-strip-inner { padding-left: 6px; padding-right: 6px; }
+            .clock-block { gap: 5px; }
+            .clock-icon { width: 23px; height: 23px; flex-basis: 23px; }
+            .live-time { font-size: 10px; }
+            .time-zone-label { font-size: 4.5px; }
+            .calendar-label { font-size: 4.5px; }
+            .calendar-item strong { font-size: 6.5px; }
+            .login-inner { padding-left: 13px; padding-right: 13px; }
+            .login-title { font-size: 29px; }
+            .status { font-size: 6.5px; }
+        }
+
+
+        @media (max-width: 640px) {
+            .topbar-inner,
+            .page,
+            .time-strip-inner,
+            .clock-block,
+            .calendar-block,
+            .form-meta,
+            .security-list {
+                width: 100%;
+            }
+
+            .brand,
+            .brand-name,
+            .controls,
+            .login-wrap,
+            .login-card,
+            .login-inner,
+            .field,
+            .input-shell,
+            .input-shell input {
+                min-width: 0;
+            }
+
+            .brand-name,
+            .gateway,
+            .login-title,
+            .login-subtitle,
+            .card-footer,
+            .security-list,
+            .calendar-label,
+            .calendar-item strong,
+            .time-zone-label {
+                overflow-wrap: anywhere;
+                word-break: break-word;
+            }
+
+            .calendar-block {
+                overflow: hidden;
+            }
+
+            .calendar-item strong {
+                white-space: nowrap;
+            }
+
+            .login-inner {
+                overflow: hidden;
+            }
+
+            .input-shell {
+                overflow: hidden;
+            }
+
+            .input-shell input {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .time-strip {
+                left: 0;
+                right: 0;
+                width: 100%;
+            }
+
+            .time-strip-inner {
+                width: 100%;
+            }
+
+            .calendar-block {
+                gap: 4px;
+            }
+
+            .calendar-item {
+                flex: 1 1 0;
+                overflow: hidden;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .001ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    
+        /* Final mobile overflow protection */
+        @media (max-width: 640px) {
+            html, body {
+                width: 100%;
+                max-width: 100vw;
+                overflow-x: hidden !important;
+            }
+
+            .background,
+            .background img,
+            .background::before,
+            .background::after,
+            .page,
+            .topbar,
+            .time-strip {
+                max-width: 100vw;
+            }
+
+            .background img {
+                width: 100%;
+                height: 100%;
+            }
+
+            .page {
+                width: 100%;
+                overflow-x: hidden;
+            }
+
+            .login-wrap {
+                width: 100%;
+                max-width: min(430px, 100%);
+            }
+
+            .login-card {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .login-inner {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+
+        /* Logo sizing safety — never allow logo decoration to cause viewport overflow */
+        .brand-logo, .logo-orb {
+            max-width: 100%;
+            flex-shrink: 0;
+        }
+        .logo-orb img {
+            max-width: 72%;
+            max-height: 72%;
+        }
+
+</style>
+</head>
+
+<body>
+    <!-- Premium cinematic background -->
+    <div class="background" aria-hidden="true">
+        <img id="churchImg" class="church-image" src="church.png" alt="">
+        <div class="background-overlay"></div>
+        <div class="light-beam"></div>
+        <div id="particles" class="particles"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <img src="logo.png" alt="MHSS Logo" class="brand-logo">
+                <div>
+                    <div class="brand-name">
+                        MHSS ERP SYSTEM <span class="online-dot"></span>
+                    </div>
+                    <div id="headerSub" class="brand-sub">Student Management • Attendance • Assets • Finance</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="lang-switch" role="group" aria-label="Language">
+                    <button id="enBtn" class="lang-button active" type="button">EN</button>
+                    <button id="amBtn" class="lang-button" type="button">አማ</button>
+                </div>
+
+                <button id="themeToggle" class="theme-button" type="button"
+                        aria-label="Switch to light mode" title="Switch to light mode">
+                    <span id="themeIcon" aria-hidden="true">☀</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Live Ethiopia clock + Gregorian / Ethiopian calendar -->
+    <section class="time-strip" aria-label="Ethiopia date and time">
+        <div class="time-strip-inner">
+            <div class="clock-block">
+                <span class="clock-icon">◷</span>
+                <div>
+                    <div id="liveTime" class="live-time">--:--:--</div>
+                    <div id="ethiopianPeriod" class="ethiopian-period">DAY</div>
+                    <div id="tzLabel" class="time-zone-label">ETHIOPIA · LOCAL 12-HOUR TIME · EAT UTC+3</div>
+                </div>
+            </div>
+
+            <div class="calendar-block">
+                <div class="calendar-item">
+                    <span id="gcLabel" class="calendar-label">GREGORIAN CALENDAR</span>
+                    <strong id="gcDate">Loading...</strong>
+                </div>
+                <div class="calendar-divider"></div>
+                <div class="calendar-item">
+                    <span id="ecLabel" class="calendar-label">ETHIOPIAN CALENDAR</span>
+                    <strong id="ecDate">ቀን በመጫን ላይ...</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="page">
+        <!-- Desktop brand message -->
+        <section class="hero">
+            <div class="hero-badge">
+                <i></i>
+                <span id="heroBadge">Sunday School Management Platform</span>
+            </div>
+
+            <h1 id="heroTitle" class="serif">
+                Manage Meserete Hiwot Sunday School with
+                <span class="gold">excellence</span>
+            </h1>
+
+            <p id="heroDesc">
+                One unified platform for student management, attendance,
+                assets, finance, and administrative operations.
+            </p>
+
+            <div class="hero-footer">
+                <strong>MESERETE HIWOT</strong>
+                &nbsp; • &nbsp; FAITH • EXCELLENCE • SERVICE
+            </div>
+        </section>
+
+        <!-- Login -->
+        <section class="login-wrap" aria-label="Login">
+            <div class="halo"></div>
+
+            <div class="login-card">
+                <div class="login-inner">
+                    <div class="sheen"></div>
+
+                    <div class="logo-orb">
+                        <img src="logo.png" alt="MHSS Logo">
+                    </div>
+
+                    <div class="eyebrow">MESERETE HIWOT</div>
+                    <div id="gatewaySub" class="gateway">ERP SYSTEM · SECURE ADMINISTRATIVE GATEWAY</div>
+
+                    <h2 id="loginTitle" class="login-title serif">Welcome Back</h2>
+                    <p id="loginSubtitle" class="login-subtitle">
+                        Sign in to access the Sunday School dashboard
+                    </p>
+
+                    <div class="status-row">
+                        <div class="status">
+                            <span class="online-dot"></span>
+                            <span id="systemOnlineText">SYSTEM ONLINE</span>
+                        </div>
+                        <div class="status">
+                            <span>🔐</span>
+                            <span id="secureAuthText">SECURE AUTHENTICATION</span>
+                        </div>
+                    </div>
+
+                    <div id="loginError" class="error" hidden>
+                        <span>⚠</span>
+                        <span id="loginErrorText">Something went wrong.</span>
+                    </div>
+
+                    <form id="loginForm" class="form" novalidate>
+                        <div class="field">
+                            <label id="emailLabel" for="email">Email Address</label>
+                            <div class="input-shell">
+                                <input
+                                    id="email"
+                                    type="email"
+                                    inputmode="email"
+                                    autocomplete="username"
+                                    placeholder="admin@mhss.com"
+                                    required
+                                >
+                                <span class="input-icon" aria-hidden="true">✉</span>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label id="passwordLabel" for="password">Password</label>
+                            <div class="input-shell">
+                                <input
+                                    id="password"
+                                    type="password"
+                                    autocomplete="current-password"
+                                    placeholder="Enter your password"
+                                    required
+                                >
+                                <button id="togglePassword" class="password-toggle" type="button"
+                                        aria-label="Show password" title="Show password">◉</button>
+                            </div>
+                        </div>
+
+                        <div class="form-meta">
+                            <label class="remember">
+                                <input id="rememberMe" type="checkbox">
+                                <span id="rememberText">Remember me</span>
+                            </label>
+                            <span id="secureText" class="secure-label">Secure Login</span>
+                        </div>
+
+                        <button id="loginBtn" class="submit" type="submit">
+                            <span id="loginBtnText">ENTER ERP <span>→</span></span>
+                        </button>
+                    </form>
+
+                    <div class="security">
+                        <div class="security-title">
+                            <span class="online-dot"></span>
+                            <span id="systemOnlineText2">SYSTEM ONLINE</span>
+                        </div>
+                        <div class="security-list">
+                            <span id="secItemAuth">Authentication Ready</span>
+                            <span id="secItemReady">ERP Services Online</span>
+                        </div>
+                    </div>
+
+                    <footer class="card-footer">
+                        <div>© 2026 MHSS ERP SYSTEM</div>
+                        <div id="footerText">Sunday School Management System · Secure Access</div>
+                    </footer>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Supabase Authentication -->
+    <script type="module">
+        import { supabase } from './supabaseClient.js';
+
+        const form = document.getElementById('loginForm');
+        const btn = document.getElementById('loginBtn');
+        const btnText = document.getElementById('loginBtnText');
+        const errorBox = document.getElementById('loginError');
+        const errorText = document.getElementById('loginErrorText');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const rememberMe = document.getElementById('rememberMe');
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorBox.hidden = false;
+        }
+
+        function hideError() {
+            errorBox.hidden = true;
+        }
+
+        function friendlyError(err) {
+            const msg = (err && err.message ? err.message : '').toLowerCase();
+            const lang = document.documentElement.lang === 'am' ? 'am' : 'en';
+
+            if (msg.includes('invalid login credentials')) {
+                return lang === 'am'
+                    ? 'ኢሜይል ወይም የይለፍ ቃል ትክክል አይደለም። እባክዎ እንደገና ይሞክሩ።'
+                    : 'Incorrect email or password. Please try again.';
+            }
+            if (msg.includes('email not confirmed')) {
+                return lang === 'am'
+                    ? 'ኢሜይልዎ ገና አልተረጋገጠም። እባክዎ ኢሜይልዎን ያረጋግጡ።'
+                    : 'Your email has not been confirmed yet. Please check your inbox.';
+            }
+            if (msg.includes('failed to fetch') || msg.includes('network')) {
+                return lang === 'am'
+                    ? 'ከአገልጋዩ ጋር መገናኘት አልተቻለም። የኢንተርኔት ግንኙነትዎን ያረጋግጡ።'
+                    : 'Could not reach the server. Please check your internet connection.';
+            }
+
+            return lang === 'am'
+                ? 'መግባት አልተሳካም። እባክዎ እንደገና ይሞክሩ።'
+                : 'Login failed. Please try again.';
+        }
+
+        function resetButton() {
+            const lang = document.documentElement.lang === 'am' ? 'am' : 'en';
+            btn.disabled = false;
+            btn.classList.remove('success');
+            btnText.innerHTML = lang === 'am'
+                ? 'ወደ ERP ግባ <span>→</span>'
+                : 'ENTER ERP <span>→</span>';
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            hideError();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const lang = document.documentElement.lang === 'am' ? 'am' : 'en';
+
+            if (!email || !password) {
+                showError(lang === 'am'
+                    ? 'እባክዎ ኢሜይል እና የይለፍ ቃል ያስገቡ።'
+                    : 'Please enter your email and password.');
+                return;
+            }
+
+            if (!emailInput.checkValidity()) {
+                showError(lang === 'am'
+                    ? 'እባክዎ ትክክለኛ ኢሜይል ያስገቡ።'
+                    : 'Please enter a valid email address.');
+                emailInput.focus();
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.innerHTML =
+                '<span class="dots"><i></i><i></i><i></i></span>' +
+                (lang === 'am' ? 'በማረጋገጥ ላይ...' : 'AUTHENTICATING...');
+
+            try {
+                const { error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    showError(friendlyError(error));
+                    resetButton();
+                    return;
+                }
+
+                if (rememberMe.checked) {
+                    localStorage.setItem('mhss-remember-email', email);
+                } else {
+                    localStorage.removeItem('mhss-remember-email');
+                }
+
+                btn.classList.add('success');
+                btnText.textContent = lang === 'am'
+                    ? 'ገብተዋል ✓'
+                    : 'ACCESS GRANTED ✓';
+
+                setTimeout(() => {
+                    btnText.textContent = lang === 'am'
+                        ? 'ዳሽቦርዱን በመክፈት ላይ...'
+                        : 'OPENING COMMAND CENTER...';
+                }, 650);
+
+                setTimeout(() => {
+                    window.location.replace('dashboard.html');
+                }, 1350);
+
+            } catch (err) {
+                showError(friendlyError(err));
+                resetButton();
+            }
+        });
+
+        // Restore remembered email.
+        const rememberedEmail = localStorage.getItem('mhss-remember-email');
+        if (rememberedEmail) {
+            emailInput.value = rememberedEmail;
+            rememberMe.checked = true;
+        }
+
+        // ------------------------------------------------------------
+        // Session protection
+        // ------------------------------------------------------------
+        // The login page must never remain visible while an active
+        // Supabase session exists. Supabase remains the source of truth;
+        // no password or access token is stored manually in localStorage.
+        let redirecting = false;
+
+        function redirectToDashboard() {
+            if (redirecting) return;
+            redirecting = true;
+            window.location.replace('dashboard.html');
+        }
+
+        async function protectLoginPage() {
+            try {
+                const { data, error } = await supabase.auth.getSession();
+
+                if (error) {
+                    console.warn('Session check failed:', error.message);
+                    return;
+                }
+
+                if (data?.session) {
+                    redirectToDashboard();
+                }
+            } catch (err) {
+                console.warn('Session check failed:', err);
+            }
+        }
+
+        await protectLoginPage();
+
+        // React to sign-in/sign-out/token refresh events.
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                redirectToDashboard();
+            }
+
+            // If a session expires while the login page is open, keep the
+            // page available for a fresh login rather than leaving stale state.
+            if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !session) {
+                redirecting = false;
+                hideError();
+                resetButton();
+            }
+        });
+
+        // Re-check when the browser tab becomes visible again.
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) protectLoginPage();
+        });
+
+        // Periodic protection against a session being created in another tab.
+        setInterval(protectLoginPage, 30000);
+    </script>
+
+    <!-- UI -->
+    <script>
+        const enBtn = document.getElementById('enBtn');
+        const amBtn = document.getElementById('amBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const password = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+
+        // ------------------------------------------------------------
+        // Live Ethiopia time + Gregorian/Ethiopian calendar
+        // Uses the real Africa/Addis_Ababa timezone and an exact
+        // Gregorian -> Ethiopian calendar conversion.
+        // ------------------------------------------------------------
+        const liveTimeEl = document.getElementById('liveTime');
+        const gcDateEl = document.getElementById('gcDate');
+        const ecDateEl = document.getElementById('ecDate');
+        const gcLabelEl = document.getElementById('gcLabel');
+        const ecLabelEl = document.getElementById('ecLabel');
+        const tzLabelEl = document.getElementById('tzLabel');
+
+        const EC_MONTHS_EN = [
+            'Meskerem','Tikimt','Hidar','Tahsas','Tir','Yekatit',
+            'Megabit','Miyazya','Ginbot','Sene','Hamle','Nehase','Pagume'
+        ];
+        const EC_MONTHS_AM = [
+            'መስከረም','ጥቅምት','ኅዳር','ታኅሣሥ','ጥር','የካቲት',
+            'መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜን'
+        ];
+        const WEEKDAYS_EN = [
+            'Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'
+        ];
+        const WEEKDAYS_AM = [
+            'እሑድ','ሰኞ','ማክሰኞ','ረቡዕ','ሐሙስ','ዓርብ','ቅዳሜ'
+        ];
+
+        // Gregorian date -> Ethiopian date.
+        // This follows the standard Ethiopian calendar epoch and
+        // correctly handles leap-year / Pagume boundaries.
+        function gregorianToEthiopian(date) {
+            const utc = new Date(Date.UTC(
+                date.getUTCFullYear(),
+                date.getUTCMonth(),
+                date.getUTCDate()
+            ));
+
+            const gYear = utc.getUTCFullYear();
+            const gMonth = utc.getUTCMonth() + 1;
+            const gDay = utc.getUTCDate();
+
+            const isGregorianLeap = y =>
+                y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0);
+
+            // Ethiopian new year is Sep 11, or Sep 12 after a Gregorian leap year.
+            const newYearDay = isGregorianLeap(gYear - 1) ? 12 : 11;
+            const currentNewYear = Date.UTC(gYear, 8, newYearDay);
+
+            let ecYear;
+            let start;
+
+            if (utc.getTime() >= currentNewYear) {
+                ecYear = gYear - 7;
+                start = currentNewYear;
+            } else {
+                const previousYear = gYear - 1;
+                const previousNewYearDay = isGregorianLeap(previousYear - 1) ? 12 : 11;
+                ecYear = gYear - 8;
+                start = Date.UTC(previousYear, 8, previousNewYearDay);
+            }
+
+            const dayOfYear = Math.floor((utc.getTime() - start) / 86400000);
+            const month = Math.floor(dayOfYear / 30) + 1;
+            const day = (dayOfYear % 30) + 1;
+
+            return { year: ecYear, month, day };
+        }
+
+        function getEthiopiaNow() {
+            // The Intl API supplies the correct Ethiopia local date/time,
+            // including the fixed UTC+3 EAT zone.
+            const parts = new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'Africa/Addis_Ababa',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            }).formatToParts(new Date());
+
+            const get = type => parts.find(p => p.type === type)?.value;
+            return {
+                year: Number(get('year')),
+                month: Number(get('month')),
+                day: Number(get('day')),
+                hour: Number(get('hour')),
+                minute: Number(get('minute')),
+                second: Number(get('second'))
+            };
+        }
+
+        function renderLiveDateTime() {
+            const now = new Date();
+            const etNow = getEthiopiaNow();
+
+            const lang = document.documentElement.lang === 'am' ? 'am' : 'en';
+            const weekday = lang === 'am'
+                ? WEEKDAYS_AM[now.toLocaleDateString('en-US', { timeZone: 'Africa/Addis_Ababa', weekday: 'long' }) === 'Sunday' ? 0 :
+                    now.toLocaleDateString('en-US', { timeZone: 'Africa/Addis_Ababa', weekday: 'long' }) === 'Monday' ? 1 :
+                    now.toLocaleDateString('en-US', { timeZone: 'Africa/Addis_Ababa', weekday: 'long' }) === 'Tuesday' ? 2 :
+                    now.toLocaleDateString('en-US', { timeZone: 'Africa/Addis_Ababa', weekday: 'long' }) === 'Wednesday' ? 3 :
+                    now.toLocaleDateString('en-US', { timeZone: 'Africa/Addis_Ababa', weekday: 'long' }) === 'Thursday' ? 4 :
+                    now.toLocaleDateString('en-US', { timeZone: 'Africa/Addis_Ababa', weekday: 'long' }) === 'Friday' ? 5 : 6]
+                : now.toLocaleDateString('en-US', { timeZone: 'Africa/Addis_Ababa', weekday: 'long' });
+
+            // Ethiopia commonly uses a local 12-hour clock whose day
+            // starts at 6:00 AM EAT. For example:
+            // 2:48 PM EAT -> 8:48 daytime Ethiopian time.
+            // 8:48 AM EAT -> 2:48 daytime Ethiopian time.
+            const isDaytime = etNow.hour >= 6 && etNow.hour < 18;
+
+            let ethiopianHour;
+            if (isDaytime) {
+                ethiopianHour = etNow.hour - 6;
+            } else {
+                ethiopianHour = etNow.hour - 18;
+            }
+
+            // 6:00 maps to 12, not 0.
+            if (ethiopianHour === 0) ethiopianHour = 12;
+
+            const period = isDaytime
+                ? (lang === 'am' ? 'የቀን ሰዓት' : 'DAY')
+                : (lang === 'am' ? 'የሌሊት ሰዓት' : 'NIGHT');
+
+            liveTimeEl.textContent =
+                `${String(ethiopianHour).padStart(2,'0')}:${String(etNow.minute).padStart(2,'0')}:${String(etNow.second).padStart(2,'0')}`;
+
+            const periodEl = document.getElementById('ethiopianPeriod');
+            if (periodEl) periodEl.textContent = period;
+
+            const gc = new Intl.DateTimeFormat(lang === 'am' ? 'am-ET' : 'en-US', {
+                timeZone: 'Africa/Addis_Ababa',
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }).format(now);
+
+            gcDateEl.textContent = gc;
+
+            const ec = gregorianToEthiopian(new Date(Date.UTC(
+                etNow.year, etNow.month - 1, etNow.day
+            )));
+
+            const ecMonth = lang === 'am'
+                ? EC_MONTHS_AM[ec.month - 1]
+                : EC_MONTHS_EN[ec.month - 1];
+
+            const ecWeekday = lang === 'am'
+                ? WEEKDAYS_AM[new Date(Date.UTC(etNow.year, etNow.month - 1, etNow.day)).getUTCDay()]
+                : WEEKDAYS_EN[new Date(Date.UTC(etNow.year, etNow.month - 1, etNow.day)).getUTCDay()];
+
+            ecDateEl.textContent = lang === 'am'
+                ? `${ecWeekday}፣ ${ecMonth} ${ec.day}፣ ${ec.year}`
+                : `${ecWeekday}, ${ecMonth} ${ec.day}, ${ec.year}`;
+
+            // The Gregorian and Ethiopian calendars both describe the same
+            // Ethiopia-local date; the time itself remains Ethiopia's EAT.
+        }
+
+        renderLiveDateTime();
+        setInterval(renderLiveDateTime, 1000);
+
+        togglePassword.addEventListener('click', () => {
+            const showing = password.type === 'text';
+            password.type = showing ? 'password' : 'text';
+            togglePassword.textContent = showing ? '◉' : '○';
+            togglePassword.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+            togglePassword.setAttribute('title', showing ? 'Show password' : 'Hide password');
+        });
+
+        const translations = {
+            en: {
+                headerSub: 'Student Management • Attendance • Assets • Finance',
+                heroBadge: 'Sunday School Management Platform',
+                heroTitle: 'Manage Meserete Hiwot Sunday School with <span class="gold">excellence</span>',
+                heroDesc: 'One unified platform for student management, attendance, assets, finance, and administrative operations.',
+                loginTitle: 'Welcome Back',
+                loginSubtitle: 'Sign in to access the Sunday School dashboard',
+                emailLabel: 'Email Address',
+                passwordLabel: 'Password',
+                rememberText: 'Remember me',
+                secureText: 'Secure Login',
+                loginBtnText: 'ENTER ERP <span>→</span>',
+                gatewaySub: 'ERP SYSTEM · SECURE ADMINISTRATIVE GATEWAY',
+                systemOnlineText: 'SYSTEM ONLINE',
+                systemOnlineText2: 'SYSTEM ONLINE',
+                secureAuthText: 'SECURE AUTHENTICATION',
+                secItemAuth: 'Authentication Ready',
+                secItemReady: 'ERP Services Online',
+                footerText: 'Sunday School Management System · Secure Access',
+                gcLabel: 'GREGORIAN CALENDAR',
+                ecLabel: 'ETHIOPIAN CALENDAR',
+                tzLabel: 'ETHIOPIA · LOCAL 12-HOUR TIME · EAT UTC+3'
+            },
+            am: {
+                headerSub: 'የተማሪ አስተዳደር • መገኘት • ንብረት • ፋይናንስ',
+                heroBadge: 'የሰንበት ትምህርት ማስተዳደሪያ መድረክ',
+                heroTitle: 'መሠረተ ሕይወት ሰንበት ትምህርት ቤትን በ<span class="gold">ዘመናዊ ልቀት</span> ያስተዳድሩ',
+                heroDesc: 'የተማሪ አስተዳደርን፣ መገኘትን፣ ንብረትን፣ ፋይናንስን እና የአስተዳደር ሥራዎችን በአንድ ዘመናዊ ስርዓት ያስተዳድሩ።',
+                loginTitle: 'እንኳን ደህና መጡ',
+                loginSubtitle: 'ወደ የሰንበት ትምህርት ዳሽቦርድ ለመግባት ይግቡ',
+                emailLabel: 'ኢሜይል አድራሻ',
+                passwordLabel: 'የይለፍ ቃል',
+                rememberText: 'አስታውሰኝ',
+                secureText: 'ደህንነቱ የተጠበቀ መግቢያ',
+                loginBtnText: 'ወደ ERP ግባ <span>→</span>',
+                gatewaySub: 'ERP ስርዓት · የተጠበቀ የአስተዳደር መግቢያ',
+                systemOnlineText: 'ስርዓቱ ንቁ ነው',
+                systemOnlineText2: 'ስርዓቱ ንቁ ነው',
+                secureAuthText: 'የተጠበቀ ማረጋገጫ',
+                secItemAuth: 'ማረጋገጫ ዝግጁ ነው',
+                secItemReady: 'የ ERP አገልግሎቶች ንቁ ናቸው',
+                footerText: 'የሰንበት ትምህርት ማስተዳደሪያ ስርዓት · የተጠበቀ መግቢያ',
+                gcLabel: 'የግሪጎሪያን ዘመን',
+                ecLabel: 'የኢትዮጵያ ዘመን',
+                tzLabel: 'ኢትዮጵያ · የአካባቢ 12-ሰዓት ጊዜ · EAT UTC+3'
+            }
+        };
+
+        function applyLanguage(lang) {
+            const t = translations[lang];
+
+            Object.keys(t).forEach(key => {
+                const el = document.getElementById(key);
+                if (el) el.innerHTML = t[key];
+            });
+
+            document.documentElement.lang = lang;
+
+            if (gcLabelEl) gcLabelEl.textContent = t.gcLabel;
+            if (ecLabelEl) ecLabelEl.textContent = t.ecLabel;
+            if (tzLabelEl) tzLabelEl.textContent = t.tzLabel;
+            renderLiveDateTime();
+
+            if (lang === 'am') {
+                document.body.classList.add('amharic');
+                amBtn.classList.add('active');
+                enBtn.classList.remove('active');
+            } else {
+                document.body.classList.remove('amharic');
+                enBtn.classList.add('active');
+                amBtn.classList.remove('active');
+            }
+
+            localStorage.setItem('mhss-lang', lang);
+        }
+
+        enBtn.addEventListener('click', () => applyLanguage('en'));
+        amBtn.addEventListener('click', () => applyLanguage('am'));
+
+        function applyTheme(theme) {
+            const light = theme === 'light';
+            document.body.classList.toggle('light-mode', light);
+
+            themeIcon.textContent = light ? '☾' : '☀';
+            themeToggle.setAttribute(
+                'aria-label',
+                light ? 'Switch to dark mode' : 'Switch to light mode'
+            );
+            themeToggle.setAttribute(
+                'title',
+                light ? 'Switch to dark mode' : 'Switch to light mode'
+            );
+
+            document.querySelector('meta[name="theme-color"]').setAttribute(
+                'content',
+                light ? '#eef1f5' : '#05070c'
+            );
+
+            localStorage.setItem('mhss-theme', theme);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            applyTheme(
+                document.body.classList.contains('light-mode') ? 'dark' : 'light'
+            );
+        });
+
+        const savedTheme = localStorage.getItem('mhss-theme');
+        const initialTheme = savedTheme ||
+            (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+
+        applyTheme(initialTheme);
+        applyLanguage(localStorage.getItem('mhss-lang') || 'en');
+
+        // Soft cursor lighting on capable desktop devices only.
+        const finePointer = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+        if (finePointer && !reducedMotion) {
+            document.addEventListener('mousemove', event => {
+                document.documentElement.style.setProperty('--mx', `${event.clientX}px`);
+                document.documentElement.style.setProperty('--my', `${event.clientY}px`);
+            });
+        }
+
+        // Lightweight ambient particles.
+        const particleField = document.getElementById('particles');
+        for (let i = 0; i < 8; i++) {
+            const p = document.createElement('span');
+            p.className = 'particle';
+            p.style.left = `${5 + Math.random() * 90}%`;
+            p.style.bottom = `${-5 + Math.random() * 10}%`;
+            p.style.animationDuration = `${17 + Math.random() * 14}s`;
+            p.style.animationDelay = `${Math.random() * 12}s`;
+            const size = 2 + Math.random() * 3;
+            p.style.width = `${size}px`;
+            p.style.height = `${size}px`;
+            particleField.appendChild(p);
+        }
+    </script>
+</body>
+</html>

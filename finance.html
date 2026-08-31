@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Meserete Hiwot ERP - Finance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+Ethiopic:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* ============================================================
+             THEME SYSTEM (Light / Dark) — same variables as students.html / begena.html
+        ============================================================ */
+        :root {
+            --bg-page: #F7F8FA; --surface: #FFFFFF; --surface-soft: #F1F3F5;
+            --text-main: #172033; --text-muted: #596579; --primary: #B8922E;
+            --primary-bright: #D4AF37; --border: #E2E6EC;
+            --glass-bg: rgba(255,255,255,.92); --glass-border: #E2E6EC;
+            --glass-gold-bg-1: #FFFFFF; --glass-gold-bg-2: #F8F9FB;
+            --glass-gold-border: rgba(184,146,46,.28); --input-bg: #FFFFFF;
+            --input-border: #D9DEE7; --select-bg: #FFFFFF;
+            --modal-bg-1: #FFFFFF; --modal-bg-2: #F7F8FA;
+            --header-bg: rgba(255,255,255,.96); --hover-bg: #F1F3F5; --gold: #B8922E;
+        }
+        html[data-theme="dark"] {
+            --bg-page: #0F172A; --surface: #111C2E; --surface-soft: #182235;
+            --text-main: #F8FAFC; --text-muted: #94A3B8; --primary: #D4AF37;
+            --primary-bright: #E7C45A; --border: rgba(255,255,255,.09);
+            --glass-bg: rgba(17,28,46,.82); --glass-border: rgba(255,255,255,.09);
+            --glass-gold-bg-1: rgba(255,255,255,.055); --glass-gold-bg-2: rgba(255,255,255,.018);
+            --glass-gold-border: rgba(212,175,55,.20); --input-bg: rgba(255,255,255,.055);
+            --input-border: rgba(255,255,255,.12); --select-bg: #172236;
+            --modal-bg-1: #111C2E; --modal-bg-2: #0B1322;
+            --header-bg: rgba(17,28,46,.86); --hover-bg: rgba(255,255,255,.08); --gold: #D4AF37;
+        }
+        html, body { width:100%; max-width:100%; min-width:0; overflow-x:hidden !important; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); transition: background .35s ease, color .35s ease; }
+        main, header, section, div, form, button, a, input, select, textarea { min-width:0; }
+        .amharic { font-family: 'Noto Sans Ethiopic', sans-serif; }
+        .amharic,h1,h2,h3,h4,p,span,label,button,a { overflow-wrap:anywhere; }
+
+        .glass-panel { background: var(--glass-bg) !important; border: 1px solid var(--glass-border) !important; backdrop-filter: blur(20px); box-shadow:0 12px 32px rgba(23,32,51,.06); }
+        html[data-theme="dark"] .glass-panel, html[data-theme="dark"] .glass-panel-gold { box-shadow:0 18px 42px rgba(0,0,0,.20); }
+        .glass-panel-gold { background: linear-gradient(155deg, var(--glass-gold-bg-1), var(--glass-gold-bg-2)) !important; border: 1px solid var(--glass-gold-border) !important; backdrop-filter: blur(24px); transition: all .35s cubic-bezier(.4,0,.2,1); }
+        .glass-panel-gold:hover { transform: translateY(-6px); box-shadow: 0 22px 45px -14px rgba(212,175,55,0.18); }
+        .card-in { animation: cardIn .45s cubic-bezier(.22,1,.36,1) both; }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; transition: all .25s cubic-bezier(.4,0,.2,1); }
+        .icon-btn:hover { transform: translateY(-3px) scale(1.08); }
+        html[data-theme="light"] .text-white { color: var(--text-main) !important; }
+        html[data-theme="light"] .text-gray-100 { color:#263246 !important; }
+        html[data-theme="light"] .text-gray-300 { color:#3F4A5C !important; }
+        html[data-theme="light"] .text-gray-400 { color:#596579 !important; }
+        html[data-theme="light"] .text-gray-500 { color:#718096 !important; }
+        html[data-theme="light"] .border-white\/10, html[data-theme="light"] .border-white\/5 { border-color: var(--border) !important; }
+        html[data-theme="light"] .bg-white\/5 { background: var(--surface-soft) !important; }
+        html[data-theme="light"] .bg-white\/10, html[data-theme="light"] .hover\:bg-white\/10:hover { background:#E9EDF2 !important; }
+        html[data-theme="light"] input, html[data-theme="light"] select, html[data-theme="light"] textarea { color: var(--text-main) !important; }
+
+        .ambient-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, rgba(0,0,0,0) 70%); top: -200px; left: -200px; z-index: -1; pointer-events: none; }
+        .ambient-glow-2 { position: absolute; width: 800px; height: 800px; background: radial-gradient(circle, rgba(56,189,248,0.03) 0%, rgba(0,0,0,0) 70%); bottom: -200px; right: -200px; z-index: -1; pointer-events: none; }
+        html[data-theme="light"] .ambient-glow, html[data-theme="light"] .ambient-glow-2 { opacity: .5; }
+
+        .modal-overlay { transition: opacity .28s ease; padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left)) !important; box-sizing:border-box; overflow:auto !important; }
+        .modal-panel { transition: transform .32s cubic-bezier(.34,1.4,.64,1), opacity .28s ease; width:min(100%,760px); max-width:100% !important; max-height:calc(100dvh - 24px) !important; margin:0 !important; box-sizing:border-box; }
+        .modal-hidden-state { opacity: 0; pointer-events: none; }
+        .modal-hidden-state .modal-panel { transform: scale(.94) translateY(14px); opacity: 0; }
+        .luxury-modal { background: linear-gradient(160deg, var(--modal-bg-1), var(--modal-bg-2)) !important; border: 1px solid var(--glass-gold-border); box-shadow: 0 25px 60px -15px rgba(0,0,0,0.5); }
+        .section-title { display: flex; align-items: center; gap: 8px; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+        .lux-input { transition: all .2s ease; background: var(--input-bg) !important; border: 1px solid var(--input-border) !important; color: var(--text-main) !important; }
+        select.lux-input { background: var(--select-bg) !important; }
+        .lux-input:focus { border-color: var(--gold) !important; box-shadow: 0 0 0 3px rgba(212,175,55,0.12); }
+        @media(max-width:640px){
+          .modal-overlay { padding:0 !important; align-items:stretch !important; justify-content:stretch !important; }
+          .modal-panel,.modal-panel.luxury-modal { width:100% !important; max-width:none !important; height:100dvh !important; max-height:100dvh !important; border-radius:0 !important; margin:0 !important; }
+          .modal-panel > form, .modal-panel > .p-6 { padding:16px !important; padding-bottom:calc(22px + env(safe-area-inset-bottom)) !important; }
+        }
+        @media(min-width:641px){ .modal-overlay { padding:18px !important; } }
+
+        header.app-header { position: sticky; top: 0; z-index: 30; background: var(--header-bg) !important; box-shadow:0 8px 28px rgba(23,32,51,.05); backdrop-filter: blur(18px); }
+        .header-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0; }
+        .lang-switch { display: flex; align-items: center; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 999px; padding: 3px; gap: 2px; flex-shrink: 0; }
+        .lang-switch button { border: none; background: transparent; font-size: 12px; font-weight: 700; letter-spacing: .03em; padding: 6px 12px; border-radius: 999px; color: var(--text-muted); cursor: pointer; transition: all .25s ease; white-space: nowrap; }
+        .lang-switch button.active { background: var(--gold); color: #1a1a1a; }
+        .theme-toggle { position: relative; width: 52px; height: 30px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--glass-bg); cursor: pointer; padding: 0; flex-shrink: 0; }
+        .theme-toggle .knob { position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background: var(--gold); display:flex; align-items:center; justify-content:center; transition: transform .35s cubic-bezier(.4,0,.2,1); }
+        html[data-theme="light"] .theme-toggle .knob { transform: translateX(22px); }
+        .theme-toggle .knob svg { width:14px; height:14px; }
+        .back-dash-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main) !important; transition: all .2s ease; white-space: nowrap; flex-shrink: 0; }
+        .back-dash-btn:hover { border-color: var(--gold); color: var(--gold) !important; }
+        /* PC / laptop widths: stack title above controls so a longer title
+           (e.g. English) never squeezes the language switch / theme toggle /
+           back button into an overlapping row the way it could when both
+           sat on one line. This keeps the header identical and comfortable
+           in either language, and only applies below full desktop widths —
+           wide monitors keep the original single-row header. */
+        @media (min-width:481px) and (max-width:1180px) {
+          header.app-header { flex-direction: column; align-items: flex-start !important; row-gap: 14px; }
+          .header-controls { width: 100%; justify-content: space-between; }
+        }
+        @media(max-width:480px){
+          main { padding:14px !important; }
+          header.app-header { padding:12px 14px !important; }
+          header.app-header h1 { font-size:1.05rem !important; line-height:1.2 !important; }
+          header.app-header p { font-size:.68rem !important; }
+          .header-controls { width:100%; justify-content:space-between; gap:7px; }
+          .lang-switch button { padding:6px 9px; } .back-dash-btn { padding:9px !important; }
+        }
+
+        .nav-pill { padding: 10px 18px; border-radius: 12px; font-size: .85rem; font-weight: 600; transition: all .25s ease; cursor: pointer; border: 1px solid var(--glass-border); white-space: nowrap; }
+        .nav-pill.active { background: var(--gold); color: #14110a; border-color: var(--gold); }
+        .nav-pill:not(.active):hover { background: var(--hover-bg); }
+
+        .status-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: .03em; text-transform: uppercase; white-space:nowrap; }
+        .status-paid, .status-approved, .status-reconciled { background: rgba(34,197,94,0.15); color: #22a35a; border: 1px solid rgba(34,197,94,0.3); }
+        html[data-theme="dark"] .status-paid, html[data-theme="dark"] .status-approved, html[data-theme="dark"] .status-reconciled { color: #4ade80; }
+        .status-pending { background: rgba(234,179,8,0.15); color: #a16207; border: 1px solid rgba(234,179,8,0.3); }
+        html[data-theme="dark"] .status-pending { color: #facc15; }
+        .status-partial { background: rgba(56,189,248,0.15); color: #0369a1; border: 1px solid rgba(56,189,248,0.3); }
+        html[data-theme="dark"] .status-partial { color: #38bdf8; }
+        .status-overdue, .status-rejected { background: rgba(239,68,68,0.15); color: #b91c1c; border: 1px solid rgba(239,68,68,0.3); }
+        html[data-theme="dark"] .status-overdue, html[data-theme="dark"] .status-rejected { color: #f87171; }
+
+        .table-row-hover:hover { background: var(--hover-bg); }
+        .photo-drop { transition: all .25s ease; }
+        .photo-drop:hover { border-color: var(--gold); background: rgba(212,175,55,0.06); }
+
+        /* ============================================================
+             MOBILE-FRIENDLY RESPONSIVE TABLES — no horizontal scroll.
+             Below 768px every .responsive-table becomes a stacked card
+             list; each <td> shows its column header via data-label.
+        ============================================================ */
+        @media (max-width: 767px) {
+            .responsive-table thead { display: none; }
+            .responsive-table, .responsive-table tbody, .responsive-table tr, .responsive-table td { display: block; width: 100%; }
+            .responsive-table tr { margin-bottom: 12px; border-radius: 16px; border: 1px solid var(--glass-border); padding: 10px 12px; background: var(--glass-bg); }
+            .responsive-table td { display: flex; justify-content: space-between; align-items: center; gap: 10px; text-align: right; padding: 8px 2px !important; border-top: 1px dashed var(--border); }
+            .responsive-table td:first-child { border-top: none; }
+            .responsive-table td::before { content: attr(data-label); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); font-weight: 700; text-align: left; flex-shrink: 0; }
+            .responsive-table td.rt-block::before { display:none; }
+            .responsive-table td.rt-block { display:block; text-align:left; }
+        }
+
+        /* Class / Grade grid cards (mirrors students.html / begena.html) */
+        .class-card-lux { min-height:110px; border-radius:22px !important; isolation:isolate; text-align:left; position:relative; overflow:hidden; }
+        .class-icon-wrap { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+        html[data-theme="light"] .class-card-lux h3, html[data-theme="light"] #currentClassName, html[data-theme="light"] #currentGradeName { color:#000 !important; }
+
+        #printArea { display: none; }
+        @media print {
+            body { background: white; color: black; }
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { display: block; position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 0; }
+            @page { size: A4 landscape; margin: 10mm; }
+            .print-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; color: #111827; }
+            .print-sub { font-size: 11px; color: #555; margin-bottom: 12px; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 10px; color: #111827; }
+            .print-table th, .print-table td { border: 1px solid #c9a227; padding: 5px 6px; text-align: left; }
+            .print-table th { background: #123A7A; color: #fff; }
+        }
+
+        .toast { animation: toastIn .3s ease, toastOut .3s ease 2.7s forwards; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(12px);} to {opacity:1; transform: translateY(0);} }
+        @keyframes toastOut { to { opacity: 0; transform: translateY(-8px);} }
+        .ec-date-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
+        .plan-tab { padding:8px 16px; border-radius:10px; font-size:.8rem; font-weight:700; cursor:pointer; border:1px solid var(--glass-border); }
+        .plan-tab.active { background: var(--gold); color:#14110a; }
+        .period-pill { padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; border:1px solid var(--glass-border); cursor:pointer; white-space:nowrap; }
+        .period-pill.paid { background: rgba(34,197,94,0.15); color:#22a35a; border-color: rgba(34,197,94,.35); }
+        .period-pill.unpaid { color: var(--text-muted); }
+
+        /* ============================================================
+             ETHIOPIAN CALENDAR PICKER (single date + range) — ported
+             from attendance.html so every popup date field uses EC by
+             default, with the Gregorian (GC) date shown as a sub-line.
+        ============================================================ */
+        .ec-range-field{min-width:0;width:100%;padding:9px 12px;border:1px solid var(--input-border);border-radius:10px;background:var(--input-bg);color:var(--text-main);font-size:12.5px;font-weight:700;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+        .ec-range-field:hover{border-color:var(--primary);}
+        .ec-picker-overlay{position:fixed;inset:0;z-index:90;background:rgba(15,23,42,.48);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;}
+        .ec-picker-card{width:min(430px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--surface);color:var(--text-main);border:1px solid var(--border);border-radius:24px;box-shadow:0 24px 70px rgba(0,0,0,.25);padding:18px;}
+        .ec-picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+        .ec-picker-title{font-size:16px;font-weight:800;}
+        .ec-picker-sub{font-size:11px;color:var(--text-muted);margin-top:2px;}
+        .ec-picker-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;}
+        .ec-picker-week{font-size:10px;color:var(--text-muted);text-align:center;font-weight:800;padding:5px 0;}
+        .ec-day{border:1px solid transparent;background:transparent;color:var(--text-main);border-radius:9px;min-height:38px;font-weight:700;cursor:pointer;}
+        .ec-day:hover{background:var(--hover-bg);border-color:var(--primary);}
+        .ec-day.selected{background:var(--primary);color:#fff;}
+        .ec-day.in-range{background:rgba(184,146,46,.14);color:var(--text-main);}
+        .ec-day.today{box-shadow:inset 0 0 0 1px var(--primary);}
+        .ec-day.empty{pointer-events:none;}
+        .ec-picker-select{border:1px solid var(--input-border);background:var(--input-bg);color:var(--text-main);border-radius:10px;padding:8px 10px;font-weight:700;min-width:0;}
+        .ec-picker-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:15px;}
+        .ec-picker-actions button{border:1px solid var(--border);border-radius:10px;padding:9px 14px;font-weight:800;background:transparent;color:var(--text-main);}
+        .ec-picker-actions .primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+        .ec-picker-actions.hidden{display:none;}
+
+        /* Payment view tabs (mirrors attendance.html tab-btn) */
+        .tab-btn { transition: all .25s ease; border-bottom: 3px solid transparent; color: var(--text-muted); }
+        .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+        .tab-btn:hover:not(.active) { color: var(--text-main); }
+
+        /* Luxury clean summary table */
+        .lux-summary-wrap { overflow-x: auto; }
+        .lux-summary-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13px; }
+        .lux-summary-table th { position:sticky; top:0; background:var(--surface-soft); color:var(--text-muted); text-transform:uppercase; font-size:10.5px; letter-spacing:.04em; padding:10px 12px; text-align:center; white-space:nowrap; border-bottom:1px solid var(--border); }
+        .lux-summary-table th:first-child, .lux-summary-table td:first-child { text-align:left; }
+        .lux-summary-table td { padding:10px 12px; text-align:center; border-bottom:1px solid var(--border); white-space:nowrap; }
+        .lux-summary-table tr:last-child td { border-bottom:none; }
+        .lux-summary-table tr:hover td { background: var(--hover-bg); }
+        .pay-dot { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:8px; font-weight:800; font-size:12px; }
+        .pay-dot.yes { background: rgba(34,197,94,0.15); color:#22a35a; }
+        .pay-dot.no { color: var(--text-muted); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative">
+
+    <div class="ambient-glow no-print"></div>
+    <div class="ambient-glow-2 no-print"></div>
+
+    <!-- HEADER -->
+    <header class="app-header w-full p-6 md:p-8 flex flex-wrap justify-between items-center md:items-end gap-4 border-b border-white/5 z-10 no-print">
+        <div class="flex items-center gap-4 md:gap-6 min-w-0">
+            <img src="logo.png" alt="Logo" class="w-12 h-12 md:w-20 md:h-20 rounded-2xl bg-white/5 p-2 border border-white/10 flex-shrink-0" onerror="this.style.display='none'">
+            <div class="min-w-0">
+                <h1 class="text-xl md:text-4xl font-bold tracking-tight truncate" data-i18n="appTitle">Meserete Hiwot ERP System</h1>
+                <p class="text-yellow-600 font-medium mt-1 text-xs md:text-base" data-i18n="appSubtitle">Financial Management System <span class="amharic text-sm ml-2">(የገንዘብ አስተዳደር)</span></p>
+            </div>
+        </div>
+
+        <div class="header-controls">
+            <div class="text-right mr-2 hidden lg:block">
+                <p class="text-sm text-gray-400" id="dateDisplay">Loading date...</p>
+                <p class="text-lg font-semibold" data-i18n="adminDashboard">Admin Dashboard</p>
+            </div>
+            <div class="lang-switch" role="group" aria-label="Language switcher">
+                <button type="button" id="langBtnEn" onclick="setLanguage('en')" aria-pressed="true">ENG</button>
+                <button type="button" id="langBtnAm" onclick="setLanguage('am')" aria-pressed="false">አማ</button>
+            </div>
+            <button type="button" class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Toggle light/dark theme">
+                <span class="knob" id="themeKnob"><svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round"/></svg></span>
+            </button>
+            <a href="dashboard.html" class="back-dash-btn" aria-label="Back to Dashboard">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <span data-i18n="backToDashboard">Back to Dashboard</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-1 p-4 md:p-10 z-10">
+
+        <!-- SECTION NAV -->
+        <div class="flex flex-wrap items-center gap-3 mb-8 no-print">
+            <div class="nav-pill active" data-section="overview" onclick="switchSection('overview')">📊 <span data-i18n="navOverview">Overview</span></div>
+            <div class="nav-pill" data-section="bank" onclick="switchSection('bank')">🏦 <span data-i18n="navBank">Bank &amp; Cash</span></div>
+            <div class="nav-pill" data-section="loans" onclick="switchSection('loans')">🤝 <span data-i18n="navLoans">Loans</span></div>
+            <div class="nav-pill" data-section="students" onclick="switchSection('students')">🎓 <span data-i18n="navStudents">Student Payment</span></div>
+            <div class="nav-pill" data-section="begena" onclick="switchSection('begena')">🎼 <span data-i18n="navBegena">Begena Payment</span></div>
+            <div class="nav-pill" data-section="reports" onclick="switchSection('reports')">📈 <span data-i18n="navReports">Reports &amp; Audit</span></div>
+        </div>
+
+        <!-- ==========================================
+             OVERVIEW SECTION
+        =========================================== -->
+        <section id="section-overview">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 no-print">
+                <div class="card-in glass-panel-gold rounded-3xl p-5 md:p-6">
+                    <div class="flex items-center justify-between mb-3"><span class="text-xs text-gray-400" data-i18n="totalIncome">Total Income</span><span class="text-xl">💰</span></div>
+                    <p id="statTotalIncome" class="text-xl md:text-2xl font-bold text-green-500">ETB 0.00</p>
+                </div>
+                <div class="card-in glass-panel-gold rounded-3xl p-5 md:p-6">
+                    <div class="flex items-center justify-between mb-3"><span class="text-xs text-gray-400" data-i18n="totalExpense">Total Expense</span><span class="text-xl">💸</span></div>
+                    <p id="statTotalExpense" class="text-xl md:text-2xl font-bold text-red-500">ETB 0.00</p>
+                </div>
+                <div class="card-in glass-panel-gold rounded-3xl p-5 md:p-6">
+                    <div class="flex items-center justify-between mb-3"><span class="text-xs text-gray-400" data-i18n="bankCashBalance">Bank + Cash Balance</span><span class="text-xl">🏦</span></div>
+                    <p id="statBankBalance" class="text-xl md:text-2xl font-bold text-blue-500">ETB 0.00</p>
+                </div>
+                <div class="card-in glass-panel-gold rounded-3xl p-5 md:p-6">
+                    <div class="flex items-center justify-between mb-3"><span class="text-xs text-gray-400" data-i18n="outstandingLoans">Outstanding Loans</span><span class="text-xl">🤝</span></div>
+                    <p id="statLoanAmount" class="text-xl md:text-2xl font-bold text-yellow-600">ETB 0.00</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 mb-8 no-print">
+                <button onclick="openTxnModal('income')" class="px-5 py-3 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition" data-i18n="newIncome">+ New Income</button>
+                <button onclick="openTxnModal('expense')" class="px-5 py-3 glass-panel rounded-xl hover:bg-white/10 transition font-bold" data-i18n="newExpense">+ New Expense</button>
+                <button onclick="switchSection('loans'); openLoanModal();" class="px-5 py-3 glass-panel rounded-xl hover:bg-white/10 transition font-bold" data-i18n="approveLoan">🤝 Approve Loan</button>
+                <button onclick="exportReportPdf()" class="px-5 py-3 glass-panel rounded-xl hover:bg-white/10 transition font-bold" data-i18n="exportReport">🖨️ Export Report</button>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center mb-4 gap-3 no-print">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button class="filter-btn nav-pill active" data-filter="all" onclick="setFilter('all')" data-i18n="filterAll">All</button>
+                    <button class="filter-btn nav-pill" data-filter="income" onclick="setFilter('income')" data-i18n="filterIncome">Income</button>
+                    <button class="filter-btn nav-pill" data-filter="expense" onclick="setFilter('expense')" data-i18n="filterExpense">Expense</button>
+                </div>
+                <input type="text" id="searchInput" data-i18n-ph="searchTxnPh" placeholder="Search description, category, payer..." class="lux-input px-4 py-2 rounded-xl focus:outline-none w-full md:w-72" oninput="renderTable()">
+            </div>
+
+            <div class="glass-panel rounded-3xl overflow-hidden no-print">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm responsive-table">
+                        <thead class="bg-white/5 text-gray-400 uppercase text-[11px] tracking-wide">
+                            <tr>
+                                <th class="p-4 text-left" data-i18n="thDate">Date</th>
+                                <th class="p-4 text-left" data-i18n="thType">Type</th>
+                                <th class="p-4 text-left" data-i18n="thDesc">Description</th>
+                                <th class="p-4 text-left" data-i18n="thCategory">Category</th>
+                                <th class="p-4 text-left" data-i18n="thMethod">Method</th>
+                                <th class="p-4 text-right" data-i18n="thAmount">Amount</th>
+                                <th class="p-4 text-left" data-i18n="thStatus">Status</th>
+                                <th class="p-4 text-left" data-i18n="thAttach">Attachment</th>
+                                <th class="p-4 text-left" data-i18n="thActions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="txnTableBody"></tbody>
+                    </table>
+                </div>
+                <p id="emptyTxnMsg" class="hidden text-center text-gray-500 py-16" data-i18n="noTxnFound">No transactions found.</p>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             BANK & CASH SECTION
+        =========================================== -->
+        <section id="section-bank" class="hidden">
+            <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+                <h2 class="text-2xl font-bold" data-i18n="bankCashTitle">Bank &amp; Cash Control</h2>
+                <button onclick="openBankModal()" class="px-4 py-2 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition text-sm" data-i18n="addAccount">+ Add Account</button>
+            </div>
+            <div id="bankAccountsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10"></div>
+
+            <div class="glass-panel rounded-3xl p-6">
+                <h3 class="section-title mb-4">🧮 <span data-i18n="reconTool">Reconciliation Tool</span></h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="systemBalance">System Balance (ETB)</label>
+                        <input id="reconSystem" type="number" readonly class="lux-input w-full rounded-lg p-2 outline-none text-yellow-600 font-bold"></div>
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="statementBalance">Bank Statement Balance (ETB)</label>
+                        <input id="reconStatement" type="number" step="0.01" class="lux-input w-full rounded-lg p-2 outline-none"></div>
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="difference">Difference</label>
+                        <p id="reconDiff" class="font-bold text-lg">ETB 0.00</p></div>
+                    <button onclick="runReconciliation()" class="px-4 py-2 glass-panel rounded-xl hover:bg-white/10 transition text-sm font-bold" data-i18n="checkRecon">✅ Check</button>
+                </div>
+                <div id="reconHistory" class="text-xs text-gray-400 space-y-1"></div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             LOANS SECTION
+        =========================================== -->
+        <section id="section-loans" class="hidden">
+            <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+                <h2 class="text-2xl font-bold" data-i18n="loansTitle">Loan &amp; Advance Management</h2>
+                <button onclick="openLoanModal()" class="px-4 py-2 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition text-sm" data-i18n="newLoan">+ New Loan</button>
+            </div>
+            <div id="loansGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+            <p id="emptyLoansMsg" class="hidden text-center text-gray-500 py-16" data-i18n="noLoans">No loans recorded.</p>
+        </section>
+
+        <!-- ==========================================
+             STUDENT PAYMENT SECTION (NEW)
+        =========================================== -->
+        <section id="section-students" class="hidden">
+            <div id="studentClassGridView">
+                <h2 class="text-2xl font-bold mb-6" data-i18n="selectClassPayment">Select a Class <span class="amharic text-gray-400 text-lg ml-2">ክፍል ይምረጡ</span></h2>
+                <div id="studentClassGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
+            </div>
+            <div id="studentPaymentWorkspace" class="hidden">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                    <div class="flex items-center gap-3">
+                        <button onclick="backToStudentClasses()" class="icon-btn glass-panel">←</button>
+                        <h2 class="text-xl md:text-2xl font-bold" id="currentClassName">Class</h2>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div class="plan-tab active" data-plan="3month" onclick="setStudentPlan('3month')" data-i18n="plan3Month">3 Month</div>
+                        <div class="plan-tab" data-plan="6month" onclick="setStudentPlan('6month')" data-i18n="plan6Month">6 Month</div>
+                        <div class="plan-tab" data-plan="yearly" onclick="setStudentPlan('yearly')" data-i18n="planYearly">Yearly</div>
+                    </div>
+                </div>
+
+                <!-- Payment / Payment Summary / Report tabs -->
+                <div id="studentTabBar" class="flex items-center gap-6 border-b border-white/10 mb-6 no-print overflow-x-auto w-full">
+                    <button data-view="payment" onclick="switchPayView('student','payment')" class="tab-btn active px-2 pb-3 text-sm font-semibold whitespace-nowrap" data-i18n="tabPayment">💳 Payment</button>
+                    <button data-view="summary" onclick="switchPayView('student','summary')" class="tab-btn px-2 pb-3 text-sm font-semibold whitespace-nowrap" data-i18n="tabSummary">🧾 Payment Summary</button>
+                    <button data-view="report" onclick="switchPayView('student','report')" class="tab-btn px-2 pb-3 text-sm font-semibold whitespace-nowrap" data-i18n="tabReport">📊 Report</button>
+                </div>
+
+                <!-- ============ PAYMENT VIEW ============ -->
+                <div id="studentPaymentView">
+                    <div class="flex flex-col md:flex-row gap-3 mb-4">
+                        <input type="text" id="studentSearchInput" data-i18n-ph="searchStudentPh" placeholder="Search student name or ID..." class="lux-input px-4 py-2 rounded-xl w-full md:w-80" oninput="renderStudentPaymentList()">
+                        <select id="studentPeriodSelect" class="lux-input px-4 py-2 rounded-xl w-full md:w-64" onchange="renderStudentPaymentList()"></select>
+                    </div>
+                    <div class="glass-panel rounded-3xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm responsive-table">
+                                <thead class="bg-white/5 text-gray-400 uppercase text-[11px] tracking-wide">
+                                    <tr>
+                                        <th class="p-4 text-left" data-i18n="thStudent">Student</th>
+                                        <th class="p-4 text-left" data-i18n="thId">ID</th>
+                                        <th class="p-4 text-left" data-i18n="thPeriod">Period</th>
+                                        <th class="p-4 text-right" data-i18n="thAmount">Amount</th>
+                                        <th class="p-4 text-left" data-i18n="thStatus">Status</th>
+                                        <th class="p-4 text-left" data-i18n="thActions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentPaymentTableBody"></tbody>
+                            </table>
+                        </div>
+                        <p id="emptyStudentPaymentMsg" class="hidden text-center text-gray-500 py-16" data-i18n="noStudentsInClass">No students found in this class.</p>
+                    </div>
+                </div>
+
+                <!-- ============ PAYMENT SUMMARY VIEW ============ -->
+                <div id="studentSummaryView" class="hidden">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 no-print w-full">
+                        <div class="flex flex-wrap items-center gap-3 glass-panel px-4 py-2 rounded-xl w-full md:w-auto">
+                            <label class="text-xs text-gray-400" data-i18n="lblFrom">From</label>
+                            <button type="button" id="studentRangeStartDisplay" onclick="openEcRangePicker('studentRangeStart','studentRangeEnd','studentRangeStartDisplay','studentRangeEndDisplay','start',()=>renderPaySummary('student'))" class="ec-range-field" style="width:170px">—</button>
+                            <label class="text-xs text-gray-400" data-i18n="lblTo">To</label>
+                            <button type="button" id="studentRangeEndDisplay" onclick="openEcRangePicker('studentRangeStart','studentRangeEnd','studentRangeStartDisplay','studentRangeEndDisplay','end',()=>renderPaySummary('student'))" class="ec-range-field" style="width:170px">—</button>
+                            <input type="hidden" id="studentRangeStart"><input type="hidden" id="studentRangeEnd">
+                            <span class="text-xs text-gray-500 amharic w-full md:w-auto text-center">🗓️ Ethiopian Calendar Date Range</span>
+                        </div>
+                        <button onclick="exportPaySummaryPdf('student')" class="px-6 py-3 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition shadow-lg shadow-yellow-500/20 w-full md:w-auto" data-i18n="exportPdf">📄 Export PDF</button>
+                    </div>
+                    <div class="glass-panel rounded-3xl w-full">
+                        <div class="lux-summary-wrap">
+                            <table class="lux-summary-table" id="studentSummaryTable">
+                                <thead id="studentSummaryHead"></thead>
+                                <tbody id="studentSummaryBody"></tbody>
+                            </table>
+                        </div>
+                        <p id="studentSummaryEmptyMsg" class="hidden text-center text-gray-500 py-16" data-i18n="noPaymentsFound">No payments found for this range.</p>
+                    </div>
+                </div>
+
+                <!-- ============ REPORT VIEW ============ -->
+                <div id="studentReportView" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 no-print">
+                        <div class="glass-panel-gold p-6 rounded-3xl text-center">
+                            <p class="text-gray-400 text-sm mb-2" data-i18n="collectionRate">Collection Rate (current period)</p>
+                            <h3 id="studentReportRate" class="text-5xl font-bold text-yellow-500">0%</h3>
+                        </div>
+                        <div class="glass-panel-gold p-6 rounded-3xl">
+                            <p class="text-gray-400 text-sm mb-3 text-center" data-i18n="topPayers">🏆 Fully Paid (in range)</p>
+                            <ol id="studentReportPaidList" class="space-y-2 text-sm"></ol>
+                        </div>
+                        <div class="glass-panel-gold p-6 rounded-3xl">
+                            <p class="text-gray-400 text-sm mb-3 text-center" data-i18n="topUnpaid">⚠️ Needing Follow-up</p>
+                            <ol id="studentReportUnpaidList" class="space-y-2 text-sm"></ol>
+                        </div>
+                    </div>
+                    <div class="glass-panel-gold p-4 rounded-3xl h-72 flex justify-center items-center card-in no-print">
+                        <canvas id="studentReportChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             BEGENA PAYMENT SECTION (NEW)
+        =========================================== -->
+        <section id="section-begena" class="hidden">
+            <div id="begenaGradeGridView">
+                <h2 class="text-2xl font-bold mb-6" data-i18n="selectRoundPayment">Select a Round <span class="amharic text-gray-400 text-lg ml-2">ዙር ይምረጡ</span></h2>
+                <div id="begenaGradeGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
+            </div>
+            <div id="begenaPaymentWorkspace" class="hidden">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                    <div class="flex items-center gap-3">
+                        <button onclick="backToBegenaGrades()" class="icon-btn glass-panel">←</button>
+                        <h2 class="text-xl md:text-2xl font-bold" id="currentGradeName">Round</h2>
+                    </div>
+                </div>
+
+                <!-- Payment / Payment Summary / Report tabs -->
+                <div id="begenaTabBar" class="flex items-center gap-6 border-b border-white/10 mb-6 no-print overflow-x-auto w-full">
+                    <button data-view="payment" onclick="switchPayView('begena','payment')" class="tab-btn active px-2 pb-3 text-sm font-semibold whitespace-nowrap" data-i18n="tabPayment">💳 Payment</button>
+                    <button data-view="summary" onclick="switchPayView('begena','summary')" class="tab-btn px-2 pb-3 text-sm font-semibold whitespace-nowrap" data-i18n="tabSummary">🧾 Payment Summary</button>
+                    <button data-view="report" onclick="switchPayView('begena','report')" class="tab-btn px-2 pb-3 text-sm font-semibold whitespace-nowrap" data-i18n="tabReport">📊 Report</button>
+                </div>
+
+                <!-- ============ PAYMENT VIEW ============ -->
+                <div id="begenaPaymentView">
+                    <div class="flex flex-col md:flex-row gap-3 mb-4">
+                        <input type="text" id="begenaSearchInput" data-i18n-ph="searchStudentPh" placeholder="Search student name or ID..." class="lux-input px-4 py-2 rounded-xl w-full md:w-80" oninput="renderBegenaPaymentList()">
+                        <select id="begenaPeriodSelect" class="lux-input px-4 py-2 rounded-xl w-full md:w-64" onchange="renderBegenaPaymentList()"></select>
+                    </div>
+                    <div class="glass-panel rounded-3xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm responsive-table">
+                                <thead class="bg-white/5 text-gray-400 uppercase text-[11px] tracking-wide">
+                                    <tr>
+                                        <th class="p-4 text-left" data-i18n="thStudent">Student</th>
+                                        <th class="p-4 text-left" data-i18n="thId">ID</th>
+                                        <th class="p-4 text-left" data-i18n="thPeriod">Period</th>
+                                        <th class="p-4 text-right" data-i18n="thAmount">Amount</th>
+                                        <th class="p-4 text-left" data-i18n="thStatus">Status</th>
+                                        <th class="p-4 text-left" data-i18n="thActions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="begenaPaymentTableBody"></tbody>
+                            </table>
+                        </div>
+                        <p id="emptyBegenaPaymentMsg" class="hidden text-center text-gray-500 py-16" data-i18n="noStudentsInClass">No students found.</p>
+                    </div>
+                </div>
+
+                <!-- ============ PAYMENT SUMMARY VIEW ============ -->
+                <div id="begenaSummaryView" class="hidden">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 no-print w-full">
+                        <div class="flex flex-wrap items-center gap-3 glass-panel px-4 py-2 rounded-xl w-full md:w-auto">
+                            <label class="text-xs text-gray-400" data-i18n="lblFrom">From</label>
+                            <button type="button" id="begenaRangeStartDisplay" onclick="openEcRangePicker('begenaRangeStart','begenaRangeEnd','begenaRangeStartDisplay','begenaRangeEndDisplay','start',()=>renderPaySummary('begena'))" class="ec-range-field" style="width:170px">—</button>
+                            <label class="text-xs text-gray-400" data-i18n="lblTo">To</label>
+                            <button type="button" id="begenaRangeEndDisplay" onclick="openEcRangePicker('begenaRangeStart','begenaRangeEnd','begenaRangeStartDisplay','begenaRangeEndDisplay','end',()=>renderPaySummary('begena'))" class="ec-range-field" style="width:170px">—</button>
+                            <input type="hidden" id="begenaRangeStart"><input type="hidden" id="begenaRangeEnd">
+                            <span class="text-xs text-gray-500 amharic w-full md:w-auto text-center">🗓️ Ethiopian Calendar Date Range</span>
+                        </div>
+                        <button onclick="exportPaySummaryPdf('begena')" class="px-6 py-3 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition shadow-lg shadow-yellow-500/20 w-full md:w-auto" data-i18n="exportPdf">📄 Export PDF</button>
+                    </div>
+                    <div class="glass-panel rounded-3xl w-full">
+                        <div class="lux-summary-wrap">
+                            <table class="lux-summary-table" id="begenaSummaryTable">
+                                <thead id="begenaSummaryHead"></thead>
+                                <tbody id="begenaSummaryBody"></tbody>
+                            </table>
+                        </div>
+                        <p id="begenaSummaryEmptyMsg" class="hidden text-center text-gray-500 py-16" data-i18n="noPaymentsFound">No payments found for this range.</p>
+                    </div>
+                </div>
+
+                <!-- ============ REPORT VIEW ============ -->
+                <div id="begenaReportView" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 no-print">
+                        <div class="glass-panel-gold p-6 rounded-3xl text-center">
+                            <p class="text-gray-400 text-sm mb-2" data-i18n="collectionRate">Collection Rate (current period)</p>
+                            <h3 id="begenaReportRate" class="text-5xl font-bold text-yellow-500">0%</h3>
+                        </div>
+                        <div class="glass-panel-gold p-6 rounded-3xl">
+                            <p class="text-gray-400 text-sm mb-3 text-center" data-i18n="topPayers">🏆 Fully Paid (in range)</p>
+                            <ol id="begenaReportPaidList" class="space-y-2 text-sm"></ol>
+                        </div>
+                        <div class="glass-panel-gold p-6 rounded-3xl">
+                            <p class="text-gray-400 text-sm mb-3 text-center" data-i18n="topUnpaid">⚠️ Needing Follow-up</p>
+                            <ol id="begenaReportUnpaidList" class="space-y-2 text-sm"></ol>
+                        </div>
+                    </div>
+                    <div class="glass-panel-gold p-4 rounded-3xl h-72 flex justify-center items-center card-in no-print">
+                        <canvas id="begenaReportChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             REPORTS & AUDIT SECTION
+        =========================================== -->
+        <section id="section-reports" class="hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h2 class="text-2xl font-bold" data-i18n="reportsTitle">Financial Health Dashboard</h2>
+                <div class="flex flex-wrap items-center gap-3 glass-panel px-4 py-2 rounded-xl no-print">
+                    <label class="text-xs text-gray-400" data-i18n="lblFrom">From</label>
+                    <button type="button" id="reportRangeStartDisplay" onclick="openEcRangePicker('reportRangeStart','reportRangeEnd','reportRangeStartDisplay','reportRangeEndDisplay','start')" class="ec-range-field" style="width:150px">—</button>
+                    <label class="text-xs text-gray-400" data-i18n="lblTo">To</label>
+                    <button type="button" id="reportRangeEndDisplay" onclick="openEcRangePicker('reportRangeStart','reportRangeEnd','reportRangeStartDisplay','reportRangeEndDisplay','end')" class="ec-range-field" style="width:150px">—</button>
+                    <input type="hidden" id="reportRangeStart"><input type="hidden" id="reportRangeEnd">
+                    <button onclick="exportReportPdf()" class="px-4 py-2 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition text-sm whitespace-nowrap" data-i18n="exportReport">🖨️ Export Report</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+                <div class="glass-panel-gold p-6 rounded-3xl flex flex-col justify-center card-in">
+                    <h3 class="text-gray-400 mb-4 text-sm font-bold uppercase tracking-wide" data-i18n="overallSummary">Overall Summary</h3>
+                    <div class="flex justify-between items-center border-b border-white/5 pb-2 mb-2">
+                        <span class="text-sm" data-i18n="netBalance">Net Balance</span><span id="statNetBalance" class="font-bold text-xl">ETB 0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/5 pb-2 mb-2">
+                        <span class="text-sm" data-i18n="txnCount">Transactions</span><span id="statTxnCount" class="font-bold text-lg text-blue-500">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm" data-i18n="activeLoans">Active Loans</span><span id="statActiveLoans" class="font-bold text-lg text-yellow-600">0</span>
+                    </div>
+                </div>
+                <div class="col-span-2 glass-panel-gold p-4 rounded-3xl h-72 flex justify-center items-center card-in">
+                    <canvas id="financeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-6">
+                <h3 class="section-title mb-4">📜 <span data-i18n="auditLog">Audit Log</span></h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs responsive-table">
+                        <thead class="text-gray-400 uppercase" style="background:var(--surface)">
+                            <tr><th class="p-2 text-left" data-i18n="thTime">Time</th><th class="p-2 text-left" data-i18n="thUser">User</th><th class="p-2 text-left" data-i18n="thAction">Action</th><th class="p-2 text-left" data-i18n="thDetails">Details</th></tr>
+                        </thead>
+                        <tbody id="auditTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ==========================================
+         INCOME / EXPENSE MODAL
+    =========================================== -->
+    <div id="txnModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto no-print">
+        <div class="modal-panel luxury-modal max-w-2xl rounded-2xl relative overflow-hidden my-8 max-h-[90vh] flex flex-col">
+            <div class="p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5 flex-shrink-0">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="bg-yellow-500 text-black p-1.5 rounded-lg text-xs">🆕</span><span id="txnModalTitle">New Transaction</span></h2>
+                <button onclick="closeTxnModal()" class="text-gray-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">&times;</button>
+            </div>
+            <form id="txnForm" class="p-6 overflow-y-auto flex flex-col gap-5" onsubmit="saveTxn(event)">
+                <input type="hidden" id="txnType"><input type="hidden" id="txnEditId">
+                <p class="section-title">💵 <span data-i18n="txnDetails">Transaction Details</span></p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1" data-i18n="lblDate">Date</label>
+                        <button type="button" id="txnDateDisplay" onclick="openEcSinglePicker('txnDate','txnDateDisplay','txnEcHint')" class="ec-range-field">🗓️ —</button>
+                        <input type="hidden" id="txnDate">
+                        <p class="ec-date-hint" id="txnEcHint"></p>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1" data-i18n="lblCategory">Category</label>
+                        <select id="txnCategory" required class="lux-input w-full rounded-lg p-2.5 outline-none"></select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1" data-i18n="lblDescription">Description</label>
+                    <textarea id="txnDescription" required rows="2" class="lux-input w-full rounded-lg p-2.5 outline-none"></textarea>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div><label id="txnPayerLabel" class="block text-xs text-gray-400 mb-1" data-i18n="lblPayerName">Payer Name</label>
+                        <input type="text" id="txnPayerName" required class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblPhone">Phone</label>
+                        <input type="text" id="txnPayerPhone" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblAmount">Amount (ETB)</label>
+                        <input type="number" step="0.01" id="txnAmount" required min="0" oninput="updateBudgetHint()" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblMethod">Method</label>
+                        <select id="txnMethod" class="lux-input w-full rounded-lg p-2.5 outline-none">
+                            <option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option><option value="Digital">Digital</option>
+                        </select></div>
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblStatus">Status</label>
+                        <select id="txnStatus" class="lux-input w-full rounded-lg p-2.5 outline-none">
+                            <option value="Paid">Paid</option><option value="Pending">Pending</option>
+                        </select></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblRefId">Transaction / Receipt ID</label>
+                        <input type="text" id="txnRefId" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblReceiver">Receiver Staff</label>
+                        <input type="text" id="txnReceiver" value="Admin" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                </div>
+                <p id="budgetHint" class="hidden text-xs px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-600"></p>
+                <p id="approvalHint" class="hidden text-xs px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500"></p>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1" data-i18n="lblAttachment">📎 Attachment</label>
+                    <input type="file" id="txnAttachInput" accept="image/*,.pdf" class="hidden" onchange="handleAttachUpload(event)">
+                    <div id="attachDrop" onclick="document.getElementById('txnAttachInput').click()" class="photo-drop w-full h-24 rounded-xl border-2 border-dashed border-white/20 flex items-center justify-center bg-white/5 cursor-pointer text-sm text-gray-400">
+                        <span id="attachLabel" data-i18n="attachPrompt">📎 Click to attach scanned invoice / receipt</span>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-2 border-t border-white/5">
+                    <button type="button" onclick="closeTxnModal()" class="px-5 py-2.5 rounded-xl glass-panel hover:bg-white/10 transition text-sm font-bold" data-i18n="cancel">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-yellow-500 text-black font-bold hover:bg-yellow-400 transition text-sm" data-i18n="saveTxn">💾 Save Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BANK ACCOUNT MODAL -->
+    <div id="bankModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto no-print">
+        <div class="modal-panel luxury-modal max-w-md rounded-2xl relative overflow-hidden my-8">
+            <div class="p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5">
+                <h2 class="text-lg font-bold" data-i18n="addBankAccount">🏦 Add Bank / Cash Account</h2>
+                <button onclick="closeBankModal()" class="text-gray-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">&times;</button>
+            </div>
+            <form class="p-6 flex flex-col gap-4" onsubmit="saveBankAccount(event)">
+                <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblAccountName">Account Name</label>
+                    <input type="text" id="bankName" required placeholder="e.g. CBE Main Account / Petty Cash Box" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblType">Type</label>
+                    <select id="bankType" class="lux-input w-full rounded-lg p-2.5 outline-none">
+                        <option value="Bank">Bank Account</option><option value="Cash">Petty Cash Box</option>
+                    </select></div>
+                <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblOpeningBalance">Opening Balance (ETB)</label>
+                    <input type="number" step="0.01" id="bankBalance" required value="0" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                <div class="flex justify-end gap-3 pt-2 border-t border-white/5">
+                    <button type="button" onclick="closeBankModal()" class="px-5 py-2.5 rounded-xl glass-panel hover:bg-white/10 transition text-sm font-bold" data-i18n="cancel">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-yellow-500 text-black font-bold hover:bg-yellow-400 transition text-sm" data-i18n="save">💾 Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- LOAN MODAL -->
+    <div id="loanModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto no-print">
+        <div class="modal-panel luxury-modal max-w-2xl rounded-2xl relative overflow-hidden my-8 max-h-[90vh] flex flex-col">
+            <div class="p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5 flex-shrink-0">
+                <h2 class="text-lg font-bold" data-i18n="loanAgreement">🤝 Loan Agreement</h2>
+                <button onclick="closeLoanModal()" class="text-gray-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">&times;</button>
+            </div>
+            <form class="p-6 overflow-y-auto flex flex-col gap-4" onsubmit="saveLoan(event)">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblBorrower">Borrower Name</label>
+                        <input type="text" id="loanBorrower" required class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblPhone">Phone</label>
+                        <input type="text" id="loanPhone" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblLoanAmount">Loan Amount (ETB)</label>
+                        <input type="number" step="0.01" id="loanAmount" required min="0" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblInterest">Interest Rate (%)</label>
+                        <input type="number" step="0.01" id="loanInterest" value="0" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblDueDate">Due Date</label>
+                        <button type="button" id="loanDueDateDisplay" onclick="openEcSinglePicker('loanDueDate','loanDueDateDisplay','loanEcHint')" class="ec-range-field">🗓️ —</button>
+                        <input type="hidden" id="loanDueDate">
+                        <p class="ec-date-hint" id="loanEcHint"></p></div>
+                </div>
+                <div class="flex justify-end gap-3 pt-2 border-t border-white/5">
+                    <button type="button" onclick="closeLoanModal()" class="px-5 py-2.5 rounded-xl glass-panel hover:bg-white/10 transition text-sm font-bold" data-i18n="cancel">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-yellow-500 text-black font-bold hover:bg-yellow-400 transition text-sm" data-i18n="approveSaveLoan">✅ Approve &amp; Save Loan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- INSTALLMENT MODAL -->
+    <div id="installModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto no-print">
+        <div class="modal-panel luxury-modal max-w-sm rounded-2xl relative overflow-hidden my-8">
+            <div class="p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5">
+                <h2 class="text-lg font-bold" data-i18n="recordInstallment">💳 Record Installment</h2>
+                <button onclick="closeInstallModal()" class="text-gray-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">&times;</button>
+            </div>
+            <form class="p-6 flex flex-col gap-4" onsubmit="saveInstallment(event)">
+                <input type="hidden" id="installLoanId">
+                <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblAmountPaid">Amount Paid (ETB)</label>
+                    <input type="number" step="0.01" id="installAmount" required min="0.01" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblPaymentDate">Payment Date</label>
+                    <button type="button" id="installDateDisplay" onclick="openEcSinglePicker('installDate','installDateDisplay','installEcHint')" class="ec-range-field">🗓️ —</button>
+                    <input type="hidden" id="installDate">
+                    <p class="ec-date-hint" id="installEcHint"></p></div>
+                <div class="flex justify-end gap-3 pt-2 border-t border-white/5">
+                    <button type="button" onclick="closeInstallModal()" class="px-5 py-2.5 rounded-xl glass-panel hover:bg-white/10 transition text-sm font-bold" data-i18n="cancel">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-yellow-500 text-black font-bold hover:bg-yellow-400 transition text-sm" data-i18n="savePayment">💾 Save Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- STUDENT / BEGENA PAYMENT MODAL (shared) -->
+    <div id="payModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto no-print">
+        <div class="modal-panel luxury-modal max-w-md rounded-2xl relative overflow-hidden my-8">
+            <div class="p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5">
+                <h2 class="text-lg font-bold" id="payModalTitle">💳 Record Payment</h2>
+                <button onclick="closePayModal()" class="text-gray-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">&times;</button>
+            </div>
+            <form class="p-6 flex flex-col gap-4" onsubmit="savePayModal(event)">
+                <input type="hidden" id="payKind"><input type="hidden" id="payStudentId"><input type="hidden" id="payStudentName"><input type="hidden" id="payGroup"><input type="hidden" id="payPlan">
+                <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblPeriod">Period</label>
+                    <input type="text" id="payPeriod" required class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblAmount">Amount (ETB)</label>
+                    <input type="number" step="0.01" id="payAmount" required min="0" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblPaymentDate">Payment Date</label>
+                    <button type="button" id="payDateDisplay" onclick="openEcSinglePicker('payDate','payDateDisplay','payEcHint')" class="ec-range-field">🗓️ —</button>
+                    <input type="hidden" id="payDate">
+                    <p class="ec-date-hint" id="payEcHint"></p></div>
+                <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblMethod">Method</label>
+                    <select id="payMethod" class="lux-input w-full rounded-lg p-2.5 outline-none">
+                        <option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option><option value="Digital">Digital</option>
+                    </select></div>
+                <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblNote">Note</label>
+                    <input type="text" id="payNote" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                <div class="flex justify-end gap-3 pt-2 border-t border-white/5">
+                    <button type="button" onclick="closePayModal()" class="px-5 py-2.5 rounded-xl glass-panel hover:bg-white/10 transition text-sm font-bold" data-i18n="cancel">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-yellow-500 text-black font-bold hover:bg-yellow-400 transition text-sm" data-i18n="savePayment">💾 Save Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         ETHIOPIAN CALENDAR PICKER (single date + range) — shared by
+         every popup date field across the whole page.
+    =========================================== -->
+    <div id="ecPicker" class="ec-picker-overlay hidden no-print" onclick="if(event.target===this)closeEcPicker()">
+        <div class="ec-picker-card">
+            <div class="ec-picker-head">
+                <div><div class="ec-picker-title">🗓️ Ethiopian Calendar</div><div id="ecPickerMode" class="ec-picker-sub">Select date</div></div>
+                <button type="button" onclick="closeEcPicker()" class="icon-btn">✕</button>
+            </div>
+            <div class="flex gap-2 mb-3">
+                <select id="ecPickerMonth" class="ec-picker-select flex-1" onchange="renderEcPickerGrid()"></select>
+                <select id="ecPickerYear" class="ec-picker-select w-28" onchange="renderEcPickerGrid()"></select>
+            </div>
+            <div id="ecPickerWeek" class="ec-picker-grid mb-1"></div>
+            <div id="ecPickerDays" class="ec-picker-grid"></div>
+            <div id="ecPickerSelection" class="mt-3 text-xs" style="color:var(--text-muted)"></div>
+            <div class="ec-picker-actions" id="ecPickerActions">
+                <button type="button" onclick="closeEcPicker()" data-i18n="cancel">Cancel</button>
+                <button type="button" class="primary" onclick="confirmEcPicker()" data-i18n="applyRange">Apply Range</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attachment Preview -->
+    <div id="attachPreviewModal" class="fixed inset-0 bg-black/90 z-[60] hidden flex justify-center items-center no-print" onclick="closeAttachPreview()">
+        <img id="attachPreviewImg" class="max-w-3xl max-h-[85vh] rounded-xl border border-yellow-500/30">
+    </div>
+
+    <div id="toastHost" class="fixed bottom-6 right-6 left-6 md:left-auto z-[70] flex flex-col gap-2 no-print"></div>
+    <div id="printArea"></div>
+
+    <!-- SUPABASE CLIENT: supabaseClient.js is the single source of truth for the client instance. -->
+    <script type="module">
+        if (location.protocol === 'file:') {
+            console.error('[Supabase] This page was opened directly as a file:// URL. Serve it over http(s) instead.');
+            window.dispatchEvent(new CustomEvent('supabase-load-failed', { detail: 'file-protocol' }));
+        } else {
+            import('./supabaseClient.js')
+                .then(({ supabase }) => { window.supabase = supabase; window.dispatchEvent(new CustomEvent('supabase-ready')); })
+                .catch((err) => {
+                    console.error('[Supabase] Failed to load supabaseClient.js:', err);
+                    window.dispatchEvent(new CustomEvent('supabase-load-failed', { detail: err && err.message }));
+                });
+        }
+    </script>
+
+    <script>
+        // ============================================================
+        // THEME (light / dark)
+        // ============================================================
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('mh_finance_theme', theme);
+        }
+        function toggleTheme() {
+            const cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            applyTheme(cur === 'light' ? 'dark' : 'light');
+        }
+        (function initTheme() { applyTheme(localStorage.getItem('mh_finance_theme') || 'light'); })();
+
+        // ============================================================
+        // LANGUAGE (English / Amharic)
+        // ============================================================
+        const translations = {
+            en: {
+                appTitle: 'Meserete Hiwot ERP System',
+                appSubtitle: 'Financial Management System <span class="amharic text-sm ml-2">(የገንዘብ አስተዳደር)</span>',
+                adminDashboard: 'Admin Dashboard', backToDashboard: 'Back to Dashboard',
+                navOverview: 'Overview', navBank: 'Bank & Cash', navLoans: 'Loans', navStudents: 'Student Payment', navBegena: 'Begena Payment', navReports: 'Reports & Audit',
+                totalIncome: 'Total Income', totalExpense: 'Total Expense', bankCashBalance: 'Bank + Cash Balance', outstandingLoans: 'Outstanding Loans',
+                newIncome: '+ New Income', newExpense: '+ New Expense', approveLoan: '🤝 Approve Loan', exportReport: '🖨️ Export Report',
+                filterAll: 'All', filterIncome: 'Income', filterExpense: 'Expense', searchTxnPh: 'Search description, category, payer...',
+                thDate: 'Date', thType: 'Type', thDesc: 'Description', thCategory: 'Category', thMethod: 'Method', thAmount: 'Amount', thStatus: 'Status', thAttach: 'Attachment', thActions: 'Actions',
+                noTxnFound: 'No transactions found.',
+                bankCashTitle: 'Bank & Cash Control', addAccount: '+ Add Account', reconTool: 'Reconciliation Tool',
+                systemBalance: 'System Balance (ETB)', statementBalance: 'Bank Statement Balance (ETB)', difference: 'Difference', checkRecon: '✅ Check',
+                loansTitle: 'Loan & Advance Management', newLoan: '+ New Loan', noLoans: 'No loans recorded.',
+                selectClassPayment: 'Select a Class <span class="amharic text-gray-400 text-lg ml-2">ክፍል ይምረጡ</span>',
+                selectRoundPayment: 'Select a Round <span class="amharic text-gray-400 text-lg ml-2">ዙር ይምረጡ</span>',
+                planMonthly: 'Monthly', plan3Month: '3 Month', plan6Month: '6 Month', planYearly: 'Yearly', searchStudentPh: 'Search student name or ID...',
+                thStudent: 'Student', thId: 'ID', thPeriod: 'Period',
+                noStudentsInClass: 'No students found in this class.',
+                tabPayment: '💳 Payment', tabSummary: '🧾 Payment Summary', tabReport: '📊 Report',
+                lblFrom: 'From', lblTo: 'To', applyRange: 'Apply Range', exportPdf: '📄 Export PDF',
+                thTotal: 'Total Paid', noPaymentsFound: 'No payments found for this range.',
+                collectionRate: 'Collection Rate (current period)', totalCollected: 'Total Collected (in range)',
+                topPayers: '🏆 Fully Paid (in range)', topUnpaid: '⚠️ Needing Follow-up',
+                reportsTitle: 'Financial Health Dashboard', overallSummary: 'Overall Summary', netBalance: 'Net Balance', txnCount: 'Transactions', activeLoans: 'Active Loans', auditLog: 'Audit Log',
+                thTime: 'Time', thUser: 'User', thAction: 'Action', thDetails: 'Details',
+                txnDetails: 'Transaction Details', lblDate: 'Date', lblCategory: 'Category', lblDescription: 'Description', lblPayerName: 'Payer Name', lblPhone: 'Phone',
+                lblAmount: 'Amount (ETB)', lblMethod: 'Method', lblStatus: 'Status', lblRefId: 'Transaction / Receipt ID', lblReceiver: 'Receiver Staff', lblAttachment: '📎 Attachment',
+                attachPrompt: '📎 Click to attach scanned invoice / receipt', cancel: 'Cancel', saveTxn: '💾 Save Transaction',
+                addBankAccount: '🏦 Add Bank / Cash Account', lblAccountName: 'Account Name', lblType: 'Type', lblOpeningBalance: 'Opening Balance (ETB)', save: '💾 Save',
+                loanAgreement: '🤝 Loan Agreement', lblBorrower: 'Borrower Name', lblLoanAmount: 'Loan Amount (ETB)', lblInterest: 'Interest Rate (%)', lblDueDate: 'Due Date', approveSaveLoan: '✅ Approve & Save Loan',
+                recordInstallment: '💳 Record Installment', lblAmountPaid: 'Amount Paid (ETB)', lblPaymentDate: 'Payment Date', savePayment: '💾 Save Payment',
+                lblPeriod: 'Period', lblNote: 'Note', recordPayment: '💳 Record Payment',
+            },
+            am: {
+                appTitle: 'መሠረተ ሕይወት ERP ስርዓት',
+                appSubtitle: 'የገንዘብ አስተዳደር ስርዓት <span class="amharic text-sm ml-2">(Financial Management)</span>',
+                adminDashboard: 'የአስተዳዳሪ ዳሽቦርድ', backToDashboard: 'ወደ ዳሽቦርድ ተመለስ',
+                navOverview: 'ማጠቃለያ', navBank: 'ባንክ እና ጥሬ ገንዘብ', navLoans: 'ብድር', navStudents: 'የተማሪ ክፍያ', navBegena: 'የበገና ክፍያ', navReports: 'ሪፖርት እና ኦዲት',
+                totalIncome: 'ጠቅላላ ገቢ', totalExpense: 'ጠቅላላ ወጪ', bankCashBalance: 'የባንክ/ጥሬ ገንዘብ ሂሳብ', outstandingLoans: 'ያልተከፈለ ብድር',
+                newIncome: '+ አዲስ ገቢ', newExpense: '+ አዲስ ወጪ', approveLoan: '🤝 ብድር ፍቀድ', exportReport: '🖨️ ሪፖርት አውጣ',
+                filterAll: 'ሁሉም', filterIncome: 'ገቢ', filterExpense: 'ወጪ', searchTxnPh: 'መግለጫ፣ ምድብ ወይም ስም ይፈልጉ...',
+                thDate: 'ቀን', thType: 'ዓይነት', thDesc: 'መግለጫ', thCategory: 'ምድብ', thMethod: 'ዘዴ', thAmount: 'መጠን', thStatus: 'ሁኔታ', thAttach: 'አባሪ', thActions: 'ድርጊቶች',
+                noTxnFound: 'ምንም ግብይት አልተገኘም።',
+                bankCashTitle: 'ባንክ እና ጥሬ ገንዘብ አስተዳደር', addAccount: '+ ሂሳብ ጨምር', reconTool: 'የማስታረቅ ሂደት',
+                systemBalance: 'የስርዓት ሂሳብ (ETB)', statementBalance: 'የባንክ መግለጫ ሂሳብ (ETB)', difference: 'ልዩነት', checkRecon: '✅ አረጋግጥ',
+                loansTitle: 'የብድር አስተዳደር', newLoan: '+ አዲስ ብድር', noLoans: 'ምንም ብድር አልተመዘገበም።',
+                selectClassPayment: 'ክፍል ይምረጡ <span class="amharic text-gray-400 text-lg ml-2">Select a Class</span>',
+                selectRoundPayment: 'ዙር ይምረጡ <span class="amharic text-gray-400 text-lg ml-2">Select a Round</span>',
+                planMonthly: 'ወርሃዊ', plan3Month: '3 ወር', plan6Month: '6 ወር', planYearly: 'ዓመታዊ', searchStudentPh: 'የተማሪ ስም ወይም መለያ ይፈልጉ...',
+                thStudent: 'ተማሪ', thId: 'መለያ', thPeriod: 'ወቅት',
+                noStudentsInClass: 'በዚህ ክፍል ውስጥ ተማሪ አልተገኘም።',
+                tabPayment: '💳 ክፍያ', tabSummary: '🧾 የክፍያ ማጠቃለያ', tabReport: '📊 ሪፖርት',
+                lblFrom: 'ከ', lblTo: 'እስከ', applyRange: 'ክልል ይተግብሩ', exportPdf: '📄 ፒዲኤፍ አውርድ',
+                thTotal: 'ጠቅላላ የተከፈለ', noPaymentsFound: 'ለዚህ ክልል ምንም ክፍያ አልተገኘም።',
+                collectionRate: 'የክፍያ ምጣኔ (የአሁኑ ወቅት)', totalCollected: 'ጠቅላላ የተሰበሰበ (በክልሉ)',
+                topPayers: '🏆 ሙሉ የከፈሉ (በክልሉ)', topUnpaid: '⚠️ ክትትል የሚያስፈልጋቸው',
+                reportsTitle: 'የፋይናንስ ጤንነት ዳሽቦርድ', overallSummary: 'ጠቅላላ ማጠቃለያ', netBalance: 'የተጣራ ሂሳብ', txnCount: 'ግብይቶች', activeLoans: 'ንቁ ብድሮች', auditLog: 'የኦዲት መዝገብ',
+                thTime: 'ሰዓት', thUser: 'ተጠቃሚ', thAction: 'ድርጊት', thDetails: 'ዝርዝር',
+                txnDetails: 'የግብይት ዝርዝር', lblDate: 'ቀን', lblCategory: 'ምድብ', lblDescription: 'መግለጫ', lblPayerName: 'የከፋይ ስም', lblPhone: 'ስልክ',
+                lblAmount: 'መጠን (ETB)', lblMethod: 'ዘዴ', lblStatus: 'ሁኔታ', lblRefId: 'የግብይት/ደረሰኝ ቁጥር', lblReceiver: 'የተቀበለው ሰራተኛ', lblAttachment: '📎 አባሪ',
+                attachPrompt: '📎 ደረሰኝ/ኢንቮይስ ለማያያዝ ይጫኑ', cancel: 'ይቅር', saveTxn: '💾 ግብይት አስቀምጥ',
+                addBankAccount: '🏦 ባንክ/ጥሬ ገንዘብ ሂሳብ ጨምር', lblAccountName: 'የሂሳብ ስም', lblType: 'ዓይነት', lblOpeningBalance: 'የመክፈቻ ሂሳብ (ETB)', save: '💾 አስቀምጥ',
+                loanAgreement: '🤝 የብድር ውል', lblBorrower: 'የተበዳሪው ስም', lblLoanAmount: 'የብድር መጠን (ETB)', lblInterest: 'የወለድ መጠን (%)', lblDueDate: 'የመክፈያ ቀን', approveSaveLoan: '✅ ብድር ፍቀድ እና አስቀምጥ',
+                recordInstallment: '💳 ክፍያ መዝግብ', lblAmountPaid: 'የተከፈለ መጠን (ETB)', lblPaymentDate: 'የክፍያ ቀን', savePayment: '💾 ክፍያ አስቀምጥ',
+                lblPeriod: 'ወቅት', lblNote: 'ማስታወሻ', recordPayment: '💳 ክፍያ መዝግብ',
+            }
+        };
+        let currentLang = localStorage.getItem('mh_finance_lang') || 'en';
+        function t(key) { return (translations[currentLang] && translations[currentLang][key]) || translations.en[key] || key; }
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang] && translations[currentLang][key] !== undefined) el.innerHTML = translations[currentLang][key];
+            });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+                const key = el.getAttribute('data-i18n-ph');
+                if (translations[currentLang] && translations[currentLang][key] !== undefined) el.setAttribute('placeholder', translations[currentLang][key]);
+            });
+            document.getElementById('langBtnEn')?.classList.toggle('active', currentLang === 'en');
+            document.getElementById('langBtnAm')?.classList.toggle('active', currentLang === 'am');
+            document.documentElement.lang = currentLang;
+            updateDate();
+        }
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('mh_finance_lang', lang);
+            applyTranslations();
+            renderAll();
+        }
+
+        // ============================================================
+        // ETHIOPIAN CALENDAR — accurate Julian Day Number based conversion
+        // (same algorithm as attendance.html) so every date on this page
+        // is truly Ethiopian-calendar correct, with GC shown as the sub date.
+        // ============================================================
+        const EC_MONTHS = ['መስከረም','ጥቅምት','ኅዳር','ታኅሳስ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜ'];
+        const EC_WEEK_NAMES = ['ሰኞ','ማክሰኞ','ረቡዕ','ሐሙስ','ዓርብ','ቅዳሜ','እሑድ'];
+        const EC_MAX_YEAR = 2030; // per admin request: Ethiopian calendar pickers/periods run up to 2030 E.C.
+        const JD_EPOCH_OFFSET_AMETE_MIHRET = 1723856;
+        function isGregLeap(y) { return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0); }
+        function gregorianToJdn(year, month, day) {
+            const y = month <= 2 ? year - 1 : year;
+            const m = month <= 2 ? month + 12 : month;
+            const a = Math.floor(y / 100);
+            const b = 2 - a + Math.floor(a / 4);
+            return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524;
+        }
+        function jdnToGregorian(jdn) {
+            const u = new Date((jdn - 2440588) * 86400000);
+            return new Date(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate());
+        }
+        function toEthiopianAccurate(d) {
+            const jdn = gregorianToJdn(d.getFullYear(), d.getMonth() + 1, d.getDate());
+            const r = (jdn - JD_EPOCH_OFFSET_AMETE_MIHRET) % 1461;
+            const n = (r % 365) + 365 * Math.floor(r / 1460);
+            const etYear = 4 * Math.floor((jdn - JD_EPOCH_OFFSET_AMETE_MIHRET) / 1461) + Math.floor(r / 365) - Math.floor(r / 1460);
+            const etMonthIdx = Math.floor(n / 30);
+            const etDay = (n % 30) + 1;
+            return { year: etYear, month: etMonthIdx + 1, day: etDay };
+        }
+        function ethiopianToGregorian(year, month, day) {
+            const jdn = JD_EPOCH_OFFSET_AMETE_MIHRET + 365 * year + Math.floor(year / 4) + 30 * month + day - 31;
+            return jdnToGregorian(jdn);
+        }
+        function ecDaysInMonth(y, m) { return m === 13 ? (((y + 1) % 4 === 0) ? 6 : 5) : 30; }
+        function dateKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+        function dateToEcKey(d) { const e = toEthiopianAccurate(d); return `${e.year}-${String(e.month).padStart(2, '0')}-${String(e.day).padStart(2, '0')}`; }
+        function ecKeyToDate(key) { const [y, m, d] = key.split('-').map(Number); return ethiopianToGregorian(y, m, d); }
+        function formatEcKey(key) { if (!key) return '—'; const [y, m, d] = key.split('-').map(Number); return `${d} ${EC_MONTHS[m - 1]} ${y} ዓ.ም`; }
+        function gregorianToEthiopian(dateStr) {
+            if (!dateStr) return null;
+            const d = new Date(dateStr + 'T00:00:00');
+            if (isNaN(d)) return null;
+            const e = toEthiopianAccurate(d);
+            return { year: e.year, month: e.month, day: e.day, label: `${e.day} ${EC_MONTHS[e.month - 1]} ${e.year} ዓ.ም` };
+        }
+        function todayStr() { return dateKey(new Date()); }
+        function ethiopianYearMonthOf(dateStr) {
+            const ec = gregorianToEthiopian(dateStr);
+            if (!ec) return { year: 0, month: 1 };
+            return { year: ec.year, month: ec.month };
+        }
+        // Updates a hidden GC input's paired display button (EC, primary) and
+        // hint line (GC, sub) — used by every popup date field on this page.
+        function updateEcFieldDisplay(inputId, displayId, hintId) {
+            const val = document.getElementById(inputId)?.value;
+            const ec = gregorianToEthiopian(val);
+            const disp = document.getElementById(displayId);
+            if (disp) disp.textContent = ec ? `🗓️ ${ec.day} ${EC_MONTHS[ec.month - 1]} ${ec.year} ዓ.ም` : '🗓️ —';
+            const hint = document.getElementById(hintId);
+            if (hint) hint.textContent = val ? ('GC: ' + val) : '';
+        }
+        // Back-compat alias (some legacy call sites referenced this name).
+        function updateEcHint(inputId, hintId) { updateEcFieldDisplay(inputId, inputId + 'Display', hintId); }
+
+        // ---------- Shared EC picker widget (single date + date range) ----------
+        let ecCtx = null;          // { mode:'single', inputId, displayId, hintId } | { mode:'range', startInput, endInput, startDisplay, endDisplay, onApply }
+        let ecTarget = 'start';    // which end of a range is being picked
+        let ecDraftSingle = null, ecDraftStart = null, ecDraftEnd = null, ecPickerGregorian = new Date();
+
+        function fillEcPickerSelectors(year, month) {
+            const ms = document.getElementById('ecPickerMonth'), ys = document.getElementById('ecPickerYear');
+            ms.innerHTML = EC_MONTHS.map((m, i) => `<option value="${i + 1}">${m}</option>`).join(''); ms.value = month;
+            const lo = Math.max(1990, year - 12), hi = EC_MAX_YEAR;
+            ys.innerHTML = ''; for (let y = lo; y <= hi; y++) ys.insertAdjacentHTML('beforeend', `<option value="${y}">${y} ዓ.ም</option>`);
+            ys.value = Math.min(year, hi);
+        }
+        function renderEcPickerGrid() {
+            const y = +document.getElementById('ecPickerYear').value, m = +document.getElementById('ecPickerMonth').value;
+            const first = ethiopianToGregorian(y, m, 1), jsDay = (first.getDay() + 6) % 7, total = ecDaysInMonth(y, m);
+            document.getElementById('ecPickerWeek').innerHTML = EC_WEEK_NAMES.map(x => `<div class="ec-picker-week">${x}</div>`).join('');
+            let html = ''; for (let i = 0; i < jsDay; i++) html += '<button class="ec-day empty" type="button"></button>';
+            const todayKey = dateToEcKey(new Date());
+            for (let d = 1; d <= total; d++) {
+                const key = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                let sel = false, inRange = false;
+                if (ecCtx.mode === 'single') { sel = key === ecDraftSingle; }
+                else { sel = key === ecDraftStart || key === ecDraftEnd; inRange = !!(ecDraftStart && ecDraftEnd && key > ecDraftStart && key < ecDraftEnd); }
+                html += `<button type="button" class="ec-day ${sel ? 'selected' : ''} ${inRange ? 'in-range' : ''} ${key === todayKey ? 'today' : ''}" onclick="pickEcPickerDay('${key}')">${d}</button>`;
+            }
+            document.getElementById('ecPickerDays').innerHTML = html;
+            document.getElementById('ecPickerSelection').textContent = ecCtx.mode === 'single'
+                ? formatEcKey(ecDraftSingle)
+                : `${currentLang === 'am' ? 'ከ' : 'From'}: ${formatEcKey(ecDraftStart)}  •  ${currentLang === 'am' ? 'እስከ' : 'To'}: ${formatEcKey(ecDraftEnd)}`;
+        }
+        function showEcPicker() { document.getElementById('ecPicker').classList.remove('hidden'); document.body.classList.add('overflow-hidden'); }
+        function closeEcPicker() { document.getElementById('ecPicker').classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }
+        function openEcSinglePicker(inputId, displayId, hintId) {
+            ecCtx = { mode: 'single', inputId, displayId, hintId };
+            const cur = document.getElementById(inputId).value || todayStr();
+            ecPickerGregorian = new Date(cur + 'T00:00:00');
+            ecDraftSingle = dateToEcKey(ecPickerGregorian);
+            const e = toEthiopianAccurate(ecPickerGregorian);
+            fillEcPickerSelectors(e.year, e.month);
+            document.getElementById('ecPickerMode').textContent = currentLang === 'am' ? 'ቀን ይምረጡ' : 'Select date';
+            document.getElementById('ecPickerActions').classList.add('hidden');
+            renderEcPickerGrid();
+            showEcPicker();
+        }
+        function openEcRangePicker(startInput, endInput, startDisplay, endDisplay, target, onApply) {
+            ecCtx = { mode: 'range', startInput, endInput, startDisplay, endDisplay, onApply };
+            ecTarget = target || 'start';
+            const sVal = document.getElementById(startInput).value, eVal = document.getElementById(endInput).value;
+            if (ecDraftStart === null) ecDraftStart = sVal ? dateToEcKey(new Date(sVal + 'T00:00:00')) : null;
+            if (ecDraftEnd === null) ecDraftEnd = eVal ? dateToEcKey(new Date(eVal + 'T00:00:00')) : null;
+            const curId = ecTarget === 'start' ? startInput : endInput;
+            const curVal = document.getElementById(curId).value || sVal || todayStr();
+            ecPickerGregorian = new Date(curVal + 'T00:00:00');
+            const e = toEthiopianAccurate(ecPickerGregorian);
+            fillEcPickerSelectors(e.year, e.month);
+            document.getElementById('ecPickerMode').textContent = ecTarget === 'start' ? (currentLang === 'am' ? 'መጀመሪያ ቀን ይምረጡ' : 'Select start date') : (currentLang === 'am' ? 'መጨረሻ ቀን ይምረጡ' : 'Select end date');
+            document.getElementById('ecPickerActions').classList.remove('hidden');
+            renderEcPickerGrid();
+            showEcPicker();
+        }
+        function pickEcPickerDay(key) {
+            if (ecCtx.mode === 'single') {
+                ecDraftSingle = key;
+                const d = ecKeyToDate(key);
+                document.getElementById(ecCtx.inputId).value = dateKey(d);
+                updateEcFieldDisplay(ecCtx.inputId, ecCtx.displayId, ecCtx.hintId);
+                closeEcPicker();
+                return;
+            }
+            if (ecTarget === 'start') {
+                ecDraftStart = key; if (ecDraftEnd && ecDraftEnd < key) ecDraftEnd = null;
+                ecTarget = 'end';
+                document.getElementById('ecPickerMode').textContent = currentLang === 'am' ? 'መጨረሻ ቀን ይምረጡ' : 'Now select end date';
+            } else {
+                ecDraftEnd = key;
+                if (ecDraftStart && ecDraftEnd < ecDraftStart) { const tmp = ecDraftStart; ecDraftStart = ecDraftEnd; ecDraftEnd = tmp; }
+            }
+            const d = ecKeyToDate(key), e = toEthiopianAccurate(d);
+            fillEcPickerSelectors(e.year, e.month);
+            renderEcPickerGrid();
+        }
+        function confirmEcPicker() {
+            if (ecCtx.mode !== 'range') { closeEcPicker(); return; }
+            if (!ecDraftStart || !ecDraftEnd) { alert(currentLang === 'am' ? 'እባክዎ ሁለቱንም ቀናት ይምረጡ።' : 'Please select both start and end dates.'); return; }
+            document.getElementById(ecCtx.startInput).value = dateKey(ecKeyToDate(ecDraftStart));
+            document.getElementById(ecCtx.endInput).value = dateKey(ecKeyToDate(ecDraftEnd));
+            document.getElementById(ecCtx.startDisplay).textContent = formatEcKey(ecDraftStart);
+            document.getElementById(ecCtx.endDisplay).textContent = formatEcKey(ecDraftEnd);
+            const cb = ecCtx.onApply;
+            closeEcPicker();
+            ecDraftStart = null; ecDraftEnd = null;
+            if (cb) cb();
+        }
+        // Sets an input pair (hidden GC value + EC display button) to a default range.
+        function setDefaultEcRange(startInputId, endInputId, startDisplayId, endDisplayId, startDate, endDate) {
+            document.getElementById(startInputId).value = dateKey(startDate);
+            document.getElementById(endInputId).value = dateKey(endDate);
+            document.getElementById(startDisplayId).textContent = formatEcKey(dateToEcKey(startDate));
+            document.getElementById(endDisplayId).textContent = formatEcKey(dateToEcKey(endDate));
+        }
+
+        // ============================================================
+        // SUPABASE DATA LAYER
+        // ============================================================
+        let supabaseLoadFailure = null;
+        window.addEventListener('supabase-load-failed', (e) => { supabaseLoadFailure = e.detail || 'unknown error'; });
+        function waitForSupabase(timeoutMs = 6000) {
+            if (window.supabase) return Promise.resolve(window.supabase);
+            if (supabaseLoadFailure) return Promise.reject(new Error('Supabase client failed to load: ' + supabaseLoadFailure));
+            return new Promise((resolve, reject) => {
+                const onReady = () => { cleanup(); resolve(window.supabase); };
+                const onFailed = (e) => { cleanup(); reject(new Error('Supabase client failed to load: ' + (e.detail || 'unknown error'))); };
+                const timer = setTimeout(() => { cleanup(); reject(new Error('Supabase client did not initialize in time.')); }, timeoutMs);
+                function cleanup() { clearTimeout(timer); window.removeEventListener('supabase-ready', onReady); window.removeEventListener('supabase-load-failed', onFailed); }
+                window.addEventListener('supabase-ready', onReady);
+                window.addEventListener('supabase-load-failed', onFailed);
+            });
+        }
+        function escapeHtml(s) { return (s ?? '').toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+        function formatCurrency(n) { return 'ETB ' + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        function uid(prefix) { return prefix + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6).toUpperCase(); }
+        function showToast(msg, type) {
+            const host = document.getElementById('toastHost');
+            const el = document.createElement('div');
+            el.className = 'toast glass-panel-gold rounded-xl px-4 py-3 text-sm font-semibold shadow-xl ' + (type === 'error' ? 'text-red-500' : 'text-yellow-600');
+            el.textContent = msg;
+            host.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
+        async function logAudit(action, details) {
+            try {
+                const client = await waitForSupabase();
+                await client.from('finance_audit_log').insert([{ time: new Date().toLocaleString(), user_name: 'Admin', action, details }]);
+            } catch (e) { console.error('audit log failed', e); }
+        }
+
+        // In-memory caches, re-fetched from Supabase whenever a section is shown.
+        let financeData = { transactions: [], loans: [], loanPayments: {}, bankAccounts: [], reconciliations: [], auditLog: [] };
+        let currentFilter = 'all';
+        let financeChart = null;
+
+        async function fetchOrError(promise, label) {
+            try {
+                const { data, error } = await promise;
+                if (error) { console.error(label, error); showToast('⚠️ ' + label + ' failed', 'error'); return []; }
+                return data || [];
+            } catch (e) { console.error(label, e); showToast('⚠️ Connection error', 'error'); return []; }
+        }
+
+        async function loadTransactions() {
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) return;
+            const rows = await fetchOrError(client.from('finance_transactions').select('*').order('date', { ascending: false }), 'Load transactions');
+            financeData.transactions = rows.map(r => ({
+                id: r.id, type: r.type, date: r.date, ecDate: r.ec_date, category: r.category, description: r.description,
+                payerName: r.payer_name, payerPhone: r.payer_phone, amount: Number(r.amount) || 0, method: r.method,
+                status: r.status, refId: r.ref_id, receiver: r.receiver, attachment: r.attachment
+            }));
+        }
+        async function loadBankAccounts() {
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) return;
+            const rows = await fetchOrError(client.from('finance_bank_accounts').select('*').order('created_at', { ascending: true }), 'Load bank accounts');
+            financeData.bankAccounts = rows.map(r => ({ id: r.id, name: r.name, type: r.type, balance: Number(r.balance) || 0 }));
+        }
+        async function loadReconciliations() {
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) return;
+            const rows = await fetchOrError(client.from('finance_reconciliations').select('*').order('created_at', { ascending: false }).limit(20), 'Load reconciliations');
+            financeData.reconciliations = rows.map(r => ({ date: new Date(r.created_at).toLocaleString(), system: Number(r.system_balance), statement: Number(r.statement_balance), diff: Number(r.difference), matched: Math.abs(Number(r.difference)) < 0.01 }));
+        }
+        async function loadLoans() {
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) return;
+            const loanRows = await fetchOrError(client.from('finance_loans').select('*').order('created_at', { ascending: false }), 'Load loans');
+            const payRows = await fetchOrError(client.from('finance_loan_payments').select('*').order('created_at', { ascending: true }), 'Load installments');
+            const byLoan = {};
+            payRows.forEach(p => { (byLoan[p.loan_id] = byLoan[p.loan_id] || []).push({ date: p.date, amount: Number(p.amount) || 0 }); });
+            financeData.loanPayments = byLoan;
+            financeData.loans = loanRows.map(r => ({
+                id: r.id, borrower: r.borrower, phone: r.phone, amount: Number(r.amount) || 0, interest: Number(r.interest) || 0,
+                dueDate: r.due_date, status: r.status, installments: byLoan[r.id] || []
+            }));
+        }
+        async function loadAuditLog() {
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) return;
+            const rows = await fetchOrError(client.from('finance_audit_log').select('*').order('created_at', { ascending: false }).limit(150), 'Load audit log');
+            financeData.auditLog = rows.map(r => ({ time: r.time, user: r.user_name, action: r.action, details: r.details }));
+        }
+
+        // ============================================================
+        // CATEGORIES / BUDGETS
+        // ============================================================
+        const INCOME_CATEGORIES = ['የአባልነት መዋጮ (Membership)', 'የልዩ ልዩ ስጦታዎች (Donations)', 'የበዓል ገቢዎች (Holiday Income)', 'የፕሮግራም ሽያጭ (Program Sales)', 'ሌላ (Other)'];
+        const EXPENSE_CATEGORIES = ['የቢሮ ወጪ (Office)', 'የፕሮግራም ወጪ (Program)', 'የጥገና ወጪ (Maintenance)', 'የትራንስፖርት ወጪ (Transport)', 'ሌላ (Other)'];
+        const BUDGETS = { 'የቢሮ ወጪ (Office)': 15000, 'የፕሮግራም ወጪ (Program)': 30000, 'የጥገና ወጪ (Maintenance)': 10000, 'የትራንስፖርት ወጪ (Transport)': 8000, 'ሌላ (Other)': 5000 };
+
+        function updateDate() {
+            const now = new Date();
+            const ec = gregorianToEthiopian(todayStr());
+            document.getElementById('dateDisplay').textContent = now.toLocaleDateString(currentLang === 'am' ? 'am-ET' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + (ec ? ' · ' + ec.label : '');
+        }
+
+        function switchSection(name) {
+            ['overview', 'bank', 'loans', 'students', 'begena', 'reports'].forEach(s => {
+                document.getElementById('section-' + s).classList.toggle('hidden', s !== name);
+            });
+            document.querySelectorAll('.nav-pill[data-section]').forEach(p => p.classList.toggle('active', p.dataset.section === name));
+            if (name === 'overview') { loadTransactions().then(renderTable); loadBankAccounts().then(() => { renderTopBar(); }); }
+            if (name === 'bank') renderBankAccounts();
+            if (name === 'loans') renderLoans();
+            if (name === 'students') { if (studentClassGrid_rendered !== true) renderStudentClassGrid(); }
+            if (name === 'begena') { if (begenaGradeGrid_rendered !== true) renderBegenaGradeGrid(); }
+            if (name === 'reports') { renderAuditLog(); renderChart(); renderTopBar(); }
+        }
+        function setFilter(f) {
+            currentFilter = f;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+            renderTable();
+        }
+
+        // ============================================================
+        // TRANSACTIONS (Income & Expense)
+        // ============================================================
+        let pendingAttachment = null;
+        function openTxnModal(type, editId) {
+            document.getElementById('txnType').value = type;
+            document.getElementById('txnEditId').value = editId || '';
+            document.getElementById('txnModalTitle').textContent = (type === 'income' ? (currentLang === 'am' ? 'አዲስ ገቢ' : 'New Income') : (currentLang === 'am' ? 'አዲስ ወጪ' : 'New Expense')) + (editId ? ' ✏️' : '');
+            document.getElementById('txnPayerLabel').textContent = type === 'income' ? t('lblPayerName') + ' (Payer)' : (currentLang === 'am' ? 'አቅራቢ/ተቀባይ' : 'Vendor / Payee');
+            const catSelect = document.getElementById('txnCategory');
+            const cats = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+            catSelect.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            document.getElementById('txnForm').reset();
+            document.getElementById('txnType').value = type;
+            document.getElementById('txnEditId').value = editId || '';
+            document.getElementById('txnDate').value = todayStr();
+            document.getElementById('txnReceiver').value = 'Admin';
+            pendingAttachment = null;
+            document.getElementById('attachLabel').textContent = t('attachPrompt');
+            document.getElementById('budgetHint').classList.add('hidden');
+            document.getElementById('approvalHint').classList.add('hidden');
+
+            if (editId) {
+                const tx = financeData.transactions.find(x => x.id === editId);
+                if (tx) {
+                    document.getElementById('txnDate').value = tx.date;
+                    catSelect.value = tx.category;
+                    document.getElementById('txnDescription').value = tx.description;
+                    document.getElementById('txnPayerName').value = tx.payerName;
+                    document.getElementById('txnPayerPhone').value = tx.payerPhone || '';
+                    document.getElementById('txnAmount').value = tx.amount;
+                    document.getElementById('txnMethod').value = tx.method;
+                    document.getElementById('txnStatus').value = tx.status;
+                    document.getElementById('txnRefId').value = tx.refId || '';
+                    document.getElementById('txnReceiver').value = tx.receiver || 'Admin';
+                    if (tx.attachment) { pendingAttachment = tx.attachment; document.getElementById('attachLabel').textContent = '✅ Attached'; }
+                }
+            }
+            updateEcHint('txnDate', 'txnEcHint');
+            document.getElementById('txnModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('txnModal').classList.remove('modal-hidden-state'), 10);
+            updateBudgetHint();
+        }
+        function closeTxnModal() {
+            const m = document.getElementById('txnModal');
+            m.classList.add('modal-hidden-state');
+            setTimeout(() => m.classList.add('hidden'), 280);
+        }
+        function updateBudgetHint() {
+            const type = document.getElementById('txnType').value;
+            const amount = parseFloat(document.getElementById('txnAmount').value) || 0;
+            const category = document.getElementById('txnCategory').value;
+            const budgetHint = document.getElementById('budgetHint');
+            const approvalHint = document.getElementById('approvalHint');
+            if (type === 'expense' && category) {
+                const budget = BUDGETS[category] || 0;
+                const spent = financeData.transactions.filter(x => x.type === 'expense' && x.category === category).reduce((s, x) => s + x.amount, 0);
+                const remaining = budget - spent - amount;
+                budgetHint.classList.remove('hidden');
+                budgetHint.textContent = `📊 Budget: ${formatCurrency(budget)} · Spent: ${formatCurrency(spent)} · Remaining: ${formatCurrency(remaining)}`;
+                budgetHint.classList.toggle('text-red-500', remaining < 0);
+                if (amount > 5000) { approvalHint.classList.remove('hidden'); approvalHint.textContent = '⚠️ Amount exceeds 5,000 ETB — requires Office Head approval.'; }
+                else if (amount > 1000) { approvalHint.classList.remove('hidden'); approvalHint.textContent = '⚠️ Amount exceeds 1,000 ETB — requires Class/Department Head approval.'; }
+                else approvalHint.classList.add('hidden');
+            } else { budgetHint.classList.add('hidden'); approvalHint.classList.add('hidden'); }
+        }
+        function handleAttachUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => { pendingAttachment = reader.result; document.getElementById('attachLabel').textContent = '✅ ' + file.name; };
+            reader.readAsDataURL(file);
+        }
+        async function saveTxn(e) {
+            e.preventDefault();
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) { showToast('⚠️ Database not connected', 'error'); return; }
+            const type = document.getElementById('txnType').value;
+            const editId = document.getElementById('txnEditId').value;
+            const dateVal = document.getElementById('txnDate').value;
+            const ec = gregorianToEthiopian(dateVal);
+            const record = {
+                id: editId || uid('TXN'), type, date: dateVal, ec_date: ec ? ec.label : null,
+                category: document.getElementById('txnCategory').value, description: document.getElementById('txnDescription').value,
+                payer_name: document.getElementById('txnPayerName').value, payer_phone: document.getElementById('txnPayerPhone').value,
+                amount: parseFloat(document.getElementById('txnAmount').value) || 0, method: document.getElementById('txnMethod').value,
+                status: document.getElementById('txnStatus').value, ref_id: document.getElementById('txnRefId').value,
+                receiver: document.getElementById('txnReceiver').value, attachment: pendingAttachment
+            };
+            const { error } = editId ? await client.from('finance_transactions').update(record).eq('id', editId) : await client.from('finance_transactions').insert([record]);
+            if (error) { console.error(error); showToast('⚠️ Save failed', 'error'); return; }
+            await logAudit(type === 'income' ? 'New/Edit Income' : 'New/Edit Expense', `${record.description} - ${formatCurrency(record.amount)}`);
+            closeTxnModal();
+            await loadTransactions(); await loadAuditLog();
+            renderTable(); renderTopBar();
+            showToast(type === 'income' ? '✅ Income recorded' : '✅ Expense recorded');
+        }
+        async function deleteTxn(id) {
+            if (!confirm('Delete this transaction? This cannot be undone.')) return;
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) return;
+            const txr = financeData.transactions.find(x => x.id === id);
+            const { error } = await client.from('finance_transactions').delete().eq('id', id);
+            if (error) { showToast('⚠️ Delete failed', 'error'); return; }
+            if (txr) await logAudit('Delete ' + (txr.type === 'income' ? 'Income' : 'Expense'), `${txr.description} - ${formatCurrency(txr.amount)}`);
+            await loadTransactions(); await loadAuditLog();
+            renderTable(); renderTopBar();
+            showToast('🗑️ Transaction deleted');
+        }
+        function viewAttachment(id) {
+            const tx = financeData.transactions.find(x => x.id === id);
+            if (!tx || !tx.attachment) return;
+            document.getElementById('attachPreviewImg').src = tx.attachment;
+            document.getElementById('attachPreviewModal').classList.remove('hidden');
+        }
+        function closeAttachPreview() { document.getElementById('attachPreviewModal').classList.add('hidden'); }
+
+        function renderTable() {
+            const search = (document.getElementById('searchInput').value || '').toLowerCase();
+            let list = financeData.transactions.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (currentFilter !== 'all') list = list.filter(x => x.type === currentFilter);
+            if (search) list = list.filter(x => (x.description || '').toLowerCase().includes(search) || (x.category || '').toLowerCase().includes(search) || (x.payerName || '').toLowerCase().includes(search));
+            const body = document.getElementById('txnTableBody');
+            document.getElementById('emptyTxnMsg').classList.toggle('hidden', list.length > 0);
+            body.innerHTML = list.map(x => `
+                <tr class="border-t border-white/5 table-row-hover">
+                    <td class="p-4 text-gray-300" data-label="${t('thDate')}">${escapeHtml(x.date)}${x.ecDate ? `<br><span class="text-[10px] text-yellow-600">${escapeHtml(x.ecDate)}</span>` : ''}</td>
+                    <td class="p-4" data-label="${t('thType')}"><span class="status-badge ${x.type === 'income' ? 'status-paid' : 'status-overdue'}">${x.type === 'income' ? t('filterIncome') : t('filterExpense')}</span></td>
+                    <td class="p-4" data-label="${t('thDesc')}"><p class="font-medium">${escapeHtml(x.description)}</p><p class="text-[11px] text-gray-500">${escapeHtml(x.payerName || '-')}</p></td>
+                    <td class="p-4 text-gray-400 text-xs" data-label="${t('thCategory')}">${escapeHtml(x.category)}</td>
+                    <td class="p-4 text-gray-400 text-xs" data-label="${t('thMethod')}">${escapeHtml(x.method)}</td>
+                    <td class="p-4 text-right font-bold ${x.type === 'income' ? 'text-green-500' : 'text-red-500'}" data-label="${t('thAmount')}">${x.type === 'income' ? '+' : '-'} ${formatCurrency(x.amount)}</td>
+                    <td class="p-4" data-label="${t('thStatus')}"><span class="status-badge status-${(x.status || '').toLowerCase()}">${escapeHtml(x.status)}</span></td>
+                    <td class="p-4" data-label="${t('thAttach')}">${x.attachment ? `<button onclick="viewAttachment('${x.id}')" class="icon-btn bg-white/5 hover:bg-white/10">📎</button>` : '<span class="text-gray-600 text-xs">-</span>'}</td>
+                    <td class="p-4" data-label="${t('thActions')}">
+                        <div class="flex gap-2 justify-end md:justify-start">
+                            <button onclick="openTxnModal('${x.type}', '${x.id}')" class="icon-btn bg-white/5 hover:bg-white/10">✏️</button>
+                            <button onclick="deleteTxn('${x.id}')" class="icon-btn bg-red-500/10 text-red-500 hover:bg-red-500/20">🗑️</button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        }
+
+        // ============================================================
+        // BANK & CASH MODULE
+        // ============================================================
+        function openBankModal() { document.getElementById('bankModal').classList.remove('hidden'); setTimeout(() => document.getElementById('bankModal').classList.remove('modal-hidden-state'), 10); }
+        function closeBankModal() { const m = document.getElementById('bankModal'); m.classList.add('modal-hidden-state'); setTimeout(() => m.classList.add('hidden'), 280); }
+        async function saveBankAccount(e) {
+            e.preventDefault();
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) { showToast('⚠️ Database not connected', 'error'); return; }
+            const acc = { id: uid('BA'), name: document.getElementById('bankName').value, type: document.getElementById('bankType').value, balance: parseFloat(document.getElementById('bankBalance').value) || 0 };
+            const { error } = await client.from('finance_bank_accounts').insert([acc]);
+            if (error) { showToast('⚠️ Save failed', 'error'); return; }
+            await logAudit('New Account', `${acc.name} - opening balance ${formatCurrency(acc.balance)}`);
+            document.getElementById('bankModal').querySelector('form').reset();
+            closeBankModal();
+            await loadBankAccounts(); await loadAuditLog();
+            renderBankAccounts(); renderTopBar();
+            showToast('🏦 Account added');
+        }
+        async function deleteBankAccount(id) {
+            if (!confirm('Remove this account?')) return;
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) return;
+            const { error } = await client.from('finance_bank_accounts').delete().eq('id', id);
+            if (error) { showToast('⚠️ Delete failed', 'error'); return; }
+            await loadBankAccounts();
+            renderBankAccounts(); renderTopBar();
+        }
+        function renderBankAccounts() {
+            const grid = document.getElementById('bankAccountsGrid');
+            grid.innerHTML = financeData.bankAccounts.map(a => `
+                <div class="card-in glass-panel-gold rounded-3xl p-6 relative">
+                    <button onclick="deleteBankAccount('${a.id}')" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-sm">🗑️</button>
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 rounded-2xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-xl">${a.type === 'Bank' ? '🏦' : '💵'}</div>
+                        <div><p class="font-bold">${escapeHtml(a.name)}</p><p class="text-[11px] text-gray-500">${a.type === 'Bank' ? 'Bank Account' : 'Petty Cash Box'}</p></div>
+                    </div>
+                    <p class="text-2xl font-bold text-blue-500">${formatCurrency(a.balance)}</p>
+                </div>`).join('');
+            document.getElementById('reconSystem').value = financeData.bankAccounts.reduce((s, a) => s + a.balance, 0).toFixed(2);
+            renderReconHistory();
+        }
+        async function runReconciliation() {
+            const client = await waitForSupabase().catch(() => null);
+            const system = parseFloat(document.getElementById('reconSystem').value) || 0;
+            const statement = parseFloat(document.getElementById('reconStatement').value) || 0;
+            const diff = system - statement;
+            document.getElementById('reconDiff').textContent = formatCurrency(diff);
+            document.getElementById('reconDiff').className = 'font-bold text-lg ' + (Math.abs(diff) < 0.01 ? 'text-green-500' : 'text-red-500');
+            if (client) {
+                await client.from('finance_reconciliations').insert([{ system_balance: system, statement_balance: statement, difference: diff }]);
+                await logAudit('Reconciliation', `System ${formatCurrency(system)} vs Statement ${formatCurrency(statement)} · diff ${formatCurrency(diff)}`);
+            }
+            await loadReconciliations();
+            renderReconHistory();
+        }
+        function renderReconHistory() {
+            const host = document.getElementById('reconHistory');
+            host.innerHTML = financeData.reconciliations.slice(0, 10).map(r => `
+                <div class="flex justify-between items-center border-b border-white/5 pb-1">
+                    <span>${escapeHtml(r.date)}</span>
+                    <span class="status-badge ${r.matched ? 'status-reconciled' : 'status-overdue'}">${r.matched ? '✅ Reconciled' : '⚠️ Mismatch ' + formatCurrency(r.diff)}</span>
+                </div>`).join('') || '<p class="text-gray-600">No reconciliation records yet.</p>';
+        }
+
+        // ============================================================
+        // LOAN MODULE
+        // ============================================================
+        function openLoanModal() {
+            document.getElementById('loanModal').querySelector('form').reset();
+            document.getElementById('loanDueDate').value = todayStr();
+            updateEcHint('loanDueDate', 'loanEcHint');
+            document.getElementById('loanModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('loanModal').classList.remove('modal-hidden-state'), 10);
+        }
+        function closeLoanModal() { const m = document.getElementById('loanModal'); m.classList.add('modal-hidden-state'); setTimeout(() => m.classList.add('hidden'), 280); }
+        async function saveLoan(e) {
+            e.preventDefault();
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) { showToast('⚠️ Database not connected', 'error'); return; }
+            const dueVal = document.getElementById('loanDueDate').value;
+            const ec = gregorianToEthiopian(dueVal);
+            const loan = {
+                id: uid('LN'), borrower: document.getElementById('loanBorrower').value, phone: document.getElementById('loanPhone').value,
+                amount: parseFloat(document.getElementById('loanAmount').value) || 0, interest: parseFloat(document.getElementById('loanInterest').value) || 0,
+                due_date: dueVal, ec_due_date: ec ? ec.label : null, status: 'Active'
+            };
+            const { error } = await client.from('finance_loans').insert([loan]);
+            if (error) { showToast('⚠️ Save failed', 'error'); return; }
+            await logAudit('Loan Approved', `${loan.borrower} - ${formatCurrency(loan.amount)} due ${loan.due_date}`);
+            closeLoanModal();
+            await loadLoans(); await loadAuditLog();
+            switchSection('loans');
+            showToast('🤝 Loan approved and saved');
+        }
+        function loanPaidAmount(loan) { return loan.installments.reduce((s, i) => s + i.amount, 0); }
+        function loanRemaining(loan) { return Math.max(loan.amount - loanPaidAmount(loan), 0); }
+        function openInstallModal(loanId) {
+            document.getElementById('installLoanId').value = loanId;
+            document.getElementById('installDate').value = todayStr();
+            updateEcHint('installDate', 'installEcHint');
+            document.getElementById('installModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('installModal').classList.remove('modal-hidden-state'), 10);
+        }
+        function closeInstallModal() { const m = document.getElementById('installModal'); m.classList.add('modal-hidden-state'); setTimeout(() => m.classList.add('hidden'), 280); }
+        async function saveInstallment(e) {
+            e.preventDefault();
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) { showToast('⚠️ Database not connected', 'error'); return; }
+            const loanId = document.getElementById('installLoanId').value;
+            const loan = financeData.loans.find(l => l.id === loanId);
+            if (!loan) return;
+            const amount = parseFloat(document.getElementById('installAmount').value) || 0;
+            const dateVal = document.getElementById('installDate').value;
+            const ec = gregorianToEthiopian(dateVal);
+            const { error } = await client.from('finance_loan_payments').insert([{ loan_id: loanId, amount, date: dateVal, ec_date: ec ? ec.label : null }]);
+            if (error) { showToast('⚠️ Save failed', 'error'); return; }
+            const newPaid = loanPaidAmount(loan) + amount;
+            if (newPaid >= loan.amount) await client.from('finance_loans').update({ status: 'Paid' }).eq('id', loanId);
+            await logAudit('Installment Paid', `${loan.borrower} paid ${formatCurrency(amount)}`);
+            closeInstallModal();
+            await loadLoans(); await loadAuditLog();
+            renderLoans();
+            showToast('💳 Installment recorded');
+        }
+        async function sendLoanReminder(loanId) {
+            const loan = financeData.loans.find(l => l.id === loanId);
+            if (!loan) return;
+            await logAudit('Reminder Sent', `SMS reminder sent to ${loan.borrower} for due date ${loan.dueDate}`);
+            await loadAuditLog();
+            showToast('🔔 Reminder sent to ' + loan.borrower + ' (simulated SMS)');
+        }
+        async function deleteLoan(id) {
+            if (!confirm('Delete this loan record?')) return;
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) return;
+            await client.from('finance_loans').delete().eq('id', id);
+            await loadLoans();
+            renderLoans();
+        }
+        function renderLoans() {
+            const today = new Date();
+            const grid = document.getElementById('loansGrid');
+            document.getElementById('emptyLoansMsg').classList.toggle('hidden', financeData.loans.length > 0);
+            grid.innerHTML = financeData.loans.map(loan => {
+                const paid = loanPaidAmount(loan);
+                const remaining = loanRemaining(loan);
+                const pct = loan.amount > 0 ? Math.min((paid / loan.amount) * 100, 100) : 0;
+                const due = new Date(loan.dueDate);
+                const daysLeft = Math.ceil((due - today) / 86400000);
+                let statusClass = 'status-paid', statusText = loan.status;
+                if (loan.status !== 'Paid') {
+                    if (daysLeft < 0) { statusClass = 'status-overdue'; statusText = 'Overdue'; }
+                    else if (daysLeft <= 3) { statusClass = 'status-pending'; statusText = 'Due Soon'; }
+                    else { statusClass = 'status-partial'; statusText = 'Active'; }
+                }
+                return `
+                <div class="card-in glass-panel-gold rounded-3xl p-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <div><p class="font-bold text-lg">${escapeHtml(loan.borrower)}</p><p class="text-[11px] text-gray-500">${escapeHtml(loan.phone || '-')}</p></div>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="flex justify-between text-sm mb-1"><span class="text-gray-400">Loan Amount</span><span class="font-bold">${formatCurrency(loan.amount)}</span></div>
+                    <div class="flex justify-between text-sm mb-1"><span class="text-gray-400">Paid</span><span class="font-bold text-green-500">${formatCurrency(paid)}</span></div>
+                    <div class="flex justify-between text-sm mb-3"><span class="text-gray-400">Remaining</span><span class="font-bold text-yellow-600">${formatCurrency(remaining)}</span></div>
+                    <div class="w-full bg-white/5 rounded-full h-2 mb-3 overflow-hidden"><div class="h-full bg-yellow-500" style="width:${pct}%"></div></div>
+                    <p class="text-[11px] text-gray-500 mb-4">Due: ${escapeHtml(loan.dueDate)} · Interest: ${loan.interest}%</p>
+                    <div class="flex gap-2 flex-wrap">
+                        ${loan.status !== 'Paid' ? `<button onclick="openInstallModal('${loan.id}')" class="px-3 py-1.5 bg-yellow-500 text-black text-xs font-bold rounded-lg hover:bg-yellow-400 transition">+ Payment</button>` : ''}
+                        ${loan.status !== 'Paid' ? `<button onclick="sendLoanReminder('${loan.id}')" class="px-3 py-1.5 glass-panel text-xs font-bold rounded-lg hover:bg-white/10 transition">🔔 Remind</button>` : ''}
+                        <button onclick="deleteLoan('${loan.id}')" class="px-3 py-1.5 bg-red-500/10 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500/20 transition">🗑️</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ============================================================
+        // STUDENT PAYMENT MODULE (class grid reused from students.html)
+        // ============================================================
+        const STUDENT_CLASSES = [
+            { group: 'catChildren', label: '📌 Children\'s Category', labelAm: '📌 የሕፃናት ምድብ', color: 'yellow-500', items: [
+                { name: 'ምድብ ቂርቆስ ፩', prefix: 'MHSS-Q1', icon: '🕊️' },
+                { name: 'ምድብ ቂርቆስ ፪', prefix: 'MHSS-Q2', icon: '👥' },
+                { name: 'ምድብ ቂርቆስ ፫', prefix: 'MHSS-Q3', icon: '⭐' }
+            ]},
+            { group: 'catCentral', label: '📌 Central Category', labelAm: '📌 የማዕከላዊ ምድብ', color: 'blue-400', items: [
+                { name: 'ምድብ ሳሙኤል', prefix: 'MHSS-SAM', icon: '⛵' },
+                { name: 'ምድብ ቶማስ', prefix: 'MHSS-THM', icon: '📖' },
+                { name: 'ምድብ እስጢፋኖስ', prefix: 'MHSS-EST', icon: '👑' }
+            ]},
+            { group: 'catYouth', label: '📌 Youth Category', labelAm: '📌 የወጣቶች ምድብ', color: 'green-400', items: [
+                { name: 'ምድብ ቅዱስ ያሬድ', prefix: 'MHSS-YRD', icon: '🎼' },
+                { name: 'ምድብ ቅዱስ ዳዊት', prefix: 'MHSS-DVD', icon: '🛡️' }
+            ]}
+        ];
+        function getCustomClasses() { try { return JSON.parse(localStorage.getItem('mh_custom_classes_v1') || '[]'); } catch (e) { return []; } }
+
+        let studentClassGrid_rendered = false;
+        let currentStudentClass = null, currentStudentPlan = '3month';
+        let studentsInClass = [], studentPaymentsInClass = [];
+
+        function renderStudentClassGrid() {
+            studentClassGrid_rendered = true;
+            const grid = document.getElementById('studentClassGrid');
+            let html = '';
+            STUDENT_CLASSES.forEach(cat => {
+                html += `<div class="md:col-span-3"><h3 class="text-lg font-bold text-${cat.color} mb-3 mt-2 amharic">${currentLang === 'am' ? cat.labelAm : cat.label}</h3></div>`;
+                cat.items.forEach(c => {
+                    html += `<button onclick="openStudentClass('${escapeHtml(c.name)}')" class="class-card-lux glass-panel-gold p-5 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-4 min-w-0"><div class="class-icon-wrap bg-${cat.color}/10 border border-${cat.color}/30">${c.icon}</div>
+                        <div class="min-w-0"><h3 class="font-bold amharic truncate">${escapeHtml(c.name)}</h3><p class="text-[11px] text-gray-500 font-mono">${c.prefix}</p></div></div>
+                        <span class="text-xl text-${cat.color}">→</span></button>`;
+                });
+            });
+            const custom = getCustomClasses();
+            if (custom.length) {
+                html += `<div class="md:col-span-3"><h3 class="text-lg font-bold text-yellow-500 mb-3 mt-2">📚 Other Classes</h3></div>`;
+                custom.forEach(c => {
+                    html += `<button onclick="openStudentClass('${escapeHtml(c.name)}')" class="class-card-lux glass-panel-gold p-5 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-4 min-w-0"><div class="class-icon-wrap bg-yellow-500/10 border border-yellow-500/30">📘</div>
+                        <div class="min-w-0"><h3 class="font-bold amharic truncate">${escapeHtml(c.name)}</h3><p class="text-[11px] text-gray-500 font-mono">${escapeHtml(c.id || '')}</p></div></div>
+                        <span class="text-xl text-yellow-500">→</span></button>`;
+                });
+            }
+            grid.innerHTML = html;
+        }
+        // Period option lists — every plan is expressed in the Ethiopian
+        // calendar and capped at EC_MAX_YEAR (2030 E.C.) as requested.
+        // 'monthly' is kept (used internally by Begena, unchanged); Student
+        // Payment now only exposes 3month / 6month / yearly.
+        const EC_QUARTER_LABELS_EN = ['Qtr 1 (Meskerem–Hidar)', 'Qtr 2 (Tahsas–Yekatit)', 'Qtr 3 (Megabit–Sene)', 'Qtr 4 (Hamle–Pagume)'];
+        const EC_QUARTER_LABELS_AM = ['ሩብ ዓመት 1 (መስከረም–ኅዳር)', 'ሩብ ዓመት 2 (ታኅሳስ–የካቲት)', 'ሩብ ዓመት 3 (መጋቢት–ሰኔ)', 'ሩብ ዓመት 4 (ሐምሌ–ጳጉሜ)'];
+        const EC_SEMESTER_LABELS_EN = ['Semester 1 (Meskerem–Yekatit)', 'Semester 2 (Megabit–Pagume)'];
+        const EC_SEMESTER_LABELS_AM = ['ግማሽ ዓመት 1 (መስከረም–የካቲት)', 'ግማሽ ዓመት 2 (መጋቢት–ጳጉሜ)'];
+        function periodOptionsFor(plan) {
+            const ec = gregorianToEthiopian(todayStr());
+            const curYear = ec ? ec.year : 2018;
+            const startYear = curYear - 1, endYear = EC_MAX_YEAR;
+            const opts = [];
+            if (plan === 'monthly') {
+                for (let y = startYear; y <= endYear; y++) {
+                    for (let m = 1; m <= 13; m++) opts.push({ value: `${y}-${String(m).padStart(2, '0')}`, label: `${EC_MONTHS[m - 1]} ${y}` });
+                }
+            } else if (plan === '3month') {
+                const labels = currentLang === 'am' ? EC_QUARTER_LABELS_AM : EC_QUARTER_LABELS_EN;
+                for (let y = startYear; y <= endYear; y++) {
+                    for (let q = 1; q <= 4; q++) opts.push({ value: `${y}-Q${q}`, label: `${labels[q - 1]} · ${y}` });
+                }
+            } else if (plan === '6month') {
+                const labels = currentLang === 'am' ? EC_SEMESTER_LABELS_AM : EC_SEMESTER_LABELS_EN;
+                for (let y = startYear; y <= endYear; y++) {
+                    for (let s = 1; s <= 2; s++) opts.push({ value: `${y}-S${s}`, label: `${labels[s - 1]} · ${y}` });
+                }
+            } else { // yearly
+                for (let y = startYear; y <= endYear; y++) opts.push({ value: String(y), label: `${y} ዓ.ም` });
+            }
+            return opts;
+        }
+        function currentDefaultPeriod(plan) {
+            const ec = gregorianToEthiopian(todayStr());
+            if (!ec) return '';
+            if (plan === 'monthly') return `${ec.year}-${String(ec.month).padStart(2, '0')}`;
+            if (plan === '3month') { const q = Math.min(4, Math.ceil(ec.month / 3)); return `${ec.year}-Q${q}`; }
+            if (plan === '6month') { const s = ec.month <= 6 ? 1 : 2; return `${ec.year}-S${s}`; }
+            return String(ec.year);
+        }
+        // Converts a period value (of a given plan) to its Ethiopian-year start
+        // date in Gregorian form — used to test whether a period falls inside a
+        // chosen Ethiopian-calendar date range on the Payment Summary view.
+        function periodStartDate(plan, periodValue) {
+            if (!periodValue) return null;
+            if (plan === 'monthly') { const [y, m] = periodValue.split('-').map(Number); return ethiopianToGregorian(y, m, 1); }
+            if (plan === '3month') { const [y, q] = periodValue.split('-Q').map(Number); return ethiopianToGregorian(y, (q - 1) * 3 + 1, 1); }
+            if (plan === '6month') { const [y, s] = periodValue.split('-S').map(Number); return ethiopianToGregorian(y, (s - 1) * 6 + 1, 1); }
+            return ethiopianToGregorian(Number(periodValue), 1, 1); // yearly
+        }
+        function periodEndDate(plan, periodValue) {
+            if (!periodValue) return null;
+            if (plan === 'monthly') { const [y, m] = periodValue.split('-').map(Number); return ethiopianToGregorian(y, m, ecDaysInMonth(y, m)); }
+            if (plan === '3month') { const [y, q] = periodValue.split('-Q').map(Number); const lastM = q * 3; return ethiopianToGregorian(y, lastM, ecDaysInMonth(y, lastM)); }
+            if (plan === '6month') { const [y, s] = periodValue.split('-S').map(Number); const lastM = s * 6; return ethiopianToGregorian(y, lastM, ecDaysInMonth(y, lastM)); }
+            const y = Number(periodValue); return ethiopianToGregorian(y, 13, ecDaysInMonth(y, 13)); // yearly
+        }
+        async function openStudentClass(className) {
+            currentStudentClass = className;
+            document.getElementById('currentClassName').textContent = className;
+            document.getElementById('studentClassGridView').classList.add('hidden');
+            document.getElementById('studentPaymentWorkspace').classList.remove('hidden');
+            document.getElementById('studentSearchInput').value = '';
+            setStudentPlanUIOnly('3month');
+            await loadClassStudentsAndPayments();
+            switchPayView('student', 'payment');
+        }
+        function backToStudentClasses() {
+            document.getElementById('studentPaymentWorkspace').classList.add('hidden');
+            document.getElementById('studentClassGridView').classList.remove('hidden');
+        }
+        function setStudentPlanUIOnly(plan) {
+            currentStudentPlan = plan;
+            document.querySelectorAll('#studentPaymentWorkspace .plan-tab').forEach(b => b.classList.toggle('active', b.dataset.plan === plan));
+            const sel = document.getElementById('studentPeriodSelect');
+            sel.innerHTML = periodOptionsFor(plan).map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+            sel.value = currentDefaultPeriod(plan);
+        }
+        function setStudentPlan(plan) { setStudentPlanUIOnly(plan); renderStudentPaymentList(); }
+        async function loadClassStudentsAndPayments() {
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) { studentsInClass = []; studentPaymentsInClass = []; return; }
+            const students = await fetchOrError(client.from('students').select('id,name,class_name').eq('class_name', currentStudentClass).order('name', { ascending: true }), 'Load students');
+            studentsInClass = students;
+            const payments = await fetchOrError(client.from('student_payments').select('*').eq('class_name', currentStudentClass), 'Load student payments');
+            studentPaymentsInClass = payments;
+        }
+        function renderStudentPaymentList() {
+            const search = (document.getElementById('studentSearchInput').value || '').toLowerCase();
+            const period = document.getElementById('studentPeriodSelect').value;
+            const body = document.getElementById('studentPaymentTableBody');
+            let list = studentsInClass.filter(s => !search || (s.name || '').toLowerCase().includes(search) || (s.id || '').toLowerCase().includes(search));
+            document.getElementById('emptyStudentPaymentMsg').classList.toggle('hidden', list.length > 0);
+            const periodLabel = document.getElementById('studentPeriodSelect').selectedOptions[0]?.textContent || period;
+            body.innerHTML = list.map(s => {
+                const pay = studentPaymentsInClass.find(p => p.student_id === s.id && p.plan === currentStudentPlan && p.period === period);
+                const paid = !!pay;
+                return `<tr class="border-t border-white/5 table-row-hover">
+                    <td class="p-4 font-medium" data-label="${t('thStudent')}">${escapeHtml(s.name)}</td>
+                    <td class="p-4 text-gray-400 text-xs font-mono" data-label="${t('thId')}">${escapeHtml(s.id)}</td>
+                    <td class="p-4 text-gray-400 text-xs" data-label="${t('thPeriod')}">${escapeHtml(periodLabel)}</td>
+                    <td class="p-4 text-right font-bold ${paid ? 'text-green-500' : 'text-gray-500'}" data-label="${t('thAmount')}">${paid ? formatCurrency(pay.amount) : '-'}</td>
+                    <td class="p-4" data-label="${t('thStatus')}"><span class="status-badge ${paid ? 'status-paid' : 'status-pending'}">${paid ? 'Paid' : 'Unpaid'}</span></td>
+                    <td class="p-4" data-label="${t('thActions')}">
+                        <div class="flex gap-2 justify-end md:justify-start">
+                            <button onclick="openPayModal('student','${escapeHtml(s.id)}','${escapeHtml((s.name||'').replace(/'/g,"&#39;"))}','${escapeHtml(currentStudentClass)}','${currentStudentPlan}')" class="px-3 py-1.5 bg-yellow-500 text-black text-xs font-bold rounded-lg hover:bg-yellow-400 transition">${paid ? '✏️ Edit' : '+ Payment'}</button>
+                            ${paid ? `<button onclick="deletePayment('student_payments','${pay.id}')" class="icon-btn bg-red-500/10 text-red-500 hover:bg-red-500/20">🗑️</button>` : ''}
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ============================================================
+        // BEGENA PAYMENT MODULE (grade grid reused from begena.html)
+        // ============================================================
+        const BEGENA_GRADES = [
+            { label: '1ኛ ዙር ተማሪዎች', prefix: 'MHSS-B1', icon: '📘', color: 'yellow-500' },
+            { label: '2ኛ ዙር ተማሪዎች', prefix: 'MHSS-B2', icon: '📗', color: 'blue-400' },
+            { label: '3ኛ ዙር ተማሪዎች', prefix: 'MHSS-B3', icon: '📙', color: 'green-400' },
+            { label: '4ኛ ዙር ተማሪዎች', prefix: 'MHSS-B4', icon: '🕊️', color: 'pink-400' },
+            { label: '5ኛ ዙር ተማሪዎች', prefix: 'MHSS-B5', icon: '✝️', color: 'sky-400' },
+            { label: '6ኛ ዙር ተማሪዎች', prefix: 'MHSS-B6', icon: '🎼', color: 'amber-400' },
+            { label: '7ኛ ዙር ተማሪዎች', prefix: 'MHSS-B7', icon: '🌿', color: 'purple-400' },
+            { label: '8ኛ ዙር ተማሪዎች', prefix: 'MHSS-B8', icon: '⭐', color: 'emerald-400' },
+            { label: '9ኛ ዙር ተማሪዎች', prefix: 'MHSS-B9', icon: '🔔', color: 'red-400' },
+            { label: '10ኛ ዙር ተማሪዎች', prefix: 'MHSS-B10', icon: '🏛️', color: 'indigo-400' }
+        ];
+        let begenaGradeGrid_rendered = false;
+        let currentBegenaGrade = null, begenaStudentsInGrade = [], begenaPaymentsInGrade = [];
+
+        function renderBegenaGradeGrid() {
+            begenaGradeGrid_rendered = true;
+            const grid = document.getElementById('begenaGradeGrid');
+            grid.innerHTML = BEGENA_GRADES.map(g => `
+                <button onclick="openBegenaGrade('${escapeHtml(g.label)}')" class="class-card-lux glass-panel-gold p-5 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-4 min-w-0"><div class="class-icon-wrap bg-${g.color}/10 border border-${g.color}/30">${g.icon}</div>
+                    <div class="min-w-0"><h3 class="font-bold amharic truncate">${escapeHtml(g.label)}</h3><p class="text-[11px] text-gray-500 font-mono">${g.prefix}</p></div></div>
+                    <span class="text-xl text-${g.color}">→</span></button>`).join('');
+        }
+        async function openBegenaGrade(label) {
+            currentBegenaGrade = label;
+            document.getElementById('currentGradeName').textContent = label;
+            document.getElementById('begenaGradeGridView').classList.add('hidden');
+            document.getElementById('begenaPaymentWorkspace').classList.remove('hidden');
+            document.getElementById('begenaSearchInput').value = '';
+            const sel = document.getElementById('begenaPeriodSelect');
+            sel.innerHTML = periodOptionsFor('monthly').map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+            sel.value = currentDefaultPeriod('monthly');
+            await loadGradeStudentsAndPayments();
+            switchPayView('begena', 'payment');
+        }
+        function backToBegenaGrades() {
+            document.getElementById('begenaPaymentWorkspace').classList.add('hidden');
+            document.getElementById('begenaGradeGridView').classList.remove('hidden');
+        }
+        async function loadGradeStudentsAndPayments() {
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) { begenaStudentsInGrade = []; begenaPaymentsInGrade = []; return; }
+            begenaStudentsInGrade = await fetchOrError(client.from('Begena_students').select('id,name,grade').eq('grade', currentBegenaGrade).order('name', { ascending: true }), 'Load Begena students');
+            begenaPaymentsInGrade = await fetchOrError(client.from('begena_student_payments').select('*').eq('grade', currentBegenaGrade), 'Load Begena payments');
+        }
+        function renderBegenaPaymentList() {
+            const search = (document.getElementById('begenaSearchInput').value || '').toLowerCase();
+            const period = document.getElementById('begenaPeriodSelect').value;
+            const body = document.getElementById('begenaPaymentTableBody');
+            let list = begenaStudentsInGrade.filter(s => !search || (s.name || '').toLowerCase().includes(search) || (s.id || '').toLowerCase().includes(search));
+            document.getElementById('emptyBegenaPaymentMsg').classList.toggle('hidden', list.length > 0);
+            const periodLabel = document.getElementById('begenaPeriodSelect').selectedOptions[0]?.textContent || period;
+            body.innerHTML = list.map(s => {
+                const pay = begenaPaymentsInGrade.find(p => p.student_id === s.id && p.period === period);
+                const paid = !!pay;
+                return `<tr class="border-t border-white/5 table-row-hover">
+                    <td class="p-4 font-medium" data-label="${t('thStudent')}">${escapeHtml(s.name)}</td>
+                    <td class="p-4 text-gray-400 text-xs font-mono" data-label="${t('thId')}">${escapeHtml(s.id)}</td>
+                    <td class="p-4 text-gray-400 text-xs" data-label="${t('thPeriod')}">${escapeHtml(periodLabel)}</td>
+                    <td class="p-4 text-right font-bold ${paid ? 'text-green-500' : 'text-gray-500'}" data-label="${t('thAmount')}">${paid ? formatCurrency(pay.amount) : '-'}</td>
+                    <td class="p-4" data-label="${t('thStatus')}"><span class="status-badge ${paid ? 'status-paid' : 'status-pending'}">${paid ? 'Paid' : 'Unpaid'}</span></td>
+                    <td class="p-4" data-label="${t('thActions')}">
+                        <div class="flex gap-2 justify-end md:justify-start">
+                            <button onclick="openPayModal('begena','${escapeHtml(s.id)}','${escapeHtml((s.name||'').replace(/'/g,"&#39;"))}','${escapeHtml(currentBegenaGrade)}','monthly')" class="px-3 py-1.5 bg-yellow-500 text-black text-xs font-bold rounded-lg hover:bg-yellow-400 transition">${paid ? '✏️ Edit' : '+ Payment'}</button>
+                            ${paid ? `<button onclick="deletePayment('begena_student_payments','${pay.id}')" class="icon-btn bg-red-500/10 text-red-500 hover:bg-red-500/20">🗑️</button>` : ''}
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ============================================================
+        // PAYMENT / PAYMENT SUMMARY / REPORT VIEW SWITCHER
+        // (shared by Student Payment and Begena Payment — mirrors the
+        //  Daily / Summary / Analytics tabs in attendance.html)
+        // ============================================================
+        const payReportCharts = { student: null, begena: null };
+        function payCfg(kind) {
+            return kind === 'student'
+                ? { students: () => studentsInClass, payments: () => studentPaymentsInClass, plan: () => currentStudentPlan, group: () => currentStudentClass, title: () => currentStudentClass, periodSelectId: 'studentPeriodSelect', table: 'student_payments' }
+                : { students: () => begenaStudentsInGrade, payments: () => begenaPaymentsInGrade, plan: () => 'monthly', group: () => currentBegenaGrade, title: () => currentBegenaGrade, periodSelectId: 'begenaPeriodSelect', table: 'begena_student_payments' };
+        }
+        function findPayment(kind, studentId, plan, period) {
+            const cfg = payCfg(kind);
+            return cfg.payments().find(p => p.student_id === studentId && p.period === period && (kind === 'begena' || p.plan === plan));
+        }
+        function switchPayView(kind, view) {
+            const prefix = kind; // 'student' | 'begena'
+            ['Payment', 'Summary', 'Report'].forEach(v => {
+                const el = document.getElementById(prefix + v + 'View');
+                if (el) el.classList.toggle('hidden', v.toLowerCase() !== view);
+            });
+            document.querySelectorAll(`#${prefix}TabBar .tab-btn`).forEach(b => b.classList.toggle('active', b.dataset.view === view));
+            if (view === 'payment') { if (kind === 'student') renderStudentPaymentList(); else renderBegenaPaymentList(); }
+            if (view === 'summary') {
+                const startId = prefix + 'RangeStart', endId = prefix + 'RangeEnd';
+                if (!document.getElementById(startId).value) {
+                    const ec = gregorianToEthiopian(todayStr());
+                    const yearStart = ec ? ethiopianToGregorian(ec.year, 1, 1) : new Date(new Date().getFullYear(), 0, 1);
+                    setDefaultEcRange(startId, endId, prefix + 'RangeStartDisplay', prefix + 'RangeEndDisplay', yearStart, new Date());
+                }
+                renderPaySummary(kind);
+            }
+            if (view === 'report') renderPayReport(kind);
+        }
+        function renderPaySummary(kind) {
+            const cfg = payCfg(kind);
+            const plan = cfg.plan();
+            const startVal = document.getElementById(kind + 'RangeStart').value;
+            const endVal = document.getElementById(kind + 'RangeEnd').value;
+            const startD = startVal ? new Date(startVal + 'T00:00:00') : null;
+            const endD = endVal ? new Date(endVal + 'T23:59:59') : null;
+            const periods = periodOptionsFor(plan).filter(o => {
+                const ps = periodStartDate(plan, o.value);
+                return startD && endD && ps >= startD && ps <= endD;
+            });
+            const students = cfg.students().slice().sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            const head = document.getElementById(kind + 'SummaryHead');
+            const body = document.getElementById(kind + 'SummaryBody');
+            const empty = document.getElementById(kind + 'SummaryEmptyMsg');
+            const noData = !students.length || !periods.length;
+            empty.classList.toggle('hidden', !noData);
+            document.getElementById(kind + 'SummaryTable').classList.toggle('hidden', noData);
+            if (noData) { head.innerHTML = ''; body.innerHTML = ''; return; }
+            head.innerHTML = `<tr><th>${t('thStudent')}</th><th>${t('thId')}</th>${periods.map(p => `<th>${escapeHtml(p.label)}</th>`).join('')}<th>${t('thTotal')}</th></tr>`;
+            body.innerHTML = students.map(s => {
+                let total = 0;
+                const cells = periods.map(p => {
+                    const pay = findPayment(kind, s.id, plan, p.value);
+                    if (pay) total += Number(pay.amount) || 0;
+                    return `<td data-label="${escapeHtml(p.label)}">${pay ? `<span class="pay-dot yes" title="${formatCurrency(pay.amount)}">✓</span>` : '<span class="pay-dot no">—</span>'}</td>`;
+                }).join('');
+                return `<tr>
+                    <td data-label="${t('thStudent')}" class="font-medium amharic">${escapeHtml(s.name)}</td>
+                    <td data-label="${t('thId')}" class="text-gray-400 text-xs font-mono">${escapeHtml(s.id)}</td>
+                    ${cells}
+                    <td data-label="${t('thTotal')}" class="font-bold text-green-500">${formatCurrency(total)}</td>
+                </tr>`;
+            }).join('');
+        }
+        function exportPaySummaryPdf(kind) {
+            const cfg = payCfg(kind);
+            const plan = cfg.plan();
+            const startVal = document.getElementById(kind + 'RangeStart').value;
+            const endVal = document.getElementById(kind + 'RangeEnd').value;
+            const startD = startVal ? new Date(startVal + 'T00:00:00') : null;
+            const endD = endVal ? new Date(endVal + 'T23:59:59') : null;
+            const periods = periodOptionsFor(plan).filter(o => { const ps = periodStartDate(plan, o.value); return startD && endD && ps >= startD && ps <= endD; });
+            const students = cfg.students().slice().sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            if (!students.length || !periods.length) { alert(currentLang === 'am' ? 'ለዚህ ክልል ምንም ውሂብ የለም።' : 'No data to export for this range.'); return; }
+            const rows = students.map(s => {
+                let total = 0;
+                const cells = periods.map(p => { const pay = findPayment(kind, s.id, plan, p.value); if (pay) total += Number(pay.amount) || 0; return `<td>${pay ? '✓' : '-'}</td>`; }).join('');
+                return `<tr><td class="name-cell">${escapeHtml(s.id)}</td><td class="name-cell">${escapeHtml(s.name)}</td>${cells}<td>${formatCurrency(total)}</td></tr>`;
+            }).join('');
+            const printArea = document.getElementById('printArea');
+            printArea.innerHTML = `
+                <div class="print-title">Meserete Hiwot ERP — ${kind === 'student' ? 'Student' : 'Begena'} Payment Summary</div>
+                <div class="print-sub">${escapeHtml(cfg.title() || '')} · ${formatEcKey(dateToEcKey(startD))} – ${formatEcKey(dateToEcKey(endD))} (GC: ${startVal} to ${endVal}) · Generated ${new Date().toLocaleString()}</div>
+                <table class="print-table"><thead><tr><th>ID</th><th>Name</th>${periods.map(p => `<th>${escapeHtml(p.label)}</th>`).join('')}<th>Total</th></tr></thead>
+                <tbody>${rows}</tbody></table>`;
+            logAudit('Export Payment Summary', `${kind === 'student' ? 'Student' : 'Begena'} · ${cfg.title() || ''} · ${startVal} to ${endVal}`);
+            setTimeout(() => window.print(), 150);
+        }
+        function renderPayReport(kind) {
+            const cfg = payCfg(kind);
+            const plan = cfg.plan();
+            const period = document.getElementById(cfg.periodSelectId).value;
+            const students = cfg.students();
+            const paidNow = students.filter(s => findPayment(kind, s.id, plan, period)).length;
+            const rate = students.length ? Math.round((paidNow / students.length) * 100) : 0;
+            document.getElementById(kind + 'ReportRate').textContent = rate + '%';
+
+            const startVal = document.getElementById(kind + 'RangeStart').value || todayStr();
+            const endVal = document.getElementById(kind + 'RangeEnd').value || todayStr();
+            const startD = new Date(startVal + 'T00:00:00'), endD = new Date(endVal + 'T23:59:59');
+            const periods = periodOptionsFor(plan).filter(o => { const ps = periodStartDate(plan, o.value); return ps >= startD && ps <= endD; });
+
+            const perStudent = students.map(s => {
+                let paidCount = 0, total = 0;
+                periods.forEach(p => { const pay = findPayment(kind, s.id, plan, p.value); if (pay) { paidCount++; total += Number(pay.amount) || 0; } });
+                return { s, paidCount, total, unpaidCount: periods.length - paidCount };
+            });
+            const fullyPaid = perStudent.filter(x => periods.length > 0 && x.unpaidCount === 0).sort((a, b) => b.total - a.total).slice(0, 5);
+            const needFollowUp = perStudent.filter(x => x.unpaidCount > 0).sort((a, b) => b.unpaidCount - a.unpaidCount).slice(0, 5);
+            const txtNoData = currentLang === 'am' ? 'መረጃ የለም' : 'No data yet';
+            const txtPeriods = currentLang === 'am' ? 'ወቅቶች የቀሩ' : 'periods missed';
+            document.getElementById(kind + 'ReportPaidList').innerHTML = fullyPaid.length
+                ? fullyPaid.map((x, i) => `<li class="flex justify-between items-center bg-white/5 rounded-lg px-3 py-2"><span class="amharic">${i + 1}. ${escapeHtml(x.s.name)}</span><span class="text-green-500 font-bold">${formatCurrency(x.total)}</span></li>`).join('')
+                : `<li class="text-gray-500 text-center">${txtNoData}</li>`;
+            document.getElementById(kind + 'ReportUnpaidList').innerHTML = needFollowUp.length
+                ? needFollowUp.map((x, i) => `<li class="flex justify-between items-center bg-white/5 rounded-lg px-3 py-2"><span class="amharic">${i + 1}. ${escapeHtml(x.s.name)}</span><span class="text-red-500 font-bold">${x.unpaidCount} ${txtPeriods}</span></li>`).join('')
+                : `<li class="text-gray-500 text-center">${txtNoData}</li>`;
+
+            const ctx = document.getElementById(kind + 'ReportChart');
+            const labels = periods.map(p => p.label);
+            const data = periods.map(p => students.filter(s => findPayment(kind, s.id, plan, p.value)).length);
+            const gridColor = document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)';
+            const tickColor = document.documentElement.getAttribute('data-theme') === 'light' ? '#596579' : '#9ca3af';
+            const varName = 'payReportChart_' + kind;
+            if (window[varName]) window[varName].destroy();
+            window[varName] = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels.length ? labels : ['No Data'], datasets: [{ label: currentLang === 'am' ? 'የከፈሉ ተማሪዎች' : 'Students Paid', data: data.length ? data : [0], backgroundColor: 'rgba(212,175,55,0.55)', borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    scales: { x: { ticks: { color: tickColor, font: { size: 10 } }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: tickColor, precision: 0 }, grid: { color: gridColor } } } }
+            });
+        }
+
+        // ============================================================
+        // SHARED PAYMENT MODAL (Student & Begena)
+        // ============================================================
+        function openPayModal(kind, studentId, studentName, group, plan) {
+            document.getElementById('payKind').value = kind;
+            document.getElementById('payStudentId').value = studentId;
+            document.getElementById('payStudentName').value = studentName;
+            document.getElementById('payGroup').value = group;
+            document.getElementById('payPlan').value = plan;
+            const period = kind === 'student' ? document.getElementById('studentPeriodSelect').value : document.getElementById('begenaPeriodSelect').value;
+            const periodLabel = kind === 'student' ? document.getElementById('studentPeriodSelect').selectedOptions[0]?.textContent : document.getElementById('begenaPeriodSelect').selectedOptions[0]?.textContent;
+            document.getElementById('payModalTitle').textContent = `💳 ${studentName} — ${periodLabel || period}`;
+            const list = kind === 'student' ? studentPaymentsInClass : begenaPaymentsInGrade;
+            const existing = list.find(p => p.student_id === studentId && (kind === 'begena' || p.plan === plan) && p.period === period);
+            document.getElementById('payPeriod').value = period;
+            document.getElementById('payAmount').value = existing ? existing.amount : '';
+            document.getElementById('payDate').value = existing ? existing.paid_date : todayStr();
+            document.getElementById('payMethod').value = existing ? existing.method : 'Cash';
+            document.getElementById('payNote').value = existing ? (existing.note || '') : '';
+            updateEcHint('payDate', 'payEcHint');
+            document.getElementById('payModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('payModal').classList.remove('modal-hidden-state'), 10);
+        }
+        function closePayModal() { const m = document.getElementById('payModal'); m.classList.add('modal-hidden-state'); setTimeout(() => m.classList.add('hidden'), 280); }
+        async function savePayModal(e) {
+            e.preventDefault();
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) { showToast('⚠️ Database not connected', 'error'); return; }
+            const kind = document.getElementById('payKind').value;
+            const studentId = document.getElementById('payStudentId').value;
+            const studentName = document.getElementById('payStudentName').value;
+            const group = document.getElementById('payGroup').value;
+            const plan = document.getElementById('payPlan').value;
+            const period = document.getElementById('payPeriod').value;
+            const dateVal = document.getElementById('payDate').value;
+            const ec = gregorianToEthiopian(dateVal);
+            const base = {
+                student_id: studentId, student_name: studentName, amount: parseFloat(document.getElementById('payAmount').value) || 0,
+                paid_date: dateVal, ec_paid_date: ec ? ec.label : null, method: document.getElementById('payMethod').value,
+                status: 'Paid', note: document.getElementById('payNote').value, period
+            };
+            let error;
+            if (kind === 'student') {
+                ({ error } = await client.from('student_payments').upsert([{ ...base, class_name: group, plan }], { onConflict: 'student_id,plan,period' }));
+            } else {
+                ({ error } = await client.from('begena_student_payments').upsert([{ ...base, grade: group }], { onConflict: 'student_id,period' }));
+            }
+            if (error) { console.error(error); showToast('⚠️ Save failed', 'error'); return; }
+            await logAudit(kind === 'student' ? 'Student Payment' : 'Begena Payment', `${studentName} - ${formatCurrency(base.amount)} (${period})`);
+            closePayModal();
+            if (kind === 'student') { await loadClassStudentsAndPayments(); renderStudentPaymentList(); }
+            else { await loadGradeStudentsAndPayments(); renderBegenaPaymentList(); }
+            showToast('💳 Payment saved');
+        }
+        async function deletePayment(table, id) {
+            if (!confirm('Delete this payment record?')) return;
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) return;
+            await client.from(table).delete().eq('id', id);
+            if (table === 'student_payments') { await loadClassStudentsAndPayments(); renderStudentPaymentList(); }
+            else { await loadGradeStudentsAndPayments(); renderBegenaPaymentList(); }
+        }
+
+        // ============================================================
+        // ANALYTICS & REPORTING
+        // ============================================================
+        function renderTopBar() {
+            const income = financeData.transactions.filter(x => x.type === 'income').reduce((s, x) => s + x.amount, 0);
+            const expense = financeData.transactions.filter(x => x.type === 'expense').reduce((s, x) => s + x.amount, 0);
+            const bankBalance = financeData.bankAccounts.reduce((s, a) => s + a.balance, 0) + income - expense;
+            const loanOutstanding = financeData.loans.filter(l => l.status !== 'Paid').reduce((s, l) => s + loanRemaining(l), 0);
+            document.getElementById('statTotalIncome').textContent = formatCurrency(income);
+            document.getElementById('statTotalExpense').textContent = formatCurrency(expense);
+            document.getElementById('statBankBalance').textContent = formatCurrency(bankBalance);
+            document.getElementById('statLoanAmount').textContent = formatCurrency(loanOutstanding);
+            document.getElementById('statNetBalance').textContent = formatCurrency(income - expense);
+            document.getElementById('statTxnCount').textContent = financeData.transactions.length;
+            document.getElementById('statActiveLoans').textContent = financeData.loans.filter(l => l.status !== 'Paid').length;
+        }
+        function renderChart() {
+            const ctx = document.getElementById('financeChart');
+            if (!ctx) return;
+            const months = {};
+            financeData.transactions.forEach(x => { const m = (x.date || '').slice(0, 7) || 'Unknown'; if (!months[m]) months[m] = { income: 0, expense: 0 }; months[m][x.type] += x.amount; });
+            const labels = Object.keys(months).sort();
+            const incomeData = labels.map(m => months[m].income);
+            const expenseData = labels.map(m => months[m].expense);
+            if (financeChart) financeChart.destroy();
+            const gridColor = document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)';
+            const tickColor = document.documentElement.getAttribute('data-theme') === 'light' ? '#596579' : '#9ca3af';
+            financeChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels.length ? labels : ['No Data'], datasets: [
+                    { label: 'Income', data: incomeData.length ? incomeData : [0], borderColor: '#22a35a', backgroundColor: 'rgba(34,163,90,0.1)', fill: true, tension: 0.35 },
+                    { label: 'Expense', data: expenseData.length ? expenseData : [0], borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.1)', fill: true, tension: 0.35 }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: tickColor } } },
+                    scales: { x: { ticks: { color: tickColor }, grid: { color: gridColor } }, y: { ticks: { color: tickColor }, grid: { color: gridColor } } } }
+            });
+        }
+        function renderAuditLog() {
+            const body = document.getElementById('auditTableBody');
+            body.innerHTML = financeData.auditLog.slice(0, 100).map(a => `
+                <tr class="border-t border-white/5">
+                    <td class="p-2 text-gray-500" data-label="${t('thTime')}">${escapeHtml(a.time)}</td>
+                    <td class="p-2" data-label="${t('thUser')}">${escapeHtml(a.user)}</td>
+                    <td class="p-2 text-yellow-600 font-semibold" data-label="${t('thAction')}">${escapeHtml(a.action)}</td>
+                    <td class="p-2 text-gray-400" data-label="${t('thDetails')}">${escapeHtml(a.details)}</td>
+                </tr>`).join('') || `<tr><td colspan="4" class="p-4 text-center text-gray-600">No audit records yet.</td></tr>`;
+        }
+        function exportReportPdf() {
+            const startVal = document.getElementById('reportRangeStart')?.value;
+            const endVal = document.getElementById('reportRangeEnd')?.value;
+            let list = financeData.transactions.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (startVal && endVal) {
+                const startD = new Date(startVal + 'T00:00:00'), endD = new Date(endVal + 'T23:59:59');
+                list = list.filter(x => { const d = new Date(x.date + 'T00:00:00'); return d >= startD && d <= endD; });
+            }
+            if (!list.length) { alert(currentLang === 'am' ? 'ለማውጣት ምንም ግብይት የለም።' : 'No transactions to export.'); return; }
+            const rangeLine = (startVal && endVal)
+                ? `${formatEcKey(dateToEcKey(new Date(startVal + 'T00:00:00')))} – ${formatEcKey(dateToEcKey(new Date(endVal + 'T00:00:00')))} (GC: ${startVal} to ${endVal})`
+                : (currentLang === 'am' ? 'ሙሉ ታሪክ' : 'Full history');
+            const printArea = document.getElementById('printArea');
+            printArea.innerHTML = `
+                <div class="print-title">Meserete Hiwot ERP — Annual Financial Report</div>
+                <div class="print-sub">${rangeLine} · Generated ${new Date().toLocaleString()} · ${list.length} transactions</div>
+                <table class="print-table"><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Category</th><th>Method</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody>${list.map(x => `<tr><td>${escapeHtml(x.date)}</td><td>${x.type === 'income' ? 'Income' : 'Expense'}</td><td>${escapeHtml(x.description)}</td><td>${escapeHtml(x.category)}</td><td>${escapeHtml(x.method)}</td><td>${(x.type === 'income' ? '+' : '-')} ${formatCurrency(x.amount)}</td><td>${escapeHtml(x.status)}</td></tr>`).join('')}</tbody></table>`;
+            logAudit('Export Report', `Exported ${list.length} transaction records${(startVal && endVal) ? ' · ' + startVal + ' to ' + endVal : ''}`);
+            setTimeout(() => window.print(), 150);
+        }
+
+        // ============================================================
+        // MASTER INIT
+        // ============================================================
+        async function renderAll() {
+            await Promise.all([loadTransactions(), loadBankAccounts(), loadReconciliations(), loadLoans(), loadAuditLog()]);
+            renderTopBar(); renderTable(); renderBankAccounts(); renderLoans(); renderChart(); renderAuditLog();
+        }
+        applyTranslations();
+        renderAll();
+    </script>
+</body>
+</html>

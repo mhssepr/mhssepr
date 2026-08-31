@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MHSS EPR — User Roles</title>
+<style>
+:root{--bg:#08090C;--surface:#111318;--surface2:#171A21;--border:#262A33;--gold:#C9A45C;--gold2:#E5CC91;--text:#F5F3EE;--muted:#8C919C;--success:#36C98F;--danger:#E45D68;--warning:#E7B84B}
+html[data-theme=light]{--bg:#F7F8FA;--surface:#FFF;--surface2:#F1F3F5;--border:#E2E6EC;--gold:#B8922E;--gold2:#D4AF37;--text:#172033;--muted:#596579;--success:#187A54;--danger:#B33440;--warning:#8A5D07}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif}body{overflow-x:hidden}button,input,select{font:inherit}button{cursor:pointer}
+.app{min-height:100vh}.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);padding:14px clamp(14px,3vw,28px)}.topin{max-width:1500px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:10px}.brand img{width:38px;height:38px;object-fit:contain;border-radius:10px}.brand h1{font-size:15px;margin:0}.brand p{font-size:11px;color:var(--muted);margin:3px 0 0}.actions{display:flex;gap:8px}.btn{min-height:40px;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:10px;padding:8px 13px;font-weight:700}.btn.primary{background:var(--gold);border-color:var(--gold);color:#17120a}.btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 35%,var(--border))}
+main{max-width:1500px;margin:auto;padding:22px clamp(14px,3vw,30px) 45px}.hero{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:18px}.hero h2{font-size:25px;margin:0}.hero p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(7,minmax(130px,1fr));gap:10px;margin-bottom:18px}.stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px}.stat span{display:block;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.stat strong{display:block;font-size:25px;margin-top:7px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}.toolbar{display:flex;gap:9px;flex-wrap:wrap;padding:14px;border-bottom:1px solid var(--border)}.toolbar input,.toolbar select,.field input,.field select{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 11px;min-height:42px;outline:none}.toolbar input{flex:1;min-width:220px}.toolbar select{min-width:150px}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:850px}.table th,.table td{text-align:left;padding:13px 14px;border-bottom:1px solid var(--border);font-size:13px}.table th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--surface2)}.table tr:last-child td{border-bottom:0}.name{font-weight:800}.email{color:var(--muted);font-size:12px;margin-top:2px}.badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid var(--border);white-space:nowrap}.active{color:var(--success);background:color-mix(in srgb,var(--success) 10%,transparent)}.inactive{color:var(--danger);background:color-mix(in srgb,var(--danger) 10%,transparent)}.role{color:var(--gold2);background:color-mix(in srgb,var(--gold) 10%,transparent)}.row-actions{display:flex;gap:6px}.mini{padding:7px 9px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:11px;font-weight:800}.empty{padding:45px;text-align:center;color:var(--muted)}
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.62);display:grid;place-items:center;padding:14px}.modal{width:min(850px,100%);max-height:92vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:0 25px 80px rgba(0,0,0,.35)}.modal-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}.modal-head h3{margin:0}.modal-body{padding:20px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.field label{display:block;font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}.field input,.field select{width:100%}.full{grid-column:1/-1}.section{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}.section h4{margin:0 0 10px;font-size:14px}.modules{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.module{border:1px solid var(--border);border-radius:11px;padding:11px;background:var(--surface2);display:flex;align-items:center;gap:8px}.module input{accent-color:var(--gold)}.permissions{width:100%;border-collapse:collapse}.permissions th,.permissions td{padding:9px;border-bottom:1px solid var(--border);font-size:11px}.permissions th{color:var(--muted);text-align:center}.permissions td{text-align:center}.permissions td:first-child{text-align:left;font-weight:700}.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border)}.notice{padding:10px 12px;border-radius:10px;margin-bottom:12px;background:color-mix(in srgb,var(--danger) 10%,transparent);color:var(--danger);font-size:12px}.hidden{display:none!important}.toast{position:fixed;right:16px;bottom:16px;z-index:100;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 14px;box-shadow:0 15px 40px rgba(0,0,0,.25);font-size:12px}.protected{color:var(--gold2);font-weight:800}
+
+.user-avatar{width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;overflow:hidden;background:linear-gradient(145deg,var(--gold2),var(--gold));color:#17120a;font-weight:800;font-size:11px;flex:0 0 34px;border:2px solid var(--surface)}.user-avatar img{width:100%;height:100%;object-fit:cover;display:block}.name-cell{display:flex;align-items:center;gap:9px}.photo-picker{display:flex;align-items:center;gap:12px;padding:12px;border:1px dashed var(--border);border-radius:12px;background:var(--surface2)}.photo-picker-preview{width:64px;height:64px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,var(--gold2),var(--gold));color:#17120a;font-weight:800;flex:0 0 64px}.photo-picker-preview img{width:100%;height:100%;object-fit:cover}.photo-picker-copy{min-width:0}.photo-picker-copy strong{display:block;font-size:12px}.photo-picker-copy span{display:block;color:var(--muted);font-size:10px;margin:3px 0 8px}.crop-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:14px}.crop-modal{width:min(560px,100%);background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 25px 90px rgba(0,0,0,.45)}.crop-head,.crop-foot{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}.crop-head h3{margin:0;font-size:15px}.crop-body{padding:14px}.crop-stage{position:relative;width:100%;height:min(58vh,390px);min-height:260px;overflow:hidden;border-radius:14px;background:#0a0b0e;touch-action:none;user-select:none}.crop-image{position:absolute;max-width:none;transform-origin:top left;pointer-events:none}.crop-window{position:absolute;left:50%;top:50%;width:min(280px,72%);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);border:3px solid rgba(255,255,255,.95);box-shadow:0 0 0 9999px rgba(0,0,0,.48);pointer-events:none}.crop-help{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:10px;margin:10px 2px}.crop-zoom{display:flex;align-items:center;gap:10px}.crop-zoom input{flex:1;accent-color:var(--gold)}.crop-foot{border-top:0;border-bottom:0;justify-content:flex-end;gap:8px}.crop-stage.dragging{cursor:grabbing}.crop-stage{cursor:grab}
+
+/* ===================== User Activity timeline ===================== */
+.name-cell.clickable{cursor:pointer}
+.name-cell.clickable:hover .name{color:var(--gold)}
+.activity-modal{width:min(640px,100%)}
+.activity-user{display:flex;align-items:center;gap:12px;min-width:0}
+.activity-user .user-avatar{width:44px;height:44px;flex:0 0 44px;font-size:13px}
+.activity-role{color:var(--muted);font-size:12px;margin-top:3px}
+.activity-loading,.activity-empty{padding:44px 10px;text-align:center;color:var(--muted);font-size:13px}
+.activity-count{color:var(--muted);font-size:11px;margin:0 2px 16px}
+.day-group{position:relative;padding-left:26px;margin-bottom:22px}
+.day-group:last-child{margin-bottom:2px}
+.day-group::before{content:'';position:absolute;left:8px;top:26px;bottom:4px;width:2px;background:var(--border)}
+.day-label{font-weight:800;font-size:12px;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.tl-item{position:relative;display:flex;align-items:center;gap:10px;padding:8px 0 8px 20px}
+.tl-item::before{content:'';position:absolute;left:-18px;top:50%;width:14px;height:2px;background:var(--border)}
+.tl-dot{position:absolute;left:-5px;top:50%;transform:translateY(-50%);width:9px;height:9px;border-radius:50%;border:2px solid var(--surface);background:var(--muted)}
+.tl-dot.INSERT{background:var(--success)}
+.tl-dot.UPDATE{background:var(--warning)}
+.tl-dot.DELETE{background:var(--danger)}
+.tl-desc{flex:1;font-weight:700;font-size:13px;min-width:0}
+.tl-time{color:var(--muted);font-size:11px;white-space:nowrap}
+@media(max-width:1100px){.stats{grid-template-columns:repeat(4,1fr)}}@media(max-width:700px){.hero{align-items:stretch;flex-direction:column}.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.full{grid-column:auto}.modules{grid-template-columns:1fr}.actions .btn{padding:8px 10px}.brand p{display:none}}
+
+/* ===================== Shared App Header (matches attendance.html) ===================== */
+.app-header{position:sticky;top:0;z-index:30;width:100%;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;background:var(--surface) !important;border-bottom:1px solid var(--border) !important;box-shadow:0 8px 28px rgba(23,32,51,.05);backdrop-filter:blur(18px);}
+html[data-theme="dark"] .app-header{box-shadow:0 18px 42px rgba(0,0,0,.20);}
+@media(min-width:769px){.app-header{flex-wrap:nowrap !important;gap:24px !important;padding:22px 32px !important;}}
+.app-header .header-brand{display:flex;align-items:center;gap:14px;min-width:0;}
+.app-header .header-brand img{width:52px;height:52px;border-radius:16px;background:var(--surface2);padding:6px;border:1px solid var(--border);box-shadow:0 8px 20px -8px rgba(184,146,46,.25);flex-shrink:0;object-fit:contain;}
+.app-header .header-brand h1{font-size:1.3rem;font-weight:800;margin:0;letter-spacing:-.01em;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.app-header .header-brand p{color:var(--gold);font-weight:600;margin:3px 0 0;font-size:.78rem;}
+.header-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+.header-date-block{text-align:right;margin-right:2px;}
+.header-date-block .header-date{font-size:.8rem;color:var(--muted);margin:0;}
+.header-date-block .header-admin{font-size:1rem;font-weight:600;margin:0;color:var(--text);}
+@media(max-width:1200px){.header-date-block{display:none;}}
+.lang-switch{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:3px;gap:2px;}
+.lang-switch button{border:none;background:transparent;font-size:12px;font-weight:700;letter-spacing:.03em;padding:6px 12px;border-radius:999px;color:var(--muted);cursor:pointer;transition:all .25s ease;}
+.lang-switch button.active{background:var(--gold);color:#fff;box-shadow:0 4px 12px -3px rgba(184,146,46,.4);}
+.theme-toggle{position:relative;width:52px;height:30px;border-radius:999px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;padding:0;flex-shrink:0;}
+.theme-toggle .knob{position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:var(--gold2);display:flex;align-items:center;justify-content:center;transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 6px rgba(0,0,0,.20);}
+html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
+.theme-toggle .knob svg{width:14px;height:14px;}
+.back-dash-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:700;background:var(--surface2);border:1px solid var(--border);color:var(--text);transition:all .2s ease;text-decoration:none;}
+.back-dash-btn:hover{background:var(--border);transform:translateY(-2px);border-color:var(--gold);color:var(--gold);}
+.header-add-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:700;background:var(--gold);border:1px solid var(--gold);color:#17120a;transition:all .2s ease;}
+.header-add-btn:hover{transform:translateY(-2px);filter:brightness(1.05);}
+@media(max-width:768px){
+  .app-header{padding:1rem !important;align-items:center !important;}
+  .header-controls{width:100%;justify-content:space-between;gap:7px;}
+}
+@media(max-width:480px){
+  .app-header{padding:14px 16px !important;}
+  .app-header .header-brand h1{font-size:1.05rem !important;}
+  .app-header .header-brand p{font-size:.68rem !important;}
+  .app-header .header-brand img{width:44px !important;height:44px !important;}
+  .header-controls{gap:7px;}
+  .lang-switch button{padding:6px 9px;}
+  .back-dash-btn,.header-add-btn{padding:9px !important;}
+  .back-dash-btn span.label{display:none;}
+}
+</style>
+</head>
+<body>
+<div id="app" class="app hidden">
+<header class="app-header">
+<div class="header-brand">
+<img src="logo.png" alt="MHSS">
+<div><h1>MESERETE HIWOT</h1><p data-i18n="brandSub">Enterprise Management System · User Roles</p></div>
+</div>
+<div class="header-controls">
+<div class="header-date-block"><p class="header-date" id="dateDisplay">Loading date...</p><p class="header-admin">Admin Dashboard</p></div>
+<div class="lang-switch" role="group" aria-label="Language switcher">
+<button type="button" id="langBtnEn" class="active" aria-pressed="true">ENG</button>
+<button type="button" id="langBtnAm" aria-pressed="false">አማ</button>
+</div>
+<button type="button" class="theme-toggle" id="themeToggleBtn" aria-label="Toggle light/dark theme" aria-pressed="true">
+<span class="knob" id="themeKnob"><svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round"/></svg></span>
+</button>
+<button type="button" class="header-add-btn" id="addBtn" data-i18n="addUser">＋ Add User</button>
+<a href="dashboard.html" class="back-dash-btn" id="backBtn" aria-label="Back to Dashboard">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+<span class="label" data-i18n="backToDashboard">Dashboard</span>
+</a>
+</div>
+</header>
+<main>
+<section class="hero"><div><h2 data-i18n="pageTitle">User Roles</h2><p data-i18n="pageDesc">Control exactly who can access each MHSS EPR module and what they can do.</p></div></section>
+<section class="stats">
+<div class="stat"><span data-i18n="statTotal">Total Users</span><strong id="sTotal">0</strong></div>
+<div class="stat"><span data-i18n="statAdmins">Total Admins</span><strong id="sAdmins">0</strong></div>
+<div class="stat"><span data-i18n="statTeachers">Total Education &amp; Training</span><strong id="sTeachers">0</strong></div>
+<div class="stat"><span data-i18n="statFinance">Total Finance &amp; Property</span><strong id="sFinance">0</strong></div>
+<div class="stat"><span data-i18n="statOther">Total Other Users</span><strong id="sOther">0</strong></div>
+<div class="stat"><span data-i18n="statActive">Active Users</span><strong id="sActive">0</strong></div>
+<div class="stat"><span data-i18n="statInactive">Inactive Users</span><strong id="sInactive">0</strong></div>
+</section>
+<section class="panel">
+<div class="toolbar">
+<input id="search" data-i18n-placeholder="searchPlaceholder" placeholder="Search name or email…">
+<select id="workFilter"><option value="" data-i18n="allWork">All Sunday School Work</option>
+<option>የሰንበት ት/ቤቱ ጽ/ቤት</option>
+<option>ሒሳብ እና ንብረት አስተዳደር</option>
+<option>የሰው ሐብት አስተዳደር ክፍል</option>
+<option>መረጃና የውስጥ ግንኙነት ክፍል</option>
+<option>መርሐግብር እና ጉባኤያት ክፍል</option>
+<option>ልማት እና እቅድ ክፍል</option>
+<option>ትምህርትና ስልጠና ክፍል</option>
+<option>መዝሙርና ኪነጥበብ ክፍል</option>
+<option>የዜማና መሳሪያ ክፍል</option>
+</select>
+<select id="roleFilter"><option value="" data-i18n="allRoles">All Role Types</option><option value="full_access" data-i18n="roleFull">Full Access</option><option value="manage" data-i18n="roleManage">Manage</option><option value="view_only" data-i18n="roleView">View Only</option><option value="custom" data-i18n="roleCustom">Custom</option></select>
+<select id="statusFilter"><option value="" data-i18n="allStatus">All Status</option><option value="active" data-i18n="statusActive">Active</option><option value="inactive" data-i18n="statusInactive">Inactive</option></select>
+<button class="btn" id="refreshBtn" data-i18n="refresh">↻ Refresh</button>
+</div>
+<div class="table-wrap"><table class="table"><thead><tr><th data-i18n="thName">Name</th><th data-i18n="thEmail">Email</th><th data-i18n="thWork">Sunday School Work</th><th data-i18n="thRole">Role / Access</th><th data-i18n="thStatus">Status</th><th data-i18n="thActions">Actions</th></tr></thead><tbody id="rows"></tbody></table></div>
+</section>
+</main>
+</div>
+
+<div class="overlay hidden" id="modalOverlay">
+<div class="modal">
+<div class="modal-head"><h3 id="modalTitle" data-i18n="addUserTitle">Add User</h3><button class="btn" id="closeModal">✕</button></div>
+<form id="userForm">
+<div class="modal-body">
+<div id="formNotice" class="notice hidden"></div>
+<div class="grid">
+<div class="field"><label data-i18n="fNameLabel">Name</label><input id="fName" required autocomplete="name"></div>
+<div class="field"><label data-i18n="fEmailLabel">Email</label><input id="fEmail" type="email" required autocomplete="email"></div>
+<div class="field" id="passwordField"><label data-i18n="fPasswordLabel">Initial Password</label><input id="fPassword" type="password" minlength="8" autocomplete="new-password"><small id="passwordHint" style="color:var(--muted);font-size:10px">Required when creating a user. Users change their own password from Settings after signing in.</small></div>
+<div class="field full" id="profilePhotoField"><label data-i18n="fPhotoLabel">Profile Picture</label><div class="photo-picker"><div id="fPhotoPreview" class="photo-picker-preview">U</div><div class="photo-picker-copy"><strong id="fPhotoTitle">Add profile picture</strong><span id="fPhotoHint">Optional. Upload a photo, crop it easily, then save the user.</span><input id="fPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><button type="button" class="btn" id="fPhotoBtn">Choose &amp; crop photo</button></div></div></div>
+<div class="field"><label data-i18n="fWorkLabel">Sunday School Work</label><select id="fWork" required>
+<option>የሰንበት ት/ቤቱ ጽ/ቤት</option>
+<option>ሒሳብ እና ንብረት አስተዳደር</option>
+<option>የሰው ሐብት አስተዳደር ክፍል</option>
+<option>መረጃና የውስጥ ግንኙነት ክፍል</option>
+<option>መርሐግብር እና ጉባኤያት ክፍል</option>
+<option>ልማት እና እቅድ ክፍል</option>
+<option>ትምህርትና ስልጠና ክፍል</option>
+<option>መዝሙርና ኪነጥበብ ክፍል</option>
+<option>የዜማና መሳሪያ ክፍል</option>
+</select></div>
+<div class="field" id="ownerPhoneField"><label>Phone Number</label><input id="fPhone" type="tel" autocomplete="tel"></div>
+</div>
+<div class="section" id="systemAccessSection"><h4 data-i18n="systemAccess">System Access</h4><div class="modules">
+<label class="module"><input type="checkbox" data-module="office"> <span data-i18n="modOffice">Office Management</span></label>
+<label class="module"><input type="checkbox" data-module="finance"> <span data-i18n="modFinance">Finance Management</span></label>
+<label class="module"><input type="checkbox" data-module="students"> <span data-i18n="modStudents">Student Management</span></label>
+<label class="module"><input type="checkbox" data-module="attendance"> <span data-i18n="modAttendance">Attendance Management</span></label>
+<label class="module"><input type="checkbox" data-module="begena"> <span data-i18n="modBegena">Begena Management</span></label>
+<label class="module"><input type="checkbox" data-module="equipment"> <span data-i18n="modEquipment">Equipment Management</span></label>
+</div></div>
+<div class="section" id="roleTypeSection"><h4 data-i18n="roleTypeHeading">Role Type</h4>
+<div class="grid">
+<div class="field"><label data-i18n="roleTypeLabel">Role Type</label><select id="fRole"><option value="full_access" data-i18n="roleFull">Full Access</option><option value="manage" data-i18n="roleManage">Manage</option><option value="view_only" data-i18n="roleView">View Only</option><option value="custom" data-i18n="roleCustom">Custom</option></select></div>
+<div class="field"><label data-i18n="statusLabel">Status</label><select id="fStatus"><option value="active" data-i18n="statusActive">Active</option><option value="inactive" data-i18n="statusInactive">Inactive</option></select></div>
+</div>
+</div>
+<div class="section" id="customSection"><h4 data-i18n="customPerms">Custom Permissions</h4>
+<table class="permissions"><thead><tr><th data-i18n="permModule">Module</th><th data-i18n="permView">View</th><th data-i18n="permAdd">Add</th><th data-i18n="permEdit">Edit</th><th data-i18n="permDelete">Delete</th><th data-i18n="permPrint">Print/Export</th></tr></thead><tbody id="permissionBody"></tbody></table>
+</div>
+</div>
+<div class="modal-foot"><button type="button" class="btn" id="cancelBtn" data-i18n="cancel">Cancel</button><button class="btn primary" id="saveBtn" type="submit" data-i18n="saveUser">Save User</button></div>
+</form>
+</div>
+</div>
+<div id="profileCropOverlay" class="crop-overlay hidden" aria-hidden="true"><div class="crop-modal" role="dialog" aria-modal="true"><div class="crop-head"><h3 id="cropTitle">Crop profile photo</h3><button type="button" class="btn" id="cropCloseBtn">✕</button></div><div class="crop-body"><div id="cropStage" class="crop-stage"><img id="cropImage" class="crop-image" alt="Crop preview"><div class="crop-window"></div></div><div class="crop-help"><span>Drag the photo to position it.</span><span>Use the slider to zoom.</span></div><div class="crop-zoom"><span>−</span><input id="cropZoom" type="range" min="1" max="3" step="0.01" value="1"><span>＋</span></div></div><div class="crop-foot"><button type="button" class="btn" id="cropCancelBtn">Cancel</button><button type="button" class="btn primary" id="cropSaveBtn">Use Photo</button></div></div></div>
+<div class="overlay hidden" id="activityOverlay">
+<div class="modal activity-modal">
+<div class="modal-head">
+<div class="activity-user"><div class="user-avatar" id="actAvatar">U</div><div><h3 id="actName" style="margin:0">User Activity</h3><div class="activity-role" id="actRole">—</div></div></div>
+<button class="btn" id="closeActivity">✕</button>
+</div>
+<div class="modal-body">
+<div class="activity-count" id="actCount"></div>
+<div id="actBody"><div class="activity-loading">Loading activity…</div></div>
+</div>
+</div>
+</div>
+<div id="toast" class="toast hidden"></div>
+
+<script type="module">
+import { supabase } from './supabaseClient.js';
+import { initializeRBAC, isSuperAdmin } from './mhss-rbac.js';
+
+const MODULES = [
+  ['office','Office Management','የቢሮ አስተዳደር'],['finance','Finance Management','የገንዘብ አስተዳደር'],['students','Student Management','የተማሪ አስተዳደር'],
+  ['attendance','Attendance Management','የክትትል አስተዳደር'],['begena','Begena Management','የበገና አስተዳደር'],['equipment','Equipment Management','የመሳሪያ አስተዳደር']
+];
+function moduleLabel(code){ const m=MODULES.find(x=>x[0]===code); if(!m) return code; return currentLang==='am'?m[2]:m[1]; }
+const $ = id => document.getElementById(id);
+let users = [];
+let editingId = null;
+
+function toast(message){ $('toast').textContent=message; $('toast').classList.remove('hidden'); setTimeout(()=> $('toast').classList.add('hidden'),2600); }
+function esc(v){ return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function roleLabel(v){ const t=translations[currentLang]; return ({full_access:t.roleFull,manage:t.roleManage,view_only:t.roleView,custom:t.roleCustom})[v]||v||'—'; }
+function accessLabel(u){
+  const t=translations[currentLang];
+  if(u.role_type==='full_access') return t.roleFull;
+  const names=(u.permissions||[]).filter(p=>p.view).map(p=>moduleLabel(p.module));
+  return names.length ? names.join(' + ') : t.noModules;
+}
+function renderStats(){
+  const normal=users.filter(u=>u.email?.toLowerCase()!=='mhssepr@gmail.com');
+  $('sTotal').textContent=normal.length;
+  $('sAdmins').textContent=normal.filter(u=>u.role_type==='full_access').length;
+  $('sTeachers').textContent=normal.filter(u=>u.sunday_school_work==='ትምህርትና ስልጠና ክፍል').length;
+  $('sFinance').textContent=normal.filter(u=>u.sunday_school_work==='ሒሳብ እና ንብረት አስተዳደር'||u.permissions?.some(p=>p.module==='finance'&&p.view)).length;
+  $('sOther').textContent=normal.filter(u=>!['ትምህርትና ስልጠና ክፍል','ሒሳብ እና ንብረት አስተዳደር'].includes(u.sunday_school_work)).length;
+  $('sActive').textContent=normal.filter(u=>u.status==='active').length;
+  $('sInactive').textContent=normal.filter(u=>u.status!=='active').length;
+}
+function renderRows(){
+  const q=$('search').value.trim().toLowerCase(), wf=$('workFilter').value, rf=$('roleFilter').value, sf=$('statusFilter').value;
+  const filtered=users.filter(u=>
+    (!q || `${u.name} ${u.email}`.toLowerCase().includes(q)) &&
+    (!wf || u.sunday_school_work===wf) && (!rf || u.role_type===rf) && (!sf || u.status===sf)
+  );
+  const t=translations[currentLang];
+  $('rows').innerHTML=filtered.length?filtered.map(u=>{
+    const protectedUser=u.email?.toLowerCase()==='mhssepr@gmail.com';
+    return `<tr>
+      <td><div class="name-cell clickable" data-activity="${u.user_id}"><div class="user-avatar">${(protectedUser ? 'logo2.png' : u.profile_photo_url)?`<img src="${esc(protectedUser ? 'logo2.png' : u.profile_photo_url)}" alt="">`:esc((u.name||'U').split(' ').filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'U')}</div><div><div class="name">${esc(u.name||'—')}</div>${protectedUser?`<div class="protected">${t.protectedSuperAdmin}</div>`:''}</div></div></td>
+      <td>${esc(u.email||'—')}</td><td>${esc(u.sunday_school_work||t.superAdmin)}</td>
+      <td><span class="badge role">${esc(accessLabel(u))}</span></td>
+      <td><span class="badge ${u.status==='active'?'active':'inactive'}">${esc(u.status==='active'?t.statusActive:u.status==='inactive'?t.statusInactive:(u.status||'—'))}</span></td>
+      <td><div class="row-actions">${protectedUser?`<button class="mini" data-owner-profile="${u.user_id}">${t.edit}</button>`:`<button class="mini" data-edit="${u.user_id}">${t.edit}</button><button class="mini" data-toggle="${u.user_id}">${u.status==='active'?t.disable:t.enable}</button><button class="mini" data-delete="${u.user_id}">${t.delete}</button>`}<button class="mini" data-activity="${u.user_id}">Activity</button></div></td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="6"><div class="empty">${t.noUsersFound}</div></td></tr>`;
+}
+async function loadUsers(){
+  $('refreshBtn').disabled=true;
+  try{
+    const {data,error}=await supabase.from('mhss_user_profiles').select('user_id,name,email,sunday_school_work,phone,role_type,status,profile_photo_url').order('created_at',{ascending:false});
+    if(error) throw error;
+    const ids=(data||[]).map(x=>x.user_id);
+    let perms=[];
+    if(ids.length){
+      const p=await supabase.from('mhss_user_permissions').select('user_id,module,view,add,edit,delete,print_export').in('user_id',ids);
+      if(p.error) throw p.error; perms=p.data||[];
+    }
+    users=(data||[]).map(u=>({...u,permissions:perms.filter(p=>p.user_id===u.user_id)}));
+    renderStats();renderRows();
+  }catch(e){ console.error(e); toast('Could not load users: '+e.message); }
+  finally{$('refreshBtn').disabled=false;}
+}
+function buildPermissionRows(existing=[]){
+  const map=new Map(existing.map(p=>[p.module,p]));
+  $('permissionBody').innerHTML=MODULES.map(([m])=>{
+    const p=map.get(m)||{};
+    return `<tr><td>${moduleLabel(m)}</td>${['view','add','edit','delete','print_export'].map(a=>`<td><input type="checkbox" data-perm="${m}:${a}" ${p[a]?'checked':''}></td>`).join('')}</tr>`;
+  }).join('');
+}
+function setModuleChecks(existing=[]){
+  const set=new Set(existing.filter(p=>p.view).map(p=>p.module));
+  document.querySelectorAll('[data-module]').forEach(c=>c.checked=set.has(c.dataset.module));
+}
+function openModal(user=null, ownerProfile=false){
+  editingId=user?.user_id||null;
+  const isOwnerProfile=!!ownerProfile;
+  $('passwordField').classList.toggle('hidden',!!editingId);
+  $('modalTitle').textContent=isOwnerProfile?'Owner Profile':(editingId?translations[currentLang].editUserTitle:translations[currentLang].addUserTitle);
+  $('fName').value=isOwnerProfile?'Meserete Hiwot':(user?.name||'');$('fEmail').value=user?.email||'';$('fPassword').value='';
+  $('fWork').value=user?.sunday_school_work||'የሰንበት ት/ቤቱ ጽ/ቤት';
+  $('fPhone').value=user?.phone||'';
+  $('ownerPhoneField').classList.toggle('hidden',!isOwnerProfile);
+  const ownerPhoto=isOwnerProfile ? (user?.profile_photo_url||'logo2.png') : (user?.profile_photo_url||''); $('fPhotoPreview').dataset.photoUrl=ownerPhoto; renderFormPhoto(ownerPhoto, isOwnerProfile?'Meserete Hiwot':(user?.name||'User'));
+  $('profilePhotoField').classList.toggle('hidden',false);
+  $('systemAccessSection').classList.toggle('hidden',isOwnerProfile);
+  $('roleTypeSection').classList.toggle('hidden',isOwnerProfile);
+  $('customSection').classList.toggle('hidden',isOwnerProfile || $('fRole').value!=='custom');
+  $('fEmail').disabled=isOwnerProfile; $('fRole').disabled=isOwnerProfile; $('fStatus').disabled=isOwnerProfile;
+  $('fName').disabled=false; $('fWork').disabled=false;
+  $('fRole').value=user?.role_type||'full_access';$('fStatus').value=user?.status||'active';
+  setModuleChecks(user?.permissions||[]);buildPermissionRows(user?.permissions||[]);updateCustom();
+  document.getElementById('userForm').dataset.ownerProfile=isOwnerProfile?'true':'false';
+  $('formNotice').classList.add('hidden');$('modalOverlay').classList.remove('hidden');
+}
+function closeModal(){$('modalOverlay').classList.add('hidden');editingId=null}
+
+/* ===================== User Activity timeline ===================== */
+const TABLE_LABELS={mhss_students:'student',mhss_attendance:'attendance',mhss_attendance_records:'attendance',mhss_finance_payments:'payment',mhss_payments:'payment',mhss_finance:'finance record',mhss_equipment:'equipment',mhss_begena:'begena record',mhss_begena_records:'begena record',mhss_user_profiles:'user profile',mhss_user_permissions:'user permissions',mhss_office:'office record'};
+function friendlyTable(name){
+  const key=String(name||'').toLowerCase();
+  if(TABLE_LABELS[key]) return TABLE_LABELS[key];
+  const clean=key.replace(/^mhss_/,'').replace(/_/g,' ').trim();
+  return clean.replace(/s$/,'')||'record';
+}
+function actionVerb(action,table){
+  const t=String(table||'').toLowerCase();
+  if(action==='INSERT'){ if(t.includes('attendance')) return 'Recorded'; if(t.includes('payment')||t.includes('finance')) return 'Recorded'; return 'Created'; }
+  if(action==='DELETE') return 'Deleted';
+  return 'Updated';
+}
+function describeEvent(r){ return `${actionVerb(r.action,r.table_name)} ${friendlyTable(r.table_name)}`; }
+function dayLabel(iso){
+  const d=new Date(iso), now=new Date();
+  const start=x=>new Date(x.getFullYear(),x.getMonth(),x.getDate()).getTime();
+  const diff=Math.round((start(now)-start(d))/86400000);
+  if(diff===0) return 'Today';
+  if(diff===1) return 'Yesterday';
+  if(diff>1&&diff<7) return d.toLocaleDateString('en-US',{weekday:'long'});
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:d.getFullYear()!==now.getFullYear()?'numeric':undefined});
+}
+function renderActivityRows(rows){
+  if(!rows.length){$('actBody').innerHTML='<div class="activity-empty">No recorded activity yet for this user.</div>';return}
+  const order=[], groups=new Map();
+  rows.forEach(r=>{const label=dayLabel(r.occurred_at); if(!groups.has(label)){groups.set(label,[]);order.push(label)} groups.get(label).push(r)});
+  $('actBody').innerHTML=order.map(label=>`<div class="day-group"><div class="day-label">${esc(label)}</div>${groups.get(label).map(r=>`<div class="tl-item"><span class="tl-dot ${esc(r.action)}"></span><div class="tl-desc">${esc(describeEvent(r))}</div><div class="tl-time">${esc(new Date(r.occurred_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}))}</div></div>`).join('')}</div>`).join('');
+}
+function closeActivity(){$('activityOverlay').classList.add('hidden')}
+async function openActivity(user){
+  $('actName').textContent=user.name||'—';
+  $('actRole').textContent=`Role: ${roleLabel(user.role_type)}`;
+  const avatarEl=$('actAvatar');
+  avatarEl.innerHTML=user.profile_photo_url?`<img src="${esc(user.profile_photo_url)}" alt="">`:esc((user.name||'U').split(' ').filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'U');
+  $('actCount').textContent='';
+  $('actBody').innerHTML='<div class="activity-loading">Loading activity…</div>';
+  $('activityOverlay').classList.remove('hidden');
+  try{
+    const {data,error}=await supabase.from('mhss_audit_logs').select('*')
+      .or(`actor_user_id.eq.${user.user_id}${user.email?`,actor_email.eq.${user.email}`:''}`)
+      .order('occurred_at',{ascending:false}).limit(300);
+    if(error) throw error;
+    const rows=data||[];
+    $('actCount').textContent=rows.length?`${rows.length} recorded event${rows.length===1?'':'s'}`:'';
+    renderActivityRows(rows);
+  }catch(err){
+    console.error(err);
+    $('actBody').innerHTML='<div class="activity-empty">Could not load activity. Make sure the audit trail is set up.</div>';
+  }
+}
+$('closeActivity').onclick=closeActivity;
+$('activityOverlay').addEventListener('click',e=>{if(e.target.id==='activityOverlay')closeActivity()});
+function updateCustom(){$('customSection').classList.toggle('hidden',$('fRole').value!=='custom');}
+function collectPayload(){
+  const role=$('fRole').value;
+  let permissions=MODULES.map(([m])=>({module:m,view:false,add:false,edit:false,delete:false,print_export:false}));
+  if(role==='full_access') permissions=permissions.map(p=>({...p,view:true,add:true,edit:true,delete:true,print_export:true}));
+  else if(role==='manage') permissions=permissions.map(p=>({...p,view:true,add:true,edit:true,print_export:true}));
+  else if(role==='view_only') permissions=permissions.map(p=>({...p,view:true}));
+  else {
+    const checked=new Map([...document.querySelectorAll('[data-perm]')].map(c=>[c.dataset.perm,c.checked]));
+    permissions=permissions.map(p=>({...p,...Object.fromEntries(['view','add','edit','delete','print_export'].map(a=>[a,!!checked.get(`${p.module}:${a}`)]))}));
+  }
+  return {name:$('fName').value.trim(),email:$('fEmail').value.trim(),password:$('fPassword').value,
+    sunday_school_work:$('fWork').value,phone:$('fPhone').value.trim(),role_type:role,status:$('fStatus').value,permissions,profile_photo_url:$('fPhotoPreview').dataset.photoUrl||''};
+}
+async function callAdmin(action,payload){
+  const {data:{session}}=await supabase.auth.getSession();
+  if(!session) throw new Error('Your session has expired.');
+  const url=`${supabase.supabaseUrl}/functions/v1/mhss-user-admin`;
+  const res=await fetch(url,{method:'POST',headers:{Authorization:`Bearer ${session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify({action,...payload})});
+  const body=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(body.error||`Request failed (${res.status})`);
+  return body;
+}
+function passwordIsStrong(p){return p.length>=8&&/[A-Za-z]/.test(p)&&/\d/.test(p)&&/[^A-Za-z0-9]/.test(p);}
+function accountInitials(name){return (String(name||'User').trim().split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('')||'U').toUpperCase()}
+function renderFormPhoto(url,name){const el=$('fPhotoPreview');if(!el)return;if(url){el.innerHTML='<img src="'+String(url).replace(/"/g,'&quot;')+'" alt="Profile photo">'}else el.textContent=accountInitials(name)}
+let cropState={img:null,scale:1,minScale:1,x:0,y:0,startX:0,startY:0,dragging:false};
+const cropOverlay=$('profileCropOverlay'),cropStage=$('cropStage'),cropImage=$('cropImage'),cropZoom=$('cropZoom');
+function openUserCrop(file){const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{cropState={img,scale:1,minScale:1,x:0,y:0,startX:0,startY:0,dragging:false};cropImage.src=reader.result;cropZoom.value='1';cropOverlay.classList.remove('hidden');cropOverlay.setAttribute('aria-hidden','false');requestAnimationFrame(resetUserCrop)};img.src=reader.result};reader.readAsDataURL(file)}
+function resetUserCrop(){const img=cropState.img;if(!img)return;const rect=cropStage.getBoundingClientRect(),size=Math.min(280,Math.max(220,Math.min(rect.width*.72,rect.height*.72))),base=Math.max(size/img.width,size/img.height);cropState.scale=base;cropState.minScale=base;cropState.x=(rect.width-img.width*base)/2;cropState.y=(rect.height-img.height*base)/2;cropZoom.value='1';renderUserCrop()}
+function renderUserCrop(){const st=cropState,img=st.img;if(!img)return;cropImage.style.width=(img.width*st.scale)+'px';cropImage.style.height=(img.height*st.scale)+'px';cropImage.style.left=st.x+'px';cropImage.style.top=st.y+'px'}
+function closeUserCrop(){cropOverlay.classList.add('hidden');cropOverlay.setAttribute('aria-hidden','true');$('fPhotoInput').value='';cropState={img:null,scale:1,x:0,y:0}}
+function zoomUserCrop(){if(!cropState.img)return;const rect=cropStage.getBoundingClientRect(),cx=rect.width/2,cy=rect.height/2,old=cropState.scale,base=cropState.minScale,target=base*(1+2*Number(cropZoom.value)),ratio=target/old;cropState.x=cx-(cx-cropState.x)*ratio;cropState.y=cy-(cy-cropState.y)*ratio;cropState.scale=target;renderUserCrop()}
+function saveUserCrop(){const st=cropState;if(!st.img)return;const stage=cropStage.getBoundingClientRect(),win=Math.min(280,Math.max(220,Math.min(stage.width*.72,stage.height*.72))),cx=stage.width/2,cy=stage.height/2,sx=(cx-win/2-st.x)/st.scale,sy=(cy-win/2-st.y)/st.scale,sw=win/st.scale,sh=win/st.scale,c=document.createElement('canvas');c.width=512;c.height=512;const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(st.img,sx,sy,sw,sh,0,0,512,512);const url=c.toDataURL('image/jpeg',.86);$('fPhotoPreview').dataset.photoUrl=url;renderFormPhoto(url,$('fName').value||'User');closeUserCrop()}
+$('fPhotoBtn').addEventListener('click',()=>$('fPhotoInput').click());$('fPhotoInput').addEventListener('change',e=>{const file=e.target.files?.[0];if(!file)return;if(!/^image\/(jpeg|png|webp)$/.test(file.type)){toast('Please choose a JPG, PNG or WebP image.');e.target.value='';return}if(file.size>5*1024*1024){toast('Please choose a photo smaller than 5 MB.');e.target.value='';return}openUserCrop(file)});cropZoom.addEventListener('input',zoomUserCrop);$('cropSaveBtn').addEventListener('click',saveUserCrop);$('cropCancelBtn').addEventListener('click',closeUserCrop);$('cropCloseBtn').addEventListener('click',closeUserCrop);
+function cropPointerStart(e){if(!cropState.img)return;cropState.dragging=true;cropState.startX=e.clientX-cropState.x;cropState.startY=e.clientY-cropState.y;cropStage.classList.add('dragging');cropStage.setPointerCapture?.(e.pointerId)}function cropPointerMove(e){if(!cropState.dragging)return;cropState.x=e.clientX-cropState.startX;cropState.y=e.clientY-cropState.startY;renderUserCrop()}function cropPointerEnd(){cropState.dragging=false;cropStage.classList.remove('dragging')}cropStage.addEventListener('pointerdown',cropPointerStart);cropStage.addEventListener('pointermove',cropPointerMove);cropStage.addEventListener('pointerup',cropPointerEnd);cropStage.addEventListener('pointercancel',cropPointerEnd);
+
+$('userForm').addEventListener('submit',async e=>{
+  e.preventDefault();$('saveBtn').disabled=true;$('formNotice').classList.add('hidden');
+  try{
+    const payload=collectPayload();
+    if(!editingId && !passwordIsStrong(payload.password)) throw new Error('Initial password must be at least 8 characters and contain letters, a number and a special symbol.');
+    if(editingId) {
+      if($('userForm').dataset.ownerProfile==='true') {
+        const patch={name:payload.name,sunday_school_work:payload.sunday_school_work,phone:payload.phone};
+        if(payload.profile_photo_url) patch.profile_photo_url=payload.profile_photo_url;
+        const {error}=await supabase.from('mhss_user_profiles').update(patch).eq('user_id',editingId);
+        if(error) throw error;
+      } else {
+        const clean={...payload}; delete clean.profile_photo_url; delete clean.phone;
+        await callAdmin('update_user',{user_id:editingId,...clean});
+      }
+    } else {
+      const photo=payload.profile_photo_url||'';
+      const result=await callAdmin('create_user',payload);
+      if(photo){
+        let newId=result?.user_id||result?.user?.id||result?.data?.user_id||'';
+        if(!newId){ const lookup=await supabase.from('mhss_user_profiles').select('user_id').eq('email',payload.email).maybeSingle(); if(!lookup.error) newId=lookup.data?.user_id||''; }
+        if(newId){ const {error:photoError}=await supabase.from('mhss_user_profiles').update({profile_photo_url:photo}).eq('user_id',newId); if(photoError) console.warn('[User Roles] profile photo save failed:',photoError); }
+      }
+    }
+    closeModal();toast(editingId?'User updated successfully.':'User created successfully.');await loadUsers();
+  }catch(err){$('formNotice').textContent=err.message;$('formNotice').classList.remove('hidden')}
+  finally{$('saveBtn').disabled=false;}
+});
+$('rows').addEventListener('click',async e=>{
+  const edit=e.target.closest('[data-edit]'),toggle=e.target.closest('[data-toggle]'),del=e.target.closest('[data-delete]');
+  try{
+    const ownerProfile=e.target.closest('[data-owner-profile]');
+    const activity=e.target.closest('[data-activity]');
+    if(activity){const u=users.find(x=>x.user_id===activity.dataset.activity);if(u)openActivity(u);return}
+    if(ownerProfile){const u=users.find(x=>x.user_id===ownerProfile.dataset.ownerProfile);if(u)openModal(u,true)}
+    if(edit){const u=users.find(x=>x.user_id===edit.dataset.edit);if(u)openModal(u)}
+    if(toggle){const u=users.find(x=>x.user_id===toggle.dataset.toggle);if(!u)return;if(!confirm(`${u.status==='active'?'Disable':'Enable'} ${u.name}?`))return;await callAdmin('set_status',{user_id:u.user_id,status:u.status==='active'?'inactive':'active'});toast('User status updated.');await loadUsers()}
+    if(del){const u=users.find(x=>x.user_id===del.dataset.delete);if(!u)return;if(!confirm(`Permanently delete ${u.name}? This cannot be undone.`))return;await callAdmin('delete_user',{user_id:u.user_id});toast('User permanently deleted.');await loadUsers()}
+  }catch(err){toast(err.message)}
+});
+$('addBtn').onclick=()=>openModal();$('closeModal').onclick=closeModal;$('cancelBtn').onclick=closeModal;$('fRole').onchange=updateCustom;$('refreshBtn').onclick=loadUsers;$('backBtn').onclick=()=>location.href='dashboard.html';
+['search','workFilter','roleFilter','statusFilter'].forEach(id=>$(id).addEventListener('input',renderRows));
+
+/* ================= Language switcher (EN / AM) — shared with dashboard.html via mh_lang_pref ================= */
+const translations = {
+  en: {
+    brandSub:'Enterprise Management System · User Roles', backToDashboard:'Dashboard', addUser:'＋ Add User',
+    pageTitle:'User Roles', pageDesc:'Control exactly who can access each MHSS EPR module and what they can do.',
+    statTotal:'Total Users', statAdmins:'Total Admins', statTeachers:'Total Education & Training', statFinance:'Total Finance & Property',
+    statOther:'Total Other Users', statActive:'Active Users', statInactive:'Inactive Users',
+    searchPlaceholder:'Search name or email…', allWork:'All Sunday School Work',
+    allRoles:'All Role Types', roleFull:'Full Access', roleManage:'Manage', roleView:'View Only', roleCustom:'Custom',
+    allStatus:'All Status', statusActive:'Active', statusInactive:'Inactive', refresh:'↻ Refresh',
+    thName:'Name', thEmail:'Email', thWork:'Sunday School Work', thRole:'Role / Access', thStatus:'Status', thActions:'Actions',
+    addUserTitle:'Add User', editUserTitle:'Edit User',
+    fNameLabel:'Name', fEmailLabel:'Email', fPasswordLabel:'Password',
+    fPasswordHint:'Required when creating a user. Users change their own password from Settings after signing in.',
+    fWorkLabel:'Sunday School Work', systemAccess:'System Access',
+    modOffice:'Office Management', modFinance:'Finance Management', modStudents:'Student Management',
+    modAttendance:'Attendance Management', modBegena:'Begena Management', modEquipment:'Equipment Management',
+    roleTypeHeading:'Role Type', roleTypeLabel:'Role Type', statusLabel:'Status',
+    customPerms:'Custom Permissions', permModule:'Module', permView:'View', permAdd:'Add', permEdit:'Edit', permDelete:'Delete', permPrint:'Print/Export',
+    cancel:'Cancel', saveUser:'Save User',
+    noModules:'No modules', protectedSuperAdmin:'Protected Super Admin', superAdmin:'Super Admin', protected:'Protected',
+    edit:'Edit', disable:'Disable', enable:'Enable', delete:'Delete', noUsersFound:'No users found.',
+  },
+  am: {
+    brandSub:'የድርጅት አስተዳደር ስርዓት · የተጠቃሚ ሚናዎች', backToDashboard:'ዳሽቦርድ', addUser:'＋ ተጠቃሚ ጨምር',
+    pageTitle:'የተጠቃሚ ሚናዎች', pageDesc:'እያንዳንዱ የMHSS EPR ሞጁል ማን ማግኘት እንደሚችል እና ምን ማድረግ እንደሚችል ይቆጣጠሩ።',
+    statTotal:'ጠቅላላ ተጠቃሚዎች', statAdmins:'ጠቅላላ አስተዳዳሪዎች', statTeachers:'ጠቅላላ ትምህርትና ስልጠና', statFinance:'ጠቅላላ ሒሳብ እና ንብረት',
+    statOther:'ጠቅላላ ሌሎች ተጠቃሚዎች', statActive:'ንቁ ተጠቃሚዎች', statInactive:'ንቁ ያልሆኑ ተጠቃሚዎች',
+    searchPlaceholder:'ስም ወይም ኢሜይል ይፈልጉ…', allWork:'ሁሉም የሰንበት ት/ቤት ስራ',
+    allRoles:'ሁሉም የሚና አይነቶች', roleFull:'ሙሉ መዳረሻ', roleManage:'አስተዳድር', roleView:'ለማየት ብቻ', roleCustom:'ብጁ',
+    allStatus:'ሁሉም ሁኔታ', statusActive:'ንቁ', statusInactive:'ንቁ ያልሆነ', refresh:'↻ አድስ',
+    thName:'ስም', thEmail:'ኢሜይል', thWork:'የሰንበት ት/ቤት ስራ', thRole:'ሚና / መዳረሻ', thStatus:'ሁኔታ', thActions:'እርምጃዎች',
+    addUserTitle:'ተጠቃሚ ጨምር', editUserTitle:'ተጠቃሚ አርትዕ',
+    fNameLabel:'ስም', fEmailLabel:'ኢሜይል', fPasswordLabel:'የይለፍ ቃል',
+    fPasswordHint:'ተጠቃሚ ሲፈጠር ያስፈልጋል። ከገባ በኋላ ተጠቃሚው ራሱ በSettings የይለፍ ቃሉን ይቀይራል።',
+    fWorkLabel:'የሰንበት ት/ቤት ስራ', systemAccess:'የስርዓት መዳረሻ',
+    modOffice:'የቢሮ አስተዳደር', modFinance:'የገንዘብ አስተዳደር', modStudents:'የተማሪ አስተዳደር',
+    modAttendance:'የክትትል አስተዳደር', modBegena:'የበገና አስተዳደር', modEquipment:'የመሳሪያ አስተዳደር',
+    roleTypeHeading:'የሚና አይነት', roleTypeLabel:'የሚና አይነት', statusLabel:'ሁኔታ',
+    customPerms:'ብጁ ፍቃዶች', permModule:'ሞጁል', permView:'ይመልከቱ', permAdd:'ጨምር', permEdit:'አርትዕ', permDelete:'ሰርዝ', permPrint:'አትም/ላክ',
+    cancel:'ይቅር', saveUser:'ተጠቃሚ አስቀምጥ',
+    noModules:'ምንም ሞጁል የለም', protectedSuperAdmin:'የተጠበቀ ዋና አስተዳዳሪ', superAdmin:'ዋና አስተዳዳሪ', protected:'የተጠበቀ',
+    edit:'አርትዕ', disable:'አሰናክል', enable:'አንቃ', delete:'ሰርዝ', noUsersFound:'ምንም ተጠቃሚ አልተገኘም።',
+  },
+};
+let currentLang = localStorage.getItem('mh_lang_pref') === 'am' ? 'am' : 'en';
+function applyLanguage(lang){
+  currentLang = lang === 'am' ? 'am' : 'en';
+  document.documentElement.lang = currentLang;
+  syncHeaderLangButtons();
+  const dict = translations[currentLang];
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const key=el.dataset.i18n; if(dict[key]) el.textContent=dict[key]; });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ const key=el.dataset.i18nPlaceholder; if(dict[key]) el.placeholder=dict[key]; });
+  localStorage.setItem('mh_lang_pref', currentLang);
+  // Re-render dynamic content (table rows, modal title, custom-permission labels) in the new language.
+  if(users.length || $('rows').children.length) renderRows();
+  if(!$('modalOverlay').classList.contains('hidden')){
+    $('modalTitle').textContent = editingId ? dict.editUserTitle : dict.addUserTitle;
+    buildPermissionRows(users.find(u=>u.user_id===editingId)?.permissions||[]);
+  }
+}
+
+/* ===================== Header (lang switch, theme toggle, date) ===================== */
+function syncHeaderLangButtons(){
+  const en = $('langBtnEn'), am = $('langBtnAm');
+  if (en) { en.classList.toggle('active', currentLang === 'en'); en.setAttribute('aria-pressed', currentLang === 'en'); }
+  if (am) { am.classList.toggle('active', currentLang === 'am'); am.setAttribute('aria-pressed', currentLang === 'am'); }
+}
+$('langBtnEn').addEventListener('click', ()=> applyLanguage('en'));
+$('langBtnAm').addEventListener('click', ()=> applyLanguage('am'));
+applyLanguage(currentLang);
+
+function applyHeaderTheme(theme){
+  const t = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  const btn = $('themeToggleBtn');
+  if (btn) btn.setAttribute('aria-pressed', t === 'light' ? 'true' : 'false');
+  localStorage.setItem('mh_theme', t);
+}
+$('themeToggleBtn').addEventListener('click', ()=>{
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  applyHeaderTheme(current === 'light' ? 'dark' : 'light');
+});
+(function initHeaderTheme(){
+  const saved = localStorage.getItem('mh_theme');
+  applyHeaderTheme(saved === 'dark' ? 'dark' : 'light');
+})();
+
+(function initHeaderDate(){
+  const etMonths = ['መስከረም','ጥቅምት','ህዳር','ታህሳስ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜ'];
+  const JD_EPOCH_OFFSET = 1723856;
+  function gToJdn(year, month, day){
+    const y = month <= 2 ? year - 1 : year, m = month <= 2 ? month + 12 : month;
+    const a = Math.floor(y / 100), b = 2 - a + Math.floor(a / 4);
+    return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524;
+  }
+  function toEthiopian(d){
+    const jdn = gToJdn(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    const r = (jdn - JD_EPOCH_OFFSET) % 1461;
+    const n = (r % 365) + 365 * Math.floor(r / 1460);
+    const etYear = 4 * Math.floor((jdn - JD_EPOCH_OFFSET) / 1461) + Math.floor(r / 365) - Math.floor(r / 1460);
+    return { etYear, etMonth: etMonths[Math.floor(n / 30)], etDay: (n % 30) + 1 };
+  }
+  const gc = new Date(), e = toEthiopian(gc), el = $('dateDisplay');
+  if (el) el.textContent = gc.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ` | ${e.etMonth} ${e.etDay}, ${e.etYear}`;
+})();
+
+(async()=>{
+  const r=await initializeRBAC({supabase});
+  const { data: authData } = await supabase.auth.getUser();
+  const owner = String(authData?.user?.email || '').trim().toLowerCase() === 'mhssepr@gmail.com';
+  if(!r?.allowed || (!isSuperAdmin() && !owner)){location.href='dashboard.html';return}
+  $('app').classList.remove('hidden');
+  await loadUsers();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meserete Hiwot ERP - Attendance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+Ethiopic:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .amharic { font-family: 'Noto Sans Ethiopic', sans-serif; }
+        .class-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .class-card:hover { transform: translateY(-5px); border-color: #FFD700; box-shadow: 0 10px 30px -10px rgba(255, 215, 0, 0.2); }
+
+        .ambient-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, rgba(0,0,0,0) 70%); top: -200px; left: -200px; z-index: -1; pointer-events: none; }
+        .ambient-glow-2 { position: absolute; width: 800px; height: 800px; background: radial-gradient(circle, rgba(56,189,248,0.03) 0%, rgba(0,0,0,0) 70%); bottom: -200px; right: -200px; z-index: -1; pointer-events: none; }
+
+        .glass-panel-gold {
+            background: linear-gradient(155deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,215,0,0.14);
+            box-shadow: 0 8px 30px -10px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+            transition: all .35s cubic-bezier(.4,0,.2,1);
+        }
+        .glass-panel-gold:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255,215,0,0.45);
+            box-shadow: 0 22px 45px -14px rgba(255,215,0,0.18), inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .class-card-lux { animation: cardIn .5s cubic-bezier(.22,1,.36,1) both; }
+        .row-in { animation: cardIn .35s cubic-bezier(.22,1,.36,1) both; }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .gold-ring { border: 2px solid rgba(255,215,0,0.55); box-shadow: 0 6px 18px -4px rgba(255,215,0,0.25); }
+        .icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; transition: all .25s cubic-bezier(.4,0,.2,1); }
+        .icon-btn:hover { transform: translateY(-3px) scale(1.08); }
+        .id-chip { background: linear-gradient(120deg, rgba(255,215,0,0.16), rgba(255,215,0,0.04)); border: 1px solid rgba(255,215,0,0.3); }
+
+        .tab-btn { transition: all .25s ease; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: #FFD700; border-bottom-color: #FFD700; }
+        .tab-btn:hover:not(.active) { color: #e5e7eb; }
+
+        .status-btn { transition: all .2s ease; opacity: .55; white-space: nowrap; }
+        .status-btn:hover { opacity: 1; transform: translateY(-2px); }
+        .status-btn.selected { opacity: 1; box-shadow: 0 6px 16px -4px rgba(0,0,0,0.5); }
+        .status-btn.selected.present { background: rgba(34,197,94,0.25) !important; border-color: #22c55e !important; color: #4ade80 !important; }
+        .status-btn.selected.late { background: rgba(234,179,8,0.25) !important; border-color: #eab308 !important; color: #facc15 !important; }
+        .status-btn.selected.absent { background: rgba(239,68,68,0.25) !important; border-color: #ef4444 !important; color: #f87171 !important; }
+        .status-btn.selected.permission { background: rgba(59,130,246,0.25) !important; border-color: #3b82f6 !important; color: #60a5fa !important; } /* Permission Action Style */
+
+        .modal-overlay { transition: opacity .28s ease; }
+        .modal-panel { transition: transform .32s cubic-bezier(.34,1.4,.64,1), opacity .28s ease; }
+        .modal-hidden-state { opacity: 0; pointer-events: none; }
+        .modal-hidden-state .modal-panel { transform: scale(.94) translateY(14px); opacity: 0; }
+        .luxury-modal { background: linear-gradient(160deg, #131c2e, #0c1322); border: 1px solid rgba(255,215,0,0.22); box-shadow: 0 25px 60px -15px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,215,0,0.05); }
+        .lux-input { transition: all .2s ease; }
+        .lux-input:focus { border-color: #FFD700 !important; box-shadow: 0 0 0 3px rgba(255,215,0,0.12); }
+
+        .toast { animation: toastIn .3s cubic-bezier(.22,1,.36,1) both, toastOut .3s ease 2.2s forwards; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastOut { to { opacity: 0; transform: translateY(-8px); } }
+
+        /* Print Styles - landscape summary sheet */
+        #printArea { display: none; }
+        @media print {
+            body { background: white; color: black; }
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { display: block; position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 0; }
+            @page { size: A4 landscape; margin: 10mm; }
+            .print-summary-table { width: 100%; border-collapse: collapse; font-size: 10px; color: #111827; }
+            .print-summary-table th, .print-summary-table td { border: 1px solid #999; padding: 4px 6px; text-align: center; }
+            .print-summary-table th { background: #f3d97a; color: #111; }
+            .print-summary-table td.name-cell { text-align: left; }
+            .print-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+            .print-header img { width: 36px; height: 36px; }
+            .print-header h2 { margin: 0; font-size: 16px; }
+            .print-header p { margin: 0; font-size: 11px; color: #555; }
+        }
+    
+        /* =========================================================
+           ATTENDANCE PAGE — STUDENTS.HTML LUXURY LIGHT THEME
+           Shared visual system, responsive hardening, no horizontal scroll
+        ========================================================= */
+        :root{
+            --bg-page:#F7F8FA;
+            --surface:#FFFFFF;
+            --surface-soft:#F1F3F5;
+            --text-main:#172033;
+            --text-muted:#596579;
+            --primary:#B8922E;
+            --primary-bright:#D4AF37;
+            --border:#E2E6EC;
+            --glass-bg:rgba(255,255,255,.94);
+            --glass-border:#E2E6EC;
+            --glass-gold-bg-1:#FFFFFF;
+            --glass-gold-bg-2:#F8F9FB;
+            --glass-gold-border:rgba(184,146,46,.28);
+            --input-bg:#FFFFFF;
+            --input-border:#D9DEE7;
+            --select-bg:#FFFFFF;
+            --header-bg:rgba(255,255,255,.96);
+            --hover-bg:#F1F3F5;
+            --gold:#B8922E;
+        }
+        html[data-theme="dark"]{
+            --bg-page:#0F172A;
+            --surface:#111C2E;
+            --surface-soft:#182235;
+            --text-main:#F8FAFC;
+            --text-muted:#94A3B8;
+            --primary:#D4AF37;
+            --primary-bright:#E7C45A;
+            --border:rgba(255,255,255,.09);
+            --glass-bg:rgba(17,28,46,.82);
+            --glass-border:rgba(255,255,255,.09);
+            --glass-gold-bg-1:rgba(255,255,255,.055);
+            --glass-gold-bg-2:rgba(255,255,255,.018);
+            --glass-gold-border:rgba(212,175,55,.20);
+            --input-bg:rgba(255,255,255,.055);
+            --input-border:rgba(255,255,255,.12);
+            --select-bg:#172236;
+            --header-bg:rgba(17,28,46,.86);
+            --hover-bg:rgba(255,255,255,.08);
+            --gold:#D4AF37;
+        }
+
+        html,body{
+            width:100%; max-width:100%; min-width:0;
+            overflow-x:hidden !important;
+            background:var(--bg-page) !important;
+            color:var(--text-main) !important;
+            transition:background .35s ease,color .35s ease;
+        }
+        body{font-family:'Inter',sans-serif;}
+        main,header,section,div,form,button,a,input,select,textarea{min-width:0;}
+        .app-header{
+            position:sticky;top:0;z-index:30;
+            background:var(--header-bg) !important;
+            border-color:var(--border) !important;
+            box-shadow:0 8px 28px rgba(23,32,51,.05);
+            backdrop-filter:blur(18px);
+        }
+        /* Desktop header alignment fix only — mobile remains unchanged */
+        @media (min-width:769px){
+            header.app-header{
+                width:100%;
+                box-sizing:border-box;
+                display:flex;
+                flex-wrap:nowrap !important;
+                align-items:center !important;
+                justify-content:space-between !important;
+                gap:24px !important;
+                padding:22px 32px !important;
+            }
+            header.app-header > .flex.items-center{
+                flex:1 1 auto;
+                min-width:0;
+                align-items:center !important;
+            }
+            header.app-header .header-controls{
+                flex:0 0 auto;
+                display:flex;
+                align-items:center;
+                justify-content:flex-end;
+                gap:12px;
+                white-space:nowrap;
+            }
+        }
+        html[data-theme="dark"] .app-header{box-shadow:0 18px 42px rgba(0,0,0,.20);}
+        .header-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+        .lang-switch{
+            display:flex;align-items:center;
+            background:var(--surface);border:1px solid var(--border);
+            border-radius:999px;padding:3px;gap:2px;
+        }
+        .lang-switch button{
+            border:none;background:transparent;font-size:12px;font-weight:700;
+            letter-spacing:.03em;padding:6px 12px;border-radius:999px;
+            color:var(--text-muted);cursor:pointer;transition:all .25s ease;
+        }
+        .lang-switch button.active{
+            background:var(--primary);color:#fff;
+            box-shadow:0 4px 12px -3px rgba(184,146,46,.4);
+        }
+        .theme-toggle{
+            position:relative;width:52px;height:30px;border-radius:999px;
+            border:1px solid var(--border);background:var(--surface);
+            cursor:pointer;padding:0;flex-shrink:0;
+        }
+        .theme-toggle .knob{
+            position:absolute;top:2px;left:2px;width:24px;height:24px;
+            border-radius:50%;background:var(--primary-bright);
+            display:flex;align-items:center;justify-content:center;
+            transition:transform .35s cubic-bezier(.4,0,.2,1);
+            box-shadow:0 2px 6px rgba(0,0,0,.20);
+        }
+        html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
+        .theme-toggle .knob svg{width:14px;height:14px;}
+        .back-dash-btn{
+            display:inline-flex;align-items:center;gap:6px;padding:10px 16px;
+            border-radius:12px;font-size:13px;font-weight:700;
+            background:var(--surface);border:1px solid var(--border);
+            color:var(--text-main);transition:all .2s ease;
+        }
+        .back-dash-btn:hover{background:var(--hover-bg);transform:translateY(-2px);border-color:var(--primary);color:var(--primary);}
+
+        .glass-panel{
+            background:var(--glass-bg) !important;
+            border-color:var(--glass-border) !important;
+            color:var(--text-main);
+            box-shadow:0 12px 32px rgba(23,32,51,.06);
+        }
+        .glass-panel-gold{
+            background:linear-gradient(155deg,var(--glass-gold-bg-1),var(--glass-gold-bg-2)) !important;
+            border-color:var(--glass-gold-border) !important;
+            color:var(--text-main);
+            box-shadow:0 12px 32px rgba(23,32,51,.06),inset 0 1px 0 rgba(255,255,255,.65);
+            transition:all .35s cubic-bezier(.4,0,.2,1);
+        }
+        .glass-panel-gold:hover{
+            transform:translateY(-4px);
+            border-color:rgba(184,146,46,.48) !important;
+            box-shadow:0 20px 40px -14px rgba(184,146,46,.18),inset 0 1px 0 rgba(255,255,255,.8);
+        }
+        html[data-theme="dark"] .glass-panel,
+        html[data-theme="dark"] .glass-panel-gold{
+            box-shadow:0 18px 42px rgba(0,0,0,.20);
+        }
+        html[data-theme="light"] .text-white{color:var(--text-main) !important;}
+        html[data-theme="light"] .text-gray-100{color:#263246 !important;}
+        html[data-theme="light"] .text-gray-200{color:#344054 !important;}
+        html[data-theme="light"] .text-gray-300{color:#3F4A5C !important;}
+        html[data-theme="light"] .text-gray-400{color:#596579 !important;}
+        html[data-theme="light"] .text-gray-500{color:#718096 !important;}
+        html[data-theme="light"] .text-gray-600{color:#667085 !important;}
+        html[data-theme="light"] .border-white\/10,
+        html[data-theme="light"] .border-white\/5{border-color:var(--border) !important;}
+        html[data-theme="light"] .bg-white\/5{background:var(--surface-soft) !important;}
+        html[data-theme="light"] .bg-white\/10,
+        html[data-theme="light"] .hover\:bg-white\/10:hover{background:#E9EDF2 !important;}
+        html[data-theme="light"] input,
+        html[data-theme="light"] select,
+        html[data-theme="light"] textarea{color:var(--text-main) !important;}
+        html[data-theme="light"] input::placeholder{color:#667085 !important;opacity:1 !important;}
+
+        /* Strict mobile fit: never create page-level scrollbars. Tables and charts
+           compress/reflow instead of overflowing the viewport. */
+        html,body{overflow-x:hidden !important;overflow-y:auto;max-width:100vw;width:100%;}
+        body{overscroll-behavior-x:none;}
+        #attendanceWorkspace,#classSelectionView,#dailyView,#summaryView,#analyticsView{max-width:100%;min-width:0;}
+        .responsive-table-panel{overflow:hidden !important;max-width:100%;}
+        .attendance-table{width:100% !important;max-width:100%;table-layout:fixed;}
+        .attendance-table th,.attendance-table td{max-width:1px;overflow:hidden;text-overflow:ellipsis;}
+        .attendance-table .status-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;}
+        .chart-wrap{position:relative;width:100%;height:260px;max-width:100%;overflow:hidden;}
+        .ec-range-field{min-width:145px;max-width:180px;padding:9px 12px;border:1px solid var(--input-border);border-radius:10px;background:var(--input-bg);color:var(--text-main);font-size:12px;font-weight:700;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+        .ec-range-field:hover{border-color:var(--primary);}
+        .ec-picker-overlay{position:fixed;inset:0;z-index:80;background:rgba(15,23,42,.48);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;}
+        .ec-picker-card{width:min(430px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--surface);color:var(--text-main);border:1px solid var(--border);border-radius:24px;box-shadow:0 24px 70px rgba(0,0,0,.22);padding:18px;}
+        .ec-picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+        .ec-picker-title{font-size:16px;font-weight:800;}
+        .ec-picker-sub{font-size:11px;color:var(--text-muted);margin-top:2px;}
+        .ec-picker-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;}
+        .ec-picker-week{font-size:10px;color:var(--text-muted);text-align:center;font-weight:800;padding:5px 0;}
+        .ec-day{border:1px solid transparent;background:transparent;color:var(--text-main);border-radius:9px;min-height:38px;font-weight:700;cursor:pointer;}
+        .ec-day:hover{background:var(--hover-bg);border-color:var(--primary);}
+        .ec-day.selected{background:var(--primary);color:#fff;}
+        .ec-day.in-range{background:rgba(184,146,46,.14);color:var(--text-main);}
+        .ec-day.today{box-shadow:inset 0 0 0 1px var(--primary);}
+        .ec-day.empty{pointer-events:none;}
+        .ec-picker-select{border:1px solid var(--input-border);background:var(--input-bg);color:var(--text-main);border-radius:10px;padding:8px 10px;font-weight:700;min-width:0;}
+        .ec-picker-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:15px;}
+        .ec-picker-actions button{border:1px solid var(--border);border-radius:10px;padding:9px 14px;font-weight:800;}
+        .ec-picker-actions .primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+        @media(max-width:700px){
+            html,body{overflow-y:auto !important;}
+            main{padding-left:10px !important;padding-right:10px !important;}
+            .header-controls{gap:5px;}
+            .app-header{padding-left:10px !important;padding-right:10px !important;}
+            .app-header .back-dash-btn{padding:8px 9px;font-size:11px;}
+            .lang-switch button{padding:5px 8px;font-size:11px;}
+            .theme-toggle{width:46px;height:28px;}
+            .theme-toggle .knob{width:22px;height:22px;}
+            html[data-theme="light"] .theme-toggle .knob{transform:translateX(18px);}
+            #attendanceWorkspace > div:first-child{padding:10px;border-radius:16px;}
+            #attendanceWorkspace > div:first-child > div{width:100%;}
+            #attendanceWorkspace .tab-btn{flex:1 1 0;text-align:center;padding:10px 5px !important;font-size:11px !important;}
+            #attendanceWorkspace > .flex.items-center.gap-6{width:100%;gap:2px !important;overflow:hidden !important;}
+            #dailyView .flex.items-center.justify-between{padding:6px 8px;gap:5px;}
+            #dailyView .icon-btn{flex:0 0 34px;}
+            #gcDateLabel{font-size:11px;}
+            #ecDateLabel{font-size:9px;}
+            #dailyView .attendance-table th,#dailyView .attendance-table td{padding:7px 4px !important;font-size:10px;}
+            #dailyView .attendance-table th:nth-child(4),#dailyView .attendance-table td:nth-child(4){display:none;}
+            #dailyView .attendance-table th:nth-child(1),#dailyView .attendance-table td:nth-child(1){width:42px;}
+            #dailyView .attendance-table th:nth-child(2),#dailyView .attendance-table td:nth-child(2){width:68px;}
+            #dailyView .attendance-table th:nth-child(3),#dailyView .attendance-table td:nth-child(3){width:auto;}
+            #dailyView .attendance-table th:nth-child(5),#dailyView .attendance-table td:nth-child(5){width:116px;}
+            #summaryView .attendance-table{font-size:8px !important;}
+            #summaryView .attendance-table th,#summaryView .attendance-table td{padding:4px 2px !important;white-space:nowrap;}
+            #summaryView .attendance-table th:first-child,#summaryView .attendance-table td:first-child{width:54px;}
+            #summaryView .attendance-table th:nth-child(2),#summaryView .attendance-table td:nth-child(2){width:72px;}
+            #summaryView .attendance-table th:last-child,#summaryView .attendance-table td:last-child{width:34px;}
+            .ec-range-field{min-width:0;width:100%;font-size:11px;}
+            #summaryView .flex.flex-col.md\:flex-row > div{width:100%;}
+            #summaryView .flex.flex-wrap.items-center{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:7px;padding:10px !important;}
+            #summaryView .flex.flex-wrap.items-center .lang-text:last-child{grid-column:1/-1;}
+            .chart-wrap{height:220px;}
+            #analyticsView .grid{gap:10px !important;}
+            #analyticsView .glass-panel-gold{padding:14px !important;}
+            #analyticsView #overallRate{font-size:40px;}
+        }
+        @media(max-width:380px){
+            #dailyView .attendance-table th:nth-child(1),#dailyView .attendance-table td:nth-child(1){display:none;}
+            #dailyView .attendance-table th:nth-child(2),#dailyView .attendance-table td:nth-child(2){width:62px;}
+            #dailyView .attendance-table th:nth-child(5),#dailyView .attendance-table td:nth-child(5){width:108px;}
+            #attendanceWorkspace .tab-btn{font-size:10px !important;}
+        }
+
+        .class-card-lux{
+            min-height:118px;border-radius:22px !important;isolation:isolate;
+            border-color:var(--glass-gold-border) !important;
+            position:relative;
+        }
+        .class-card-lux::after{
+            content:"";position:absolute;inset:auto 18px 0;height:2px;
+            background:linear-gradient(90deg,transparent,var(--primary),transparent);
+            opacity:.28;pointer-events:none;
+        }
+        html[data-theme="light"] .class-card-lux h3,
+        html[data-theme="light"] .class-card-lux .amharic.text-white,
+        html[data-theme="light"] #currentClassName{color:#000 !important;}
+        .class-card-lux:hover .w-14{transform:translateY(-2px) scale(1.04);}
+
+        /* Workspace header */
+        #attendanceWorkspace{animation:attendanceIn .4s cubic-bezier(.22,1,.36,1) both;}
+        @keyframes attendanceIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+        #attendanceWorkspace > div:first-child{
+            padding:14px 16px;border:1px solid var(--border);
+            background:var(--surface);border-radius:20px;
+            box-shadow:0 8px 24px rgba(23,32,51,.045);
+        }
+        #attendanceWorkspace > div:first-child .glass-panel{
+            color:var(--text-main);
+        }
+
+        /* Modern premium tabs */
+        #attendanceWorkspace .tab-btn{
+            position:relative;border:1px solid transparent !important;
+            border-bottom:0 !important;border-radius:13px 13px 0 0;
+            padding:12px 16px !important;color:var(--text-muted);
+            background:transparent;transition:all .25s ease;
+        }
+        #attendanceWorkspace .tab-btn.active{
+            color:var(--primary) !important;
+            background:var(--surface);
+            border-color:var(--border) !important;
+            box-shadow:0 -2px 12px rgba(23,32,51,.04);
+        }
+        #attendanceWorkspace .tab-btn.active::after{
+            content:"";position:absolute;left:14px;right:14px;bottom:-2px;
+            height:3px;border-radius:4px;background:var(--primary);
+        }
+        #attendanceWorkspace > .flex.items-center.gap-6{
+            gap:8px !important;border-color:var(--border) !important;
+            padding:6px 6px 0;background:var(--surface-soft);border-radius:16px 16px 0 0;
+        }
+
+        /* Daily controls */
+        #dailyView .glass-panel,#summaryView .glass-panel,#analyticsView .glass-panel{
+            border-radius:20px !important;
+        }
+        #dailyView .glass-panel-gold,#analyticsView .glass-panel-gold{
+            border-radius:20px !important;
+        }
+        #dailyView table thead,#summaryView table thead{
+            background:var(--surface-soft) !important;color:var(--text-muted) !important;
+        }
+        #dailyView table tbody tr:hover,#summaryView table tbody tr:hover{
+            background:var(--hover-bg) !important;
+        }
+        #dailyView table td,#dailyView table th,
+        #summaryView table td,#summaryView table th{
+            border-color:var(--border) !important;
+        }
+        .status-btn{
+            opacity:1 !important;
+            background:var(--surface) !important;
+            border-color:var(--border) !important;
+            transition:all .2s ease;
+        }
+        .status-btn:hover{transform:translateY(-2px);box-shadow:0 7px 16px rgba(23,32,51,.08);}
+        .status-btn.selected.present{background:rgba(34,197,94,.12) !important;border-color:#22c55e !important;color:#15803d !important;}
+        .status-btn.selected.late{background:rgba(234,179,8,.14) !important;border-color:#eab308 !important;color:#a16207 !important;}
+        .status-btn.selected.absent{background:rgba(239,68,68,.12) !important;border-color:#ef4444 !important;color:#dc2626 !important;}
+        .status-btn.selected.permission{background:rgba(59,130,246,.12) !important;border-color:#3b82f6 !important;color:#2563eb !important;}
+
+        /* Date/search/action controls */
+        #dailyView input,#summaryView input,#dailyView .icon-btn{
+            background:var(--surface) !important;border-color:var(--border) !important;color:var(--text-main) !important;
+        }
+        #dailyView .icon-btn{box-shadow:0 4px 12px rgba(23,32,51,.05);}
+        #searchInput{background:var(--surface) !important;border:1px solid var(--input-border) !important;color:var(--text-main) !important;}
+
+        /* Analytics luxury cards */
+        #analyticsView .glass-panel-gold{position:relative;overflow:hidden;}
+        #analyticsView .glass-panel-gold::before{
+            content:"";position:absolute;width:110px;height:110px;right:-48px;top:-58px;
+            border-radius:50%;background:rgba(184,146,46,.08);pointer-events:none;
+        }
+        #overallRate{color:var(--primary) !important;}
+        #topPresentList li,#topAbsentList li{
+            background:var(--surface-soft) !important;border:1px solid var(--border);
+            border-radius:12px !important;padding:10px 12px !important;
+        }
+
+        /* Better buttons */
+        .bg-yellow-500{background:var(--primary) !important;}
+        .hover\:bg-yellow-400:hover{background:var(--primary-bright) !important;}
+        .text-yellow-500,.text-yellow-400{color:var(--primary) !important;}
+        .shadow-yellow-500\/20{--tw-shadow-color:rgba(184,146,46,.20) !important;}
+
+        /* Modal theme */
+        .luxury-modal{
+            background:linear-gradient(160deg,var(--surface),var(--bg-page)) !important;
+            border-color:var(--glass-gold-border) !important;
+            color:var(--text-main) !important;
+        }
+        .lux-input{
+            background:var(--input-bg) !important;border-color:var(--input-border) !important;
+            color:var(--text-main) !important;
+        }
+
+        /* Responsive/mobile hardening */
+        @media(max-width:768px){
+            main{padding:1.25rem !important;}
+            header.app-header{padding:1rem !important;align-items:center !important;}
+            .header-controls{width:100%;justify-content:space-between;gap:7px;}
+            #searchInput{width:100% !important;}
+            #attendanceWorkspace > div:first-child{padding:12px;}
+            #attendanceWorkspace > .flex.items-center.gap-6{
+                overflow-x:auto !important;overflow-y:hidden;
+                scrollbar-width:none;white-space:nowrap;
+            }
+            #attendanceWorkspace > .flex.items-center.gap-6::-webkit-scrollbar{display:none;}
+            #attendanceWorkspace .tab-btn{flex:0 0 auto;}
+        }
+        @media(max-width:480px){
+            main{padding:16px !important;}
+            header.app-header{padding:14px 16px !important;}
+            header.app-header h1{font-size:1.05rem !important;line-height:1.2 !important;}
+            header.app-header p{font-size:.68rem !important;}
+            header.app-header img{width:44px !important;height:44px !important;}
+            .header-controls{gap:7px;}
+            .lang-switch button{padding:6px 9px;}
+            .back-dash-btn{padding:9px !important;}
+            .back-dash-btn span.label{display:none;}
+            #classSelectionView h2{font-size:1.45rem !important;}
+            /* Strict mobile fit: never create page-level scrollbars. Tables and charts
+           compress/reflow instead of overflowing the viewport. */
+        html,body{overflow-x:hidden !important;overflow-y:auto;max-width:100vw;width:100%;}
+        body{overscroll-behavior-x:none;}
+        #attendanceWorkspace,#classSelectionView,#dailyView,#summaryView,#analyticsView{max-width:100%;min-width:0;}
+        .responsive-table-panel{overflow:hidden !important;max-width:100%;}
+        .attendance-table{width:100% !important;max-width:100%;table-layout:fixed;}
+        .attendance-table th,.attendance-table td{max-width:1px;overflow:hidden;text-overflow:ellipsis;}
+        .attendance-table .status-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;}
+        .chart-wrap{position:relative;width:100%;height:260px;max-width:100%;overflow:hidden;}
+        .ec-range-field{min-width:145px;max-width:180px;padding:9px 12px;border:1px solid var(--input-border);border-radius:10px;background:var(--input-bg);color:var(--text-main);font-size:12px;font-weight:700;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+        .ec-range-field:hover{border-color:var(--primary);}
+        .ec-picker-overlay{position:fixed;inset:0;z-index:80;background:rgba(15,23,42,.48);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;}
+        .ec-picker-card{width:min(430px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--surface);color:var(--text-main);border:1px solid var(--border);border-radius:24px;box-shadow:0 24px 70px rgba(0,0,0,.22);padding:18px;}
+        .ec-picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+        .ec-picker-title{font-size:16px;font-weight:800;}
+        .ec-picker-sub{font-size:11px;color:var(--text-muted);margin-top:2px;}
+        .ec-picker-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;}
+        .ec-picker-week{font-size:10px;color:var(--text-muted);text-align:center;font-weight:800;padding:5px 0;}
+        .ec-day{border:1px solid transparent;background:transparent;color:var(--text-main);border-radius:9px;min-height:38px;font-weight:700;cursor:pointer;}
+        .ec-day:hover{background:var(--hover-bg);border-color:var(--primary);}
+        .ec-day.selected{background:var(--primary);color:#fff;}
+        .ec-day.in-range{background:rgba(184,146,46,.14);color:var(--text-main);}
+        .ec-day.today{box-shadow:inset 0 0 0 1px var(--primary);}
+        .ec-day.empty{pointer-events:none;}
+        .ec-picker-select{border:1px solid var(--input-border);background:var(--input-bg);color:var(--text-main);border-radius:10px;padding:8px 10px;font-weight:700;min-width:0;}
+        .ec-picker-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:15px;}
+        .ec-picker-actions button{border:1px solid var(--border);border-radius:10px;padding:9px 14px;font-weight:800;}
+        .ec-picker-actions .primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+        @media(max-width:700px){
+            html,body{overflow-y:auto !important;}
+            main{padding-left:10px !important;padding-right:10px !important;}
+            .header-controls{gap:5px;}
+            .app-header{padding-left:10px !important;padding-right:10px !important;}
+            .app-header .back-dash-btn{padding:8px 9px;font-size:11px;}
+            .lang-switch button{padding:5px 8px;font-size:11px;}
+            .theme-toggle{width:46px;height:28px;}
+            .theme-toggle .knob{width:22px;height:22px;}
+            html[data-theme="light"] .theme-toggle .knob{transform:translateX(18px);}
+            #attendanceWorkspace > div:first-child{padding:10px;border-radius:16px;}
+            #attendanceWorkspace > div:first-child > div{width:100%;}
+            #attendanceWorkspace .tab-btn{flex:1 1 0;text-align:center;padding:10px 5px !important;font-size:11px !important;}
+            #attendanceWorkspace > .flex.items-center.gap-6{width:100%;gap:2px !important;overflow:hidden !important;}
+            #dailyView .flex.items-center.justify-between{padding:6px 8px;gap:5px;}
+            #dailyView .icon-btn{flex:0 0 34px;}
+            #gcDateLabel{font-size:11px;}
+            #ecDateLabel{font-size:9px;}
+            #dailyView .attendance-table th,#dailyView .attendance-table td{padding:7px 4px !important;font-size:10px;}
+            #dailyView .attendance-table th:nth-child(4),#dailyView .attendance-table td:nth-child(4){display:none;}
+            #dailyView .attendance-table th:nth-child(1),#dailyView .attendance-table td:nth-child(1){width:42px;}
+            #dailyView .attendance-table th:nth-child(2),#dailyView .attendance-table td:nth-child(2){width:68px;}
+            #dailyView .attendance-table th:nth-child(3),#dailyView .attendance-table td:nth-child(3){width:auto;}
+            #dailyView .attendance-table th:nth-child(5),#dailyView .attendance-table td:nth-child(5){width:116px;}
+            #summaryView .attendance-table{font-size:8px !important;}
+            #summaryView .attendance-table th,#summaryView .attendance-table td{padding:4px 2px !important;white-space:nowrap;}
+            #summaryView .attendance-table th:first-child,#summaryView .attendance-table td:first-child{width:54px;}
+            #summaryView .attendance-table th:nth-child(2),#summaryView .attendance-table td:nth-child(2){width:72px;}
+            #summaryView .attendance-table th:last-child,#summaryView .attendance-table td:last-child{width:34px;}
+            .ec-range-field{min-width:0;width:100%;font-size:11px;}
+            #summaryView .flex.flex-col.md\:flex-row > div{width:100%;}
+            #summaryView .flex.flex-wrap.items-center{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:7px;padding:10px !important;}
+            #summaryView .flex.flex-wrap.items-center .lang-text:last-child{grid-column:1/-1;}
+            .chart-wrap{height:220px;}
+            #analyticsView .grid{gap:10px !important;}
+            #analyticsView .glass-panel-gold{padding:14px !important;}
+            #analyticsView #overallRate{font-size:40px;}
+        }
+        @media(max-width:380px){
+            #dailyView .attendance-table th:nth-child(1),#dailyView .attendance-table td:nth-child(1){display:none;}
+            #dailyView .attendance-table th:nth-child(2),#dailyView .attendance-table td:nth-child(2){width:62px;}
+            #dailyView .attendance-table th:nth-child(5),#dailyView .attendance-table td:nth-child(5){width:108px;}
+            #attendanceWorkspace .tab-btn{font-size:10px !important;}
+        }
+
+
+        /* Shared custom classes from students.html */
+        #customClassesSection .custom-attendance-card{
+            min-height:104px;border-radius:22px !important;isolation:isolate;
+            border:1px solid var(--glass-gold-border);position:relative;overflow:hidden;
+            background:var(--glass-bg);box-shadow:0 8px 26px rgba(23,32,51,.06);
+            transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+        }
+        #customClassesSection .custom-attendance-card:hover{
+            transform:translateY(-4px);border-color:var(--primary);
+            box-shadow:0 16px 34px rgba(23,32,51,.10);
+        }
+        .custom-attendance-open{
+            width:100%;height:100%;display:flex;align-items:center;justify-content:space-between;
+            gap:12px;padding:18px;text-align:left;
+        }
+        .custom-attendance-icon{
+            width:52px;height:52px;border-radius:16px;display:flex;align-items:center;
+            justify-content:center;background:rgba(212,175,55,.10);
+            border:1px solid rgba(212,175,55,.24);font-size:23px;flex-shrink:0;
+        }
+        .custom-attendance-id{font-size:10px;color:var(--text-muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:3px;}
+
+        .class-card-lux{min-height:104px;}
+            .class-card-lux > div{padding:16px !important;}
+            #dailyView .grid.grid-cols-2{gap:10px !important;}
+            #dailyView .glass-panel{border-radius:16px !important;}
+            #analyticsView .glass-panel-gold{padding:18px !important;}
+            #analyticsView .grid{gap:12px !important;}
+        }
+        @media(prefers-reduced-motion:reduce){
+            *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+        }
+        button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
+            outline:2px solid var(--gold);outline-offset:2px;
+        }
+        .amharic,h1,h2,h3,h4,p,span,label,button,a{overflow-wrap:anywhere;}
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <div class="ambient-glow no-print"></div>
+    <div class="ambient-glow-2 no-print"></div>
+
+    <!-- HEADER -->
+    <header class="app-header glass-panel w-full p-6 md:p-8 flex flex-wrap justify-between items-center md:items-end gap-4 border-b border-white/5 z-10 no-print">
+        <div class="flex items-center gap-4 md:gap-6 min-w-0">
+            <img src="logo.png" alt="Logo" class="w-12 h-12 md:w-20 md:h-20 rounded-2xl bg-white/5 p-2 border border-white/10 shadow-xl shadow-yellow-500/10 flex-shrink-0">
+            <div class="min-w-0">
+                <h1 class="text-xl md:text-4xl font-bold tracking-tight truncate lang-text" data-en="Meserete Hiwot ERP System" data-am="መሠረተ ሕይወት ሰንበት ት/ቤት">Meserete Hiwot ERP System</h1>
+                <p class="text-yellow-500 font-medium mt-1 text-xs md:text-base lang-text" data-en="Attendance Management System" data-am="የመገኘት መረጃ አስተዳደር ስርዓት">Attendance Management System</p>
+            </div>
+        </div>
+
+        <div class="header-controls">
+            <div class="text-right mr-2 hidden lg:block">
+                <p class="text-sm text-gray-400" id="dateDisplay">Loading date...</p>
+                <p class="text-lg font-semibold lang-text" data-en="Admin Dashboard" data-am="የአስተዳዳሪ ዳሽቦርድ">Admin Dashboard</p>
+            </div>
+
+            <div class="lang-switch" role="group" aria-label="Language switcher">
+                <button type="button" id="langBtnEn" onclick="setAttendanceLanguage('en')" class="active" aria-pressed="true">ENG</button>
+                <button type="button" id="langBtnAm" onclick="setAttendanceLanguage('am')" aria-pressed="false">አማ</button>
+            </div>
+
+            <button type="button" class="theme-toggle" id="themeToggleBtn" onclick="toggleAttendanceTheme()" aria-label="Toggle light/dark theme" aria-pressed="true">
+                <span class="knob" id="themeKnob">
+                    <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round"/></svg>
+                </span>
+            </button>
+
+            <a href="dashboard.html" class="back-dash-btn" aria-label="Back to Dashboard">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <span class="label lang-text" data-en="Back to Dashboard" data-am="ወደ ዳሽቦርድ ተመለስ">Back to Dashboard</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-1 p-4 md:p-10 z-10 w-full overflow-hidden">
+
+        <!-- ==========================================
+             1. CLASS SELECTION DASHBOARD
+        =========================================== -->
+        <section id="classSelectionView" class="block no-print">
+            <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h2 class="text-2xl md:text-3xl font-bold lang-text" data-en="Select a Class" data-am="ክፍል ይምረጡ">Select a Class</h2>
+                
+                <!-- Global Scan ID Button -->
+                <button onclick="openGlobalScanModal()" class="px-4 py-3 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition shadow-lg shadow-yellow-500/20 flex items-center gap-2 text-sm md:text-base w-full md:w-auto justify-center">
+                    <span class="lang-text" data-en="🔍 Scan Student ID Barcode" data-am="🔍 የተማሪ መታወቂያ ስካን ያድርጉ">🔍 Scan Student ID Barcode</span>
+                </button>
+            </div>
+
+            <!-- DATABASE CLASS/ GROUP LIST — loaded from Supabase student_classes -->
+            <div id="dbClassSelectionContainer"></div>
+
+            <!-- 📌 የሕፃናት ምድብ -->
+            <h3 class="text-xl font-bold text-yellow-500 mb-4 amharic border-b border-white/10 pb-2 inline-block">📌 የሕፃናት ምድብ</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                <button onclick="openClass('ምድብ ቂርቆስ ፩', 'MHSS-Q1')" class="class-card-lux glass-panel-gold rounded-3xl text-left relative overflow-hidden group">
+                    <div class="flex items-center justify-between p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-2xl flex-shrink-0">📋</div>
+                            <div><h3 class="text-lg font-bold amharic text-white leading-tight">ምድብ ቂርቆስ ፩</h3><p class="text-[11px] text-gray-400 mt-1 lang-text" data-en="Tap to take attendance" data-am="መገኘት ለመመዝገብ ይጫኑ">Tap to take attendance</p></div>
+                        </div>
+                        <span class="text-xl text-yellow-500 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                    </div>
+                </button>
+                <button onclick="openClass('ምድብ ቂርቆስ ፪', 'MHSS-Q2')" class="class-card-lux glass-panel-gold rounded-3xl text-left relative overflow-hidden group">
+                    <div class="flex items-center justify-between p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-2xl flex-shrink-0">📋</div>
+                            <div><h3 class="text-lg font-bold amharic text-white leading-tight">ምድብ ቂርቆስ ፪</h3><p class="text-[11px] text-gray-400 mt-1 lang-text" data-en="Tap to take attendance" data-am="መገኘት ለመመዝገብ ይጫኑ">Tap to take attendance</p></div>
+                        </div>
+                        <span class="text-xl text-yellow-500 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                    </div>
+                </button>
+                <button onclick="openClass('ምድብ ቂርቆስ ፫', 'MHSS-Q3')" class="class-card-lux glass-panel-gold rounded-3xl text-left relative overflow-hidden group">
+                    <div class="flex items-center justify-between p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-2xl flex-shrink-0">📋</div>
+                            <div><h3 class="text-lg font-bold amharic text-white leading-tight">ምድብ ቂርቆስ ፫</h3><p class="text-[11px] text-gray-400 mt-1 lang-text" data-en="Tap to take attendance" data-am="መገኘት ለመመዝገብ ይጫኑ">Tap to take attendance</p></div>
+                        </div>
+                        <span class="text-xl text-yellow-500 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- 📌 የማዕከላዊ ምድብ -->
+            <h3 class="text-xl font-bold text-blue-400 mb-4 amharic border-b border-white/10 pb-2 inline-block">📌 የማዕከላዊ ምድብ</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                <button onclick="openClass('ምድብ ሳሙኤል', 'MHSS-SAM')" class="class-card-lux glass-panel-gold rounded-3xl text-left relative overflow-hidden group">
+                    <div class="flex items-center justify-between p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-blue-400/10 border border-blue-400/30 flex items-center justify-center text-2xl flex-shrink-0">📋</div>
+                            <div><h3 class="text-lg font-bold amharic text-white leading-tight">ምድብ ሳሙኤል</h3><p class="text-[11px] text-gray-400 mt-1 lang-text" data-en="Tap to take attendance" data-am="መገኘት ለመመዝገብ ይጫኑ">Tap to take attendance</p></div>
+                        </div>
+                        <span class="text-xl text-blue-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                    </div>
+                </button>
+                <button onclick="openClass('ምድብ ቶማስ', 'MHSS-THM')" class="class-card-lux glass-panel-gold rounded-3xl text-left relative overflow-hidden group">
+                    <div class="flex items-center justify-between p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-blue-400/10 border border-blue-400/30 flex items-center justify-center text-2xl flex-shrink-0">📋</div>
+                            <div><h3 class="text-lg font-bold amharic text-white leading-tight">ምድብ ቶማስ</h3><p class="text-[11px] text-gray-400 mt-1 lang-text" data-en="Tap to take attendance" data-am="መገኘት ለመመዝገብ ይጫኑ">Tap to take attendance</p></div>
+                        </div>
+                        <span class="text-xl text-blue-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                    </div>
+                </button>
+                <button onclick="openClass('ምድብ እስጢፋኖስ', 'MHSS-EST')" class="class-card-lux glass-panel-gold rounded-3xl text-left relative overflow-hidden group">
+                    <div class="flex items-center justify-between p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-blue-400/10 border border-blue-400/30 flex items-center justify-center text-2xl flex-shrink-0">📋</div>
+                            <div><h3 class="text-lg font-bold amharic text-white leading-tight">ምድብ እስጢፋኖስ</h3><p class="text-[11px] text-gray-400 mt-1 lang-text" data-en="Tap to take attendance" data-am="መገኘት ለመመዝገብ ይጫኑ">Tap to take attendance</p></div>
+                        </div>
+                        <span class="text-xl text-blue-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- 📌 የወጣቶች ምድብ -->
+            <h3 class="text-xl font-bold text-green-400 mb-4 amharic border-b border-white/10 pb-2 inline-block">📌 የወጣቶች ምድብ</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <button onclick="openClass('ምድብ ቅዱስ ያሬድ', 'MHSS-YRD')" class="class-card-lux glass-panel-gold rounded-3xl text-left relative overflow-hidden group">
+                    <div class="flex items-center justify-between p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-green-400/10 border border-green-400/30 flex items-center justify-center text-2xl flex-shrink-0">📋</div>
+                            <div><h3 class="text-lg font-bold amharic text-white leading-tight">ምድብ ቅዱስ ያሬድ</h3><p class="text-[11px] text-gray-400 mt-1 lang-text" data-en="Tap to take attendance" data-am="መገኘት ለመመዝገብ ይጫኑ">Tap to take attendance</p></div>
+                        </div>
+                        <span class="text-xl text-green-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                    </div>
+                </button>
+                <button onclick="openClass('ምድብ ቅዱስ ዳዊት', 'MHSS-DVD')" class="class-card-lux glass-panel-gold rounded-3xl text-left relative overflow-hidden group">
+                    <div class="flex items-center justify-between p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-green-400/10 border border-green-400/30 flex items-center justify-center text-2xl flex-shrink-0">📋</div>
+                            <div><h3 class="text-lg font-bold amharic text-white leading-tight">ምድብ ቅዱስ ዳዊት</h3><p class="text-[11px] text-gray-400 mt-1 lang-text" data-en="Tap to take attendance" data-am="መገኘት ለመመዝገብ ይጫኑ">Tap to take attendance</p></div>
+                        </div>
+                        <span class="text-xl text-green-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                    </div>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- CUSTOM CLASSES — shared with students.html and finance.html -->
+        <section id="customClassesSection" class="hidden mt-10 no-print">
+            <div class="flex items-center justify-between gap-3 mb-4">
+                <h3 class="text-xl font-bold text-yellow-500 amharic border-b border-white/10 pb-2 inline-block">
+                    📚 <span class="lang-text" data-en="Added Classes" data-am="የተጨመሩ ክፍሎች">Added Classes</span>
+                </h3>
+                <span class="text-[10px] text-gray-500 lang-text" data-en="Shared from Student Management" data-am="ከተማሪ አስተዳደር የሚጋራ">Shared from Student Management</span>
+            </div>
+            <div id="customClassesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- ==========================================
+             2/3/4. ATTENDANCE WORKSPACE (Daily / Summary / Analytics)
+        =========================================== -->
+        <section id="attendanceWorkspace" class="hidden">
+
+            <!-- Header row -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4 no-print">
+                <div class="flex items-center gap-4">
+                    <button onclick="goBackToClasses()" class="p-3 glass-panel rounded-xl hover:bg-white/10 transition whitespace-nowrap lang-text" data-en="⬅️ Back" data-am="⬅️ ተመለስ">⬅️ Back</button>
+                    <div>
+                        <h2 id="currentClassName" class="text-xl md:text-2xl font-bold amharic text-yellow-500">ክፍል ስም</h2>
+                        <p class="text-sm text-gray-400 lang-text" data-en="Attendance Management" data-am="የመገኘት መረጃ አስተዳደር">Attendance Management</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex items-center gap-6 border-b border-white/10 mb-6 no-print overflow-x-auto w-full">
+                <button id="tabDaily" onclick="switchView('daily')" class="tab-btn active px-2 pb-3 text-sm font-semibold whitespace-nowrap lang-text" data-en="📅 View Daily Attendance" data-am="📅 ዕለታዊ መገኘት ይመልከቱ">📅 View Daily Attendance</button>
+                <button id="tabSummary" onclick="switchView('summary')" class="tab-btn px-2 pb-3 text-sm font-semibold whitespace-nowrap lang-text" data-en="🗓️ Attendance Summary" data-am="🗓️ የመገኘት ማጠቃለያ">🗓️ Attendance Summary</button>
+                <button id="tabAnalytics" onclick="switchView('analytics')" class="tab-btn px-2 pb-3 text-sm font-semibold whitespace-nowrap lang-text" data-en="📊 Analytics" data-am="📊 ትንታኔ">📊 Analytics</button>
+            </div>
+
+            <!-- ============ DAILY VIEW ============ -->
+            <div id="dailyView">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 no-print w-full">
+                    <button onclick="openScanModal()" class="px-5 py-3 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition shadow-lg shadow-yellow-500/20 flex items-center gap-2 w-full md:w-auto justify-center">
+                        <span class="lang-text" data-en="🔍 Scan ID" data-am="🔍 መታወቂያ ስካን">🔍 Scan ID</span>
+                    </button>
+
+                    <div class="flex items-center justify-between w-full md:w-auto gap-3 glass-panel px-4 py-2 rounded-xl">
+                        <button onclick="changeDate(-1)" class="icon-btn bg-white/5 hover:bg-white/10">◀</button>
+                        <button onclick="openDatePicker()" class="text-center px-3 hover:text-yellow-400 transition w-full md:w-auto">
+                            <p id="gcDateLabel" class="font-semibold text-sm">Loading...</p>
+                            <p id="ecDateLabel" class="text-[11px] text-gray-400 amharic">📅 Change Date</p>
+                        </button>
+                        <button onclick="changeDate(1)" class="icon-btn bg-white/5 hover:bg-white/10">▶</button>
+                        <input type="date" id="hiddenDateInput" class="hidden" onchange="onDatePicked(this.value)">
+                    </div>
+
+                    <input type="text" id="searchInput" placeholder="Search ID, Name..." onkeyup="renderDailyTable()" class="glass-panel bg-transparent px-4 py-2 rounded-xl focus:outline-none focus:border-yellow-500 w-full md:w-64">
+                </div>
+
+                <!-- Quick stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 no-print">
+                    <div class="glass-panel p-4 rounded-2xl text-center">
+                        <p class="text-xs text-gray-400 lang-text" data-en="Total" data-am="አጠቃላይ">Total</p>
+                        <h3 id="dayTotal" class="text-2xl font-bold mt-1">0</h3>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl text-center border border-green-500/20">
+                        <p class="text-xs text-gray-400 lang-text" data-en="Present" data-am="የተገኘ">Present</p>
+                        <h3 id="dayPresent" class="text-2xl font-bold mt-1 text-green-400">0</h3>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl text-center border border-yellow-500/20">
+                        <p class="text-xs text-gray-400 lang-text" data-en="Late" data-am="ያረፈደ">Late</p>
+                        <h3 id="dayLate" class="text-2xl font-bold mt-1 text-yellow-400">0</h3>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl text-center border border-red-500/20">
+                        <p class="text-xs text-gray-400 lang-text" data-en="Absent" data-am="የቀረ">Absent</p>
+                        <h3 id="dayAbsent" class="text-2xl font-bold mt-1 text-red-400">0</h3>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-3xl w-full no-print responsive-table-panel">
+                    <table class="w-full text-sm attendance-table">
+                        <thead class="bg-white/5 text-gray-400 uppercase text-xs">
+                            <tr>
+                                <th class="p-4 text-left lang-text" data-en="Photo" data-am="ፎቶ">Photo</th>
+                                <th class="p-4 text-left lang-text" data-en="ID Number" data-am="መለያ ቁጥር">መለያ ቁጥር</th>
+                                <th class="p-4 text-left lang-text" data-en="Student Name" data-am="የተማሪ ስም">የተማሪ ስም</th>
+                                <th class="p-4 text-left lang-text" data-en="Phone" data-am="ስልክ">Phone</th>
+                                <th class="p-4 text-center lang-text" data-en="Action / Permission" data-am="ድርጊቶች / ፈቃድ">Action / Permission</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dailyTableBody"></tbody>
+                    </table>
+                    <p id="dailyEmptyMsg" class="hidden text-center text-gray-500 py-16 lang-text" data-en="No students found in this class." data-am="በዚህ ክፍል ውስጥ ተማሪዎች አልተገኙም።">No students found in this class.</p>
+                </div>
+            </div>
+
+            <!-- ============ SUMMARY VIEW ============ -->
+            <div id="summaryView" class="hidden">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 no-print w-full">
+                    <div class="flex flex-wrap items-center gap-3 glass-panel px-4 py-2 rounded-xl w-full md:w-auto">
+                        <label class="text-xs text-gray-400 lang-text" data-en="From" data-am="ከ">From</label>
+                        <button type="button" id="rangeStartDisplay" onclick="openEcRangePicker('start')" class="ec-range-field">—</button>
+                        <label class="text-xs text-gray-400 lang-text" data-en="To" data-am="እስከ">To</label>
+                        <button type="button" id="rangeEndDisplay" onclick="openEcRangePicker('end')" class="ec-range-field">—</button>
+                        <span class="text-xs text-gray-500 amharic ml-1 lang-text w-full md:w-auto text-center" data-en="🗓️ Ethiopian Calendar Date Range" data-am="🗓️ የኢትዮጵያ የቀን ክልል ይምረጡ">🗓️ Ethiopian Calendar Date Range</span>
+                        <input type="hidden" id="rangeStart">
+                        <input type="hidden" id="rangeEnd">
+                    </div>
+                    <button onclick="exportSummaryPdf()" class="px-6 py-3 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition shadow-lg shadow-yellow-500/20 w-full md:w-auto lang-text" data-en="📄 Export PDF" data-am="📄 ፒዲኤፍ አውርድ">📄 Export PDF</button>
+                </div>
+
+                <div class="glass-panel rounded-3xl w-full no-print responsive-table-panel">
+                    <table class="w-full text-sm attendance-table" id="summaryTable">
+                        <thead class="bg-white/5 text-gray-400 uppercase text-xs" id="summaryTableHead"></thead>
+                        <tbody id="summaryTableBody"></tbody>
+                    </table>
+                    <p id="summaryEmptyMsg" class="hidden text-center text-gray-500 py-16 lang-text" data-en="No students found in this class." data-am="በዚህ ክፍል ውስጥ ተማሪዎች አልተገኙም።">No students found in this class.</p>
+                </div>
+            </div>
+
+            <!-- ============ ANALYTICS VIEW ============ -->
+            <div id="analyticsView" class="hidden">
+                <div class="flex justify-end mb-6 no-print">
+                    <button onclick="renderAnalytics(true)" class="px-5 py-3 glass-panel rounded-xl hover:bg-white/10 transition font-semibold lang-text" data-en="🔄 Recalculate" data-am="🔄 እንደገና አስላ">🔄 Recalculate</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 no-print">
+                    <div class="glass-panel-gold p-6 rounded-3xl text-center">
+                        <p class="text-gray-400 text-sm mb-2 lang-text" data-en="Overall Class Attendance Rate" data-am="የክፍሉ አጠቃላይ የመገኘት ምጣኔ">Overall Class Attendance Rate</p>
+                        <h3 id="overallRate" class="text-5xl font-bold text-yellow-400">0%</h3>
+                    </div>
+                    <div class="glass-panel-gold p-6 rounded-3xl">
+                        <p class="text-gray-400 text-sm mb-3 text-center lang-text" data-en="🏆 Top 3 Most Present" data-am="🏆 ከፍተኛ መገኘት ያላቸው 3 ተማሪዎች">🏆 Top 3 Most Present</p>
+                        <ol id="topPresentList" class="space-y-2 text-sm"></ol>
+                    </div>
+                    <div class="glass-panel-gold p-6 rounded-3xl">
+                        <p class="text-gray-400 text-sm mb-3 text-center lang-text" data-en="⚠️ Needing Intervention" data-am="⚠️ ክትትል የሚፈልጉ">⚠️ Needing Intervention</p>
+                        <ol id="topAbsentList" class="space-y-2 text-sm"></ol>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-3xl no-print w-full">
+                    <p class="text-gray-400 text-sm mb-4 lang-text" data-en="Attendance Trend Over Time (last 14 days)" data-am="የመገኘት ሂደት (ባለፉት 14 ቀናት)">Attendance Trend Over Time (last 14 days)</p>
+                    <div class="chart-wrap">
+                        <canvas id="trendChart" height="90"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Ethiopian Calendar Range Picker -->
+    <div id="ecRangePicker" class="ec-picker-overlay hidden no-print" onclick="if(event.target===this)closeEcRangePicker()">
+        <div class="ec-picker-card">
+            <div class="ec-picker-head">
+                <div><div class="ec-picker-title">🗓️ Ethiopian Calendar</div><div id="ecPickerMode" class="ec-picker-sub">Select start date</div></div>
+                <button type="button" onclick="closeEcRangePicker()" class="icon-btn">✕</button>
+            </div>
+            <div class="flex gap-2 mb-3">
+                <select id="ecPickerMonth" class="ec-picker-select flex-1" onchange="renderEcPicker()"></select>
+                <select id="ecPickerYear" class="ec-picker-select w-28" onchange="renderEcPicker()"></select>
+            </div>
+            <div id="ecPickerWeek" class="ec-picker-grid mb-1"></div>
+            <div id="ecPickerDays" class="ec-picker-grid"></div>
+            <div id="ecPickerSelection" class="mt-3 text-xs text-gray-500"></div>
+            <div class="ec-picker-actions"><button type="button" onclick="closeEcRangePicker()">Cancel</button><button type="button" class="primary" onclick="confirmEcRangePicker()">Apply Range</button></div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         CLASS-SPECIFIC SCAN ID MODAL
+    =========================================== -->
+    <div id="scanModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center no-print">
+        <div class="modal-panel luxury-modal w-[95%] max-w-md max-h-[90vh] overflow-y-auto rounded-2xl relative">
+            <div class="p-4 md:p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5">
+                <h2 class="text-lg font-bold flex items-center gap-2 lang-text" data-en="Scan Student ID" data-am="የተማሪ መታወቂያ ስካን">
+                    <span class="bg-yellow-500 text-black p-1.5 rounded-lg text-xs">🔍</span>
+                    Scan Student ID
+                </h2>
+                <button onclick="closeScanModal()" class="text-gray-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">&times;</button>
+            </div>
+            <div class="p-4 md:p-6 flex flex-col gap-4">
+                <p class="text-xs text-gray-400 lang-text" data-en="Use a barcode scanner (acts as keyboard input) or type the student's ID and press Enter. Marks the student Present for the selected date." data-am="የባርኮድ ስካነር ይጠቀሙ ወይም የተማሪውን መታወቂያ አስገብተው 'Enter' ይጫኑ። ለተመረጠው ቀን ተማሪውን 'ተገኝቷል' ብሎ ይመዘግባል።">Use a barcode scanner (acts as keyboard input) or type the student's ID and press Enter. Marks the student <b>Present</b> for the selected date.</p>
+                <input type="text" id="scanInput" placeholder="e.g. MHSS-Q1-01" autofocus
+                    class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-3 text-center font-mono text-lg outline-none"
+                    onkeyup="if(event.key==='Enter') handleScanSubmit()">
+                <button onclick="handleScanSubmit()" class="px-5 py-3 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition lang-text" data-en="Mark Present" data-am="ተገኝቷል ብለህ መዝግብ">Mark Present</button>
+                <p id="scanFeedback" class="text-sm text-center min-h-[1.2em]"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         GLOBAL SCAN ID MODAL (For All Classes)
+    =========================================== -->
+    <div id="globalScanModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[55] modal-overlay modal-hidden-state hidden flex justify-center items-center no-print">
+        <div class="modal-panel luxury-modal w-[95%] max-w-md max-h-[90vh] overflow-y-auto rounded-2xl relative">
+            <div class="p-4 md:p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5">
+                <h2 class="text-lg font-bold flex items-center gap-2 lang-text" data-en="Global Barcode Scanner" data-am="አጠቃላይ የባርኮድ ስካነር">
+                    <span class="bg-yellow-500 text-black p-1.5 rounded-lg text-xs">🔍</span>
+                    Global Barcode Scanner
+                </h2>
+                <button onclick="closeGlobalScanModal()" class="text-gray-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">&times;</button>
+            </div>
+            <div class="p-4 md:p-6 flex flex-col gap-4">
+                <p class="text-xs text-gray-400 lang-text" data-en="Scan a student's ID card from ANY class. They will automatically be marked Present for TODAY." data-am="የማንኛውንም ተማሪ መታወቂያ ስካን ያድርጉ። ለዛሬው ቀን በቀጥታ 'ተገኝቷል' ተብሎ ይመዘገባል።">Scan a student's ID card from ANY class. They will automatically be marked Present for TODAY.</p>
+                <input type="text" id="globalScanInput" placeholder="Scan Barcode..." autofocus
+                    class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-3 text-center font-mono text-lg outline-none"
+                    onkeyup="if(event.key==='Enter') handleGlobalScanSubmit()">
+                <button onclick="handleGlobalScanSubmit()" class="px-5 py-3 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition lang-text" data-en="Mark Present" data-am="ተገኝቷል ብለህ መዝግብ">Mark Present</button>
+                <div id="globalScanFeedback" class="text-sm text-center min-h-[4em] bg-white/5 rounded-lg p-2 flex flex-col justify-center">
+                    <span class="text-gray-500 lang-text" data-en="Waiting for scan..." data-am="ለስካን በመጠባበቅ ላይ...">Waiting for scan...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[60] flex flex-col gap-2 no-print"></div>
+
+    <!-- Hidden printable summary sheet -->
+    <div id="printArea"></div>
+
+    <!-- SUPABASE CLIENT: reuses the same supabaseClient.js module as students.html
+         (single source of truth for the client instance), instead of creating a
+         second, separate createClient() call here. -->
+    <script type="module">
+        if (location.protocol === 'file:') {
+            console.error('[Supabase] This page was opened directly as a file:// URL. ES modules (import/export) are blocked by the browser under file://, so supabaseClient.js cannot load. Serve this folder over http(s) instead — e.g. `python3 -m http.server` then open http://localhost:8000/attendance.html, or use a "Live Server" style tool, or host it.');
+            window.dispatchEvent(new CustomEvent('supabase-load-failed', { detail: 'file-protocol' }));
+        } else {
+            import('./supabaseClient.js')
+                .then(async ({ supabase }) => {
+                    window.supabase = supabase;
+                    window.dispatchEvent(new CustomEvent('supabase-ready'));
+
+                    // Auth Check
+                    const { data } = await supabase.auth.getSession();
+                    if (!data.session) {
+                        window.location.href = 'index.html';
+                    }
+                })
+                .catch((err) => {
+                    console.error('[Supabase] Failed to load supabaseClient.js:', err);
+                    console.error('[Supabase] Check that supabaseClient.js is in the SAME folder as attendance.html, is spelled/cased exactly right, and that it loaded with no network/CORS error in the Network tab.');
+                    window.dispatchEvent(new CustomEvent('supabase-load-failed', { detail: err && err.message }));
+                });
+        }
+    </script>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // =========================================================
+        // ATTENDANCE THEME — shared with students.html
+        // Light is the default and the preference is persisted.
+        // =========================================================
+        function applyAttendanceTheme(theme) {
+            const safeTheme = theme === 'dark' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', safeTheme);
+            const btn = document.getElementById('themeToggleBtn');
+            if (btn) btn.setAttribute('aria-pressed', safeTheme === 'light' ? 'true' : 'false');
+            localStorage.setItem('mh_theme', safeTheme);
+        }
+        function toggleAttendanceTheme() {
+            const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+            applyAttendanceTheme(current === 'light' ? 'dark' : 'light');
+            if (typeof currentView !== 'undefined') {
+                if (currentView === 'analytics') setTimeout(() => renderAnalytics(false), 50);
+            }
+        }
+        (function initAttendanceTheme() {
+            const saved = localStorage.getItem('mh_theme');
+            applyAttendanceTheme(saved === 'dark' ? 'dark' : 'light');
+        })();
+
+        // Shared-style language buttons matching students.html.
+        function setAttendanceLanguage(lang) {
+            currentLang = lang === 'am' ? 'am' : 'en';
+            const label = document.getElementById('langLabel');
+            if (label) label.textContent = currentLang === 'en' ? 'አማርኛ' : 'English';
+            const en = document.getElementById('langBtnEn');
+            const am = document.getElementById('langBtnAm');
+            if (en) { en.classList.toggle('active', currentLang === 'en'); en.setAttribute('aria-pressed', currentLang === 'en'); }
+            if (am) { am.classList.toggle('active', currentLang === 'am'); am.setAttribute('aria-pressed', currentLang === 'am'); }
+            applyTranslations();
+        renderCustomClasses();
+            if (typeof currentView !== 'undefined') {
+                if (currentView === 'daily') renderDailyTable();
+                if (currentView === 'summary') renderSummary();
+                if (currentView === 'analytics') renderAnalytics(false);
+            }
+        }
+
+        // Language State
+        let currentLang = 'en';
+
+        function toggleLanguage() {
+            setAttendanceLanguage(currentLang === 'en' ? 'am' : 'en');
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('.lang-text').forEach(el => {
+                if (el.hasAttribute('data-' + currentLang)) {
+                    el.textContent = el.getAttribute('data-' + currentLang);
+                }
+            });
+            // Update inputs placeholders
+            const searchInput = document.getElementById('searchInput');
+            if(searchInput) searchInput.placeholder = currentLang === 'en' ? 'Search ID, Name...' : 'መታወቂያ፣ ስም ይፈልጉ...';
+        }
+
+        // 1. Date Setup - accurate Gregorian -> Ethiopian conversion (Julian Day Number based)
+        const etMonths = ['መስከረም','ጥቅምት','ህዳር','ታህሳስ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜ'];
+        const JD_EPOCH_OFFSET_AMETE_MIHRET = 1723856;
+        function gregorianToJdn(year, month, day) {
+            const y = month <= 2 ? year - 1 : year;
+            const m = month <= 2 ? month + 12 : month;
+            const a = Math.floor(y / 100);
+            const b = 2 - a + Math.floor(a / 4);
+            return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524;
+        }
+        function toEthiopian(d) {
+            const jdn = gregorianToJdn(d.getFullYear(), d.getMonth() + 1, d.getDate());
+            const r = (jdn - JD_EPOCH_OFFSET_AMETE_MIHRET) % 1461;
+            const n = (r % 365) + 365 * Math.floor(r / 1460);
+            const etYear = 4 * Math.floor((jdn - JD_EPOCH_OFFSET_AMETE_MIHRET) / 1461) + Math.floor(r / 365) - Math.floor(r / 1460);
+            const etMonthIdx = Math.floor(n / 30); // 0-based
+            const etDay = (n % 30) + 1;
+            return { etYear, etMonth: etMonths[etMonthIdx], etDay };
+        }
+        const ecMonthNames = etMonths;
+        const ecWeekNames = ['ሰኞ','ማክሰኞ','ረቡዕ','ሐሙስ','ዓርብ','ቅዳሜ','እሑድ'];
+        let ecRangeTarget = 'start', ecDraftStart = null, ecDraftEnd = null, ecPickerGregorian = new Date();
+        function jdnToGregorian(jdn){
+            // JDN 2440588 is 1970-01-01 UTC.
+            const u = new Date((jdn - 2440588) * 86400000);
+            return new Date(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate());
+        }
+        function ethiopianToGregorian(year,month,day){
+            const jdn = JD_EPOCH_OFFSET_AMETE_MIHRET + 365*year + Math.floor(year/4) + 30*month + day - 31;
+            return jdnToGregorian(jdn);
+        }
+        function ecDaysInMonth(y,m){ return m===13 ? (((y+1)%4===0) ? 6 : 5) : 30; }
+        function dateToEcKey(d){ const e=toEthiopian(d); return `${e.etYear}-${String(ecMonthNames.indexOf(e.etMonth)+1).padStart(2,'0')}-${String(e.etDay).padStart(2,'0')}`; }
+        function ecKeyToDate(key){ const [y,m,d]=key.split('-').map(Number); return ethiopianToGregorian(y,m,d); }
+        function formatEcKey(key){ if(!key) return '—'; const [y,m,d]=key.split('-').map(Number); return `${ecMonthNames[m-1]} ${d}, ${y} ዓ.ም`; }
+        function setDefaultEcRange(start,end){ document.getElementById('rangeStart').value=dateKey(start); document.getElementById('rangeEnd').value=dateKey(end); document.getElementById('rangeStartDisplay').textContent=formatEcKey(dateToEcKey(start)); document.getElementById('rangeEndDisplay').textContent=formatEcKey(dateToEcKey(end)); }
+        function openEcRangePicker(target){
+            ecRangeTarget=target; const currentKey=document.getElementById(target==='start'?'rangeStart':'rangeEnd').value || dateKey(new Date());
+            ecPickerGregorian=ecKeyToDate(dateToEcKey(new Date(currentKey+'T00:00:00')));
+            if(!ecDraftStart) ecDraftStart=document.getElementById('rangeStart').value; if(!ecDraftEnd) ecDraftEnd=document.getElementById('rangeEnd').value;
+            const e=toEthiopian(ecPickerGregorian); fillEcPickerSelectors(e.etYear,ecMonthNames.indexOf(e.etMonth)+1); renderEcPicker();
+            document.getElementById('ecPickerMode').textContent=target==='start'?'Select start date':'Select end date';
+            document.getElementById('ecRangePicker').classList.remove('hidden'); document.body.classList.add('overflow-hidden');
+        }
+        function fillEcPickerSelectors(year,month){
+            const ms=document.getElementById('ecPickerMonth'), ys=document.getElementById('ecPickerYear');
+            ms.innerHTML=ecMonthNames.map((m,i)=>`<option value="${i+1}">${m}</option>`).join(''); ms.value=month;
+            ys.innerHTML=''; for(let y=year-10;y<=year+10;y++) ys.insertAdjacentHTML('beforeend',`<option value="${y}">${y} ዓ.ም</option>`); ys.value=year;
+        }
+        function renderEcPicker(){
+            const y=+document.getElementById('ecPickerYear').value,m=+document.getElementById('ecPickerMonth').value;
+            const first=ethiopianToGregorian(y,m,1), jsDay=(first.getDay()+6)%7, total=ecDaysInMonth(y,m);
+            document.getElementById('ecPickerWeek').innerHTML=ecWeekNames.map(x=>`<div class="ec-picker-week">${x}</div>`).join('');
+            let html=''; for(let i=0;i<jsDay;i++) html+='<button class="ec-day empty" type="button"></button>';
+            const startKey=ecDraftStart,endKey=ecDraftEnd,todayKey=dateToEcKey(new Date());
+            for(let d=1;d<=total;d++){ const key=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; const sel=key===startKey||key===endKey; const a=startKey&&endKey&&key>startKey&&key<endKey; html+=`<button type="button" class="ec-day ${sel?'selected':''} ${a?'in-range':''} ${key===todayKey?'today':''}" onclick="pickEcDay('${key}')">${d}</button>`; }
+            document.getElementById('ecPickerDays').innerHTML=html; document.getElementById('ecPickerSelection').textContent=`From: ${formatEcKey(startKey)}  •  To: ${formatEcKey(endKey)}`;
+        }
+        function pickEcDay(key){
+            if(ecRangeTarget==='start'){ ecDraftStart=key; if(ecDraftEnd && ecDraftEnd<key) ecDraftEnd=null; document.getElementById('ecPickerMode').textContent='Now select end date'; }
+            else { ecDraftEnd=key; if(ecDraftStart && ecDraftEnd<ecDraftStart){ const t=ecDraftStart; ecDraftStart=ecDraftEnd; ecDraftEnd=t; } }
+            const d=ecKeyToDate(key),e=toEthiopian(d); fillEcPickerSelectors(e.etYear,ecMonthNames.indexOf(e.etMonth)+1); renderEcPicker();
+        }
+        function confirmEcRangePicker(){ if(!ecDraftStart||!ecDraftEnd){ alert('Please select both start and end dates.'); return; } document.getElementById('rangeStart').value=dateKey(ecKeyToDate(ecDraftStart)); document.getElementById('rangeEnd').value=dateKey(ecKeyToDate(ecDraftEnd)); document.getElementById('rangeStartDisplay').textContent=formatEcKey(ecDraftStart); document.getElementById('rangeEndDisplay').textContent=formatEcKey(ecDraftEnd); closeEcRangePicker(); renderSummary(); }
+        function closeEcRangePicker(){ document.getElementById('ecRangePicker').classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }
+
+        (function initHeaderDate() {
+            const gc = new Date();
+            const e = toEthiopian(gc);
+            document.getElementById('dateDisplay').textContent =
+                gc.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) +
+                ` | ${e.etMonth} ${e.etDay}, ${e.etYear}`;
+        })();
+
+        // 2. Student Database — loaded live from the Supabase "students" table
+        //    (same table students.html writes to). No more localStorage seed data.
+        let studentsData = [];
+
+        // Resolves once window.supabase (from supabaseClient.js) is ready.
+        // Mirrors the event-driven pattern in students.html rather than
+        // polling window.supabase, so failures (bad network, file:// protocol,
+        // supabaseClient.js missing) surface immediately instead of timing out.
+        let supabaseLoadFailure = null;
+        window.addEventListener('supabase-load-failed', (e) => { supabaseLoadFailure = (e.detail || 'unknown error'); });
+
+        function waitForSupabase(timeoutMs = 8000) {
+            if (window.supabase) return Promise.resolve(window.supabase);
+            if (supabaseLoadFailure) return Promise.reject(new Error('Supabase client failed to load: ' + supabaseLoadFailure));
+            return new Promise((resolve, reject) => {
+                const onReady = () => { cleanup(); resolve(window.supabase); };
+                const onFailed = (e) => { cleanup(); reject(new Error('Supabase client failed to load: ' + (e.detail || 'unknown error'))); };
+                const timer = setTimeout(() => { cleanup(); reject(new Error('Supabase client did not initialize in time. Open the browser console for details.')); }, timeoutMs);
+                function cleanup() {
+                    clearTimeout(timer);
+                    window.removeEventListener('supabase-ready', onReady);
+                    window.removeEventListener('supabase-load-failed', onFailed);
+                }
+                window.addEventListener('supabase-ready', onReady);
+                window.addEventListener('supabase-load-failed', onFailed);
+            });
+        }
+
+        // Maps a students-table row (snake_case, from mapToDB() in students.html)
+        // back into the camelCase shape attendance.html works with.
+        function mapStudentFromDB(r) {
+            return {
+                id: r.id,
+                name: r.name,
+                christianName: r.christian_name,
+                gender: r.gender,
+                phone: r.phone,
+                className: r.class_name,
+                grade: r.grade,
+                fieldOfStudy: r.field_of_study,
+                photo: r.photo
+            };
+        }
+
+        // Fetches all students from Supabase. Called on load, and re-run by
+        // refreshStudents() any time you want the latest data (e.g. after
+        // adding someone in students.html).
+        async function loadStudentsFromSupabase() {
+            try {
+                const client = await waitForSupabase();
+                const { data, error } = await client.from('students').select('*').order('id');
+                if (error) throw error;
+                studentsData = (data || []).map(mapStudentFromDB);
+            } catch (err) {
+                console.error('Failed to load students from Supabase:', err);
+                showToast(currentLang === 'en' ? 'Could not load students from the database.' : 'ተማሪዎችን ከዳታቤዝ ማምጣት አልተቻለም።', 'error');
+                studentsData = [];
+            }
+            // Re-render whatever's currently on screen with the fresh data.
+            if (currentClassStr) {
+                if (currentView === 'daily') renderDailyTable();
+                else if (currentView === 'summary') renderSummary();
+            }
+        }
+        let studentsLoadPromise = loadStudentsFromSupabase();
+        function refreshStudents() { return (studentsLoadPromise = loadStudentsFromSupabase()); }
+
+        // Persists a new/updated student (e.g. auto-registered via barcode scan)
+        // back to the shared Supabase "students" table.
+        async function saveStudentToSupabase(student) {
+            try {
+                const client = await waitForSupabase();
+                const dbRecord = {
+                    id: student.id,
+                    name: student.name,
+                    gender: student.gender || null,
+                    phone: student.phone || null,
+                    class_name: student.className,
+                    photo: student.photo || null
+                };
+                const { error } = await client.from('students').upsert([dbRecord], { onConflict: 'id' });
+                if (error) throw error;
+            } catch (err) {
+                console.error('Failed to save student to Supabase:', err);
+                showToast(currentLang === 'en' ? 'Could not save student to the database.' : 'ተማሪውን ማስቀመጥ አልተቻለም።', 'error');
+            }
+        }
+
+        // 3. Attendance store — backed by the Supabase "attendance_records" table.
+        // attendanceStore keeps the same in-memory shape as before
+        // (attendanceStore[dateKey][studentId] = 'present'|'late'|'absent')
+        // so every render/summary/analytics function below needs no changes —
+        // only how it gets populated and saved has changed.
+        let attendanceStore = {};
+
+        function mergeAttendanceRows(rows) {
+            (rows || []).forEach(r => {
+                attendanceStore[r.record_date] = attendanceStore[r.record_date] || {};
+                attendanceStore[r.record_date][r.student_id] = r.status;
+            });
+        }
+
+        // Loads every attendance record for one class from Supabase and merges
+        // it into attendanceStore. Called whenever a class is opened.
+        async function loadAttendanceForClass(className) {
+            try {
+                const client = await waitForSupabase();
+                const { data, error } = await client
+                    .from('attendance_records')
+                    .select('student_id, class_name, record_date, status')
+                    .eq('class_name', className);
+                if (error) throw error;
+                mergeAttendanceRows(data);
+            } catch (err) {
+                console.error('Failed to load attendance from Supabase:', err);
+                showToast(currentLang === 'en' ? 'Could not load attendance from the database.' : 'የክትትል መረጃ ማምጣት አልተቻለም።', 'error');
+            }
+        }
+
+        // Writes one attendance mark to Supabase (upsert keeps it to one row
+        // per student per day, matching the unique(student_id, record_date)
+        // constraint on attendance_records).
+        async function markAttendance(studentId, className, dateStr, status) {
+            attendanceStore[dateStr] = attendanceStore[dateStr] || {};
+            attendanceStore[dateStr][studentId] = status;
+            try {
+                const client = await waitForSupabase();
+                const { error } = await client
+                    .from('attendance_records')
+                    .upsert([{ student_id: studentId, class_name: className, record_date: dateStr, status }], { onConflict: 'student_id,record_date' });
+                if (error) throw error;
+            } catch (err) {
+                console.error('Failed to save attendance to Supabase:', err);
+                showToast(currentLang === 'en' ? 'Could not save attendance to the database.' : 'ክትትሉን ማስቀመጥ አልተቻለም።', 'error');
+            }
+        }
+
+
+        // ============================================================
+        // SHARED CLASS/GROUP LIST — Supabase is the single source of truth
+        // ============================================================
+        let studentClassesCache = [];
+        let studentClassesLoadPromise = null;
+
+        function classGroupMeta(groupName, index) {
+            const g = String(groupName || '').trim();
+            if (g === 'የሕፃናት ምድብ') return { color: 'yellow-500', icon: '🕊️' };
+            if (g === 'የማዕከላዊ ምድብ') return { color: 'blue-400', icon: '📖' };
+            if (g === 'የወጣቶች ምድብ') return { color: 'green-400', icon: '🎼' };
+            const colors = ['purple-400','pink-400','sky-400','amber-400','rose-400'];
+            const icons = ['📘','⭐','🌿','🔔','✝️'];
+            return { color: colors[index % colors.length], icon: icons[index % icons.length] };
+        }
+
+        function renderDatabaseClassSelection() {
+            const host = document.getElementById('dbClassSelectionContainer');
+            if (!host) return;
+            const groups = [];
+            const byGroup = new Map();
+            studentClassesCache.forEach(c => {
+                const g = String(c.group_name || 'Other Groups').trim() || 'Other Groups';
+                if (!byGroup.has(g)) { byGroup.set(g, []); groups.push(g); }
+                byGroup.get(g).push(c);
+            });
+            const systemOrder = ['የሕፃናት ምድብ','የማዕከላዊ ምድብ','የወጣቶች ምድብ'];
+            groups.sort((a,b) => {
+                const ai = systemOrder.indexOf(a), bi = systemOrder.indexOf(b);
+                if (ai !== -1 || bi !== -1) return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+                return a.localeCompare(b, 'am');
+            });
+            host.innerHTML = groups.map((groupName, gi) => {
+                const meta = classGroupMeta(groupName, gi);
+                const labelEn = groupName === 'የሕፃናት ምድብ' ? "Children's Category" : groupName === 'የማዕከላዊ ምድብ' ? 'Central Category' : groupName === 'የወጣቶች ምድብ' ? "Youth Category" : groupName;
+                const cards = (byGroup.get(groupName) || []).map(c => `
+                    <button onclick="openClass('${escapeHtml(c.class_name)}', '${escapeHtml(c.code || '')}')" class="class-card-lux glass-panel-gold rounded-3xl text-left relative overflow-hidden group">
+                        <div class="flex items-center justify-between p-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-${meta.color}/10 border border-${meta.color}/30 flex items-center justify-center text-2xl flex-shrink-0">${meta.icon}</div>
+                                <div><h3 class="text-lg font-bold amharic text-white leading-tight">${escapeHtml(c.class_name)}</h3><p class="text-[11px] text-gray-400 mt-1">${escapeHtml(c.code || '')} · <span class="lang-text" data-en="Tap to take attendance" data-am="መገኘት ለመመዝገብ ይጫኑ">Tap to take attendance</span></p></div>
+                            </div>
+                            <span class="text-xl text-${meta.color} opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                        </div>
+                    </button>`).join('');
+                return `<h3 class="text-xl font-bold text-${meta.color} mb-4 amharic border-b border-white/10 pb-2 inline-block">📌 ${escapeHtml(groupName)} <span class="text-xs font-normal text-gray-500">(${escapeHtml(labelEn)})</span></h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">${cards}</div>`;
+            }).join('');
+            if (typeof applyTranslations === 'function') applyTranslations();
+        }
+
+        async function loadStudentClassesFromSupabase() {
+            try {
+                const client = await waitForSupabase();
+                const { data: classRows, error: classError } = await client
+                    .from('student_classes')
+                    .select('id,group_id,name,code,is_system,sort_order')
+                    .order('sort_order', { ascending: true })
+                    .order('name', { ascending: true });
+                if (classError) throw classError;
+
+                const { data: groupRows, error: groupError } = await client
+                    .from('student_groups')
+                    .select('id,name,slug,is_system,sort_order')
+                    .order('sort_order', { ascending: true })
+                    .order('name', { ascending: true });
+                if (groupError) throw groupError;
+
+                const groupsById = new Map((groupRows || []).map(g => [String(g.id), g]));
+                studentClassesCache = (classRows || []).map(c => ({
+                    ...c,
+                    class_name: c.name,
+                    group_name: groupsById.get(String(c.group_id))?.name || 'Other Groups'
+                }));
+                renderDatabaseClassSelection();
+            } catch (err) {
+                console.error('Failed to load student classes from Supabase:', err);
+                showToast(currentLang === 'en' ? 'Could not load classes from the database.' : 'ክፍሎችን ከዳታቤዝ ማምጣት አልተቻለም።', 'error');
+            }
+        }
+
+        function hideLegacyClassLists() {
+            const root = document.getElementById('classSelectionView');
+            if (!root) return;
+            root.querySelectorAll(':scope > h3, :scope > div.grid').forEach(el => el.classList.add('hidden'));
+            const legacyCustom = document.getElementById('customClassesSection');
+            if (legacyCustom) legacyCustom.classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            hideLegacyClassLists();
+            loadStudentClassesFromSupabase();
+        });
+
+        // Legacy localStorage class list intentionally disabled.
+        // Classes now come exclusively from Supabase student_classes.
+
+        // 4. State
+        let currentClassStr = '';
+        let currentIdPrefix = '';
+        let currentDate = new Date();
+        let currentView = 'daily';
+        let trendChartInstance = null;
+
+        // 5. Helpers
+        function dateKey(d) { return d.toISOString().slice(0, 10); }
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        function getPhotoUrl(s) {
+            return s.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1e293b&color=FFD700&bold=true`;
+        }
+        function classStudents() {
+            return studentsData.filter(s => s.className === currentClassStr);
+        }
+        function showToast(msg, type) {
+            const box = document.getElementById('toastContainer');
+            const colors = { success: 'border-green-500/40 text-green-300', error: 'border-red-500/40 text-red-300', info: 'border-yellow-500/40 text-yellow-300' };
+            const div = document.createElement('div');
+            div.className = `toast glass-panel border ${colors[type] || colors.info} px-4 py-3 rounded-xl text-sm font-medium shadow-lg`;
+            div.textContent = msg;
+            box.appendChild(div);
+            setTimeout(() => div.remove(), 2600);
+        }
+
+        // 6. Navigation
+        async function openClass(className, idPrefix) {
+            currentClassStr = className;
+            currentIdPrefix = idPrefix;
+            currentDate = new Date();
+            document.getElementById('currentClassName').textContent = className;
+            document.getElementById('classSelectionView').classList.add('hidden');
+            document.getElementById('attendanceWorkspace').classList.remove('hidden');
+
+            const today = dateKey(new Date());
+            setDefaultEcRange(new Date(Date.now() - 6 * 86400000), new Date());
+
+            // Make sure the first render has real data from Supabase, not an empty array.
+            try { await studentsLoadPromise; } catch (e) {}
+            await loadAttendanceForClass(className);
+            switchView('daily');
+        }
+        function goBackToClasses() {
+            currentClassStr = '';
+            document.getElementById('attendanceWorkspace').classList.add('hidden');
+            document.getElementById('classSelectionView').classList.remove('hidden');
+            if (trendChartInstance) { trendChartInstance.destroy(); trendChartInstance = null; }
+        }
+        function switchView(view) {
+            currentView = view;
+            ['daily', 'summary', 'analytics'].forEach(v => {
+                document.getElementById(v + 'View').classList.toggle('hidden', v !== view);
+                document.getElementById('tab' + v.charAt(0).toUpperCase() + v.slice(1)).classList.toggle('active', v === view);
+            });
+            if (view === 'daily') renderDailyTable();
+            if (view === 'summary') renderSummary();
+            if (view === 'analytics') renderAnalytics();
+        }
+
+        // 7. Daily View
+        function updateDateLabels() {
+            const e = toEthiopian(currentDate);
+            document.getElementById('gcDateLabel').textContent = currentDate.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            document.getElementById('ecDateLabel').textContent = `📅 ${e.etMonth} ${e.etDay}, ${e.etYear} ዓ.ም`;
+            document.getElementById('hiddenDateInput').value = dateKey(currentDate);
+        }
+        function changeDate(delta) {
+            currentDate.setDate(currentDate.getDate() + delta);
+            currentDate = new Date(currentDate);
+            renderDailyTable();
+        }
+        function openDatePicker() {
+            const input = document.getElementById('hiddenDateInput');
+            input.value = dateKey(currentDate);
+            if (input.showPicker) input.showPicker(); else input.click();
+        }
+        function onDatePicked(value) {
+            if (!value) return;
+            currentDate = new Date(value + 'T00:00:00');
+            renderDailyTable();
+        }
+
+        function setStatus(studentId, status) {
+            const key = dateKey(currentDate);
+            markAttendance(studentId, currentClassStr, key, status);
+            renderDailyTable();
+        }
+
+        function renderDailyTable() {
+            updateDateLabels();
+            const key = dateKey(currentDate);
+            const dayRecord = attendanceStore[key] || {};
+            const searchTerm = (document.getElementById('searchInput').value || '').toLowerCase();
+
+            const students = classStudents().filter(s =>
+                s.id.toLowerCase().includes(searchTerm) ||
+                s.name.toLowerCase().includes(searchTerm) ||
+                (s.phone || '').includes(searchTerm)
+            );
+
+            const tbody = document.getElementById('dailyTableBody');
+            const emptyMsg = document.getElementById('dailyEmptyMsg');
+            tbody.innerHTML = '';
+            emptyMsg.classList.toggle('hidden', students.length > 0);
+
+            let present = 0, late = 0, absent = 0;
+
+            students.forEach(s => {
+                const status = dayRecord[s.id] || '';
+                if (status === 'present') present++;
+                if (status === 'late') late++;
+                if (status === 'absent') absent++;
+
+                const txtP = currentLang === 'en' ? 'Present' : 'ተገኝቷል';
+                const txtL = currentLang === 'en' ? 'Late' : 'ያረፈደ';
+                const txtA = currentLang === 'en' ? 'Absent' : 'የቀረ';
+                const txtPerm = currentLang === 'en' ? 'Perm.' : 'ፈቃድ';
+
+                tbody.innerHTML += `
+                    <tr class="row-in border-t border-white/5 hover:bg-white/5 transition">
+                        <td class="p-4"><img src="${getPhotoUrl(s)}" class="w-11 h-11 rounded-full object-cover gold-ring" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1e293b&color=FFD700'"></td>
+                        <td class="p-4"><span class="id-chip text-yellow-400 font-mono text-xs px-2 py-0.5 rounded-full">${escapeHtml(s.id)}</span></td>
+                        <td class="p-4 amharic font-semibold whitespace-nowrap">${escapeHtml(s.name)}</td>
+                        <td class="p-4 text-gray-400">${escapeHtml(s.phone || '-')}</td>
+                        <td class="p-4 min-w-[320px]">
+                            <div class="flex justify-center gap-1.5 md:gap-2 flex-wrap">
+                                <button onclick="setStatus('${s.id}','present')" class="status-btn present px-2 md:px-3 py-1.5 rounded-lg text-xs font-bold border border-green-500/30 bg-green-500/5 text-green-400 ${status === 'present' ? 'selected present' : ''}">✔ ${txtP}</button>
+                                <button onclick="setStatus('${s.id}','late')" class="status-btn late px-2 md:px-3 py-1.5 rounded-lg text-xs font-bold border border-yellow-500/30 bg-yellow-500/5 text-yellow-400 ${status === 'late' ? 'selected late' : ''}">⏰ ${txtL}</button>
+                                <button onclick="setStatus('${s.id}','absent')" class="status-btn absent px-2 md:px-3 py-1.5 rounded-lg text-xs font-bold border border-red-500/30 bg-red-500/5 text-red-400 ${status === 'absent' ? 'selected absent' : ''}">✘ ${txtA}</button>
+                                <button onclick="setStatus('${s.id}','permission')" class="status-btn permission px-2 md:px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-500/30 bg-blue-500/5 text-blue-400 ${status === 'permission' ? 'selected permission' : ''}">🛡️ ${txtPerm}</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+
+            document.getElementById('dayTotal').textContent = students.length;
+            document.getElementById('dayPresent').textContent = present;
+            document.getElementById('dayLate').textContent = late;
+            document.getElementById('dayAbsent').textContent = absent;
+        }
+
+        // 7b. Barcode payload parser
+        // Student ID barcodes may encode just the ID (e.g. "MHSS-Q1-01"), or a
+        // delimited payload with Name, ID, Class name and Phone together
+        // (e.g. "አበበ ከበደ|MHSS-Q1-01|ምድብ ቂርቆስ ፩|0911223344"). This parses either.
+        function parseBarcodePayload(raw) {
+            const str = (raw || '').trim();
+            if (!str) return null;
+
+            let parts;
+            if (str.includes('|')) parts = str.split('|');
+            else if (str.includes('\t')) parts = str.split('\t');
+            else if (str.includes(';')) parts = str.split(';');
+            else if (str.includes(',')) parts = str.split(',');
+            else parts = [str];
+
+            parts = parts.map(p => p.trim()).filter(p => p.length);
+
+            if (parts.length === 1) {
+                return { id: parts[0], name: null, className: null, phone: null };
+            }
+
+            const idRe = /^[A-Za-z0-9]+-[A-Za-z0-9-]+$/;
+            const phoneRe = /^\+?\d[\d\s-]{7,14}$/;
+
+            let id = null, phone = null, className = null, name = null;
+            const remaining = [];
+
+            parts.forEach(p => {
+                if (!id && idRe.test(p)) { id = p; return; }
+                if (!phone && phoneRe.test(p)) { phone = p; return; }
+                remaining.push(p);
+            });
+
+            remaining.forEach(p => {
+                if (!className && p.includes('ምድብ')) { className = p; return; }
+                if (!name) { name = p; return; }
+                if (!className) { className = p; }
+            });
+
+            // Fallback: assume order Name | ID | Class | Phone if detection was incomplete
+            if (!id && parts[1]) id = parts[1];
+            if (!id) id = parts[0];
+            if (!name) name = parts[0] !== id ? parts[0] : null;
+            if (!className && parts[2]) className = parts[2];
+            if (!phone && parts[3]) phone = parts[3];
+
+            return { id, name, className, phone };
+        }
+
+        // Finds a student by ID, or auto-registers them if the scanned payload
+        // included enough info (name + class) and the ID isn't in the database yet.
+        function resolveScannedStudent(raw, poolFilterClassName) {
+            const parsed = parseBarcodePayload(raw);
+            if (!parsed || !parsed.id) return { student: null, parsed, created: false };
+
+            const pool = poolFilterClassName ? studentsData.filter(s => s.className === poolFilterClassName) : studentsData;
+            let student = pool.find(s => s.id.toLowerCase() === parsed.id.toLowerCase())
+                || studentsData.find(s => s.id.toLowerCase() === parsed.id.toLowerCase());
+
+            let created = false;
+            if (!student && parsed.name && parsed.className) {
+                student = { id: parsed.id, name: parsed.name, phone: parsed.phone || '', gender: '', className: parsed.className, photo: null };
+                studentsData.push(student);
+                saveStudentToSupabase(student);
+                created = true;
+            } else if (student && (parsed.name || parsed.phone)) {
+                // Backfill any missing details from the card without overwriting existing data
+                if (!student.phone && parsed.phone) student.phone = parsed.phone;
+                if (created === false) saveStudentToSupabase(student);
+            }
+
+            return { student, parsed, created };
+        }
+
+        // 8. Class Scan ID Modal & Barcode Logic
+        let barcodeBuffer = '';
+        let lastKeyTime = Date.now();
+
+        document.addEventListener('keydown', function(e) {
+            if (e.target.tagName === 'INPUT' && e.target.id !== 'scanInput' && e.target.id !== 'globalScanInput') return;
+            const currentTime = Date.now();
+            if (currentTime - lastKeyTime > 100) barcodeBuffer = '';
+            lastKeyTime = currentTime;
+
+            if (e.key === 'Enter' && barcodeBuffer.length > 0) {
+                // If global modal is open
+                if (!document.getElementById('globalScanModal').classList.contains('hidden')) {
+                    handleGlobalBarcodeScan(barcodeBuffer);
+                } 
+                // If specific class view is active
+                else if (currentClassStr) {
+                    handleClassBarcodeScan(barcodeBuffer);
+                }
+                barcodeBuffer = '';
+                e.preventDefault();
+            } else if (e.key.length === 1) {
+                barcodeBuffer += e.key;
+            }
+        });
+
+        // 8a. Class Specific Barcode
+        function handleClassBarcodeScan(scannedId) {
+            const raw = scannedId.trim();
+            const { student, parsed } = resolveScannedStudent(raw, currentClassStr);
+            const feedback = document.getElementById('scanFeedback');
+            const scanModal = document.getElementById('scanModal');
+
+            if (!student) {
+                if (!scanModal.classList.contains('hidden')) {
+                    feedback.className = 'text-sm text-center min-h-[1.2em] text-red-400';
+                    feedback.textContent = currentLang === 'en' ? `No student with ID "${parsed ? parsed.id : raw}" in this class.` : `በዚህ ክፍል መታወቂያ "${parsed ? parsed.id : raw}" አልተገኘም።`;
+                }
+                showToast(`ID not found: ${raw}`, 'error');
+                return;
+            }
+
+            if (student.className !== currentClassStr) {
+                if (!scanModal.classList.contains('hidden')) {
+                    feedback.className = 'text-sm text-center min-h-[1.2em] text-yellow-400';
+                    feedback.textContent = currentLang === 'en' ? `${student.name} belongs to "${student.className}", not this class.` : `${student.name} የ"${student.className}" ተማሪ ነው/ናት፣ የዚህ ክፍል አይደለም/አይደለችም።`;
+                }
+                showToast(`${student.name} is not in this class`, 'error');
+                return;
+            }
+
+            setStatus(student.id, 'present');
+            renderDailyTable();
+
+            if (!scanModal.classList.contains('hidden')) {
+                feedback.className = 'text-sm text-center min-h-[1.2em] text-green-400';
+                feedback.textContent = currentLang === 'en' ? `✔ ${student.name} marked Present.` : `✔ ${student.name} ተገኝቷል ተብሏል።`;
+            }
+            showToast(`${student.name} marked Present`, 'success');
+        }
+
+        function openScanModal() {
+            document.getElementById('scanModal').classList.remove('hidden');
+            requestAnimationFrame(() => document.getElementById('scanModal').classList.remove('modal-hidden-state'));
+            document.getElementById('scanFeedback').textContent = '';
+            const input = document.getElementById('scanInput');
+            input.value = '';
+            setTimeout(() => input.focus(), 100);
+        }
+        function closeScanModal() {
+            const modal = document.getElementById('scanModal');
+            modal.classList.add('modal-hidden-state');
+            setTimeout(() => modal.classList.add('hidden'), 280);
+        }
+        function handleScanSubmit() {
+            const raw = document.getElementById('scanInput').value;
+            if (!raw) return;
+            handleClassBarcodeScan(raw);
+            const input = document.getElementById('scanInput');
+            input.value = '';
+            input.focus();
+        }
+
+        // 8b. Global Scan Modal
+        function openGlobalScanModal() {
+            document.getElementById('globalScanModal').classList.remove('hidden');
+            requestAnimationFrame(() => document.getElementById('globalScanModal').classList.remove('modal-hidden-state'));
+            const waitingText = currentLang === 'en' ? "Waiting for scan..." : "ለስካን በመጠባበቅ ላይ...";
+            document.getElementById('globalScanFeedback').innerHTML = `<span class="text-gray-500">${waitingText}</span>`;
+            const input = document.getElementById('globalScanInput');
+            input.value = '';
+            setTimeout(() => input.focus(), 100);
+        }
+        
+        function closeGlobalScanModal() {
+            const modal = document.getElementById('globalScanModal');
+            modal.classList.add('modal-hidden-state');
+            setTimeout(() => modal.classList.add('hidden'), 280);
+        }
+
+        function handleGlobalScanSubmit() {
+            const raw = document.getElementById('globalScanInput').value.trim();
+            if (!raw) return;
+            handleGlobalBarcodeScan(raw);
+            const input = document.getElementById('globalScanInput');
+            input.value = '';
+            input.focus();
+        }
+
+        function handleGlobalBarcodeScan(scannedId) {
+            const raw = scannedId.trim();
+            const { student, parsed, created } = resolveScannedStudent(raw, null);
+            const feedback = document.getElementById('globalScanFeedback');
+
+            if (!student) {
+                const notFound = currentLang === 'en' ? `No student found with ID "${parsed ? parsed.id : raw}".` : `በመታወቂያ "${parsed ? parsed.id : raw}" ተማሪ አልተገኘም።`;
+                feedback.innerHTML = `<span class="text-red-400 font-bold">${notFound}</span>`;
+                showToast(`ID not found: ${raw}`, 'error');
+            } else {
+                // Mark present for TODAY
+                const todayKey = dateKey(new Date());
+                markAttendance(student.id, student.className, todayKey, 'present');
+                
+                const marked = currentLang === 'en' ? "✔ Marked Present!" : "✔ ተገኝቷል ተብሏል!";
+                const className = currentLang === 'en' ? "Class" : "ክፍል";
+                const phoneLabel = currentLang === 'en' ? "Phone" : "ስልክ";
+                const newBadge = created ? (currentLang === 'en' ? '<span class="text-blue-400">(new student registered from card)</span><br>' : '<span class="text-blue-400">(ከካርዱ አዲስ ተማሪ ተመዝግቧል)</span><br>') : '';
+
+                feedback.innerHTML = `
+                    <div class="text-green-400 font-bold mb-1 text-lg">${marked}</div>
+                    <div class="text-xs text-gray-300 amharic">
+                        ${newBadge}
+                        ${student.name} | ${student.id}<br>
+                        <span class="text-yellow-400">${className}: ${student.className}</span> | ${phoneLabel}: ${student.phone || '-'}
+                    </div>
+                `;
+                showToast(`${student.name} marked Present`, 'success');
+                if (currentClassStr === student.className && currentView === 'daily') renderDailyTable();
+            }
+        }
+
+        // 9. Summary View
+        function dateRangeArray(startStr, endStr) {
+            const dates = [];
+            let d = new Date(startStr + 'T00:00:00');
+            const end = new Date(endStr + 'T00:00:00');
+            while (d <= end) {
+                dates.push(dateKey(d));
+                d.setDate(d.getDate() + 1);
+            }
+            return dates;
+        }
+        function statusMark(status) {
+            if (status === 'present') return '<span class="text-green-400 font-bold">P</span>';
+            if (status === 'late') return '<span class="text-yellow-400 font-bold">L</span>';
+            if (status === 'absent') return '<span class="text-red-400 font-bold">A</span>';
+            if (status === 'permission') return '<span class="text-blue-400 font-bold amharic">ፈ/Prm</span>';
+            return '<span class="text-gray-600">-</span>';
+        }
+        function renderSummary() {
+            const startStr = document.getElementById('rangeStart').value;
+            const endStr = document.getElementById('rangeEnd').value;
+            if (!startStr || !endStr) return;
+            const dates = dateRangeArray(startStr, endStr);
+            const students = classStudents();
+
+            const thead = document.getElementById('summaryTableHead');
+            const tbody = document.getElementById('summaryTableBody');
+            const emptyMsg = document.getElementById('summaryEmptyMsg');
+            emptyMsg.classList.toggle('hidden', students.length > 0);
+
+            const hID = currentLang === 'en' ? 'ID' : 'መለያ';
+            const hName = currentLang === 'en' ? 'Name' : 'ስም';
+            const hAbsences = currentLang === 'en' ? 'Absences' : 'የቀረበት';
+
+            thead.innerHTML = `<tr>
+                <th class="p-3 text-left whitespace-nowrap">${hID}</th>
+                <th class="p-3 text-left whitespace-nowrap">${hName}</th>
+                ${dates.map(d => {
+                    const et = toEthiopian(new Date(d + 'T00:00:00'));
+                    return `<th class="p-2 text-center whitespace-nowrap text-[11px] leading-tight amharic border-x border-white/5">${et.etMonth} ${et.etDay},<br>${et.etYear}</th>`;
+                }).join('')}
+                <th class="p-3 text-center whitespace-nowrap">${hAbsences}</th>
+            </tr>`;
+
+            tbody.innerHTML = students.map(s => {
+                let absences = 0;
+                const cells = dates.map(d => {
+                    const status = (attendanceStore[d] || {})[s.id];
+                    if (status === 'absent') absences++;
+                    return `<td class="p-3 text-center border border-white/5">${statusMark(status)}</td>`;
+                }).join('');
+                return `<tr class="row-in">
+                    <td class="p-3 border-t border-white/5"><span class="id-chip text-yellow-400 font-mono text-xs px-2 py-0.5 rounded-full whitespace-nowrap">${escapeHtml(s.id)}</span></td>
+                    <td class="p-3 border-t border-white/5 amharic font-semibold whitespace-nowrap">${escapeHtml(s.name)}</td>
+                    ${cells}
+                    <td class="p-3 text-center border-t border-white/5 font-bold ${absences > 2 ? 'text-red-400' : 'text-gray-300'}">${absences}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function exportSummaryPdf() {
+            const startStr = document.getElementById('rangeStart').value;
+            const endStr = document.getElementById('rangeEnd').value;
+            const dates = dateRangeArray(startStr, endStr);
+            const students = classStudents();
+            if (!students.length) { 
+                alert(currentLang === 'en' ? 'No students to export in this class.' : 'በዚህ ክፍል ውስጥ ተማሪዎች አልተገኙም።');
+                return; 
+            }
+
+            const rows = students.map(s => {
+                let absences = 0;
+                const cells = dates.map(d => {
+                    const status = (attendanceStore[d] || {})[s.id];
+                    if (status === 'absent') absences++;
+                    const label = status === 'present' ? 'P' : status === 'late' ? 'L' : status === 'absent' ? 'A' : status === 'permission' ? 'Prm' : '-';
+                    return `<td>${label}</td>`;
+                }).join('');
+                return `<tr><td class="name-cell">${escapeHtml(s.id)}</td><td class="name-cell">${escapeHtml(s.name)}</td>${cells}<td>${absences}</td></tr>`;
+            }).join('');
+
+            const printArea = document.getElementById('printArea');
+            printArea.innerHTML = `
+                <div class="print-header">
+                    <img src="logo.png" onerror="this.style.display='none'">
+                    <div>
+                        <h2>Meserete Hiwot ERP - Attendance Summary</h2>
+                        <p>${escapeHtml(currentClassStr)} | ${startStr} to ${endStr}</p>
+                    </div>
+                </div>
+                <table class="print-summary-table">
+                    <thead><tr><th>ID</th><th>Name</th>${dates.map(d => {
+                        const et = toEthiopian(new Date(d + 'T00:00:00'));
+                        return `<th>${et.etMonth} ${et.etDay}, ${et.etYear}</th>`;
+                    }).join('')}<th>Absences</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
+
+            setTimeout(() => window.print(), 150);
+        }
+
+        // 10. Analytics View
+        function renderAnalytics(showToastMsg) {
+            const students = classStudents();
+            const dates = [];
+            for (let i = 13; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                dates.push(dateKey(d));
+            }
+
+            // Overall rate + per-student stats
+            let totalMarks = 0, presentMarks = 0;
+            const perStudent = students.map(s => {
+                let p = 0, total = 0;
+                dates.forEach(d => {
+                    const status = (attendanceStore[d] || {})[s.id];
+                    if (status) {
+                        total++;
+                        if (status === 'present' || status === 'late') p++;
+                        totalMarks++;
+                        if (status === 'present' || status === 'late') presentMarks++;
+                    }
+                });
+                return { s, rate: total ? p / total : 0, absences: total - p };
+            });
+
+            const overallRate = totalMarks ? Math.round((presentMarks / totalMarks) * 100) : 0;
+            document.getElementById('overallRate').textContent = overallRate + '%';
+
+            const topPresent = [...perStudent].sort((a, b) => b.rate - a.rate).slice(0, 3);
+            const topAbsent = [...perStudent].sort((a, b) => b.absences - a.absences).slice(0, 3);
+
+            const txtAbsent = currentLang === 'en' ? 'absent' : 'የቀረ';
+            const txtNoData = currentLang === 'en' ? 'No data yet' : 'መረጃ አልተገኘም';
+
+            document.getElementById('topPresentList').innerHTML = topPresent.length
+                ? topPresent.map((x, i) => `<li class="flex justify-between items-center bg-white/5 rounded-lg px-3 py-2"><span class="amharic">${i + 1}. ${escapeHtml(x.s.name)}</span><span class="text-green-400 font-bold">${Math.round(x.rate * 100)}%</span></li>`).join('')
+                : `<li class="text-gray-500 text-center">${txtNoData}</li>`;
+
+            document.getElementById('topAbsentList').innerHTML = topAbsent.length
+                ? topAbsent.map((x, i) => `<li class="flex justify-between items-center bg-white/5 rounded-lg px-3 py-2"><span class="amharic">${i + 1}. ${escapeHtml(x.s.name)}</span><span class="text-red-400 font-bold">${x.absences} ${txtAbsent}</span></li>`).join('')
+                : `<li class="text-gray-500 text-center">${txtNoData}</li>`;
+
+            // Trend chart
+            const trendData = dates.map(d => {
+                const record = attendanceStore[d] || {};
+                const relevant = students.filter(s => record[s.id]);
+                if (!relevant.length) return null;
+                const good = relevant.filter(s => record[s.id] === 'present' || record[s.id] === 'late').length;
+                return Math.round((good / relevant.length) * 100);
+            });
+
+            const ctx = document.getElementById('trendChart');
+            if (trendChartInstance) trendChartInstance.destroy();
+            trendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates.map(d => {
+                        const et = toEthiopian(new Date(d + 'T00:00:00'));
+                        return `${et.etMonth} ${et.etDay}`;
+                    }),
+                    datasets: [{
+                        label: 'Attendance %',
+                        data: trendData,
+                        borderColor: '#FFD700',
+                        backgroundColor: 'rgba(255,215,0,0.12)',
+                        tension: 0.35,
+                        fill: true,
+                        spanGaps: true,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#FFD700'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { min: 0, max: 100, ticks: { color: '#9ca3af', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { ticks: { color: '#9ca3af', font: {size: 10} }, grid: { display: false } }
+                    }
+                }
+            });
+
+            if (showToastMsg) showToast(currentLang === 'en' ? 'Analytics recalculated' : 'ትንታኔ እንደገና ተሰልቷል', 'info');
+        }
+    </script>
+</body>
+</html>

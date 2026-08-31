@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Begena - Student Information & Attendance Management</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root{
+        --idc-blue:#123A7A; --idc-gold:#C9A227; --idc-navy:#1B1B2F;
+    }
+    body{ font-family:'Inter', sans-serif; background:#0f172a; color:#fff; }
+    .amharic{ font-family:'Noto Sans Ethiopic', sans-serif; }
+
+    /* Language Toggle Logic */
+    body.lang-am .lang-en { display: none !important; }
+    body.lang-en .lang-am { display: none !important; }
+
+    .ambient-glow{ position:fixed; width:600px; height:600px; background:radial-gradient(circle, rgba(255,215,0,0.06) 0%, rgba(0,0,0,0) 70%); top:-200px; left:-200px; z-index:-1; pointer-events:none; }
+    .ambient-glow-2{ position:fixed; width:800px; height:800px; background:radial-gradient(circle, rgba(56,189,248,0.04) 0%, rgba(0,0,0,0) 70%); bottom:-200px; right:-200px; z-index:-1; pointer-events:none; }
+
+    /* ===== Begena (Ethiopian lyre/harp) low-opacity abstract watermark ===== */
+    .begena-mark{ position:fixed; pointer-events:none; z-index:-1; color:#C9A227; opacity:.05; }
+    .begena-mark svg{ width:100%; height:100%; }
+    .begena-mark-1{ top:-60px; right:-80px; width:520px; height:520px; transform:rotate(8deg); }
+    .begena-mark-2{ bottom:-100px; left:-100px; width:600px; height:600px; transform:rotate(-14deg); }
+    .begena-mark-3{ top:38%; left:50%; width:420px; height:420px; transform:translate(-50%,-50%) rotate(3deg); opacity:.025; }
+
+    .glass-panel{ background:rgba(255,255,255,0.03); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.08); }
+    .glass-panel-gold{
+        background:linear-gradient(155deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+        backdrop-filter:blur(24px);
+        border:1px solid rgba(255,215,0,0.14);
+        box-shadow:0 8px 30px -10px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+        transition:all .35s cubic-bezier(.4,0,.2,1);
+    }
+    .glass-panel-gold:hover{ transform:translateY(-6px); border-color:rgba(255,215,0,0.45); box-shadow:0 22px 45px -14px rgba(255,215,0,0.18), inset 0 1px 0 rgba(255,255,255,0.08); }
+
+    .card-in{ animation:cardIn .5s cubic-bezier(.22,1,.36,1) both; }
+    @keyframes cardIn{ from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:translateY(0) scale(1);} }
+
+    .hero-card{ position:relative; overflow:hidden; border-radius:28px; }
+    .hero-card::after{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 15% 0%, rgba(201,162,39,0.10), transparent 60%); pointer-events:none; }
+    .hero-ribbon{ position:absolute; top:0; right:0; width:150px; height:52px; background:linear-gradient(115deg, var(--idc-gold) 0%, #e3c766 30%, var(--idc-blue) 78%, #0d2a5c 100%); clip-path:polygon(28% 0,100% 0,100% 100%); z-index:0; opacity:.9; }
+
+    .gold-text{ background:linear-gradient(120deg,#f5e08a,#C9A227 45%,#f5e08a 90%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+    .icon-btn{ width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:10px; transition:all .25s cubic-bezier(.4,0,.2,1); }
+    .icon-btn:hover{ transform:translateY(-3px) scale(1.08); }
+
+    .lux-input{ transition:all .2s ease; }
+    .lux-input:focus{ border-color:#FFD700 !important; box-shadow:0 0 0 3px rgba(255,215,0,0.12); }
+    .section-title{ display:flex; align-items:center; gap:8px; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:#FFD700; font-weight:700; }
+
+    .modal-overlay{ transition:opacity .28s ease; }
+    .modal-panel{ transition:transform .32s cubic-bezier(.34,1.4,.64,1), opacity .28s ease; }
+    .modal-hidden-state{ opacity:0; pointer-events:none; }
+    .modal-hidden-state .modal-panel{ transform:scale(.94) translateY(14px); opacity:0; }
+    .luxury-modal{ background:linear-gradient(160deg,#131c2e,#0c1322); border:1px solid rgba(255,215,0,0.22); box-shadow:0 25px 60px -15px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,215,0,0.05); }
+
+    .avatar-ring{ border:2px solid rgba(255,215,0,0.55); box-shadow:0 6px 18px -4px rgba(255,215,0,0.25); }
+
+    .status-btn{ transition:all .2s cubic-bezier(.4,0,.2,1); border:1px solid rgba(255,255,255,0.1); }
+    .status-btn.active-present{ background:rgba(34,197,94,0.18); border-color:#22c55e; color:#4ade80; }
+    .status-btn.active-absent{ background:rgba(239,68,68,0.18); border-color:#ef4444; color:#f87171; }
+    .status-btn.active-late{ background:rgba(245,158,11,0.18); border-color:#f59e0b; color:#fbbf24; }
+    .status-btn.active-permission{ background:rgba(56,189,248,0.18); border-color:#38bdf8; color:#7dd3fc; }
+
+    .view{ display:none; }
+    .view.active{ display:block; }
+
+    ::-webkit-scrollbar{ width:8px; height:8px; }
+    ::-webkit-scrollbar-thumb{ background:rgba(255,215,0,0.25); border-radius:8px; }
+
+    /* ===== Attendance Summary + Analytics ===== */
+    .attendance-tabs{display:flex;gap:6px;overflow-x:auto;padding:6px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:16px;scrollbar-width:none}
+    .attendance-tabs::-webkit-scrollbar{display:none}
+    .attendance-tab{flex:1 0 auto;border:1px solid transparent;border-radius:12px;padding:11px 15px;font-size:12px;font-weight:800;color:#94a3b8;transition:.25s;white-space:nowrap}
+    .attendance-tab.active{background:rgba(201,162,39,.14);border-color:rgba(201,162,39,.35);color:#f5d76e;box-shadow:0 8px 22px rgba(0,0,0,.16)}
+    .attendance-pane{display:none}.attendance-pane.active{display:block}
+    .metric-card{position:relative;overflow:hidden}.metric-card::after{content:"";position:absolute;width:110px;height:110px;right:-55px;top:-55px;border-radius:50%;background:rgba(201,162,39,.08);pointer-events:none}
+    .summary-table{width:100%;border-collapse:collapse;font-size:12px}.summary-table th,.summary-table td{padding:10px 8px;border-bottom:1px solid rgba(148,163,184,.14);text-align:center}.summary-table th{color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.04em;background:rgba(255,255,255,.035)}.summary-table td:first-child,.summary-table th:first-child{text-align:left}
+    .progress-track{height:7px;border-radius:999px;background:rgba(148,163,184,.14);overflow:hidden}.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#C9A227,#f5d76e)}
+    .chart-box{height:310px;position:relative}.chart-box canvas{max-width:100%!important}
+    .range-control{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:10px 12px;color:#fff;font-size:12px;outline:none}
+    @media(max-width:640px){.attendance-tab{font-size:10px;padding:10px 11px}.summary-table{font-size:10px}.summary-table th,.summary-table td{padding:7px 4px}.chart-box{height:250px}}
+
+/* ===================== LUXURY LIGHT / DARK THEME ===================== */
+:root {
+    --bg: #F7F8FA;
+    --surface: #FFFFFF;
+    --surface-soft: #F1F3F5;
+    --text: #172033;
+    --text-muted: #596579;
+    --primary: #B8922E;
+    --primary-bright: #D4AF37;
+    --border: #E2E6EC;
+    --success: #2E8B57;
+    --warning: #B27A12;
+    --danger: #C43D3D;
+    --info: #2879A8;
+    --shadow: 0 14px 38px rgba(23,32,51,.08);
+}
+html[data-theme="dark"] {
+    --bg: #0F172A;
+    --surface: #111C2E;
+    --surface-soft: #172338;
+    --text: #F8FAFC;
+    --text-muted: #AAB5C6;
+    --primary: #D4AF37;
+    --primary-bright: #F0C95A;
+    --border: rgba(255,255,255,.10);
+    --success: #4ADE80;
+    --warning: #FACC15;
+    --danger: #F87171;
+    --info: #38BDF8;
+    --shadow: 0 18px 48px rgba(0,0,0,.30);
+}
+html, body { width:100%; max-width:100%; overflow-x:hidden !important; }
+body {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    transition: background-color .25s ease, color .25s ease;
+}
+main, header, section, div { max-width:100%; }
+.glass-panel {
+    background: color-mix(in srgb, var(--surface) 92%, transparent) !important;
+    border-color: var(--border) !important;
+    box-shadow: var(--shadow);
+}
+.glass-panel-gold {
+    position:relative;
+    background: linear-gradient(145deg, var(--surface), var(--surface-soft)) !important;
+    border:1px solid color-mix(in srgb, var(--primary) 28%, var(--border)) !important;
+    box-shadow: 0 12px 34px rgba(23,32,51,.08), inset 0 1px 0 rgba(255,255,255,.65);
+}
+html[data-theme="dark"] .glass-panel-gold {
+    box-shadow: 0 18px 42px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.glass-panel-gold::before {
+    content:"";
+    position:absolute; left:0; right:0; top:0; height:3px;
+    background:linear-gradient(90deg, var(--primary), var(--primary-bright), transparent);
+    opacity:.9; border-radius:inherit;
+}
+.glass-panel-gold:hover {
+    transform:translateY(-3px);
+    border-color:color-mix(in srgb, var(--primary) 52%, var(--border)) !important;
+    box-shadow:0 18px 44px rgba(23,32,51,.12);
+}
+html[data-theme="dark"] .glass-panel-gold:hover { box-shadow:0 22px 48px rgba(0,0,0,.34); }
+
+.text-white { color:var(--text) !important; }
+.text-gray-300, .text-gray-400, .text-gray-500 { color:var(--text-muted) !important; }
+.text-yellow-500, .text-yellow-400, .text-yellow-300 { color:var(--primary) !important; }
+.text-green-400 { color:var(--success) !important; }
+.text-red-400 { color:var(--danger) !important; }
+.text-blue-400 { color:var(--info) !important; }
+.border-white\/5, .border-white\/10, .border-white\/20 { border-color:var(--border) !important; }
+.bg-white\/5 { background:color-mix(in srgb, var(--surface-soft) 78%, transparent) !important; }
+.bg-white\/10 { background:color-mix(in srgb, var(--surface-soft) 92%, transparent) !important; }
+.bg-black\/50 { background:color-mix(in srgb, var(--surface-soft) 88%, #000 12%) !important; }
+.lux-input, input, select, textarea {
+    color:var(--text) !important;
+    border-color:var(--border) !important;
+}
+.lux-input, select, textarea, input.bg-white\/5 {
+    background:var(--surface-soft) !important;
+}
+select option { background:var(--surface); color:var(--text); }
+input::placeholder, textarea::placeholder { color:var(--text-muted) !important; opacity:.85; }
+
+header.glass-panel {
+    background:var(--surface) !important;
+    box-shadow:0 8px 30px rgba(23,32,51,.07);
+}
+header img { border-color:var(--border) !important; background:var(--surface-soft) !important; }
+.luxury-modal {
+    background:linear-gradient(155deg, var(--surface), var(--surface-soft)) !important;
+    color:var(--text);
+    border-color:color-mix(in srgb, var(--primary) 35%, var(--border)) !important;
+    box-shadow:0 30px 70px rgba(23,32,51,.18);
+}
+html[data-theme="dark"] .luxury-modal { box-shadow:0 30px 70px rgba(0,0,0,.55); }
+.modal-overlay { background:rgba(15,23,42,.58) !important; }
+html[data-theme="dark"] .modal-overlay { background:rgba(0,0,0,.78) !important; }
+.modal-panel { width:min(92vw, 680px); }
+.tab-btn { color:var(--text-muted); }
+.tab-btn.active { color:var(--primary) !important; border-bottom-color:var(--primary) !important; }
+.tab-btn:hover:not(.active) { color:var(--text) !important; }
+table { width:100% !important; max-width:100% !important; table-layout:fixed; }
+th, td { border-color:var(--border) !important; overflow-wrap:anywhere; word-break:break-word; }
+thead { background:var(--surface-soft) !important; }
+thead th { color:var(--text-muted) !important; }
+tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transparent) !important; }
+.status-yellow { color:var(--warning); }
+.status-blue { color:var(--info); }
+.status-green { color:var(--success); }
+.status-red { color:var(--danger); }
+.status-gray { color:var(--text-muted); }
+
+.stat-card {
+    min-height:145px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    overflow:hidden;
+}
+.stat-card h3 { letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
+.stat-card .stat-label {
+    color:var(--text-muted) !important;
+    font-weight:600;
+    letter-spacing:.01em;
+}
+.stat-card .stat-value { color:var(--text) !important; }
+.stat-card.stat-success .stat-value { color:var(--success) !important; }
+.stat-card.stat-warning .stat-value { color:var(--warning) !important; }
+.stat-card.stat-danger .stat-value { color:var(--danger) !important; }
+
+.theme-toggle {
+    width:42px; height:38px; display:inline-flex; align-items:center; justify-content:center;
+    border:1px solid var(--border); border-radius:12px;
+    background:var(--surface-soft); color:var(--text); cursor:pointer;
+    transition:all .2s ease;
+}
+.theme-toggle:hover { transform:translateY(-1px); border-color:var(--primary); color:var(--primary); }
+.back-dashboard {
+    background:var(--surface-soft) !important;
+    color:var(--text) !important;
+    border-color:var(--border) !important;
+}
+.back-dashboard:hover { border-color:var(--primary) !important; color:var(--primary) !important; }
+
+#toastContainer { max-width:calc(100vw - 24px); }
+.toast { max-width:min(420px, calc(100vw - 24px)); }
+
+/* No horizontal page scrolling; tables remain contained and readable */
+.overflow-x-auto { overflow-x:hidden !important; }
+@media (max-width: 900px) {
+    main { padding:1.25rem !important; }
+    header.glass-panel { padding:1.25rem !important; }
+    header .flex.items-center.gap-6 { gap:1rem !important; }
+    header h1 { font-size:1.65rem !important; }
+    .stat-card { min-height:125px; }
+    .quick-action-btn { min-width:0; flex:1 1 calc(50% - .75rem); }
+}
+@media (max-width: 640px) {
+    body { font-size:14px; }
+    header.glass-panel { align-items:stretch !important; }
+    header .flex.items-center.gap-6 { width:100%; }
+    header img { width:3.5rem !important; height:3.5rem !important; }
+    header h1 { font-size:1.15rem !important; line-height:1.25 !important; }
+    header .flex.items-center.gap-4.mb-2 {
+        width:100%; margin:0 !important; gap:.5rem !important;
+        align-items:center !important;
+    }
+    header .text-right { display:none !important; }
+    main { padding:.75rem !important; }
+    .grid.md\\:grid-cols-4 { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+    .glass-panel-gold { padding:.9rem !important; border-radius:1rem !important; }
+    .glass-panel-gold h3 { font-size:1.8rem !important; }
+    .quick-action-btn { flex:1 1 100%; width:100%; }
+    .tab-btn { font-size:.7rem !important; padding-left:.1rem !important; padding-right:.1rem !important; }
+    .modal-overlay { padding:.5rem !important; align-items:flex-start !important; }
+    .modal-panel {
+        width:100% !important; max-width:100% !important; max-height:calc(100dvh - 1rem) !important;
+        margin:.5rem 0 !important; border-radius:1rem !important;
+    }
+    .modal-panel > form, .modal-panel > .p-6 { padding:1rem !important; }
+    .modal-panel .grid.grid-cols-2 { grid-template-columns:1fr !important; }
+    .modal-panel .grid.grid-cols-2 > .col-span-2 { grid-column:auto !important; }
+    .modal-panel .flex.justify-end { flex-direction:column-reverse; }
+    .modal-panel .flex.justify-end button { width:100%; }
+    .modal-panel h2 { font-size:1rem !important; }
+    #scanModal .modal-panel { margin-top:1rem !important; }
+    #toastContainer { left:.75rem; right:.75rem; bottom:.75rem; }
+}
+@media (max-width: 390px) {
+    .grid.md\\:grid-cols-4 { grid-template-columns:1fr !important; }
+    header .flex.items-center.gap-4.mb-2 { flex-wrap:wrap; }
+    .tab-btn { font-size:.62rem !important; }
+}
+
+    
+.lang-btn { transition: all .2s ease; }
+.lang-btn.active { background: #FFD700 !important; color: #000 !important; }
+/* ===== Begena theme integration ===== */
+html[data-theme="dark"] .begena-mark { color:#C9A227; }
+html[data-theme="light"] .begena-mark { color:#B8922E; opacity:.035; }
+html[data-theme="light"] .hero-card::after { background:radial-gradient(circle at 15% 0%, rgba(201,162,39,0.08), transparent 60%); }
+.status-btn { color:var(--text-muted); border-color:var(--border); }
+html[data-theme="light"] .status-btn.active-present { background:rgba(46,139,87,.12); border-color:#2E8B57; color:#2E8B57; }
+html[data-theme="light"] .status-btn.active-absent { background:rgba(196,61,61,.10); border-color:#C43D3D; color:#C43D3D; }
+html[data-theme="light"] .status-btn.active-late { background:rgba(178,122,18,.10); border-color:#B27A12; color:#B27A12; }
+html[data-theme="light"] .status-btn.active-permission { background:rgba(40,121,168,.10); border-color:#2879A8; color:#2879A8; }
+.attendance-tabs { background:color-mix(in srgb,var(--surface-soft) 88%,transparent); border-color:var(--border); }
+.attendance-tab { color:var(--text-muted); }
+.attendance-tab.active { background:color-mix(in srgb,var(--primary) 14%,transparent); border-color:color-mix(in srgb,var(--primary) 35%,var(--border)); color:var(--primary); }
+.summary-table th,.summary-table td { border-color:var(--border); }
+.summary-table th { color:var(--text-muted); background:var(--surface-soft); }
+.progress-track { background:color-mix(in srgb,var(--text-muted) 14%,transparent); }
+.range-control { background:var(--surface-soft); border-color:var(--border); color:var(--text); }
+</style>
+
+<style id="student-header-match">
+/* Match students.html header layout exactly; page content is untouched. */
+header.app-header { position:sticky; top:0; z-index:30; }
+.header-controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.lang-switch { display:flex; align-items:center; background:var(--glass-bg, var(--surface-soft)); border:1px solid var(--glass-border, var(--border)); border-radius:999px; padding:3px; gap:2px; }
+.lang-switch button { border:none; background:transparent; font-size:12px; font-weight:700; letter-spacing:.03em; padding:6px 12px; border-radius:999px; color:var(--text-muted); cursor:pointer; transition:all .25s ease; }
+.lang-switch button.active { background:var(--primary, #B8922E); color:#fff; box-shadow:0 4px 12px -3px rgba(255,215,0,.4); }
+.theme-toggle { position:relative; width:52px; height:30px; border-radius:999px; border:1px solid var(--glass-border, var(--border)); background:var(--glass-bg, var(--surface-soft)); cursor:pointer; padding:0; flex-shrink:0; }
+.theme-toggle .knob { position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%; background:var(--primary-bright, #D4AF37); display:flex; align-items:center; justify-content:center; transition:transform .35s cubic-bezier(.4,0,.2,1); box-shadow:0 2px 6px rgba(0,0,0,.3); }
+html[data-theme="light"] .theme-toggle .knob { transform:translateX(22px); }
+.theme-toggle .knob svg { width:14px; height:14px; }
+.theme-toggle .theme-toggle-label { display:none; }
+.back-dash-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 16px; border-radius:12px; font-size:13px; font-weight:700; background:var(--glass-bg, var(--surface)); border:1px solid var(--glass-border, var(--border)); color:var(--text-main, var(--text)); transition:all .2s ease; text-decoration:none; }
+.back-dash-btn:hover { background:var(--hover-bg, var(--surface-soft)); transform:translateY(-2px); }
+@media (min-width:769px) {
+  header.app-header { flex-wrap:nowrap !important; align-items:center !important; justify-content:space-between !important; gap:28px !important; min-height:104px; }
+  header.app-header > div:first-child { flex:1 1 auto; min-width:0; }
+  header.app-header > .header-controls { flex:0 0 auto; width:auto !important; max-width:none !important; flex-wrap:nowrap !important; align-items:center !important; justify-content:flex-end !important; gap:10px !important; white-space:nowrap; }
+  header.app-header > div:first-child > div { min-width:0; }
+  header.app-header h1 { white-space:nowrap !important; overflow:hidden; text-overflow:ellipsis; }
+  header.app-header .text-right { flex:0 0 auto; min-width:155px; margin-right:2px !important; }
+  header.app-header .lang-switch, header.app-header .theme-toggle, header.app-header .back-dash-btn { flex:0 0 auto !important; }
+  header.app-header .back-dash-btn { white-space:nowrap !important; }
+}
+@media (max-width:768px) {
+  header.app-header { padding:1rem !important; flex-wrap:wrap; gap:12px; }
+}
+@media (max-width:640px) {
+  header.app-header { padding:14px 16px !important; align-items:center !important; }
+  header.app-header h1 { font-size:1.05rem !important; line-height:1.2 !important; }
+  header.app-header p { font-size:.68rem !important; }
+  .header-controls { width:100%; justify-content:space-between; gap:7px; }
+  .lang-switch button { padding:6px 9px; }
+  .back-dash-btn { padding:9px !important; }
+  .back-dash-btn span.label { display:none; }
+}
+@media (max-width:480px) {
+  header.app-header h1 { font-size:1.05rem !important; }
+  header.app-header img { width:44px !important; height:44px !important; }
+}
+</style>
+</head>
+<body class="lang-en min-h-screen flex flex-col relative overflow-x-hidden">
+
+<div class="ambient-glow"></div>
+<div class="ambient-glow-2"></div>
+<div class="begena-mark begena-mark-1">
+    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M55 185 L42 35 Q100 5 158 35 L145 185 Z" stroke="currentColor" stroke-width="3"/>
+        <path d="M60 35 Q100 55 140 35" stroke="currentColor" stroke-width="2.5"/>
+        <line x1="63" y1="45" x2="66" y2="178" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="77" y1="42" x2="79" y2="180" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="91" y1="40" x2="92" y2="181" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="105" y1="40" x2="105" y2="181" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="119" y1="42" x2="118" y2="180" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="133" y1="45" x2="131" y2="178" stroke="currentColor" stroke-width="1.2"/>
+        <circle cx="100" cy="20" r="6" stroke="currentColor" stroke-width="2"/>
+    </svg>
+</div>
+<div class="begena-mark begena-mark-2">
+    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M55 185 L42 35 Q100 5 158 35 L145 185 Z" stroke="currentColor" stroke-width="3"/>
+        <path d="M60 35 Q100 55 140 35" stroke="currentColor" stroke-width="2.5"/>
+        <line x1="63" y1="45" x2="66" y2="178" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="77" y1="42" x2="79" y2="180" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="91" y1="40" x2="92" y2="181" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="105" y1="40" x2="105" y2="181" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="119" y1="42" x2="118" y2="180" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="133" y1="45" x2="131" y2="178" stroke="currentColor" stroke-width="1.2"/>
+        <circle cx="100" cy="20" r="6" stroke="currentColor" stroke-width="2"/>
+    </svg>
+</div>
+<div class="begena-mark begena-mark-3">
+    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="100,10 190,70 155,190 45,190 10,70" stroke="currentColor" stroke-width="2"/>
+        <polygon points="100,45 160,85 138,165 62,165 40,85" stroke="currentColor" stroke-width="1.4"/>
+    </svg>
+</div>
+
+<!-- HEADER -->
+<header class="app-header glass-panel w-full p-6 md:p-8 flex flex-wrap justify-between items-center md:items-end gap-4 border-b border-white/5 z-10 no-print">
+        <div class="flex items-center gap-4 md:gap-6 min-w-0">
+            <img src="logo.png" alt="Logo" class="w-12 h-12 md:w-20 md:h-20 rounded-2xl bg-white/5 p-2 border border-white/10 shadow-xl shadow-yellow-500/10 flex-shrink-0">
+            <div class="min-w-0">
+                <h1 class="text-xl md:text-4xl font-bold tracking-tight truncate">
+                    <span class="lang-en">Meserete Hiwot ERP System</span>
+                    <span class="lang-am">መሰረተ ህይወት ኢ.አር.ፒ ሲስተም</span>
+                </h1>
+                <p class="text-yellow-500 font-medium mt-1 text-xs md:text-base">
+                    <span class="lang-en">Begena Student Info &amp; Attendance <span class="amharic text-sm ml-2">(የበገና ተማሪዎች መረጃና ክትትል)</span></span>
+                    <span class="lang-am">የበገና ተማሪዎች መረጃና ክትትል አስተዳደር</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="header-controls">
+            <div class="text-right mr-2 hidden lg:block">
+                <p class="text-sm text-gray-400" id="dateDisplay">Loading date...</p>
+                <p class="text-lg font-semibold"><span class="lang-en">Admin Dashboard</span><span class="lang-am">አድሚን ዳሽቦርድ</span></p>
+            </div>
+
+            <!-- Language Switcher -->
+            <div class="lang-switch" role="group" aria-label="Language switcher">
+                <button type="button" id="langBtnEn" onclick="setBegenaLanguage('en')" aria-pressed="true">ENG</button>
+                <button type="button" id="langBtnAm" onclick="setBegenaLanguage('am')" aria-pressed="false">አማ</button>
+            </div>
+
+            <!-- Theme Toggle -->
+            <button type="button" class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Toggle light/dark theme" aria-pressed="false">
+                <span class="knob" id="themeKnob">
+                    <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round"/></svg>
+                </span>
+            </button>
+
+            <!-- Back to Dashboard -->
+            <a href="dashboard.html" class="back-dash-btn" aria-label="Back to Dashboard">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <span class="label"><span class="lang-en">Back to Dashboard</span><span class="lang-am">ወደ ዳሽቦርድ ተመለስ</span></span>
+            </a>
+        </div>
+    </header>
+
+<main class="flex-1 p-4 md:p-10 z-10 max-w-7xl w-full mx-auto">
+
+    <!-- ============ HOME VIEW ============ -->
+    <section id="homeView" class="view active">
+        <div class="text-center mb-10 card-in">
+            <h2 class="text-2xl md:text-3xl font-bold">
+                <span class="lang-en">Welcome <span class="amharic text-gray-400 text-lg font-normal ml-1">እንኳን ደህና መጡ</span></span>
+                <span class="lang-am">እንኳን ደህና መጡ</span>
+            </h2>
+            <p class="text-gray-400 mt-2 text-sm md:text-base">
+                <span class="lang-en">Choose a module to get started</span>
+                <span class="lang-am">ለጀመር ሞጁል ይምረጡ</span>
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <button onclick="enterModule('students')" class="hero-card glass-panel-gold p-6 md:p-8 text-left card-in group">
+                <div class="hero-ribbon"></div>
+                <div class="relative z-10 flex flex-col gap-4">
+                    <div class="w-16 h-16 rounded-2xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-3xl">🧑‍🎓</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">
+                            <span class="lang-en">Student Information</span>
+                            <span class="lang-am">የተማሪዎች መረጃ</span>
+                        </h3>
+                        <p class="amharic text-gray-400 text-sm mt-1">
+                            <span class="lang-en">የተማሪዎች መረጃ አስተዳደር</span>
+                            <span class="lang-am">Student Information Management</span>
+                        </p>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        <span class="lang-en">Register, manage and browse Begena students by grade.</span>
+                        <span class="lang-am">የበገና ተማሪዎችን ይመዝግቡ፣ ያስተዳድሩ እና በደረጃ ይፈልጉ።</span>
+                    </p>
+                    <span class="text-yellow-500 font-semibold text-sm flex items-center gap-2 mt-2">
+                        <span class="lang-en">Open module</span><span class="lang-am">ሞጁሉን ክፈት</span>
+                        <span class="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                    </span>
+                </div>
+            </button>
+
+            <button onclick="enterModule('attendance')" class="hero-card glass-panel-gold p-6 md:p-8 text-left card-in group" style="animation-delay:.08s">
+                <div class="hero-ribbon"></div>
+                <div class="relative z-10 flex flex-col gap-4">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-400/10 border border-blue-400/30 flex items-center justify-center text-3xl">📋</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">
+                            <span class="lang-en">Attendance Management</span>
+                            <span class="lang-am">የክትትል አስተዳደር</span>
+                        </h3>
+                        <p class="amharic text-gray-400 text-sm mt-1">
+                            <span class="lang-en">ክትትል አስተዳደር</span>
+                            <span class="lang-am">Attendance Management</span>
+                        </p>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        <span class="lang-en">Take daily attendance and review summaries by grade.</span>
+                        <span class="lang-am">ዕለታዊ ክትትል ይውሰዱ እና ማጠቃለያዎችን በክፍል ይገምግሙ።</span>
+                    </p>
+                    <span class="text-blue-400 font-semibold text-sm flex items-center gap-2 mt-2">
+                        <span class="lang-en">Open module</span><span class="lang-am">ሞጁሉን ክፈት</span> 
+                        <span class="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                    </span>
+                </div>
+            </button>
+        </div>
+    </section>
+
+    <!-- ============ GRADE SELECT VIEW ============ -->
+    <section id="gradeView" class="view">
+        <div class="flex items-center gap-4 mb-8">
+            <button onclick="goHome()" class="icon-btn bg-white/5 hover:bg-white/10 border border-white/10">←</button>
+            <div>
+                <h2 id="gradeViewTitle" class="text-2xl md:text-3xl font-bold">
+                    <span class="lang-en">Select a Class Round <span class="text-gray-400 amharic text-lg font-normal ml-2">ዙር ይምረጡ</span></span>
+                    <span class="lang-am">ዙር ይምረጡ</span>
+                </h2>
+                <p id="gradeViewSubtitle" class="text-gray-400 text-sm mt-1"></p>
+            </div>
+        </div>
+        <div id="gradeCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+
+    <!-- ============ STUDENTS WORKSPACE ============ -->
+    <section id="studentsWorkspace" class="view">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-4">
+                <button onclick="backToGrades()" class="icon-btn bg-white/5 hover:bg-white/10 border border-white/10">←</button>
+                <div>
+                    <h2 id="studentsGradeTitle" class="text-xl md:text-2xl font-bold amharic"></h2>
+                    <p class="text-gray-400 text-sm mt-1"><span id="studentsCount">0</span> 
+                        <span class="lang-en">students in this round</span><span class="lang-am">ተማሪዎች በዚህ ዙር አሉ</span>
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <input id="studentSearch" oninput="renderStudentsList()" placeholder="🔍 Search name / ID (e.g. 001)..." class="lux-input bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm outline-none w-full sm:w-64">
+                <button onclick="openStudentModal()" class="w-full sm:w-auto px-5 py-2 rounded-xl text-sm font-bold bg-yellow-500 text-black hover:bg-yellow-400 transition whitespace-nowrap">
+                    ＋ <span class="lang-en">Add Student</span><span class="lang-am">ተማሪ መዝግብ</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Modern & Stylish Analytics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+            <div class="glass-panel-gold rounded-3xl p-5 md:p-6 flex items-center justify-between relative overflow-hidden group card-in">
+                <div class="z-10">
+                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">
+                        <span class="lang-en">Total Students</span><span class="lang-am">ጠቅላላ ተማሪዎች</span>
+                    </p>
+                    <p id="statTotal" class="text-4xl font-bold text-yellow-500">0</p>
+                </div>
+                <div class="text-5xl opacity-20 group-hover:scale-110 transition-transform duration-300 z-10">🎓</div>
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-yellow-500/10 rounded-full blur-2xl"></div>
+            </div>
+            <div class="glass-panel-gold rounded-3xl p-5 md:p-6 flex items-center justify-between relative overflow-hidden group card-in" style="animation-delay:0.1s">
+                <div class="z-10">
+                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1 amharic">
+                        <span class="lang-en">Male Students</span><span class="lang-am">ወንዶች</span>
+                    </p>
+                    <p id="statMale" class="text-4xl font-bold text-blue-400">0</p>
+                </div>
+                <div class="text-5xl opacity-20 group-hover:scale-110 transition-transform duration-300 z-10">👦</div>
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-400/10 rounded-full blur-2xl"></div>
+            </div>
+            <div class="glass-panel-gold rounded-3xl p-5 md:p-6 flex items-center justify-between relative overflow-hidden group card-in" style="animation-delay:0.2s">
+                <div class="z-10">
+                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1 amharic">
+                        <span class="lang-en">Female Students</span><span class="lang-am">ሴቶች</span>
+                    </p>
+                    <p id="statFemale" class="text-4xl font-bold text-pink-400">0</p>
+                </div>
+                <div class="text-5xl opacity-20 group-hover:scale-110 transition-transform duration-300 z-10">👧</div>
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-pink-400/10 rounded-full blur-2xl"></div>
+            </div>
+        </div>
+
+        <div id="studentsListWrap" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+        <div id="studentsEmptyState" class="hidden text-center text-gray-500 py-16">
+            <p class="text-4xl mb-3">🎓</p>
+            <p class="amharic text-lg font-bold">
+                <span class="lang-en">ምንም ተማሪ አልተመዘገበም</span><span class="lang-am">ምንም ተማሪ አልተመዘገበም</span>
+            </p>
+            <p class="text-sm mt-1">
+                <span class="lang-en">No students registered in this round yet.</span><span class="lang-am">በዚህ ዙር እስካሁን ምንም ተማሪ አልተመዘገበም።</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- ============ ATTENDANCE WORKSPACE ============ -->
+    <section id="attendanceWorkspace" class="view">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+            <div class="flex items-center gap-4">
+                <button onclick="backToGrades()" class="icon-btn bg-white/5 hover:bg-white/10 border border-white/10">←</button>
+                <div>
+                    <h2 id="attendanceGradeTitle" class="text-xl md:text-2xl font-bold amharic"></h2>
+                    <p class="text-gray-400 text-sm mt-1"><span class="lang-en">Attendance Management • Summary • Analytics</span><span class="lang-am">የክትትል አስተዳደር • ማጠቃለያ • ትንታኔ</span></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 glass-panel-gold rounded-xl px-3 py-2 w-full md:w-auto justify-between">
+                <button onclick="changeDate(-1)" class="icon-btn hover:bg-white/10">‹</button>
+                <div class="text-center flex-1">
+                    <input type="date" id="attendanceDate" onchange="onDateChange()" class="lux-input bg-transparent text-sm outline-none px-2 w-full text-center">
+                    <p id="attendanceEcDate" class="text-[10px] text-yellow-400 amharic"></p>
+                </div>
+                <button onclick="changeDate(1)" class="icon-btn hover:bg-white/10">›</button>
+            </div>
+        </div>
+
+        <div class="attendance-tabs mb-6">
+            <button id="attendanceTabDaily" class="attendance-tab active" onclick="switchAttendanceTab('daily')">📋 <span class="lang-en">Attendance</span><span class="lang-am">ክትትል</span></button>
+            <button id="attendanceTabSummary" class="attendance-tab" onclick="switchAttendanceTab('summary')">🗓️ <span class="lang-en">Attendance Summary</span><span class="lang-am">የክትትል ማጠቃለያ</span></button>
+            <button id="attendanceTabAnalytics" class="attendance-tab" onclick="switchAttendanceTab('analytics')">📊 <span class="lang-en">Analytics</span><span class="lang-am">ትንታኔ</span></button>
+        </div>
+
+        <!-- DAILY ATTENDANCE -->
+        <div id="attendanceDailyPane" class="attendance-pane active">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="metric-card glass-panel-gold rounded-2xl p-4"><p class="text-xs text-gray-400"><span class="lang-en">Present</span><span class="lang-am">ተገኝ</span></p><p id="sumPresent" class="text-2xl font-bold text-green-400">0</p></div>
+                <div class="metric-card glass-panel-gold rounded-2xl p-4"><p class="text-xs text-gray-400"><span class="lang-en">Absent</span><span class="lang-am">ቀሪ</span></p><p id="sumAbsent" class="text-2xl font-bold text-red-400">0</p></div>
+                <div class="metric-card glass-panel-gold rounded-2xl p-4"><p class="text-xs text-gray-400"><span class="lang-en">Late</span><span class="lang-am">አርፍዷል</span></p><p id="sumLate" class="text-2xl font-bold text-amber-400">0</p></div>
+                <div class="metric-card glass-panel-gold rounded-2xl p-4"><p class="text-xs text-gray-400"><span class="lang-en">Excused</span><span class="lang-am">በፍቃድ</span></p><p id="sumPermission" class="text-2xl font-bold text-sky-400">0</p></div>
+            </div>
+            <div id="attendanceListWrap" class="flex flex-col gap-3"></div>
+            <div id="attendanceEmptyState" class="hidden text-center text-gray-500 py-16">
+                <p class="text-4xl mb-3">📋</p><p class="amharic text-lg font-bold"><span class="lang-en">No students registered</span><span class="lang-am">ምንም ተማሪ አልተመዘገበም</span></p>
+                <p class="text-sm mt-1"><span class="lang-en">Register students in this round first.</span><span class="lang-am">በመጀመሪያ በዚህ ዙር ተማሪዎችን ይመዝግቡ።</span></p>
+            </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div id="attendanceSummaryPane" class="attendance-pane">
+            <div class="glass-panel-gold rounded-2xl p-4 mb-5">
+                <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                    <div>
+                        <p class="font-bold"><span class="lang-en">Class Attendance Summary</span><span class="lang-am">የክፍሉ የክትትል ማጠቃለያ</span></p>
+                        <p class="text-xs text-gray-400 mt-1"><span class="lang-en">Review every student's attendance across a selected date range.</span><span class="lang-am">በተመረጠ የቀን ክልል የእያንዳንዱን ተማሪ ክትትል ይመልከቱ።</span></p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                        <label class="text-[10px] text-gray-400 self-center"><span class="lang-en">FROM</span><span class="lang-am">ከ</span></label>
+                        <input type="date" id="summaryStartDate" class="range-control w-full sm:w-auto">
+                        <label class="text-[10px] text-gray-400 self-center"><span class="lang-en">TO</span><span class="lang-am">እስከ</span></label>
+                        <input type="date" id="summaryEndDate" class="range-control w-full sm:w-auto">
+                        <button onclick="loadSummaryData()" class="px-4 py-2 rounded-xl bg-yellow-500 text-black font-bold text-xs">↻ <span class="lang-en">Apply</span><span class="lang-am">አስላ</span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+                <div class="glass-panel rounded-2xl p-4"><p class="text-xs text-gray-400">📅 <span class="lang-en">Days Recorded</span><span class="lang-am">የተመዘገቡ ቀናት</span></p><p id="summaryDays" class="text-2xl font-bold mt-1">0</p></div>
+                <div class="glass-panel rounded-2xl p-4"><p class="text-xs text-gray-400">👥 <span class="lang-en">Class Size</span><span class="lang-am">የክፍሉ ብዛት</span></p><p id="summaryClassSize" class="text-2xl font-bold mt-1">0</p></div>
+                <div class="glass-panel rounded-2xl p-4"><p class="text-xs text-gray-400">✅ <span class="lang-en">Present / Late</span><span class="lang-am">ተገኝ / አርፍዷል</span></p><p id="summaryGood" class="text-2xl font-bold text-green-400 mt-1">0</p></div>
+                <div class="glass-panel rounded-2xl p-4"><p class="text-xs text-gray-400">📈 <span class="lang-en">Attendance Rate</span><span class="lang-am">የክትትል ምጣኔ</span></p><p id="summaryRate" class="text-2xl font-bold text-yellow-400 mt-1">0%</p></div>
+            </div>
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto"><table class="summary-table"><thead><tr><th><span class="lang-en">Student</span><span class="lang-am">ተማሪ</span></th><th>ID</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Recorded</th><th>Rate</th></tr></thead><tbody id="summaryTableBody"></tbody></table></div>
+                <div id="summaryEmpty" class="hidden text-center text-gray-500 py-14"><span class="text-3xl">📊</span><p class="mt-2"><span class="lang-en">No attendance records for this range.</span><span class="lang-am">በዚህ የቀን ክልል የክትትል መረጃ የለም።</span></p></div>
+            </div>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div id="attendanceAnalyticsPane" class="attendance-pane">
+            <div class="flex flex-col sm:flex-row justify-between gap-3 mb-5">
+                <div><p class="font-bold text-lg"><span class="lang-en">Class Attendance Analytics</span><span class="lang-am">የክፍሉ የክትትል ትንታኔ</span></p><p class="text-xs text-gray-400"><span class="lang-en">Live calculations from Begena_Attendance.</span><span class="lang-am">ከ Begena_Attendance የሚመጣ ቀጥታ ስሌት።</span></p></div>
+                <button onclick="loadAnalyticsData(true)" class="px-4 py-2 rounded-xl glass-panel border border-white/10 font-bold text-xs">🔄 <span class="lang-en">Recalculate</span><span class="lang-am">እንደገና አስላ</span></button>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+                <div class="metric-card glass-panel-gold rounded-2xl p-5 text-center"><p class="text-xs text-gray-400"><span class="lang-en">Overall Rate</span><span class="lang-am">አጠቃላይ ምጣኔ</span></p><p id="analyticsRate" class="text-4xl font-bold text-yellow-400 mt-1">0%</p></div>
+                <div class="metric-card glass-panel-gold rounded-2xl p-5 text-center"><p class="text-xs text-gray-400"><span class="lang-en">Best Student</span><span class="lang-am">ምርጥ ተማሪ</span></p><p id="analyticsBest" class="font-bold mt-2 truncate">—</p><p id="analyticsBestRate" class="text-xs text-green-400">0%</p></div>
+                <div class="metric-card glass-panel-gold rounded-2xl p-5 text-center"><p class="text-xs text-gray-400"><span class="lang-en">Needs Attention</span><span class="lang-am">ክትትል የሚፈልግ</span></p><p id="analyticsRisk" class="font-bold mt-2 truncate">—</p><p id="analyticsRiskRate" class="text-xs text-red-400">0%</p></div>
+                <div class="metric-card glass-panel-gold rounded-2xl p-5 text-center"><p class="text-xs text-gray-400"><span class="lang-en">Recorded Marks</span><span class="lang-am">የተመዘገቡ ምልክቶች</span></p><p id="analyticsMarks" class="text-4xl font-bold text-blue-400 mt-1">0</p></div>
+            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                <div class="glass-panel rounded-2xl p-5"><p class="font-bold mb-3"><span class="lang-en">Attendance Trend — Last 30 Days</span><span class="lang-am">የክትትል አዝማሚያ — ያለፉት 30 ቀናት</span></p><div class="chart-box"><canvas id="begenaTrendChart"></canvas></div></div>
+                <div class="glass-panel rounded-2xl p-5"><p class="font-bold mb-3"><span class="lang-en">Status Distribution</span><span class="lang-am">የሁኔታ ስርጭት</span></p><div class="chart-box"><canvas id="begenaStatusChart"></canvas></div></div>
+            </div>
+            <div class="glass-panel rounded-2xl p-5 mt-5"><p class="font-bold mb-4"><span class="lang-en">Student Performance Ranking</span><span class="lang-am">የተማሪ አፈጻጸም ደረጃ</span></p><div id="analyticsRanking" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div></div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ============ STUDENT ADD/EDIT MODAL ============ -->
+<div id="studentModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto p-4 w-full">
+    <div class="modal-panel luxury-modal w-full max-w-2xl rounded-2xl relative overflow-hidden my-8 max-h-[90vh] flex flex-col">
+        <div class="p-4 md:p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5 flex-shrink-0">
+            <h2 class="text-lg font-bold flex items-center gap-2">
+                <span class="bg-yellow-500 text-black p-1.5 rounded-lg text-xs">🆕</span>
+                <span id="studentModalTitle" class="lang-en">Register Student</span>
+                <span id="studentModalTitleAm" class="lang-am">ተማሪ መመዝገቢያ</span>
+                <span class="amharic text-gray-400 text-sm ml-1 lang-en">ተማሪ መመዝገቢያ</span>
+            </h2>
+            <button onclick="closeStudentModal()" class="text-gray-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">&times;</button>
+        </div>
+        <form id="studentForm" onsubmit="saveStudentForm(event)" class="p-4 md:p-6 overflow-y-auto flex flex-col gap-5">
+            <input type="hidden" id="sEditId">
+            <p class="section-title"><span class="lang-en">👤 Basic Information</span><span class="lang-am">👤 መሰረታዊ መረጃ</span></p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                    <label class="block text-xs text-gray-400 mb-1 amharic"><span class="lang-en">ሙሉ ስም · Full Name</span><span class="lang-am">ሙሉ ስም</span></label>
+                    <input type="text" id="sName" required class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1 amharic"><span class="lang-en">✝️ የክርስትና ስም · Christian Name</span><span class="lang-am">✝️ የክርስትና ስም</span></label>
+                    <input type="text" id="sChristianName" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1 amharic"><span class="lang-en">ጾታ · Gender</span><span class="lang-am">ጾታ</span></label>
+                    <select id="sGender" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2.5 text-sm outline-none">
+                        <option value="ወንድ">ወንድ · Male</option>
+                        <option value="ሴት">ሴት · Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1 amharic"><span class="lang-en">ስልክ ቁጥር · Phone</span><span class="lang-am">ስልክ ቁጥር</span></label>
+                    <input type="tel" id="sPhone" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1 amharic"><span class="lang-en">የአለማዊ ትምህርት · Secular Education</span><span class="lang-am">የአለማዊ ትምህርት</span></label>
+                    <select id="sSecularEducation" onchange="toggleFieldOfStudy()" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2.5 text-sm outline-none">
+                        <option value="1st Grade">1st Grade (1ኛ ክፍል)</option>
+                        <option value="2nd Grade">2nd Grade (2ኛ ክፍል)</option>
+                        <option value="3rd Grade">3rd Grade (3ኛ ክፍል)</option>
+                        <option value="4th Grade">4th Grade (4ኛ ክፍል)</option>
+                        <option value="5th Grade">5th Grade (5ኛ ክፍል)</option>
+                        <option value="6th Grade">6th Grade (6ኛ ክፍል)</option>
+                        <option value="7th Grade">7th Grade (7ኛ ክፍል)</option>
+                        <option value="8th Grade">8th Grade (8ኛ ክፍል)</option>
+                        <option value="9th Grade">9th Grade (9ኛ ክፍል)</option>
+                        <option value="10th Grade">10th Grade (10ኛ ክፍል)</option>
+                        <option value="11th Grade">11th Grade (11ኛ ክፍል)</option>
+                        <option value="12th Grade">12th Grade (12ኛ ክፍል)</option>
+                        <option value="University">University (ዩኒቨርሲቲ)</option>
+                        <option value="Diploma">Diploma (ዲፕሎማ)</option>
+                        <option value="Masters">Masters (ማስተርስ)</option>
+                    </select>
+                </div>
+                
+                <div id="fieldOfStudyWrapper" class="sm:col-span-2 hidden">
+                    <label class="block text-xs text-gray-400 mb-1 amharic"><span class="lang-en">የተማሩበት ዘርፍ · Field of Study</span><span class="lang-am">የተማሩበት ዘርፍ (Field of Study)</span></label>
+                    <input type="text" id="sFieldOfStudy" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm outline-none">
+                </div>
+
+                <!-- Ethiopian Calendar Date Picker optimized for mobile -->
+                <div class="sm:col-span-2">
+                    <label class="block text-xs text-gray-400 mb-1 amharic"><span class="lang-en">🎂 ዕድሜ / የትውልድ ቀን (EC) · Age / DOB</span><span class="lang-am">🎂 ዕድሜ / የትውልድ ቀን (በኢትዮጵያ ካላንደር)</span></label>
+                    <div class="flex gap-2 w-full">
+                        <select id="dobDay" class="lux-input flex-1 bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
+                            <option value="">ቀን (Day)</option>
+                            <script>for(let i=1;i<=30;i++) document.write(`<option value="${i}">${i}</option>`);</script>
+                        </select>
+                        <select id="dobMonth" class="lux-input flex-1 bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none amharic">
+                            <option value="">ወር (Month)</option>
+                            <option value="መስከረም">መስከረም</option><option value="ጥቅምት">ጥቅምት</option><option value="ህዳር">ህዳር</option>
+                            <option value="ታህሳስ">ታህሳስ</option><option value="ጥር">ጥር</option><option value="የካቲት">የካቲት</option>
+                            <option value="መጋቢት">መጋቢት</option><option value="ሚያዝያ">ሚያዝያ</option><option value="ግንቦት">ግንቦት</option>
+                            <option value="ሰኔ">ሰኔ</option><option value="ሐምሌ">ሐምሌ</option><option value="ነሐሴ">ነሐሴ</option>
+                            <option value="ጳጉሜ">ጳጉሜ</option>
+                        </select>
+                        <input type="number" id="dobYear" placeholder="ዓ.ም (Year)" class="lux-input flex-1 bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none text-center">
+                    </div>
+                </div>
+
+                <!-- 3 separate fields for Address -->
+                <div class="sm:col-span-2 p-3 rounded-xl border border-white/10 bg-white/5">
+                    <label class="block text-xs text-gray-400 mb-2 amharic"><span class="lang-en">🏠 አድራሻ · Address Details</span><span class="lang-am">🏠 አድራሻ</span></label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <input type="text" id="sAddress" placeholder="አድራሻ (Address)" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
+                        <input type="text" id="sRegion" placeholder="ክልል (Region)" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
+                        <input type="text" id="sSubCity" placeholder="ክ/ከተማ (Sub-city)" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
+                    </div>
+                </div>
+
+                <div class="sm:col-span-2 mt-2">
+                    <p class="section-title text-red-400"><span class="lang-en">🚨 Emergency Contact</span><span class="lang-am">🚨 የአደጋ ጊዜ መረጃ</span></p>
+                </div>
+                <div>
+                    <label class="block text-xs text-red-300 mb-1 amharic"><span class="lang-en">የአደጋ ጊዜ ተጠሪ ስም · Emergency Name</span><span class="lang-am">የአደጋ ጊዜ ተጠሪ ስም</span></label>
+                    <input type="text" id="sEmergencyName" class="lux-input w-full bg-red-500/5 border border-red-500/20 rounded-lg p-2.5 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-red-300 mb-1 amharic"><span class="lang-en">የአደጋ ጊዜ ተጠሪ ስልክ · Emergency Phone</span><span class="lang-am">የአደጋ ጊዜ ተጠሪ ስልክ</span></label>
+                    <input type="tel" id="sEmergencyPhone" class="lux-input w-full bg-red-500/5 border border-red-500/20 rounded-lg p-2.5 text-sm outline-none">
+                </div>
+
+                <div class="sm:col-span-2 hidden">
+                    <label class="block text-xs text-gray-400 mb-1 amharic">🎵 ደረጃ · Round</label>
+                    <select id="sGrade" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none"></select>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
+                <button type="button" onclick="closeStudentModal()" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                    <span class="lang-en">Cancel</span><span class="lang-am">ተወው</span>
+                </button>
+                <button type="submit" class="px-6 py-2.5 rounded-xl text-sm font-bold bg-yellow-500 text-black hover:bg-yellow-400 transition shadow-lg shadow-yellow-500/20">
+                    💾 <span class="lang-en">Save Student</span><span class="lang-am">መዝግብ</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+    // Shared project-wide Supabase client.
+    // supabaseClient.js must export: export { supabase }
+    if (location.protocol === 'file:') {
+        console.error('[Supabase] begena.html was opened using file://. Serve the project over http(s).');
+        window.dispatchEvent(new CustomEvent('supabase-load-failed', { detail: 'file-protocol' }));
+    } else {
+        import('./supabaseClient.js')
+            .then(({ supabase }) => {
+                if (!supabase) throw new Error('supabaseClient.js did not export a Supabase client named "supabase".');
+                window.supabase = supabase;
+                window.dispatchEvent(new CustomEvent('supabase-ready'));
+            })
+            .catch((err) => {
+                console.error('[Supabase] Failed to load shared supabaseClient.js:', err);
+                window.dispatchEvent(new CustomEvent('supabase-load-failed', { detail: err?.message || String(err) }));
+            });
+    }
+</script>
+
+<script>
+    // Header date display
+    (function(){
+        const gc = new Date();
+        const etMonths = ['መስከረም','ጥቅምት','ህዳር','ታህሳስ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜ'];
+        const etYear = gc.getFullYear() - 8;
+        const etMonth = etMonths[(gc.getMonth() + 10) % 12];
+        const etDay = ((gc.getDate() + 22) % 30) + 1;
+        const dateEl = document.getElementById('dateDisplay');
+        if (dateEl) {
+            dateEl.textContent = gc.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ` | ${etMonth} ${etDay}, ${etYear}`;
+        }
+    })();
+
+    // Language Toggle Logic
+    let isAmharic = false;
+    function toggleLanguage() {
+        isAmharic = !isAmharic;
+        if (isAmharic) {
+            document.body.classList.remove('lang-en');
+            document.body.classList.add('lang-am');
+        } else {
+            document.body.classList.remove('lang-am');
+            document.body.classList.add('lang-en');
+        }
+    }
+
+    // ==========================================================
+    // DATA MODEL & CONSTANTS
+    // ==========================================================
+    const GRADES = [
+        { label: '1ኛ ዙር ተማሪዎች', prefix: 'MHSS-B1', icon: '📘' },
+        { label: '2ኛ ዙር ተማሪዎች', prefix: 'MHSS-B2', icon: '📗' },
+        { label: '3ኛ ዙር ተማሪዎች', prefix: 'MHSS-B3', icon: '📙' },
+        { label: '4ኛ ዙር ተማሪዎች', prefix: 'MHSS-B4', icon: '🕊️' },
+        { label: '5ኛ ዙር ተማሪዎች', prefix: 'MHSS-B5', icon: '✝️' },
+        { label: '6ኛ ዙር ተማሪዎች', prefix: 'MHSS-B6', icon: '🎼' },
+        { label: '7ኛ ዙር ተማሪዎች', prefix: 'MHSS-B7', icon: '🌿' },
+        { label: '8ኛ ዙር ተማሪዎች', prefix: 'MHSS-B8', icon: '⭐' },
+        { label: '9ኛ ዙር ተማሪዎች', prefix: 'MHSS-B9', icon: '🔔' },
+        { label: '10ኛ ዙር ተማሪዎች', prefix: 'MHSS-B10', icon: '🏛️' },
+    ];
+    const GRADE_COLORS = ['yellow-500','blue-400','green-400','pink-400','sky-400','amber-400','purple-400','emerald-400','red-400','indigo-400'];
+
+    // ==========================================================
+    // SUPABASE DATA MODEL
+    // ==========================================================
+    // Uses ONLY:
+    //   public."Begena_students"
+    //   public."Begena_Attendance"
+    // Never uses the existing students / attendance_record tables.
+
+    // ==========================================================
+    // SHARED SUPABASE CLIENT
+    // ==========================================================
+    // IMPORTANT: Do NOT create a second Supabase client here.
+    // The shared ./supabaseClient.js module is the single source
+    // of truth for the project URL and anon key.
+    let supabaseClient = window.supabase || null;
+    let supabaseLoadFailure = null;
+    let supabaseReadyResolve;
+    let supabaseReadyReject;
+
+    const supabaseReady = new Promise((resolve, reject) => {
+        supabaseReadyResolve = resolve;
+        supabaseReadyReject = reject;
+    });
+
+    window.addEventListener('supabase-ready', () => {
+        supabaseClient = window.supabase || null;
+        if (supabaseClient) supabaseReadyResolve(supabaseClient);
+        else supabaseReadyReject(new Error('Shared Supabase client was not exposed on window.supabase.'));
+    });
+
+    window.addEventListener('supabase-load-failed', (event) => {
+        supabaseLoadFailure = event.detail || 'Unable to load supabaseClient.js';
+        supabaseReadyReject(new Error(supabaseLoadFailure));
+    });
+
+    let studentsData = [];
+    let attendanceStore = {};
+    let currentMode = null;      // 'students' | 'attendance'
+    let currentGrade = null;
+    let currentDate = new Date().toISOString().slice(0,10);
+    let attendanceLoadedDate = null;
+
+    function dbReady(){
+        if (!supabaseClient){
+            alert(isAmharic
+                ? 'Supabase አልተገናኘም። supabaseClient.js እንዲጫን ያረጋግጡ።'
+                : 'Supabase is not connected. Make sure supabaseClient.js loads correctly.');
+            return false;
+        }
+        return true;
+    }
+
+    function showDbError(action, error){
+        console.error('Begena Supabase error:', action, error);
+        const message = error?.message || String(error || 'Unknown error');
+        alert((isAmharic ? 'የዳታቤዝ ስህተት፦ ' : 'Database error: ') + message);
+    }
+
+    function mapStudent(row){
+        return {
+            id: row.id,
+            name: row.name || '',
+            christianName: row.christian_name || '',
+            gender: row.gender || '',
+            phone: row.phone || '',
+            dob: row.dob || '',
+            address: row.address || '',
+            region: row.region || '',
+            subCity: row.sub_city || '',
+            emergencyName: row.emergency_name || '',
+            emergencyPhone: row.emergency_phone || '',
+            secularEdu: row.secular_education || '',
+            fieldOfStudy: row.field_of_study || '',
+            grade: row.grade || '',
+            regDate: row.registration_date || ''
+        };
+    }
+
+    function studentToDb(payload){
+        return {
+            name: payload.name,
+            christian_name: payload.christianName || null,
+            gender: payload.gender || null,
+            phone: payload.phone || null,
+            dob: payload.dob || null,
+            address: payload.address || null,
+            region: payload.region || null,
+            sub_city: payload.subCity || null,
+            emergency_name: payload.emergencyName || null,
+            emergency_phone: payload.emergencyPhone || null,
+            secular_education: payload.secularEdu || null,
+            field_of_study: payload.fieldOfStudy || null,
+            grade: payload.grade,
+            registration_date: payload.regDate || new Date().toISOString().slice(0,10)
+        };
+    }
+
+    async function loadStudents(){
+        if (!dbReady()) return false;
+        try {
+            const { data, error } = await supabaseClient
+                .from('Begena_students')
+                .select('*')
+                .order('name', { ascending: true });
+            if (error) throw error;
+            studentsData = (data || []).map(mapStudent);
+            return true;
+        } catch (error) {
+            showDbError('load students', error);
+            studentsData = [];
+            return false;
+        }
+    }
+
+    async function saveStudent(payload, editId){
+        if (!dbReady()) return false;
+        try {
+            if (editId) {
+                const { error } = await supabaseClient
+                    .from('Begena_students')
+                    .update(studentToDb(payload))
+                    .eq('id', editId);
+                if (error) throw error;
+            } else {
+                const id = nextStudentId(payload.grade);
+                const { error } = await supabaseClient
+                    .from('Begena_students')
+                    .insert({
+                        id,
+                        ...studentToDb(payload)
+                    });
+                if (error) throw error;
+            }
+            await loadStudents();
+            return true;
+        } catch (error) {
+            showDbError(editId ? 'update student' : 'insert student', error);
+            return false;
+        }
+    }
+
+    async function removeStudent(id){
+        if (!dbReady()) return false;
+        try {
+            const { error } = await supabaseClient
+                .from('Begena_students')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+            await loadStudents();
+            return true;
+        } catch (error) {
+            showDbError('delete student', error);
+            return false;
+        }
+    }
+
+    async function loadAttendance(date = currentDate){
+        if (!dbReady()) return false;
+        try {
+            const { data, error } = await supabaseClient
+                .from('Begena_Attendance')
+                .select('student_id, attendance_date, status, notes')
+                .eq('attendance_date', date);
+            if (error) throw error;
+
+            attendanceStore = {};
+            (data || []).forEach(row => {
+                attendanceStore[row.student_id] = row.status;
+            });
+            attendanceLoadedDate = date;
+            return true;
+        } catch (error) {
+            showDbError('load attendance', error);
+            attendanceStore = {};
+            return false;
+        }
+    }
+
+    async function saveAttendance(studentId, status){
+        if (!dbReady()) return false;
+        try {
+            const { error } = await supabaseClient
+                .from('Begena_Attendance')
+                .upsert({
+                    student_id: studentId,
+                    attendance_date: currentDate,
+                    status
+                }, {
+                    onConflict: 'student_id,attendance_date'
+                });
+            if (error) throw error;
+            attendanceStore[studentId] = status;
+            return true;
+        } catch (error) {
+            showDbError('save attendance', error);
+            return false;
+        }
+    }
+
+    function getPrefixForGrade(gradeLabel) {
+        const found = GRADES.find(g => g.label === gradeLabel);
+        return found ? found.prefix : 'MHSS-B0';
+    }
+
+    function nextStudentId(gradeLabel){
+        const prefix = getPrefixForGrade(gradeLabel);
+        let max = 0;
+        studentsData.forEach(s => { 
+            if(s.grade === gradeLabel && s.id && s.id.startsWith(prefix)) {
+                const parts = s.id.split('-');
+                const n = parseInt(parts[parts.length-1], 10);
+                if (!isNaN(n) && n > max) max = n; 
+            }
+        });
+        return `${prefix}-${String(max+1).padStart(3,'0')}`;
+    }
+
+    function escapeHtml(str){
+        return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // ==========================================================
+    // NAVIGATION
+    // ==========================================================
+    function showView(id){
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+    function goHome(){ currentMode = null; currentGrade = null; showView('homeView'); }
+
+    async function enterModule(mode){
+        currentMode = mode;
+        await loadStudents();
+        const titleEn = mode === 'students' ? 'Select a Class Round' : 'Select a Round for Attendance';
+        const titleAm = mode === 'students' ? 'ዙር ይምረጡ' : 'ለክትትል ዙር ይምረጡ';
+        const subEn = mode === 'students' ? 'Choose a round to manage its student roster.' : 'Choose a round to take or review attendance.';
+        const subAm = mode === 'students' ? 'የተማሪዎችን መረጃ ለማስተዳደር ዙር ይምረጡ።' : 'ክትትል ለመውሰድ ወይም ለመገምገም ዙር ይምረጡ።';
+
+        document.getElementById('gradeViewTitle').innerHTML = `
+            <span class="lang-en">${titleEn} <span class="text-gray-400 amharic text-lg font-normal ml-2">ዙር ይምረጡ</span></span>
+            <span class="lang-am">${titleAm}</span>
+        `;
+        document.getElementById('gradeViewSubtitle').innerHTML = `
+            <span class="lang-en">${subEn}</span><span class="lang-am">${subAm}</span>
+        `;
+        renderGradeCards();
+        showView('gradeView');
+    }
+
+    function backToGrades(){
+        showView('gradeView');
+    }
+
+    function renderGradeCards(){
+        const grid = document.getElementById('gradeCardsGrid');
+        grid.innerHTML = GRADES.map((g,i) => {
+            const count = studentsData.filter(s => s.grade === g.label).length;
+            const color = GRADE_COLORS[i % GRADE_COLORS.length];
+            const helpTextEn = currentMode === 'students' ? 'Tap to manage' : 'Tap for attendance';
+            const helpTextAm = currentMode === 'students' ? 'ለማስተዳደር ይጫኑ' : 'ለክትትል ይጫኑ';
+            
+            return `
+            <button onclick="openGrade('${g.label}')" class="glass-panel-gold rounded-3xl text-left relative overflow-hidden group card-in" style="animation-delay:${i*0.03}s">
+                <div class="flex items-center justify-between p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-${color}/10 border border-${color}/30 flex items-center justify-center text-2xl flex-shrink-0">${g.icon}</div>
+                        <div>
+                            <h3 class="text-lg font-bold amharic text-white leading-tight">${g.label}</h3>
+                            <p class="text-[11px] text-gray-400 mt-1 uppercase tracking-wide font-semibold">
+                                <span class="lang-en">${g.prefix} • ${count} student${count!==1?'s':''}</span>
+                                <span class="lang-am">${g.prefix} • ${count} ተማሪዎች</span>
+                            </p>
+                            <p class="text-[10px] text-gray-500 mt-0.5">
+                                <span class="lang-en">${helpTextEn}</span><span class="lang-am">${helpTextAm}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <span class="text-xl text-${color} opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
+                </div>
+            </button>`;
+        }).join('');
+    }
+
+    async function openGrade(gradeLabel){
+        currentGrade = gradeLabel;
+        if (currentMode === 'students'){
+            document.getElementById('studentsGradeTitle').textContent = gradeLabel;
+            document.getElementById('studentSearch').value = '';
+            await loadStudents();
+            renderStudentsList();
+            showView('studentsWorkspace');
+        } else {
+            document.getElementById('attendanceGradeTitle').textContent = gradeLabel;
+            document.getElementById('attendanceDate').value = currentDate;
+            await loadStudents();
+            await loadAttendance(currentDate);
+            document.getElementById('attendanceTabDaily').classList.add('active');
+            document.getElementById('attendanceTabSummary').classList.remove('active');
+            document.getElementById('attendanceTabAnalytics').classList.remove('active');
+            document.getElementById('attendanceDailyPane').classList.add('active');
+            document.getElementById('attendanceSummaryPane').classList.remove('active');
+            document.getElementById('attendanceAnalyticsPane').classList.remove('active');
+            defaultSummaryRange();
+            updateEcDateLabel();
+            renderAttendanceList();
+            showView('attendanceWorkspace');
+        }
+    }
+
+    // Dynamic Field of Study Toggle
+    function toggleFieldOfStudy() {
+        const val = document.getElementById('sSecularEducation').value;
+        const wrap = document.getElementById('fieldOfStudyWrapper');
+        if (['University', 'Diploma', 'Masters'].includes(val)) {
+            wrap.classList.remove('hidden');
+        } else {
+            wrap.classList.add('hidden');
+            document.getElementById('sFieldOfStudy').value = '';
+        }
+    }
+
+    // ==========================================================
+    // STUDENTS MODULE
+    // ==========================================================
+    function renderStudentsList(){
+        const term = document.getElementById('studentSearch').value.trim().toLowerCase();
+        
+        // Search functionality matching exact ID, partial numbers like '001', or name
+        const list = studentsData.filter(s => {
+            if (s.grade !== currentGrade) return false;
+            if (!term) return true;
+            
+            const nameMatch = (s.name||'').toLowerCase().includes(term);
+            const idMatch = (s.id||'').toLowerCase().includes(term);
+            // also allow matching "B1-001" or just "001" easily
+            const idParts = (s.id||'').toLowerCase().split('-');
+            const lastPartMatch = idParts[idParts.length-1]?.includes(term);
+            const lastTwoPartsMatch = (idParts[idParts.length-2] + '-' + idParts[idParts.length-1])?.includes(term);
+
+            return nameMatch || idMatch || lastPartMatch || lastTwoPartsMatch;
+        });
+
+        const all = studentsData.filter(s => s.grade === currentGrade);
+        document.getElementById('studentsCount').textContent = all.length;
+        document.getElementById('statTotal').textContent = all.length;
+        document.getElementById('statMale').textContent = all.filter(s => s.gender === 'ወንድ').length;
+        document.getElementById('statFemale').textContent = all.filter(s => s.gender === 'ሴት').length;
+
+        const wrap = document.getElementById('studentsListWrap');
+        const empty = document.getElementById('studentsEmptyState');
+        if (!list.length){ wrap.innerHTML=''; empty.classList.remove('hidden'); return; }
+        empty.classList.add('hidden');
+
+        wrap.innerHTML = list.map(s => {
+            const initials = (s.name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('');
+            return `
+            <div class="glass-panel-gold rounded-2xl p-5 card-in relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-yellow-500/5 rounded-bl-full pointer-events-none transition-all duration-300 group-hover:bg-yellow-500/10 group-hover:scale-110"></div>
+                <div class="flex items-start gap-4 relative z-10">
+                    <div class="avatar-ring w-14 h-14 rounded-xl bg-yellow-500/10 flex items-center justify-center text-lg font-bold text-yellow-500 flex-shrink-0">${escapeHtml(initials)}</div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-white truncate text-lg">${escapeHtml(s.name)}</h3>
+                        <p class="text-xs text-gray-400 amharic">${escapeHtml(s.christianName||'-')}</p>
+                        <p class="inline-block mt-1 bg-yellow-500/10 border border-yellow-500/20 text-[10px] text-yellow-500 font-mono px-2 py-0.5 rounded-md font-bold">${escapeHtml(s.id)}</p>
+                    </div>
+                    <div class="flex gap-1 flex-shrink-0">
+                        <button onclick="openStudentModal('${s.id}')" class="icon-btn bg-white/5 hover:bg-white/10 border border-white/10" title="Edit">✏️</button>
+                        <button onclick="deleteStudent('${s.id}')" class="icon-btn bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400" title="Delete">🗑️</button>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-white/5 grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11px] text-gray-400 relative z-10">
+                    <p>📞 ${escapeHtml(s.phone||'-')}</p>
+                    <p>🎂 ${escapeHtml(s.dob||'-')}</p>
+                    <p class="col-span-2 truncate">🏠 ${[s.address, s.subCity, s.region].filter(Boolean).map(escapeHtml).join(', ') || '-'}</p>
+                    <p class="col-span-2 truncate text-red-400/80">🚨 ${escapeHtml(s.emergencyName||'-')} (${escapeHtml(s.emergencyPhone||'-')})</p>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function openStudentModal(id){
+        const form = document.getElementById('studentForm');
+        form.reset();
+        const gradeSel = document.getElementById('sGrade');
+        gradeSel.innerHTML = GRADES.map(g => `<option value="${g.label}">${g.label}</option>`).join('');
+        gradeSel.value = currentGrade;
+        toggleFieldOfStudy(); // Reset field of study visibility
+
+        if (id){
+            const s = studentsData.find(x => x.id === id);
+            if (!s) return;
+            document.getElementById('studentModalTitle').textContent = 'Edit Student';
+            document.getElementById('studentModalTitleAm').textContent = 'ተማሪ መረጃ ማስተካከያ';
+            document.getElementById('sEditId').value = s.id;
+            document.getElementById('sName').value = s.name || '';
+            document.getElementById('sChristianName').value = s.christianName || '';
+            document.getElementById('sGender').value = s.gender || 'ወንድ';
+            document.getElementById('sPhone').value = s.phone || '';
+            
+            // Parse DOB if available
+            if(s.dob) {
+                const parts = s.dob.split('/');
+                if(parts.length === 3) {
+                    document.getElementById('dobDay').value = parts[0];
+                    document.getElementById('dobMonth').value = parts[1];
+                    document.getElementById('dobYear').value = parts[2];
+                }
+            }
+
+            document.getElementById('sAddress').value = s.address || '';
+            document.getElementById('sRegion').value = s.region || '';
+            document.getElementById('sSubCity').value = s.subCity || '';
+            
+            document.getElementById('sEmergencyName').value = s.emergencyName || '';
+            document.getElementById('sEmergencyPhone').value = s.emergencyPhone || '';
+            
+            document.getElementById('sSecularEducation').value = s.secularEdu || '1st Grade';
+            toggleFieldOfStudy();
+            document.getElementById('sFieldOfStudy').value = s.fieldOfStudy || '';
+            
+            gradeSel.value = s.grade || currentGrade;
+        } else {
+            document.getElementById('studentModalTitle').textContent = 'Register Student';
+            document.getElementById('studentModalTitleAm').textContent = 'ተማሪ መመዝገቢያ';
+            document.getElementById('sEditId').value = '';
+        }
+
+        const modal = document.getElementById('studentModal');
+        modal.classList.remove('hidden');
+        requestAnimationFrame(() => modal.classList.remove('modal-hidden-state'));
+    }
+
+    function closeStudentModal(){
+        const modal = document.getElementById('studentModal');
+        modal.classList.add('modal-hidden-state');
+        setTimeout(() => modal.classList.add('hidden'), 280);
+    }
+
+    async function saveStudentForm(e){
+        e.preventDefault();
+        const editId = document.getElementById('sEditId').value;
+
+        const dDay = document.getElementById('dobDay').value;
+        const dMon = document.getElementById('dobMonth').value;
+        const dYr = document.getElementById('dobYear').value;
+        const dobStr = (dDay && dMon && dYr) ? `${dDay}/${dMon}/${dYr}` : '';
+
+        const payload = {
+            name: document.getElementById('sName').value.trim(),
+            christianName: document.getElementById('sChristianName').value.trim(),
+            gender: document.getElementById('sGender').value,
+            phone: document.getElementById('sPhone').value.trim(),
+            dob: dobStr,
+            address: document.getElementById('sAddress').value.trim(),
+            region: document.getElementById('sRegion').value.trim(),
+            subCity: document.getElementById('sSubCity').value.trim(),
+            emergencyName: document.getElementById('sEmergencyName').value.trim(),
+            emergencyPhone: document.getElementById('sEmergencyPhone').value.trim(),
+            secularEdu: document.getElementById('sSecularEducation').value,
+            fieldOfStudy: document.getElementById('sFieldOfStudy').value.trim(),
+            grade: document.getElementById('sGrade').value,
+            regDate: new Date().toISOString().slice(0,10)
+        };
+        if (!payload.name){ alert('Please enter the student name.'); return; }
+        if (!payload.grade){ alert('Please select a student round.'); return; }
+
+        const ok = await saveStudent(payload, editId);
+        if (!ok) return;
+
+        closeStudentModal();
+        renderStudentsList();
+    }
+
+    async function deleteStudent(id){
+        const confMsg = isAmharic ? 'ይህን ተማሪ ከዝርዝሩ መሰረዝ ይፈልጋሉ?' : 'Remove this student from the roster?';
+        if (!confirm(confMsg)) return;
+        const ok = await removeStudent(id);
+        if (ok) renderStudentsList();
+    }
+
+    // ==========================================================
+    // ATTENDANCE MODULE + SUMMARY + ANALYTICS
+    // ==========================================================
+    async function onDateChange(){
+        currentDate = document.getElementById('attendanceDate').value || currentDate;
+        await loadAttendance(currentDate);
+        updateEcDateLabel();
+        renderAttendanceList();
+    }
+
+    async function changeDate(delta){
+        const d = new Date(currentDate + 'T00:00:00');
+        d.setDate(d.getDate() + delta);
+        currentDate = d.toISOString().slice(0,10);
+        document.getElementById('attendanceDate').value = currentDate;
+        await loadAttendance(currentDate);
+        updateEcDateLabel();
+        renderAttendanceList();
+    }
+
+    async function setStatus(studentId, status){
+        const ok = await saveAttendance(studentId, status);
+        if (ok) {
+            renderAttendanceList();
+            if (document.getElementById('attendanceSummaryPane').classList.contains('active')) await loadSummaryData();
+            if (document.getElementById('attendanceAnalyticsPane').classList.contains('active')) await loadAnalyticsData(false);
+        }
+    }
+
+    const STATUS_LABELS = {
+        present:    { label:'ተገኝ', en:'Present',    cls:'active-present' },
+        absent:     { label:'ቀሪ', en:'Absent',      cls:'active-absent' },
+        late:       { label:'አርፍዷል', en:'Late',      cls:'active-late' },
+        permission: { label:'በፍቃድ', en:'Excused',   cls:'active-permission' },
+    };
+
+    function switchAttendanceTab(tab){
+        ['daily','summary','analytics'].forEach(name=>{
+            document.getElementById('attendanceTab'+name.charAt(0).toUpperCase()+name.slice(1)).classList.toggle('active', name===tab);
+            document.getElementById('attendance'+name.charAt(0).toUpperCase()+name.slice(1)+'Pane').classList.toggle('active', name===tab);
+        });
+        if(tab==='summary') loadSummaryData();
+        if(tab==='analytics') loadAnalyticsData(false);
+    }
+
+    function updateEcDateLabel(){
+        const d=new Date(currentDate+'T00:00:00');
+        const months=['መስከረም','ጥቅምት','ህዳር','ታህሳስ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜ'];
+        // Accurate enough for display using the established Ethiopian calendar conversion used by this module.
+        const jdn=Math.floor((1461*(d.getFullYear()+4800+Math.floor((d.getMonth()+1-14)/12)))/4)+Math.floor((367*(d.getMonth()+1-2-12*Math.floor((d.getMonth()+1-14)/12)))/12)-Math.floor(3*Math.floor((d.getFullYear()+4900+Math.floor((d.getMonth()+1-14)/12))/100)/4)+d.getDate()-32075;
+        const r=jdn-1723856, y=4*Math.floor(r/1461)+Math.floor((r%1461)/365)-Math.floor((r%1461)/1460), n=((r%1461)%365)+365*Math.floor((r%1461)/1460), m=Math.floor(n/30), day=(n%30)+1;
+        const el=document.getElementById('attendanceEcDate'); if(el) el.textContent=`${months[m]||months[0]} ${day}, ${y} ዓ.ም`;
+    }
+
+    function renderAttendanceList(){
+        const list = studentsData.filter(s => s.grade === currentGrade);
+        const dayRecord = attendanceLoadedDate === currentDate ? attendanceStore : {};
+        let present=0, absent=0, late=0, permission=0;
+        list.forEach(s=>{ const st=dayRecord[s.id]; if(st==='present')present++; else if(st==='absent')absent++; else if(st==='late')late++; else if(st==='permission')permission++; });
+        document.getElementById('sumPresent').textContent=present;
+        document.getElementById('sumAbsent').textContent=absent;
+        document.getElementById('sumLate').textContent=late;
+        document.getElementById('sumPermission').textContent=permission;
+        const wrap=document.getElementById('attendanceListWrap'), empty=document.getElementById('attendanceEmptyState');
+        if(!list.length){wrap.innerHTML='';empty.classList.remove('hidden');return;} empty.classList.add('hidden');
+        wrap.innerHTML=list.map(s=>{
+            const st=dayRecord[s.id]; const initials=(s.name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('');
+            const buttons=Object.entries(STATUS_LABELS).map(([key,info])=>`<button onclick="setStatus('${escapeHtml(s.id)}','${key}')" class="status-btn px-3 py-2 rounded-lg text-xs font-semibold amharic flex-1 sm:flex-none ${st===key?info.cls:'bg-white/5 text-gray-400 hover:bg-white/10'}"><span class="lang-en">${info.en}</span><span class="lang-am">${info.label}</span></button>`).join('');
+            return `<div class="glass-panel-gold rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-in relative overflow-hidden"><div class="flex items-center gap-4 flex-1 min-w-0"><div class="avatar-ring w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center text-sm font-bold text-yellow-500 flex-shrink-0">${escapeHtml(initials)}</div><div class="min-w-0"><p class="font-bold text-white truncate">${escapeHtml(s.name)}</p><p class="text-[10px] text-gray-400 mt-1">${escapeHtml(s.gender||'-')} · ${escapeHtml(s.phone||'-')}</p><p class="inline-block mt-1 bg-yellow-500/10 border border-yellow-500/20 text-[10px] text-yellow-500 font-mono px-1.5 py-0.5 rounded font-bold">${escapeHtml(s.id)}</p></div></div><div class="flex gap-2 w-full sm:w-auto">${buttons}</div></div>`;
+        }).join('');
+    }
+
+    function defaultSummaryRange(){
+        const end=currentDate; const d=new Date(end+'T00:00:00'); d.setDate(d.getDate()-29);
+        document.getElementById('summaryStartDate').value=d.toISOString().slice(0,10);
+        document.getElementById('summaryEndDate').value=end;
+    }
+
+    async function fetchAttendanceRange(start,end){
+        if(!dbReady()) return [];
+        const {data,error}=await supabaseClient.from('Begena_Attendance').select('student_id,attendance_date,status').gte('attendance_date',start).lte('attendance_date',end);
+        if(error){showDbError('load attendance summary',error);return [];} return data||[];
+    }
+
+    async function loadSummaryData(){
+        if(!currentGrade)return;
+        const start=document.getElementById('summaryStartDate').value;
+        const end=document.getElementById('summaryEndDate').value;
+        if(!start||!end||start>end){alert(isAmharic?'የቀን ክልሉ ትክክል አይደለም።':'Please select a valid date range.');return;}
+        const students=studentsData.filter(s=>s.grade===currentGrade); const rows=await fetchAttendanceRange(start,end);
+        const byStudent={}; const dates=new Set();
+        rows.forEach(r=>{ if(!students.some(s=>s.id===r.student_id))return; dates.add(r.attendance_date); byStudent[r.student_id]=byStudent[r.student_id]||{present:0,late:0,absent:0,permission:0}; if(byStudent[r.student_id][r.status]!==undefined)byStudent[r.student_id][r.status]++; });
+        let good=0,marks=0;
+        const body=document.getElementById('summaryTableBody');
+        body.innerHTML=students.map(s=>{const x=byStudent[s.id]||{present:0,late:0,absent:0,permission:0};const recorded=x.present+x.late+x.absent+x.permission;const rate=recorded?Math.round(((x.present+x.late)/recorded)*100):0;good+=x.present+x.late;marks+=recorded;return `<tr><td class="font-bold">${escapeHtml(s.name)}</td><td class="font-mono text-[10px]">${escapeHtml(s.id)}</td><td class="text-green-400 font-bold">${x.present}</td><td class="text-amber-400 font-bold">${x.late}</td><td class="text-red-400 font-bold">${x.absent}</td><td class="text-sky-400 font-bold">${x.permission}</td><td>${recorded}</td><td class="min-w-[90px]"><div class="flex items-center gap-2"><div class="progress-track flex-1"><div class="progress-fill" style="width:${rate}%"></div></div><span class="font-bold text-yellow-400">${rate}%</span></div></td></tr>`;}).join('');
+        const totalPossible=marks; const rate=totalPossible?Math.round(good/totalPossible*100):0;
+        document.getElementById('summaryDays').textContent=dates.size; document.getElementById('summaryClassSize').textContent=students.length; document.getElementById('summaryGood').textContent=good; document.getElementById('summaryRate').textContent=rate+'%';
+        document.getElementById('summaryEmpty').classList.toggle('hidden', rows.length>0 || students.length===0);
+    }
+
+    let begenaTrendChart=null, begenaStatusChart=null;
+    async function loadAnalyticsData(showToastMsg=false){
+        if(!currentGrade)return;
+        const students=studentsData.filter(s=>s.grade===currentGrade); const end=new Date(currentDate+'T00:00:00'); const start=new Date(end); start.setDate(start.getDate()-29);
+        const startKey=start.toISOString().slice(0,10), endKey=currentDate; const rows=await fetchAttendanceRange(startKey,endKey);
+        const allowed=new Set(students.map(s=>s.id)); const relevant=rows.filter(r=>allowed.has(r.student_id));
+        let p=0,l=0,a=0,e=0; const per={}; relevant.forEach(r=>{per[r.student_id]=per[r.student_id]||{p:0,l:0,a:0,e:0}; if(r.status==='present'){p++;per[r.student_id].p++;} else if(r.status==='late'){l++;per[r.student_id].l++;} else if(r.status==='absent'){a++;per[r.student_id].a++;} else if(r.status==='permission'){e++;per[r.student_id].e++;}});
+        const marks=p+l+a+e, rate=marks?Math.round((p+l)/marks*100):0;
+        document.getElementById('analyticsRate').textContent=rate+'%'; document.getElementById('analyticsMarks').textContent=marks;
+        const ranking=students.map(s=>{const x=per[s.id]||{p:0,l:0,a:0,e:0};const total=x.p+x.l+x.a+x.e;return {s,total,rate:total?Math.round((x.p+x.l)/total*100):0,abs:x.a};}).sort((x,y)=>y.rate-x.rate||x.abs-y.abs);
+        const best=ranking.find(x=>x.total>0), risk=[...ranking].filter(x=>x.total>0).sort((x,y)=>x.rate-y.rate)[0];
+        document.getElementById('analyticsBest').textContent=best?best.s.name:'—';document.getElementById('analyticsBestRate').textContent=best?best.rate+'%':'0%';
+        document.getElementById('analyticsRisk').textContent=risk?risk.s.name:'—';document.getElementById('analyticsRiskRate').textContent=risk?risk.rate+'%':'0%';
+        document.getElementById('analyticsRanking').innerHTML=ranking.filter(x=>x.total>0).map((x,i)=>`<div class="glass-panel-gold rounded-xl p-3 flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-yellow-500/10 text-yellow-400 flex items-center justify-center font-bold">${i+1}</div><div class="min-w-0 flex-1"><p class="font-bold truncate">${escapeHtml(x.s.name)}</p><div class="progress-track mt-2"><div class="progress-fill" style="width:${x.rate}%"></div></div></div><div class="text-right"><b class="text-yellow-400">${x.rate}%</b><p class="text-[9px] text-gray-400">${x.abs} absent</p></div></div>`).join('') || '<p class="text-center text-gray-500 py-8">No attendance data yet.</p>';
+        const dates=[],trend=[];for(let i=29;i>=0;i--){const d=new Date(end);d.setDate(d.getDate()-i);const key=d.toISOString().slice(0,10);dates.push(key);const day=relevant.filter(r=>r.attendance_date===key);const good=day.filter(r=>r.status==='present'||r.status==='late').length;trend.push(day.length?Math.round(good/day.length*100):null);}
+        if(window.Chart){
+            if(begenaTrendChart)begenaTrendChart.destroy(); if(begenaStatusChart)begenaStatusChart.destroy();
+            begenaTrendChart=new Chart(document.getElementById('begenaTrendChart'),{type:'line',data:{labels:dates.map(x=>x.slice(5)),datasets:[{label:'Attendance %',data:trend,borderColor:'#C9A227',backgroundColor:'rgba(201,162,39,.12)',fill:true,tension:.35,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{ticks:{maxTicksLimit:8}}}}});
+            begenaStatusChart=new Chart(document.getElementById('begenaStatusChart'),{type:'doughnut',data:{labels:['Present','Late','Absent','Excused'],datasets:[{data:[p,l,a,e],backgroundColor:['#22c55e','#f59e0b','#ef4444','#38bdf8'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'}}}});
+        }
+        if(showToastMsg) alert(isAmharic?'ትንታኔ እንደገና ተሰልቷል።':'Analytics recalculated.');
+    }
+
+    // ==========================================================
+    
+// ===================== THEME SYSTEM =====================
+function applyTheme(theme) {
+    const root = document.documentElement;
+    root.setAttribute('data-theme', theme);
+    localStorage.setItem('mh_begena_theme', theme);
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+        const dark = theme === 'dark';
+        btn.textContent = dark ? '☀' : '☾';
+        btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+        btn.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+    }
+    // Keep charts visually in sync when the theme changes.
+    if (typeof loadAnalyticsData === 'function' && typeof currentGrade !== 'undefined' && currentGrade) {
+        setTimeout(() => loadAnalyticsData(false), 0);
+    }
+}
+function toggleTheme() {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+(function initTheme() {
+    // Light mode is the default. A user's later choice is remembered.
+    const saved = localStorage.getItem('mh_begena_theme') || 'light';
+    applyTheme(saved);
+})();
+
+// Equipment-style language buttons while preserving Begena's existing language system.
+function setBegenaLanguage(lang) {
+    if (typeof isAmharic !== 'undefined') {
+        isAmharic = lang === 'am';
+    }
+    document.body.classList.toggle('lang-am', lang === 'am');
+    document.body.classList.toggle('lang-en', lang !== 'am');
+    localStorage.setItem('mh_begena_lang', lang);
+    const en = document.getElementById('langBtnEn');
+    const am = document.getElementById('langBtnAm');
+    if (en) en.classList.toggle('active', lang === 'en');
+    if (am) am.classList.toggle('active', lang === 'am');
+}
+(function initBegenaLanguageButtons() {
+    const saved = localStorage.getItem('mh_begena_lang') || (typeof isAmharic !== 'undefined' && isAmharic ? 'am' : 'en');
+    setBegenaLanguage(saved);
+})();
+
+// INIT
+    // ==========================================================
+    (async function initBegena(){
+        document.getElementById('attendanceDate').value = currentDate;
+        try {
+            if (!supabaseClient) await supabaseReady;
+        } catch (error) {
+            console.error('[Begena] Supabase client failed to load:', error);
+            alert(isAmharic
+                ? 'Supabase አልተገናኘም። supabaseClient.js እና የፋይል አቀማመጡን ያረጋግጡ።'
+                : 'Supabase could not be loaded. Check supabaseClient.js and make sure it is in the same folder as begena.html.');
+            return;
+        }
+        if (!dbReady()) return;
+        await loadStudents();
+        await loadAttendance(currentDate);
+        goHome();
+    })();
+</script>
+</body>
+</html>

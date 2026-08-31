@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meserete Hiwot ERP - Report & Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+Ethiopic:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script> <!-- Excel export -->
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .amharic { font-family: 'Noto Sans Ethiopic', sans-serif; }
+
+        .ambient-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, rgba(0,0,0,0) 70%); top: -200px; left: -200px; z-index: -1; pointer-events: none; }
+        .ambient-glow-2 { position: absolute; width: 800px; height: 800px; background: radial-gradient(circle, rgba(56,189,248,0.03) 0%, rgba(0,0,0,0) 70%); bottom: -200px; right: -200px; z-index: -1; pointer-events: none; }
+
+        .glass-panel-gold {
+            background: linear-gradient(155deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,215,0,0.14);
+            box-shadow: 0 8px 30px -10px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+            transition: all .35s cubic-bezier(.4,0,.2,1);
+        }
+        .glass-panel-gold:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255,215,0,0.45);
+            box-shadow: 0 22px 45px -14px rgba(255,215,0,0.18), inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .row-in { animation: cardIn .35s cubic-bezier(.22,1,.36,1) both; }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .icon-btn { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; transition: all .25s cubic-bezier(.4,0,.2,1); }
+        .id-chip { background: linear-gradient(120deg, rgba(255,215,0,0.16), rgba(255,215,0,0.04)); border: 1px solid rgba(255,215,0,0.3); }
+
+        .tab-btn { transition: all .25s ease; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: #FFD700; border-bottom-color: #FFD700; }
+        .tab-btn:hover:not(.active) { color: #e5e7eb; }
+
+        .status-pill { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+        .status-green  { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.35); }
+        .status-red    { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.35); }
+        .status-blue   { background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.35); }
+
+        .lux-input { transition: all .2s ease; }
+        .lux-input:focus { border-color: #FFD700 !important; box-shadow: 0 0 0 3px rgba(255,215,0,0.12); }
+        .section-title { display: flex; align-items: center; gap: 8px; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: #FFD700; font-weight: 700; }
+
+        .source-dot { width: 8px; height: 8px; border-radius: 9999px; display: inline-block; animation: pulseDot 2s ease-in-out infinite; }
+        @keyframes pulseDot { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74,222,128,0.5); } 50% { opacity: .7; box-shadow: 0 0 0 5px rgba(74,222,128,0); } }
+
+        .toggle-switch { width: 42px; height: 24px; border-radius: 999px; position: relative; cursor: pointer; transition: background .25s; }
+        .toggle-switch .knob { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 999px; background: white; transition: transform .25s; }
+        .toggle-switch.on { background: #FFD700; }
+        .toggle-switch.on .knob { transform: translateX(18px); }
+        .toggle-switch.off { background: rgba(255,255,255,0.15); }
+
+        .toast { animation: toastIn .3s cubic-bezier(.22,1,.36,1) both, toastOut .3s ease 2.4s forwards; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastOut { to { opacity: 0; transform: translateY(-8px); } }
+
+        /* ============ ORBITAL ERP CORE ============ */
+        .orbital-shell { position: relative; border-radius: 28px; padding: 28px; overflow: hidden; }
+        .orbital-shell::before { content:''; position:absolute; inset:0; background: radial-gradient(120% 90% at 50% 0%, rgba(56,189,248,0.07), transparent 60%), radial-gradient(80% 60% at 50% 100%, rgba(255,215,0,0.05), transparent 60%); pointer-events:none; }
+        .orbital-topline { display:flex; align-items:center; justify-content:space-between; gap:12px; position:relative; z-index:2; margin-bottom: 10px; }
+        .orbital-status-badge { font-size:.62rem; letter-spacing:.14em; font-weight:800; padding:5px 12px; border-radius:999px; background:rgba(74,222,128,0.12); border:1px solid rgba(74,222,128,0.4); color:#4ade80; display:inline-flex; align-items:center; gap:6px; }
+        .orbital-status-badge .pulse-dot { width:6px; height:6px; border-radius:999px; background:#4ade80; animation: pulseDot 2s ease-in-out infinite; }
+
+        .orbital-wrap { position: relative; width: 100%; max-width: 620px; margin: 6px auto 0; aspect-ratio: 1 / 1; perspective: 1400px; z-index: 2; }
+        .orbit-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; overflow: visible; }
+        .orbit-line-base { stroke: rgba(255,255,255,0.10); stroke-width: 0.5; fill: none; }
+        .orbit-line-flow { stroke-width: 0.7; fill: none; stroke-linecap: round; stroke-dasharray: 3 5; animation: flowDash 1.8s linear infinite; }
+        .orbit-line-flow.gold { stroke: rgba(255,215,0,0.85); }
+        .orbit-line-flow.blue { stroke: rgba(56,189,248,0.85); }
+        .orbit-line-flow.dim { stroke: rgba(148,163,184,0.35); animation: none; stroke-dasharray: 2 6; }
+        @keyframes flowDash { to { stroke-dashoffset: -16; } }
+
+        .core-orb { position: absolute; top: 50%; left: 50%; width: 36%; aspect-ratio: 1/1; border-radius: 50%; transform: translate(-50%, -50%); z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8%; background: radial-gradient(circle at 34% 28%, rgba(255,215,0,0.22), rgba(15,23,42,0.94) 68%); border: 1px solid rgba(255,215,0,0.4); box-shadow: 0 0 70px -12px rgba(255,215,0,0.35), inset 0 0 34px rgba(56,189,248,0.14); backdrop-filter: blur(6px); animation: orbFadeIn .7s cubic-bezier(.22,1,.36,1) both; }
+        .core-orb::before, .core-orb::after { content:''; position:absolute; border-radius:50%; pointer-events:none; }
+        .core-orb::before { inset: -13%; border: 1px solid rgba(56,189,248,0.22); border-top-color: rgba(255,215,0,0.55); animation: coreSpin 16s linear infinite; }
+        .core-orb::after { inset: -24%; border: 1px dashed rgba(255,215,0,0.14); animation: coreSpin 30s linear infinite reverse; }
+        @keyframes coreSpin { to { transform: rotate(360deg); } }
+        @keyframes orbFadeIn { from { opacity:0; transform: translate(-50%,-50%) scale(.75); } to { opacity:1; transform: translate(-50%,-50%) scale(1); } }
+        .core-orb .core-brand { font-size: .58rem; letter-spacing:.16em; text-transform:uppercase; color:#93c5fd; }
+        .core-orb .core-title { font-size: 1rem; font-weight: 800; color:#FFD700; letter-spacing:.02em; text-shadow: 0 0 14px rgba(255,215,0,0.5); line-height:1.15; margin-top:2px; }
+        .core-orb .core-sub { font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; color:#7dd3fc; margin-top:4px; }
+        .core-orb .core-status-pill { margin-top:8px; font-size:.55rem; font-weight:700; letter-spacing:.06em; padding:3px 9px; border-radius:999px; background:rgba(74,222,128,0.14); border:1px solid rgba(74,222,128,0.4); color:#4ade80; }
+
+        .orbit-node { position: absolute; top: 50%; left: 50%; width: 27%; transform: translate(-50%, -50%); z-index: 4; cursor: pointer; opacity: 0; animation: nodeFadeIn .55s cubic-bezier(.22,1,.36,1) forwards; }
+        @keyframes nodeFadeIn { from { opacity:0; transform: translate(-50%, -50%) scale(.55); } to { opacity:1; transform: translate(-50%, -50%) scale(1); } }
+        .orbit-node .node-card { position: relative; padding: 12px 8px; border-radius: 16px; text-align: center; background: linear-gradient(155deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015)); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 10px 26px -12px rgba(0,0,0,0.6); transition: transform .35s cubic-bezier(.4,0,.2,1), border-color .35s, box-shadow .35s; animation: nodeFloat 6s ease-in-out infinite; }
+        .orbit-node[data-node="sunday_school"] .node-card { animation-delay: .5s; }
+        .orbit-node[data-node="begena"] .node-card { animation-delay: 1s; }
+        @keyframes nodeFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .orbit-node:hover .node-card, .orbit-node.selected .node-card { animation-play-state: paused; transform: translateY(-9px); border-color: rgba(255,215,0,0.5); box-shadow: 0 20px 42px -14px rgba(255,215,0,0.28); }
+        .orbit-node.selected .node-card { border-color: rgba(56,189,248,0.6); box-shadow: 0 20px 42px -14px rgba(56,189,248,0.3); }
+        .orbit-node .node-icon { font-size: 1.25rem; }
+        .orbit-node .node-name { font-size: .64rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; margin-top: 4px; color: #e5e7eb; }
+        .orbit-node .node-status { font-size: .52rem; letter-spacing: .04em; margin-top: 4px; padding: 2px 7px; border-radius: 999px; display: inline-block; }
+        .orbit-node .node-status.live { background: rgba(74,222,128,0.14); border: 1px solid rgba(74,222,128,0.4); color: #4ade80; }
+        .orbit-node .node-status.seed { background: rgba(56,189,248,0.14); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; }
+        .orbit-node .node-status.pending { background: rgba(148,163,184,0.14); border: 1px solid rgba(148,163,184,0.35); color: #94a3b8; }
+
+        .orbital-panel { position: relative; z-index: 2; margin-top: 18px; border-radius: 20px; padding: 0; max-height: 0; opacity: 0; overflow: hidden; transition: max-height .45s cubic-bezier(.4,0,.2,1), opacity .35s ease, padding .45s; }
+        .orbital-panel.open { max-height: 340px; opacity: 1; padding: 18px 20px; background: linear-gradient(155deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015)); border: 1px solid rgba(56,189,248,0.22); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
+        .orbital-panel-hint { text-align:center; font-size:.72rem; color:#64748b; margin-top:14px; position:relative; z-index:2; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .core-orb, .core-orb::before, .core-orb::after, .orbit-node, .orbit-node .node-card, .orbit-line-flow, .pulse-dot { animation: none !important; opacity: 1 !important; transform: translate(-50%, -50%) !important; }
+        }
+
+        @media (max-width: 1024px) { .orbital-wrap { max-width: 440px; } }
+
+        @media (max-width: 640px) {
+            .orbital-wrap { max-width: 100%; aspect-ratio: auto; height: auto; display: flex; flex-direction: column; gap: 12px; }
+            .orbit-svg { display: none; }
+            .core-orb { position: static; transform: none; width: 100%; max-width: 200px; margin: 0 auto; animation: orbFadeIn .7s cubic-bezier(.22,1,.36,1) both; padding: 10%; }
+            .orbit-node { position: static; transform: none; width: 100%; }
+            .orbit-node .node-card { display:flex; align-items:center; gap:10px; text-align:left; animation: none; }
+            .orbit-node .node-icon { font-size:1.1rem; }
+            .orbit-node .node-name, .orbit-node .node-status { margin-top:0; }
+        }
+
+        /* ============ ROYAL 3D EXECUTIVE COMMAND CENTER ============ */
+
+        /* --- LEVEL 1: Background atmosphere --- */
+        .cmd-atmosphere { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(9,14,28,0) 0%, rgba(9,14,28,0) 100%), #0b1120; }
+        .cmd-glow-gold { position: absolute; width: 900px; height: 900px; top: -320px; left: 50%; transform: translateX(-58%); background: radial-gradient(circle, rgba(255,215,0,0.06) 0%, rgba(0,0,0,0) 65%); }
+        .cmd-glow-blue { position: absolute; width: 1000px; height: 1000px; bottom: -380px; right: -200px; background: radial-gradient(circle, rgba(56,189,248,0.05) 0%, rgba(0,0,0,0) 65%); }
+        .cmd-rays { position: absolute; inset: -10% -10% auto -10%; height: 60%; background: conic-gradient(from 200deg at 50% 0%, rgba(255,215,0,0.05), rgba(0,0,0,0) 18%, rgba(0,0,0,0) 82%, rgba(56,189,248,0.045)); opacity: .7; }
+        .cmd-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 64px 64px; -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 20%, #000 0%, transparent 75%); mask-image: radial-gradient(ellipse 70% 55% at 50% 20%, #000 0%, transparent 75%); }
+        .cmd-particle { position: absolute; border-radius: 999px; background: rgba(255,215,0,0.55); box-shadow: 0 0 8px 1px rgba(255,215,0,0.35); animation: particleDrift linear infinite; }
+        .cmd-particle.blue { background: rgba(56,189,248,0.55); box-shadow: 0 0 8px 1px rgba(56,189,248,0.3); }
+        @keyframes particleDrift { 0% { transform: translateY(0) translateX(0); opacity: 0; } 8% { opacity: .8; } 92% { opacity: .6; } 100% { transform: translateY(-140px) translateX(18px); opacity: 0; } }
+
+        /* --- LEVEL 2: Glass surfaces / 3D header --- */
+        .cmd-header { position: relative; overflow: hidden; box-shadow: 0 20px 50px -20px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.05); }
+        .cmd-header::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,215,0,0.35), rgba(255,215,0,0) 60%); height: 1px; top: auto; bottom: 0; }
+        .cmd-header-sweep { position: absolute; top: 0; left: -30%; width: 30%; height: 100%; background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 45%, rgba(255,215,0,0.08) 50%, rgba(255,255,255,0.06) 55%, rgba(255,255,255,0) 100%); transform: skewX(-18deg); animation: headerSweep 9s ease-in-out infinite; pointer-events: none; }
+        @keyframes headerSweep { 0% { left: -30%; } 35% { left: 120%; } 100% { left: 120%; } }
+        .cmd-status-live { font-size: .62rem; letter-spacing: .12em; font-weight: 800; padding: 5px 12px; border-radius: 999px; background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.4); color: #4ade80; display: inline-flex; align-items: center; gap: 6px; }
+        .cmd-exec-btn { position: relative; overflow: hidden; }
+        .cmd-exec-btn.active { background: linear-gradient(120deg, rgba(255,215,0,0.22), rgba(255,215,0,0.06)); border-color: rgba(255,215,0,0.5); color: #FFD700; }
+
+        /* --- LEVEL 3: KPI 3D tilt cards --- */
+        .kpi-card-3d { perspective: 1000px; }
+        .kpi-inner { position: relative; transform: rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg)); transition: transform .25s cubic-bezier(.4,0,.2,1); transform-style: preserve-3d; will-change: transform; }
+        .kpi-inner::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(120deg, rgba(255,255,255,0.10), rgba(255,255,255,0) 40%); opacity: 0; transition: opacity .3s; pointer-events: none; }
+        .kpi-card-3d:hover .kpi-inner::before { opacity: 1; }
+        .kpi-trend { font-size: .68rem; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 999px; }
+        .kpi-trend.up { color: #4ade80; background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); }
+        .kpi-trend.down { color: #f87171; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); }
+        .kpi-trend.flat { color: #94a3b8; background: rgba(148,163,184,0.1); border: 1px solid rgba(148,163,184,0.25); }
+        .kpi-mini-bar { display: flex; height: 6px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,0.06); margin-top: 10px; }
+        .kpi-mini-bar span { height: 100%; transition: width .6s cubic-bezier(.22,1,.36,1); }
+        .kpi-mini-ring { position: relative; width: 46px; height: 46px; }
+        .kpi-mini-ring svg { transform: rotate(-90deg); }
+        .kpi-mini-ring circle { fill: none; stroke-width: 4; }
+
+        /* --- LEVEL 3: Data chambers around charts --- */
+        .chamber { position: relative; overflow: hidden; }
+        .chamber::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(120% 80% at 15% 0%, rgba(56,189,248,0.06), transparent 55%); pointer-events: none; }
+        .chamber::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06); pointer-events: none; }
+        .chamber-label { display: inline-flex; align-items: center; gap: 6px; }
+        .chamber-canvas-wrap { position: relative; border-radius: 16px; padding: 14px; background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.06); }
+
+        /* --- Micro-interactions --- */
+        button:not(.toggle-switch):active, a.cmd-pressable:active { transform: translateY(1px) scale(.985); }
+        .cmd-pressable { transition: transform .15s ease; }
+
+        /* --- Executive Mode --- */
+        
+        
+        
+        
+        
+        .exec-mode-badge { display: none; }
+        body.executive-mode .exec-mode-badge { display: inline-flex; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cmd-header-sweep, .cmd-particle { animation: none !important; display: none; }
+            .kpi-inner { transform: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            .kpi-inner { transform: none !important; }
+        }
+
+        #printArea { display: none; }
+        @media print {
+            body { background: white; color: black; }
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { display: block; position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 0; }
+            @page { size: A4 landscape; margin: 12mm; }
+            .print-header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; border-bottom: 2px solid #FFD700; padding-bottom: 10px; }
+            .print-header img { width: 40px; height: 40px; }
+            .print-header h2 { margin: 0; font-size: 17px; }
+            .print-header p { margin: 0; font-size: 11px; color: #555; }
+            .print-meta { display: flex; justify-content: space-between; font-size: 10px; color: #555; margin: 8px 0 12px; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 10px; color: #111827; }
+            .print-table th, .print-table td { border: 1px solid #999; padding: 5px 7px; text-align: left; }
+            .print-table th { background: #f3d97a; color: #111; }
+            .print-signature { display: flex; justify-content: space-between; margin-top: 40px; font-size: 10px; color: #333; }
+            .print-signature .line { width: 220px; border-top: 1px solid #333; margin-top: 30px; padding-top: 4px; }
+        }
+    
+/* =========================================================
+   STUDENTS-PAGE THEME SYSTEM — shared light/dark appearance
+   ========================================================= */
+:root {
+  --bg-page:#F7F8FA; --surface:#FFFFFF; --surface-soft:#F1F3F5;
+  --text-main:#172033; --text-muted:#596579; --primary:#B8922E;
+  --primary-bright:#D4AF37; --border:#E2E6EC;
+  --glass-bg:rgba(255,255,255,.92); --glass-border:#E2E6EC;
+  --glass-gold-bg-1:#FFFFFF; --glass-gold-bg-2:#F8F9FB;
+  --glass-gold-border:rgba(184,146,46,.28); --input-bg:#FFFFFF;
+  --input-border:#D9DEE7; --select-bg:#FFFFFF;
+  --modal-bg-1:#FFFFFF; --modal-bg-2:#F7F8FA;
+  --header-bg:rgba(255,255,255,.96); --hover-bg:#F1F3F5; --gold:#B8922E;
+}
+html[data-theme="dark"] {
+  --bg-page:#0F172A; --surface:#111C2E; --surface-soft:#182235;
+  --text-main:#F8FAFC; --text-muted:#94A3B8; --primary:#D4AF37;
+  --primary-bright:#E7C45A; --border:rgba(255,255,255,.09);
+  --glass-bg:rgba(17,28,46,.82); --glass-border:rgba(255,255,255,.09);
+  --glass-gold-bg-1:rgba(255,255,255,.055); --glass-gold-bg-2:rgba(255,255,255,.018);
+  --glass-gold-border:rgba(212,175,55,.20); --input-bg:rgba(255,255,255,.055);
+  --input-border:rgba(255,255,255,.12); --select-bg:#172236;
+  --modal-bg-1:#111C2E; --modal-bg-2:#0B1322; --header-bg:rgba(17,28,46,.86);
+  --hover-bg:rgba(255,255,255,.08); --gold:#D4AF37;
+}
+html,body { background:var(--bg-page) !important; color:var(--text-main) !important; transition:background .35s ease,color .35s ease; }
+body { min-width:0; }
+.glass-panel { background:var(--glass-bg) !important; border-color:var(--glass-border) !important; color:var(--text-main); }
+.glass-panel-gold { background:linear-gradient(155deg,var(--glass-gold-bg-1),var(--glass-gold-bg-2)) !important; border-color:var(--glass-gold-border) !important; }
+header.app-header, header.cmd-header { background:var(--header-bg) !important; border-color:var(--border) !important; box-shadow:0 8px 28px rgba(23,32,51,.05); backdrop-filter:blur(18px); }
+html[data-theme="dark"] header.app-header, html[data-theme="dark"] header.cmd-header { box-shadow:0 18px 42px rgba(0,0,0,.20); }
+html[data-theme="light"] .text-white { color:var(--text-main) !important; }
+html[data-theme="light"] .text-gray-100 { color:#263246 !important; }
+html[data-theme="light"] .text-gray-200 { color:#344054 !important; }
+html[data-theme="light"] .text-gray-300 { color:#3F4A5C !important; }
+html[data-theme="light"] .text-gray-400 { color:#596579 !important; }
+html[data-theme="light"] .text-gray-500 { color:#718096 !important; }
+html[data-theme="light"] .text-gray-600 { color:#475467 !important; }
+html[data-theme="light"] .border-white\/10 { border-color:var(--border) !important; }
+html[data-theme="light"] .border-white\/5 { border-color:var(--border) !important; }
+html[data-theme="light"] .bg-white\/5 { background:var(--surface-soft) !important; }
+html[data-theme="light"] .bg-white\/10,html[data-theme="light"] .hover\:bg-white\/10:hover { background:#E9EDF2 !important; }
+html[data-theme="light"] .cmd-atmosphere { opacity:.35; }
+html[data-theme="light"] .cmd-header-sweep { opacity:.45; }
+html[data-theme="light"] input,html[data-theme="light"] select,html[data-theme="light"] textarea { color:var(--text-main) !important; background:var(--input-bg) !important; }
+html[data-theme="light"] input::placeholder,html[data-theme="light"] textarea::placeholder { color:#667085 !important; opacity:1 !important; }
+
+/* Shared header controls, matching students.html */
+.header-controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.lang-switch { display:flex; align-items:center; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:999px; padding:3px; gap:2px; }
+.lang-switch button { border:none; background:transparent; font-size:12px; font-weight:700; letter-spacing:.03em; padding:6px 12px; border-radius:999px; color:var(--text-muted); cursor:pointer; transition:all .25s ease; }
+.lang-switch button.active { background:var(--gold); color:#1a1a1a; box-shadow:0 4px 12px -3px rgba(255,215,0,.4); }
+.theme-toggle { position:relative; width:52px; height:30px; border-radius:999px; border:1px solid var(--glass-border); background:var(--glass-bg); cursor:pointer; padding:0; flex-shrink:0; }
+.theme-toggle .knob { position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center; transition:transform .35s cubic-bezier(.4,0,.2,1); box-shadow:0 2px 6px rgba(0,0,0,.3); }
+html[data-theme="light"] .theme-toggle .knob { transform:translateX(22px); }
+.theme-toggle .knob svg { width:14px; height:14px; }
+.back-dash-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 16px; border-radius:12px; font-size:13px; font-weight:700; background:var(--surface); border:1px solid var(--border); color:var(--text-main); transition:all .2s ease; }
+.back-dash-btn:hover { border-color:var(--primary); color:var(--primary); transform:translateY(-2px); }
+
+/* Make major report surfaces follow the theme instead of fixed dark colors. */
+.cmd-status-live { color:#16a34a; background:rgba(74,222,128,.12); border-color:rgba(74,222,128,.35); }
+html[data-theme="dark"] .cmd-status-live { color:#4ade80; }
+.chamber-canvas-wrap { background:color-mix(in srgb,var(--surface) 82%,transparent); border-color:var(--border); }
+.lux-input, select, input, textarea { border-color:var(--input-border); color:var(--text-main); }
+
+@media(max-width:768px){
+  header.cmd-header { padding:1rem !important; align-items:center !important; gap:12px; }
+  header.cmd-header .header-controls { width:100%; justify-content:space-between; gap:7px; }
+}
+@media(max-width:480px){
+  header.cmd-header h1 { font-size:1.05rem !important; line-height:1.2 !important; }
+  header.cmd-header img { width:44px !important; height:44px !important; }
+  .back-dash-btn { padding:9px !important; }
+}
+
+</style>
+
+<style>
+/* ===== Report v3: clean, responsive, student-style visual system ===== */
+:root{
+  --report-bg:#f5f7fb; --report-card:#ffffff; --report-text:#172033;
+  --report-muted:#64748b; --report-border:#e2e8f0; --report-accent:#b58a2b;
+  --report-accent-soft:rgba(181,138,43,.10);
+}
+[data-theme="dark"]{
+  --report-bg:#07111f; --report-card:#0d1a2b; --report-text:#f1f5f9;
+  --report-muted:#94a3b8; --report-border:rgba(255,255,255,.09);
+  --report-accent:#e8bd55; --report-accent-soft:rgba(232,189,85,.10);
+}
+html,body{max-width:100%;overflow-x:hidden!important}
+body{background:var(--report-bg)!important;color:var(--report-text)!important}
+header,.cmd-header{background:var(--report-card)!important;border-bottom:1px solid var(--report-border)!important;box-shadow:0 8px 30px rgba(15,23,42,.06)!important}
+.glass-panel,.glass-panel-gold,.chamber,.orbital-shell{
+  background:var(--report-card)!important;color:var(--report-text)!important;
+  border-color:var(--report-border)!important;box-shadow:0 10px 30px rgba(15,23,42,.06)!important;
+}
+.text-gray-400,.text-gray-500{color:var(--report-muted)!important}
+.text-gray-300{color:var(--report-text)!important}
+.tab-btn{color:var(--report-muted)!important;border-radius:10px;transition:.2s}
+.tab-btn:hover,.tab-btn.active{color:var(--report-accent)!important;background:var(--report-accent-soft)}
+.lux-input,.theme-input,select,input{
+  background:var(--report-card)!important;color:var(--report-text)!important;border-color:var(--report-border)!important;
+}
+.lang-switch{background:var(--report-bg)!important;border-color:var(--report-border)!important}
+.lang-switch button{color:var(--report-muted)!important}
+.lang-switch button.active{background:var(--report-accent)!important;color:#fff!important}
+.source-dot{flex:none}
+.kpi-inner,.kpi-card{background:transparent!important}
+.orbital-wrap{max-width:100%!important}
+.chamber-canvas-wrap{background:var(--report-bg)!important;border-color:var(--report-border)!important}
+.report-table-wrap{max-width:100%;overflow:hidden}
+#reportTable{width:100%;table-layout:fixed}
+#reportTable th,#reportTable td{overflow-wrap:anywhere}
+#mobileInsightGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.insight-card{min-width:0;padding:18px;border:1px solid var(--report-border);background:var(--report-card);border-radius:18px}
+.insight-value{font-size:1.35rem;font-weight:800;margin-top:5px}
+.insight-label{font-size:.72rem;color:var(--report-muted);text-transform:uppercase;letter-spacing:.07em}
+.chart-grid-new{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.new-chart-card{min-width:0;border:1px solid var(--report-border);background:var(--report-card);border-radius:20px;padding:18px;box-shadow:0 10px 30px rgba(15,23,42,.05)}
+.new-chart-card .chart-box{height:250px;position:relative}
+.quick-actions{display:flex;gap:8px;flex-wrap:wrap}
+.quick-actions button{border:1px solid var(--report-border);background:var(--report-card);color:var(--report-text);padding:8px 12px;border-radius:10px;font-size:12px;font-weight:700}
+@media(max-width:900px){#mobileInsightGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.chart-grid-new{grid-template-columns:1fr}}
+@media(max-width:640px){
+  main{padding:14px!important}
+  header{padding-left:12px!important;padding-right:12px!important}
+  header .cmd-header-inner{gap:8px!important}
+  header h1{font-size:1rem!important}
+  header p{font-size:.68rem!important}
+  .lang-switch button{padding:5px 9px!important}
+  .theme-toggle{transform:scale(.9)}
+  .back-dash-btn .label{display:none}
+  #mobileInsightGrid{grid-template-columns:1fr 1fr;gap:10px}
+  .insight-card{padding:13px;border-radius:14px}
+  .insight-value{font-size:1.05rem}
+  .chart-grid-new{grid-template-columns:1fr;gap:12px}
+  .new-chart-card{padding:13px;border-radius:15px}
+  .new-chart-card .chart-box{height:210px}
+  .tab-btn{font-size:.76rem!important;padding:8px!important}
+  .orbital-shell{display:none!important}
+  .data-source-panel{display:none!important}
+  #reportTable thead{display:none}
+  #reportTable tbody,#reportTable tr,#reportTable td{display:block;width:100%}
+  #reportTable tr{padding:12px;border-bottom:1px solid var(--report-border)}
+  #reportTable td{padding:4px 0!important;text-align:left!important;border:0!important}
+  #reportTable td::before{content:attr(data-label);display:inline-block;min-width:88px;color:var(--report-muted);font-size:10px;text-transform:uppercase;font-weight:700;margin-right:6px}
+  #toastContainer{left:12px;right:12px;bottom:12px}
+}
+</style>
+
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <div class="cmd-atmosphere no-print" aria-hidden="true">
+        <div class="cmd-rays"></div>
+        <div class="cmd-glow-gold"></div>
+        <div class="cmd-glow-blue"></div>
+        <div class="cmd-grid"></div>
+        <div class="cmd-particle" style="left:8%; width:3px; height:3px; animation-duration:14s; animation-delay:0s; bottom:0;"></div>
+        <div class="cmd-particle blue" style="left:18%; width:2px; height:2px; animation-duration:18s; animation-delay:2s; bottom:0;"></div>
+        <div class="cmd-particle" style="left:29%; width:2px; height:2px; animation-duration:16s; animation-delay:5s; bottom:0;"></div>
+        <div class="cmd-particle blue" style="left:41%; width:3px; height:3px; animation-duration:20s; animation-delay:1s; bottom:0;"></div>
+        <div class="cmd-particle" style="left:54%; width:2px; height:2px; animation-duration:15s; animation-delay:7s; bottom:0;"></div>
+        <div class="cmd-particle blue" style="left:63%; width:2px; height:2px; animation-duration:19s; animation-delay:3s; bottom:0;"></div>
+        <div class="cmd-particle" style="left:74%; width:3px; height:3px; animation-duration:17s; animation-delay:6s; bottom:0;"></div>
+        <div class="cmd-particle blue" style="left:83%; width:2px; height:2px; animation-duration:13s; animation-delay:4s; bottom:0;"></div>
+        <div class="cmd-particle" style="left:91%; width:2px; height:2px; animation-duration:21s; animation-delay:8s; bottom:0;"></div>
+        <div class="cmd-particle blue" style="left:96%; width:3px; height:3px; animation-duration:16s; animation-delay:2.5s; bottom:0;"></div>
+    </div>
+
+    <div class="ambient-glow no-print"></div>
+    <div class="ambient-glow-2 no-print"></div>
+
+    <!-- HEADER -->
+    <header class="cmd-header glass-panel w-full p-8 flex justify-between items-end border-b border-white/5 z-10 no-print">
+        <div class="cmd-header-sweep" aria-hidden="true"></div>
+        <div class="flex items-center gap-6">
+            <img src="logo.png" alt="Logo" class="w-20 h-20 rounded-2xl bg-white/5 p-2 border border-white/10 shadow-xl shadow-yellow-500/10">
+            <div>
+                <h1 class="text-4xl font-bold tracking-tight">Meserete Hiwot EPR System</h1>
+                <p class="text-yellow-500 font-medium mt-1">Report &amp; Analytics Management System <span class="amharic text-sm ml-2">(የሪፖርት እና ትንተና ማዕከል)</span></p>
+                <span class="exec-mode-badge cmd-status-live mt-2"><span class="pulse-dot" style="width:6px;height:6px;border-radius:999px;background:#4ade80;"></span> EXECUTIVE MODE</span>
+            </div>
+        </div>
+        <div class="header-controls mb-2">
+            <span class="cmd-status-live exec-hide hidden lg:inline-flex"><span class="pulse-dot" style="width:6px;height:6px;border-radius:999px;background:#4ade80;"></span> SYSTEM LIVE</span>
+            <div class="text-right mr-2 hidden lg:block exec-hide">
+                <p class="text-sm text-gray-400" id="dateDisplay">Loading date...</p>
+                <p class="text-lg font-semibold">Admin Dashboard</p>
+            </div>
+            <div class="lang-switch exec-hide" role="group" aria-label="Language switcher">
+                <button type="button" id="langBtnEn" class="active" aria-pressed="true">ENG</button>
+                <button type="button" id="langBtnAm" aria-pressed="false">አማ</button>
+            </div>
+            <button type="button" class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Toggle light/dark theme" aria-pressed="false">
+                <span class="knob" id="themeKnob">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round"/></svg>
+                </span>
+            </button>
+                        <a href="dashboard.html" class="back-dash-btn cmd-pressable exec-hide">🏠 <span class="label">Home</span></a>
+        </div>
+    </header>
+
+    <main class="flex-1 p-10 z-10">
+
+        <!-- Data Source Sync Panel -->
+        <div class="glass-panel rounded-2xl p-4 mb-6 flex flex-wrap items-center gap-6 no-print exec-hide">
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide">🔗 Live Data Sources:</p>
+            <div class="flex items-center gap-2 text-sm"><span class="source-dot bg-green-400"></span> Financial System <span class="text-gray-500 text-xs">· synced</span></div>
+            <div class="flex items-center gap-2 text-sm"><span class="source-dot bg-green-400"></span> Sunday School System <span class="text-gray-500 text-xs">· synced</span></div>
+            <div class="flex items-center gap-2 text-sm"><span class="source-dot bg-green-400"></span> Begena System <span class="text-gray-500 text-xs">· synced</span></div>
+            <p class="text-xs text-gray-500 ml-auto" id="lastSyncLabel">Last updated just now</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex flex-wrap items-center gap-3 border-b border-white/10 mb-6 no-print">
+            <button id="tabDashboard" onclick="switchTab('dashboard')" class="tab-btn active px-2 pb-3 text-sm font-semibold whitespace-nowrap">📊 Dashboard <span class="amharic">ዳሽቦርድ</span></button>
+            <button id="tabReports" onclick="switchTab('reports')" class="tab-btn px-2 pb-3 text-sm font-semibold whitespace-nowrap">📄 Report Generator <span class="amharic">ሪፖርት ማመንጫ</span></button>
+        </div>
+
+        <!-- ============ DASHBOARD TAB ============ -->
+        <div id="dashboardTab">
+
+            <!-- Orbital ERP Core Visualization -->
+            <div class="glass-panel-gold orbital-shell mb-6 no-print">
+                <div class="orbital-topline">
+                    <div>
+                        <p class="section-title mb-1">🛰️ Orbital ERP Core <span class="amharic normal-case font-normal text-gray-400">የስርዓት ማዕከል</span></p>
+                        <p class="text-xs text-gray-500">Live view of connected modules · click a node for details</p>
+                    </div>
+                    <span class="orbital-status-badge"><span class="pulse-dot"></span> SYSTEM ONLINE</span>
+                </div>
+
+                <div class="orbital-wrap" id="orbitalWrap">
+                    <svg class="orbit-svg" viewBox="0 0 100 100" preserveAspectRatio="none" id="orbitSvg">
+                        <line class="orbit-line-base" x1="50" y1="50" x2="50" y2="12"></line>
+                        <line class="orbit-line-base" x1="50" y1="50" x2="82.9" y2="69"></line>
+                        <line class="orbit-line-base" x1="50" y1="50" x2="17.1" y2="69"></line>
+                        <line class="orbit-line-flow gold" id="flowFinancial" x1="50" y1="50" x2="50" y2="12"></line>
+                        <line class="orbit-line-flow blue" id="flowSundaySchool" x1="50" y1="50" x2="82.9" y2="69"></line>
+                        <line class="orbit-line-flow blue" id="flowBegena" x1="50" y1="50" x2="17.1" y2="69"></line>
+                    </svg>
+
+                    <div class="core-orb">
+                        <p class="core-brand">Meserete Hiwot</p>
+                        <p class="core-title">ERP CORE</p>
+                        <p class="core-sub">Data Nucleus</p>
+                        <span class="core-status-pill" id="coreStatusPill">ONLINE</span>
+                    </div>
+
+                    <div class="orbit-node" data-node="financial" style="top:12%; left:50%; animation-delay:.15s;" onclick="selectOrbitalNode('financial')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectOrbitalNode('financial');}" role="button" tabindex="0" aria-label="Financial System module">
+                        <div class="node-card">
+                            <div class="node-icon">💰</div>
+                            <div class="node-name">Finance</div>
+                            <div class="node-status" id="nodeStatusFinancial"></div>
+                        </div>
+                    </div>
+                    <div class="orbit-node" data-node="sunday_school" style="top:69%; left:82.9%; animation-delay:.35s;" onclick="selectOrbitalNode('sunday_school')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectOrbitalNode('sunday_school');}" role="button" tabindex="0" aria-label="Sunday School System module">
+                        <div class="node-card">
+                            <div class="node-icon">🎓</div>
+                            <div class="node-name">Sunday School</div>
+                            <div class="node-status" id="nodeStatusSundaySchool"></div>
+                        </div>
+                    </div>
+                    <div class="orbit-node" data-node="begena" style="top:69%; left:17.1%; animation-delay:.55s;" onclick="selectOrbitalNode('begena')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectOrbitalNode('begena');}" role="button" tabindex="0" aria-label="Begena System module">
+                        <div class="node-card">
+                            <div class="node-icon">🎼</div>
+                            <div class="node-name">Begena</div>
+                            <div class="node-status" id="nodeStatusBegena"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="orbital-panel" id="orbitalPanel">
+                    <div id="orbitalPanelContent"></div>
+                </div>
+                <p class="orbital-panel-hint" id="orbitalHint">Select a module above to see its live statistics.</p>
+            </div>
+
+            <!-- Global View Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 no-print">
+                <div class="kpi-card-3d">
+                    <div class="kpi-inner glass-panel-gold p-6 rounded-3xl border border-yellow-500/20">
+                        <div class="flex items-start justify-between">
+                            <p class="text-gray-400 text-sm">💰 Total Financial Capacity <span class="amharic block text-[10px]">ጠቅላላ የገንዘብ አቅም</span></p>
+                            <span id="kpiNetTrend" class="kpi-trend flat">—</span>
+                        </div>
+                        <h3 id="statNetCapacity" class="text-3xl font-bold mt-2 text-yellow-400">0 ETB</h3>
+                        <p class="text-xs text-gray-500 mt-1">Net balance (income − expense), all sources</p>
+                        <div class="kpi-mini-bar" title="Income vs expense share">
+                            <span id="kpiNetBarIncome" style="width:50%; background:#4ade80;"></span>
+                            <span id="kpiNetBarExpense" style="width:50%; background:#f87171;"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-card-3d">
+                    <div class="kpi-inner glass-panel-gold p-6 rounded-3xl border border-blue-500/20">
+                        <div class="flex items-start justify-between gap-2">
+                            <p class="text-gray-400 text-sm">🎓 Total Students <span class="amharic block text-[10px]">ጠቅላላ ተማሪዎች</span></p>
+                            <div class="kpi-mini-ring shrink-0">
+                                <svg width="46" height="46" viewBox="0 0 46 46">
+                                    <circle cx="23" cy="23" r="19" stroke="rgba(255,255,255,0.08)"></circle>
+                                    <circle id="kpiStudentsRing" cx="23" cy="23" r="19" stroke="#38bdf8" stroke-dasharray="119.4" stroke-dashoffset="119.4" stroke-linecap="round"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 id="statTotalStudents" class="text-3xl font-bold mt-2 text-blue-400">0</h3>
+                        <p class="text-xs text-gray-500 mt-1"><span id="statSundaySchoolCount">0</span> Sunday School · <span id="statBegenaCount">0</span> Begena</p>
+                    </div>
+                </div>
+                <div class="kpi-card-3d">
+                    <div class="kpi-inner glass-panel-gold p-6 rounded-3xl border border-green-500/20">
+                        <div class="flex items-start justify-between">
+                            <p class="text-gray-400 text-sm">✅ Payment / Attendance Performance <span class="amharic block text-[10px]">የክፍያ አፈጻጸም</span></p>
+                            <span id="kpiPerfTrend" class="kpi-trend flat">—</span>
+                        </div>
+                        <h3 id="statPerformance" class="text-3xl font-bold mt-2 text-green-400">0%</h3>
+                        <p class="text-xs text-gray-500 mt-1">Blended fee-collection and attendance rate</p>
+                        <div class="kpi-mini-bar" title="Blended performance">
+                            <span id="kpiPerfBar" style="width:0%; background:#4ade80;"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 no-print">
+                <div class="chamber glass-panel p-6 rounded-3xl">
+                    <p class="text-gray-400 text-sm mb-4 chamber-label">📊 Sunday School vs Begena - Income Comparison <span class="amharic">የገቢ ንፅፅር</span></p>
+                    <div class="chamber-canvas-wrap"><canvas id="compareChart" height="200"></canvas></div>
+                </div>
+                <div class="chamber glass-panel p-6 rounded-3xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <p class="text-gray-400 text-sm chamber-label">📈 Income &amp; Expense Trend <span class="amharic">የገቢ እና ወጪ አዝማሚያ</span></p>
+                        <select id="trendGranularity" onchange="renderTrendChart()" class="lux-input bg-[#1e293b] border border-white/10 rounded-lg px-3 py-1.5 text-xs">
+                            <option value="week">Weekly</option>
+                            <option value="month" selected>Monthly</option>
+                            <option value="year">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="chamber-canvas-wrap"><canvas id="trendChart" height="200"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        
+            <!-- Smart Live Insights -->
+            <section class="mb-6">
+                <div class="flex items-center justify-between gap-3 mb-3">
+                    <div>
+                        <h2 class="text-lg font-bold">Smart Insights <span class="amharic">ዘመናዊ ግንዛቤዎች</span></h2>
+                        <p class="text-xs text-gray-500">Automatically calculated from your live Supabase records.</p>
+                    </div>
+                    <div class="quick-actions no-print">
+                        <button onclick="quickReport('month')">This Month</button>
+                        <button onclick="quickReport('year')">This Year</button>
+                        <button onclick="quickReport('all')">All Time</button>
+                    </div>
+                </div>
+                <div id="mobileInsightGrid">
+                    <div class="insight-card"><div class="insight-label">Income</div><div id="smartIncome" class="insight-value text-green-400">0 ETB</div></div>
+                    <div class="insight-card"><div class="insight-label">Expenses</div><div id="smartExpense" class="insight-value text-red-400">0 ETB</div></div>
+                    <div class="insight-card"><div class="insight-label">Net</div><div id="smartNet" class="insight-value">0 ETB</div></div>
+                    <div class="insight-card"><div class="insight-label">Attendance</div><div id="smartAttendance" class="insight-value">0%</div></div>
+                </div>
+            </section>
+
+            <!-- Advanced live charts -->
+            <section class="chart-grid-new mb-6">
+                <div class="new-chart-card">
+                    <div class="mb-3"><h3 class="font-bold">Income Mix</h3><p class="text-xs text-gray-500">Where recorded income comes from.</p></div>
+                    <div class="chart-box"><canvas id="incomeMixChart"></canvas></div>
+                </div>
+                <div class="new-chart-card">
+                    <div class="mb-3"><h3 class="font-bold">Attendance Overview</h3><p class="text-xs text-gray-500">Present, late and absent records.</p></div>
+                    <div class="chart-box"><canvas id="attendanceChart"></canvas></div>
+                </div>
+                <div class="new-chart-card">
+                    <div class="mb-3"><h3 class="font-bold">Financial Pulse</h3><p class="text-xs text-gray-500">Income versus expenses over time.</p></div>
+                    <div class="chart-box"><canvas id="pulseChart"></canvas></div>
+                </div>
+            </section>
+
+<!-- ============ REPORT GENERATOR TAB ============ -->
+        <div id="reportsTab" class="hidden">
+            <!-- Custom Report Builder -->
+            <div class="glass-panel-gold rounded-3xl p-6 mb-6 no-print">
+                <p class="section-title mb-4">🛠️ Custom Report Builder <span class="amharic normal-case font-normal text-gray-400">የራስ ሪፖርት ገንቢ</span></p>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">From</label>
+                        <input type="date" id="rbStart" onchange="renderReportTable()" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">To</label>
+                        <input type="date" id="rbEnd" onchange="renderReportTable()" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1 amharic">ክፍል / ምንጭ (Source)</label>
+                        <select id="rbSource" onchange="renderReportTable()" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
+                            <option value="">All Sources</option>
+                            <option value="financial">Financial System</option>
+                            <option value="sunday_school">Sunday School System</option>
+                            <option value="begena">Begena System</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1 amharic">የገቢ አይነት (Category)</label>
+                        <select id="rbCategory" onchange="renderReportTable()" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Type</label>
+                        <select id="rbType" onchange="renderReportTable()" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
+                            <option value="">Income &amp; Expense</option>
+                            <option value="income">Income Only</option>
+                            <option value="expense">Expense Only</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex flex-wrap justify-between items-center gap-3 mt-5 pt-4 border-t border-white/10">
+                    <div class="flex gap-4 text-sm">
+                        <p>Income: <span id="rbTotalIncome" class="text-green-400 font-bold">0 ETB</span></p>
+                        <p>Expense: <span id="rbTotalExpense" class="text-red-400 font-bold">0 ETB</span></p>
+                        <p>Net: <span id="rbTotalNet" class="text-yellow-400 font-bold">0 ETB</span></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="exportReportPdf()" class="px-5 py-2.5 glass-panel rounded-xl hover:bg-white/10 transition font-semibold text-sm">📄 Export PDF</button>
+                        <button onclick="exportReportExcel()" class="px-5 py-2.5 glass-panel rounded-xl hover:bg-white/10 transition font-semibold text-sm">📊 Export Excel/CSV</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scheduled Reporting -->
+            <div class="glass-panel rounded-3xl p-6 mb-6 no-print flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <p class="section-title mb-1">📬 Scheduled Reporting <span class="amharic normal-case font-normal text-gray-400">ራስ-ሰር ሪፖርት መላኪያ</span></p>
+                    <p class="text-xs text-gray-400">Automatically email a full report to leadership at the end of every month.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="email" id="scheduleEmail" placeholder="leader@church.org" class="lux-input bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none w-56">
+                    <div id="scheduleToggle" onclick="toggleSchedule()" class="toggle-switch off"><div class="knob"></div></div>
+                </div>
+            </div>
+
+            <!-- Report Table -->
+            <div class="glass-panel rounded-3xl overflow-x-auto no-print">
+                <table class="w-full text-sm">
+                    <thead class="bg-white/5 text-gray-400 uppercase text-xs">
+                        <tr>
+                            <th class="p-4 text-left">Date</th>
+                            <th class="p-4 text-left">Source</th>
+                            <th class="p-4 text-left">Category</th>
+                            <th class="p-4 text-left">Description</th>
+                            <th class="p-4 text-center">Type</th>
+                            <th class="p-4 text-right">Amount (ETB)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody"></tbody>
+                </table>
+                <p id="reportEmptyMsg" class="hidden text-center text-gray-500 py-16">No records match this filter.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[60] flex flex-col gap-2 no-print"></div>
+
+    <!-- Hidden printable report sheet -->
+    <div id="printArea"></div>
+
+    <!-- SHARED LIGHT / DARK THEME -->
+    <script>
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const btn = document.getElementById('themeToggleBtn');
+            if (btn) btn.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
+            localStorage.setItem('mh_theme', theme);
+        }
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            applyTheme(current === 'light' ? 'dark' : 'light');
+        }
+        (function initTheme() {
+            const saved = localStorage.getItem('mh_theme');
+            applyTheme(saved === 'dark' ? 'dark' : 'light');
+        })();
+    </script>
+
+    <!-- LIVE REPORT DATA ENGINE -->
+    <script type="module">
+        import { supabase } from './supabaseClient.js';
+
+        const etMonths = ['መስከረም','ጥቅምት','ህዳር','ታህሳስ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜ'];
+        const SOURCE_LABELS = {
+            financial: 'Financial',
+            sunday_school: 'Sunday School',
+            begena: 'Begena'
+        };
+
+        let financeTx = [];
+        let live = {
+            students: [],
+            begenaStudents: [],
+            attendance: [],
+            begenaAttendance: [],
+            assets: [],
+            officeLetters: [],
+            bankAccounts: []
+        };
+        let currentTab = 'dashboard';
+        let compareChartInstance = null;
+        let trendChartInstance = null;
+        let scheduleOn = false;
+
+        const $ = id => document.getElementById(id);
+        const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        }[c]));
+        const money = n => `${Math.round(Number(n) || 0).toLocaleString()} ETB`;
+        const num = v => Number(v) || 0;
+
+        function toast(msg, type='info') {
+            const box = $('toastContainer');
+            if (!box) return;
+            const div = document.createElement('div');
+            const cls = type === 'success'
+                ? 'border-green-500/40 text-green-300'
+                : type === 'error'
+                ? 'border-red-500/40 text-red-300'
+                : 'border-yellow-500/40 text-yellow-300';
+            div.className = `toast glass-panel border ${cls} px-4 py-3 rounded-xl text-sm font-medium shadow-lg`;
+            div.textContent = msg;
+            box.appendChild(div);
+            setTimeout(() => div.remove(), 3500);
+        }
+
+        async function get(table, columns='*', orderColumn=null) {
+            let q = supabase.from(table).select(columns);
+            if (orderColumn) q = q.order(orderColumn, { ascending: false });
+            const { data, error } = await q;
+            if (error) {
+                console.error(`[Report] ${table}:`, error);
+                return { data: [], error };
+            }
+            return { data: data || [], error: null };
+        }
+
+        function dateOf(row) {
+            return row.date || row.paid_date || row.record_date || row.attendance_date ||
+                   row.checkoutDate || row.due_date || row.created_at?.slice(0,10) || '';
+        }
+
+        function addTransaction(source, row, category, description, date, amount, type='income') {
+            if (!date || !num(amount)) return;
+            financeTx.push({
+                id: `${source}-${row.id ?? Math.random()}`,
+                source, category, description, date: String(date).slice(0,10),
+                amount: num(amount), type
+            });
+        }
+
+        async function loadLiveData() {
+            const results = await Promise.all([
+                get('finance_transactions', '*', 'date'),
+                get('student_payments', '*', 'paid_date'),
+                get('begena_student_payments', '*', 'paid_date'),
+                get('students', 'id,name,class_name', 'created_at'),
+                get('Begena_students', 'id,name,grade', 'created_at'),
+                get('attendance_records', 'student_id,class_name,record_date,status', 'record_date'),
+                get('Begena_Attendance', 'student_id,attendance_date,status', 'attendance_date'),
+                get('assets', '*', 'created_at'),
+                get('office_letters', '*', 'created_at'),
+                get('finance_bank_accounts', '*', 'created_at')
+            ]);
+
+            const [
+                finance, studentPayments, begenaPayments, students, begenaStudents,
+                attendance, begenaAttendance, assets, officeLetters, bankAccounts
+            ] = results;
+
+            live = {
+                students: students.data,
+                begenaStudents: begenaStudents.data,
+                attendance: attendance.data,
+                begenaAttendance: begenaAttendance.data,
+                assets: assets.data,
+                officeLetters: officeLetters.data,
+                bankAccounts: bankAccounts.data
+            };
+
+            financeTx = [];
+
+            // Financial page records — these are the authoritative income/expense records.
+            finance.data.forEach(r => {
+                addTransaction(
+                    'financial', r, r.category || 'General',
+                    r.description || r.payer_name || r.receiver || 'Financial transaction',
+                    r.date, r.amount, r.type === 'expense' ? 'expense' : 'income'
+                );
+            });
+
+            // Sunday School payments — linked to the students/payment page.
+            studentPayments.data.forEach(r => {
+                addTransaction(
+                    'sunday_school', r,
+                    r.plan || r.period || 'Student Payment',
+                    `${r.student_name || 'Student'}${r.period ? ' · ' + r.period : ''}`,
+                    r.paid_date, r.amount, 'income'
+                );
+            });
+
+            // Begena payments — linked to the Begena payment module.
+            begenaPayments.data.forEach(r => {
+                addTransaction(
+                    'begena', r,
+                    r.period || 'Begena Payment',
+                    `${r.student_name || 'Student'}${r.period ? ' · ' + r.period : ''}`,
+                    r.paid_date, r.amount, 'income'
+                );
+            });
+
+            renderDashboard();
+            renderReportTable();
+        }
+
+        function setHeaderDate() {
+            const gc = new Date();
+            const etYear = gc.getFullYear() - 8;
+            const etMonth = etMonths[(gc.getMonth() + 10) % 12];
+            const etDay = ((gc.getDate() + 22) % 30) + 1;
+            $('dateDisplay').textContent =
+                gc.toLocaleDateString('en-US', {
+                    weekday:'long', year:'numeric', month:'long', day:'numeric'
+                }) + ` | ${etMonth} ${etDay}, ${etYear}`;
+            $('lastSyncLabel').textContent = 'Live data · updated ' + gc.toLocaleTimeString();
+        }
+
+        function attendanceRate(rows) {
+            if (!rows.length) return 0;
+            const counted = rows.filter(r => ['present','late','absent'].includes(String(r.status).toLowerCase()));
+            if (!counted.length) return 0;
+            const present = counted.filter(r => ['present','late'].includes(String(r.status).toLowerCase())).length;
+            return Math.round((present / counted.length) * 100);
+        }
+
+        function computeSourceTotals() {
+            const out = {
+                financial:{income:0, expense:0},
+                sunday_school:{income:0, expense:0},
+                begena:{income:0, expense:0}
+            };
+            financeTx.forEach(t => {
+                if (!out[t.source]) out[t.source] = {income:0, expense:0};
+                out[t.source][t.type] += num(t.amount);
+            });
+            return out;
+        }
+
+        function renderDashboard() {
+            const income = financeTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+            const expense = financeTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+            const net = income - expense;
+
+            $('statNetCapacity').textContent = money(net);
+            $('statSundaySchoolCount').textContent = live.students.length.toLocaleString();
+            $('statBegenaCount').textContent = live.begenaStudents.length.toLocaleString();
+            $('statTotalStudents').textContent =
+                (live.students.length + live.begenaStudents.length).toLocaleString();
+
+            const total = live.students.length + live.begenaStudents.length;
+            const ring = $('kpiStudentsRing');
+            if (ring) ring.setAttribute('stroke-dashoffset', String(119.4 * (1 - (total ? live.students.length/total : 0))));
+
+            const ssRate = attendanceRate(live.attendance);
+            const bgRate = attendanceRate(live.begenaAttendance);
+            const attendanceRows = live.attendance.length + live.begenaAttendance.length;
+            const performance = attendanceRows
+                ? Math.round(
+                    (live.attendance.filter(r=>['present','late'].includes(String(r.status).toLowerCase())).length +
+                     live.begenaAttendance.filter(r=>['present','late'].includes(String(r.status).toLowerCase())).length)
+                    / attendanceRows * 100
+                  )
+                : 0;
+            $('statPerformance').textContent = performance + '%';
+            $('kpiPerfBar').style.width = performance + '%';
+
+            const flow = income + expense;
+            const incomeShare = flow ? Math.round(income / flow * 100) : 0;
+            $('kpiNetBarIncome').style.width = incomeShare + '%';
+            $('kpiNetBarExpense').style.width = (100-incomeShare) + '%';
+
+            $('kpiNetTrend').textContent = financeTx.length ? '● live' : '— no transactions';
+            $('kpiNetTrend').className = financeTx.length ? 'kpi-trend up' : 'kpi-trend flat';
+
+            renderCompareChart();
+            renderTrendChart();
+            refreshOrbitalStatuses();
+            renderSmartInsights();
+            renderAdvancedCharts();
+        }
+
+        function renderCompareChart() {
+            if (!window.Chart) return;
+            const totals = computeSourceTotals();
+            const ctx = $('compareChart');
+            if (!ctx) return;
+            if (compareChartInstance) compareChartInstance.destroy();
+            compareChartInstance = new Chart(ctx, {
+                type:'bar',
+                data:{
+                    labels:['Sunday School','Begena'],
+                    datasets:[{
+                        label:'Income (ETB)',
+                        data:[totals.sunday_school.income, totals.begena.income]
+                    }]
+                },
+                options:{
+                    responsive:true,
+                    maintainAspectRatio:false,
+                    plugins:{legend:{labels:{color:'#cbd5e1'}}},
+                    scales:{
+                        x:{ticks:{color:'#94a3b8'},grid:{display:false}},
+                        y:{ticks:{color:'#94a3b8'},grid:{color:'rgba(255,255,255,.06)'}}
+                    }
+                }
+            });
+        }
+
+        function renderTrendChart() {
+            if (!window.Chart) return;
+            const ctx = $('trendChart');
+            if (!ctx) return;
+            if (trendChartInstance) trendChartInstance.destroy();
+
+            const gran = $('trendGranularity')?.value || 'month';
+            const buckets = {};
+            financeTx.forEach(t => {
+                const d = new Date(t.date + 'T00:00:00');
+                if (Number.isNaN(d.getTime())) return;
+                let key;
+                if (gran === 'year') key = String(d.getFullYear());
+                else if (gran === 'week') {
+                    const one = new Date(d.getFullYear(),0,1);
+                    key = `${d.getFullYear()}-W${String(Math.ceil((((d-one)/86400000)+one.getDay()+1)/7)).padStart(2,'0')}`;
+                } else key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                buckets[key] ||= {income:0,expense:0};
+                buckets[key][t.type] += num(t.amount);
+            });
+            const labels = Object.keys(buckets).sort();
+            trendChartInstance = new Chart(ctx, {
+                type:'line',
+                data:{
+                    labels,
+                    datasets:[
+                        {label:'Income', data:labels.map(k=>buckets[k].income), tension:.35},
+                        {label:'Expense', data:labels.map(k=>buckets[k].expense), tension:.35}
+                    ]
+                },
+                options:{
+                    responsive:true,
+                    maintainAspectRatio:false,
+                    plugins:{legend:{labels:{color:'#cbd5e1'}}},
+                    scales:{
+                        x:{ticks:{color:'#94a3b8'},grid:{display:false}},
+                        y:{ticks:{color:'#94a3b8'},grid:{color:'rgba(255,255,255,.06)'}}
+                    }
+                }
+            });
+        }
+
+        function refreshOrbitalStatuses() {
+            const set = (id, text) => { if ($(id)) $(id).textContent = text; };
+            const financial = financeTx.filter(t=>t.source==='financial').length;
+            const ss = live.students.length;
+            const bg = live.begenaStudents.length;
+            set('nodeStatusFinancial', financial ? `${financial} records` : 'No records');
+            set('nodeStatusSundaySchool', `${ss} students`);
+            set('nodeStatusBegena', `${bg} students`);
+            if ($('coreStatusPill')) $('coreStatusPill').textContent = financeTx.length ? 'LIVE · SUPABASE' : 'LIVE · NO DATA';
+        }
+
+        function selectOrbitalNode(node) {
+            const totals = computeSourceTotals();
+            const content = $('orbitalPanelContent');
+            const hint = $('orbitalHint');
+            if (!content) return;
+            const data = node === 'financial'
+                ? totals.financial
+                : node === 'sunday_school'
+                ? totals.sunday_school
+                : totals.begena;
+            const title = SOURCE_LABELS[node] || node;
+            content.innerHTML = `
+                <div class="p-5">
+                    <div class="text-xs uppercase tracking-widest text-gray-500">${esc(title)} · Live</div>
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        <div class="glass-panel rounded-2xl p-4">
+                            <div class="text-xs text-gray-500">Income</div>
+                            <div class="text-xl font-bold text-green-400">${money(data.income)}</div>
+                        </div>
+                        <div class="glass-panel rounded-2xl p-4">
+                            <div class="text-xs text-gray-500">Expense</div>
+                            <div class="text-xl font-bold text-red-400">${money(data.expense)}</div>
+                        </div>
+                    </div>
+                    <button class="mt-4 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm"
+                        onclick="jumpToFilteredReport('${esc(node)}')">Open detailed records →</button>
+                </div>`;
+            if (hint) hint.textContent = `${title}: live information loaded from Supabase.`;
+        }
+
+        function jumpToFilteredReport(source) {
+            $('rbSource').value = source;
+            switchTab('reports');
+            renderReportTable();
+        }
+
+        function populateCategoryFilter() {
+            const sel = $('rbCategory');
+            if (!sel) return;
+            const current = sel.value;
+            const cats = [...new Set(financeTx.map(t=>t.category).filter(Boolean))].sort();
+            sel.innerHTML = '<option value="">All Categories</option>' +
+                cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+            if (cats.includes(current)) sel.value = current;
+        }
+
+        function filteredTx() {
+            const start = $('rbStart').value;
+            const end = $('rbEnd').value;
+            const source = $('rbSource').value;
+            const category = $('rbCategory').value;
+            const type = $('rbType').value;
+            return financeTx.filter(t =>
+                (!start || t.date >= start) &&
+                (!end || t.date <= end) &&
+                (!source || t.source === source) &&
+                (!category || t.category === category) &&
+                (!type || t.type === type)
+            ).sort((a,b)=>b.date.localeCompare(a.date));
+        }
+
+        function renderReportTable() {
+            populateCategoryFilter();
+            const rows = filteredTx();
+            $('reportEmptyMsg').classList.toggle('hidden', rows.length > 0);
+            $('reportTableBody').innerHTML = rows.map(t => `
+                <tr class="row-in border-t border-white/5 hover:bg-white/5 transition">
+                    <td data-label="Date" class="p-4 text-gray-400">${esc(t.date)}</td>
+                    <td data-label="Source" class="p-4"><span class="id-chip text-yellow-400 font-mono text-xs px-2 py-0.5 rounded-full">${esc(SOURCE_LABELS[t.source] || t.source)}</span></td>
+                    <td data-label="Category" class="p-4 text-gray-300">${esc(t.category)}</td>
+                    <td data-label="Description" class="p-4 text-gray-400">${esc(t.description)}</td>
+                    <td data-label="Type" class="p-4 text-center">${t.type==='income'
+                        ? '<span class="status-pill status-green">Income</span>'
+                        : '<span class="status-pill status-red">Expense</span>'}</td>
+                    <td data-label="Amount" class="p-4 text-right font-semibold ${t.type==='income'?'text-green-400':'text-red-400'}">
+                        ${t.type==='income'?'+':'-'}${num(t.amount).toLocaleString()}
+                    </td>
+                </tr>`).join('');
+
+            const income = rows.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+            const expense = rows.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+            $('rbTotalIncome').textContent = money(income);
+            $('rbTotalExpense').textContent = money(expense);
+            $('rbTotalNet').textContent = money(income-expense);
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            $('dashboardTab').classList.toggle('hidden', tab !== 'dashboard');
+            $('reportsTab').classList.toggle('hidden', tab !== 'reports');
+            $('tabDashboard').classList.toggle('active', tab === 'dashboard');
+            $('tabReports').classList.toggle('active', tab === 'reports');
+            if (tab === 'dashboard') renderDashboard();
+            else renderReportTable();
+        }
+
+        function exportReportExcel() {
+            const rows = filteredTx();
+            if (!rows.length) return toast('No records to export.', 'info');
+            if (!window.XLSX) return toast('Excel library is not available.', 'error');
+            const data = rows.map(t => ({
+                Date:t.date,
+                Source:SOURCE_LABELS[t.source] || t.source,
+                Category:t.category,
+                Description:t.description,
+                Type:t.type,
+                'Amount (ETB)':num(t.amount)
+            }));
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, 'Live Report');
+            XLSX.writeFile(wb, `MHSS-Live-Report-${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        function exportReportPdf() {
+            const rows = filteredTx();
+            const income = rows.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+            const expense = rows.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+            $('printArea').innerHTML = `
+                <div class="print-header">
+                    <img src="logo.png" onerror="this.style.display='none'">
+                    <div><h2>Meserete Hiwot ERP - Live Report</h2><p>Generated ${new Date().toLocaleString()}</p></div>
+                </div>
+                <div class="print-meta">
+                    <span>Period: ${esc($('rbStart').value || 'All')} to ${esc($('rbEnd').value || 'All')}</span>
+                    <span>Income: ${income.toLocaleString()} ETB | Expense: ${expense.toLocaleString()} ETB | Net: ${(income-expense).toLocaleString()} ETB</span>
+                </div>
+                <table class="print-table">
+                    <thead><tr><th>Date</th><th>Source</th><th>Category</th><th>Description</th><th>Type</th><th>Amount</th></tr></thead>
+                    <tbody>${rows.map(t=>`
+                        <tr><td>${esc(t.date)}</td><td>${esc(SOURCE_LABELS[t.source]||t.source)}</td>
+                        <td>${esc(t.category)}</td><td>${esc(t.description)}</td>
+                        <td>${esc(t.type)}</td><td>${num(t.amount).toLocaleString()} ETB</td></tr>`).join('')}</tbody>
+                </table>
+                <div class="print-signature"><div class="line">Prepared By</div><div class="line">Approved By (Signature)</div></div>`;
+            setTimeout(()=>window.print(),100);
+        }
+
+        function toggleExecutiveMode() {
+            document.body.classList.toggle('executive-mode');
+            localStorage.setItem('mh_reports_exec_mode', document.body.classList.contains('executive-mode') ? '1':'0');
+        }
+
+        function toggleSchedule() {
+            scheduleOn = !scheduleOn;
+            $('scheduleToggle').className = 'toggle-switch ' + (scheduleOn ? 'on':'off');
+            localStorage.setItem('mh_reports_schedule_v1', JSON.stringify({
+                on:scheduleOn, email:$('scheduleEmail').value.trim()
+            }));
+            toast(scheduleOn ? 'Report preference enabled.' : 'Report preference disabled.', scheduleOn?'success':'info');
+        }
+
+        function restorePreferences() {
+            try {
+                const exec = localStorage.getItem('mh_reports_exec_mode') === '1';
+                document.body.classList.toggle('executive-mode', exec);
+                const p = JSON.parse(localStorage.getItem('mh_reports_schedule_v1') || '{}');
+                scheduleOn = !!p.on;
+                $('scheduleEmail').value = p.email || '';
+                $('scheduleToggle').className = 'toggle-switch ' + (scheduleOn?'on':'off');
+            } catch(e) {}
+        }
+
+        // Inline handlers in the existing HTML need global functions.
+        Object.assign(window, {
+            switchTab, selectOrbitalNode, jumpToFilteredReport, quickReport, setLanguage,
+            renderTrendChart, renderReportTable, exportReportExcel,
+            exportReportPdf, toggleExecutiveMode, toggleSchedule
+        });
+
+        // Keep the page synchronized with the same Supabase database used by the other modules.
+
+        let incomeMixChartInstance = null, attendanceChartInstance = null, pulseChartInstance = null;
+
+        function chartDefaults() {
+            return {
+                responsive:true, maintainAspectRatio:false,
+                plugins:{legend:{labels:{color:getComputedStyle(document.documentElement).getPropertyValue('--report-muted') || '#94a3b8'}}},
+                scales:{
+                    x:{ticks:{color:'#94a3b8'},grid:{display:false}},
+                    y:{ticks:{color:'#94a3b8'},grid:{color:'rgba(148,163,184,.12)'}}
+                }
+            };
+        }
+
+        function renderAdvancedCharts() {
+            if (!window.Chart) return;
+            const totals=computeSourceTotals();
+            const mixCtx=$('incomeMixChart'), attCtx=$('attendanceChart'), pulseCtx=$('pulseChart');
+            if(incomeMixChartInstance) incomeMixChartInstance.destroy();
+            if(attendanceChartInstance) attendanceChartInstance.destroy();
+            if(pulseChartInstance) pulseChartInstance.destroy();
+
+            incomeMixChartInstance=new Chart(mixCtx,{
+                type:'doughnut',
+                data:{labels:['Financial','Sunday School','Begena'],
+                    datasets:[{data:[totals.financial.income,totals.sunday_school.income,totals.begena.income]}]},
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
+            });
+
+            const allAtt=[...live.attendance,...live.begenaAttendance];
+            const present=allAtt.filter(r=>String(r.status).toLowerCase()==='present').length;
+            const late=allAtt.filter(r=>String(r.status).toLowerCase()==='late').length;
+            const absent=allAtt.filter(r=>String(r.status).toLowerCase()==='absent').length;
+            attendanceChartInstance=new Chart(attCtx,{
+                type:'bar',data:{labels:['Present','Late','Absent'],datasets:[{label:'Records',data:[present,late,absent]}]},
+                options:chartDefaults()
+            });
+
+            const buckets={};
+            financeTx.forEach(t=>{
+                const d=new Date(t.date+'T00:00:00'); if(isNaN(d)) return;
+                const key=d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+                buckets[key] ||= {income:0,expense:0,sort:d.getTime()};
+                buckets[key][t.type]+=num(t.amount);
+            });
+            const keys=Object.keys(buckets).sort((a,b)=>buckets[a].sort-buckets[b].sort);
+            pulseChartInstance=new Chart(pulseCtx,{
+                type:'line',data:{labels:keys,datasets:[
+                    {label:'Income',data:keys.map(k=>buckets[k].income),tension:.35},
+                    {label:'Expense',data:keys.map(k=>buckets[k].expense),tension:.35}
+                ]},options:chartDefaults()
+            });
+        }
+
+        function renderSmartInsights() {
+            const income=financeTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+            const expense=financeTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+            const att=[...live.attendance,...live.begenaAttendance];
+            const valid=att.filter(r=>['present','late','absent'].includes(String(r.status).toLowerCase()));
+            const good=valid.filter(r=>['present','late'].includes(String(r.status).toLowerCase())).length;
+            const rate=valid.length?Math.round(good/valid.length*100):0;
+            $('smartIncome').textContent=money(income);
+            $('smartExpense').textContent=money(expense);
+            $('smartNet').textContent=money(income-expense);
+            $('smartAttendance').textContent=rate+'%';
+            $('smartNet').className='insight-value '+(income-expense>=0?'text-green-400':'text-red-400');
+        }
+
+        function quickReport(period) {
+            const now=new Date(), pad=n=>String(n).padStart(2,'0');
+            if(period==='all'){ $('rbStart').value=''; $('rbEnd').value=''; }
+            else if(period==='month'){
+                $('rbStart').value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;
+                $('rbEnd').value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(new Date(now.getFullYear(),now.getMonth()+1,0).getDate())}`;
+            } else {
+                $('rbStart').value=`${now.getFullYear()}-01-01`;
+                $('rbEnd').value=`${now.getFullYear()}-12-31`;
+            }
+            switchTab('reports'); renderReportTable();
+        }
+
+        function setLanguage(lang) {
+            const am=lang==='am';
+            document.documentElement.lang=am?'am':'en';
+            $('langBtnEn').classList.toggle('active',!am);
+            $('langBtnAm').classList.toggle('active',am);
+            $('langBtnEn').setAttribute('aria-pressed',String(!am));
+            $('langBtnAm').setAttribute('aria-pressed',String(am));
+            localStorage.setItem('mh_report_lang',lang);
+
+            const map={
+              'Report & Analytics Management System (የሪፖርት እና ትንተና ማዕከል)':am?'የሪፖርት እና ትንተና ማዕከል':'Report & Analytics Management System',
+              'Admin Dashboard':am?'የአስተዳደር ዳሽቦርድ':'Admin Dashboard',
+              '🔗 Live Data Sources:':am?'🔗 የቀጥታ የመረጃ ምንጮች፦':'🔗 Live Data Sources:',
+              '📄 Report Generator ሪፖርት ማመንጫ':am?'📄 ሪፖርት ማመንጫ':'📄 Report Generator',
+              'Smart Insights':am?'ዘመናዊ ግንዛቤዎች':'Smart Insights',
+              'Income':am?'ገቢ':'Income','Expenses':am?'ወጪ':'Expenses','Net':am?'ተጣራ':'Net','Attendance':am?'ተገኝነት':'Attendance',
+              'Income Mix':am?'የገቢ ድርሻ':'Income Mix','Attendance Overview':am?'የተገኝነት አጠቃላይ እይታ':'Attendance Overview',
+              'Financial Pulse':am?'የገንዘብ እንቅስቃሴ':'Financial Pulse',
+              '🛠️ Custom Report Builder የራስ ሪፖርት ገንቢ':am?'🛠️ የራስ ሪፖርት ገንቢ':'🛠️ Custom Report Builder',
+              'From':am?'ከ':'From','To':am?'እስከ':'To','Type':am?'አይነት':'Type',
+              '📄 Export PDF':am?'📄 PDF አውጣ':'📄 Export PDF',
+              '📊 Export Excel/CSV':am?'📊 Excel/CSV አውጣ':'📊 Export Excel/CSV',
+              'No records match this filter.':am?'ከዚህ ማጣሪያ ጋር የሚስማማ መዝገብ የለም።':'No records match this filter.'
+            };
+            document.querySelectorAll('h1,h2,h3,p,label,button').forEach(el=>{
+                const txt=el.textContent.trim();
+                if(map[txt] && !el.querySelector('.amharic')) el.textContent=map[txt];
+            });
+            document.querySelectorAll('.amharic').forEach(el=>el.style.display=am?'inline':'inline');
+        }
+
+        async function init() {
+            setHeaderDate();
+            restorePreferences();
+            $('langBtnEn')?.addEventListener('click', () => setLanguage('en'));
+            $('langBtnAm')?.addEventListener('click', () => setLanguage('am'));
+            setLanguage(localStorage.getItem('mh_report_lang') === 'am' ? 'am' : 'en');
+
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (!sessionData?.session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Do not fabricate fallback values. Empty database = zero/empty report.
+            await loadLiveData();
+
+            // Re-fetch when the page becomes visible again.
+            document.addEventListener('visibilitychange', async () => {
+                if (!document.hidden) {
+                    await loadLiveData();
+                    $('lastSyncLabel').textContent = 'Live data · updated ' + new Date().toLocaleTimeString();
+                }
+            });
+
+            // Short realtime-friendly refresh without requiring another report page.
+            setInterval(async () => {
+                if (!document.hidden) {
+                    await loadLiveData();
+                    $('lastSyncLabel').textContent = 'Live data · updated ' + new Date().toLocaleTimeString();
+                }
+            }, 60000);
+        }
+
+        init().catch(err => {
+            console.error('[Report] initialization failed:', err);
+            toast('Report could not load live data. Check Supabase permissions/network.', 'error');
+        });
+    </script>
+</body>
+</html>
