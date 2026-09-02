@@ -1689,7 +1689,7 @@ html[data-theme="dark"] .view-lux-modal{
                     <div class="flex items-center gap-2 flex-wrap w-full lg:w-auto lg:ml-auto">
                         <button onclick="printAll()" class="px-4 py-2 glass-panel rounded-xl hover:bg-white/10 text-sm transition flex-1 lg:flex-none" data-i18n="printAll">🖨️ Print All</button>
                         <button onclick="printSelected()" class="px-4 py-2 glass-panel rounded-xl hover:bg-white/10 text-sm transition flex-1 lg:flex-none" data-i18n="printSelected">🖨️ Print Selected</button>
-                        <button onclick="printSelectedIdCards()" class="px-4 py-2 glass-panel rounded-xl hover:bg-white/10 text-sm transition border border-yellow-500/40 flex-1 lg:flex-none" data-i18n="printIdCard">🪪 Print ID Card</button>
+                        <button onclick="openIdCardPrintPage()" class="px-4 py-2 glass-panel rounded-xl hover:bg-white/10 text-sm transition border border-yellow-500/40 flex-1 lg:flex-none" data-i18n="printIdCard">🪪 Print ID Card</button>
                         <button onclick="openAddStudentModal()" class="px-5 py-2 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition shadow-lg shadow-yellow-500/20 flex-1 lg:flex-none" data-i18n="addStudent">+ Add Student</button>
                     </div>
                 </div>
@@ -3849,6 +3849,13 @@ html[data-theme="dark"] .view-lux-modal{
 
         function printSelectedIdCards() {
             printIdCardsBulk(getSelectedStudents());
+        }
+
+        // Opens the new dedicated A4 ID-card print page, scoped to the
+        // class currently open on this Students page.
+        function openIdCardPrintPage() {
+            if (!currentClassStr) { alert('No class selected.'); return; }
+            window.location.href = 'print-id-cards.html?class=' + encodeURIComponent(currentClassStr);
         }
 
         async function downloadStudentPdf(s) {

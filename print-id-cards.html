@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Print Student ID Cards - Meserete Hiwot ERP</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Ethiopic+Lisan:wght@400;700&family=Noto+Sans+Ethiopic:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@400;500;600;700&family=Ethiopic+Lisan:wght@400;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<style>
+    /* ==========================================
+         GLOBAL THEME — same variables/keys as students.html
+         (mh_theme / mh_lang), so this page always matches
+         whatever the user has set on the rest of the system.
+    =========================================== */
+    :root {
+        --bg-page: #F7F8FA; --surface: #FFFFFF; --surface-soft: #F1F3F5;
+        --text-main: #172033; --text-muted: #596579; --primary: #B8922E;
+        --primary-bright: #D4AF37; --border: #E2E6EC;
+        --glass-bg: rgba(255,255,255,.92); --glass-border: #E2E6EC;
+        --glass-gold-bg-1: #FFFFFF; --glass-gold-bg-2: #F8F9FB;
+        --glass-gold-border: rgba(184,146,46,.28); --input-bg: #FFFFFF;
+        --input-border: #D9DEE7; --gold: #B8922E;
+    }
+    html[data-theme="dark"] {
+        --bg-page: #0F172A; --surface: #111C2E; --surface-soft: #182235;
+        --text-main: #F8FAFC; --text-muted: #94A3B8; --primary: #D4AF37;
+        --primary-bright: #E7C45A; --border: rgba(255,255,255,.09);
+        --glass-bg: rgba(17,28,46,.82); --glass-border: rgba(255,255,255,.09);
+        --glass-gold-bg-1: rgba(255,255,255,.055); --glass-gold-bg-2: rgba(255,255,255,.018);
+        --glass-gold-border: rgba(212,175,55,.20); --input-bg: rgba(255,255,255,.055);
+        --input-border: rgba(255,255,255,.12); --gold: #D4AF37;
+    }
+    html, body { background: var(--bg-page); color: var(--text-main); font-family: 'Inter', sans-serif; transition: background .3s ease, color .3s ease; }
+    .amharic { font-family: 'Ethiopia Lissan', 'Abyssinica SIL', 'Nyala', 'Power Ethiopic', sans-serif; }
+    .glass-panel { background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); }
+    .lux-input { background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); }
+    .lux-input:focus { outline: none; border-color: var(--gold); }
+    .gold-btn { background: var(--gold); color: #1a1a1a; font-weight: 700; }
+    .gold-btn:hover { filter: brightness(1.08); }
+    .gold-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ==========================================
+         STUDENT ID CARD — copied verbatim from students.html
+         so the preview, and the printed card, are always
+         identical to the corrected design (single source of truth).
+    =========================================== */
+    :root {
+        --idc-gold: #C9A227;
+        --idc-blue: #123A7A;
+        --idc-white: #FFFFFF;
+        --idc-navy: #1B1B2F;
+        --idc-graybg: #F5F5F5;
+    }
+    .idcard {
+        position: relative;
+        width: 300px;
+        height: 380px;
+        background: var(--idc-white);
+        border-radius: 26px;
+        border: 1.5px solid rgba(201,162,39,0.5);
+        overflow: hidden;
+        box-shadow: 0 12px 30px -8px rgba(0,0,0,0.35);
+        font-family: 'Poppins', 'Inter', 'Ethiopia Lissan', 'Abyssinica SIL', 'Nyala', sans-serif;
+        color: var(--idc-navy);
+        display: flex;
+        flex-direction: column;
+    }
+    .idcard-amh { font-family: 'Ethiopia Lissan', 'Abyssinica SIL', 'Nyala', 'Power Ethiopic', sans-serif; }
+    .idcard-guilloche {
+        position: absolute; inset: 0; pointer-events: none; z-index: 0; opacity: 0.25;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M0 40 Q 20 15, 40 40 T 80 40' fill='none' stroke='%23C9A227' stroke-width='0.5' opacity='0.7'/%3E%3Cpath d='M0 40 Q 20 65, 40 40 T 80 40' fill='none' stroke='%23123A7A' stroke-width='0.5' opacity='0.7'/%3E%3Cpath d='M40 0 Q 15 20, 40 40 T 40 80' fill='none' stroke='%23C9A227' stroke-width='0.5' opacity='0.7'/%3E%3Cpath d='M40 0 Q 65 20, 40 40 T 40 80' fill='none' stroke='%23123A7A' stroke-width='0.5' opacity='0.7'/%3E%3C/svg%3E");
+        background-size: 80px 80px;
+    }
+    .idcard::before {
+        content: "✝"; position: absolute; top: -10px; right: -14px; font-size: 140px;
+        color: var(--idc-gold); opacity: 0.05; line-height: 1; pointer-events: none; font-family: serif;
+    }
+    .idcard::after {
+        content: ""; position: absolute; inset: 0;
+        background: radial-gradient(circle at 12% 0%, rgba(201,162,39,0.06), transparent 55%);
+        pointer-events: none;
+    }
+    .idcard-corner-tr, .idcard-corner-bl { position: absolute; width: 46px; height: 46px; border-radius: 50%; pointer-events: none; z-index: 2; }
+    .idcard-corner-tr { top: -4px; right: -4px; border: 3px solid var(--idc-gold); border-color: var(--idc-gold) var(--idc-gold) transparent transparent; }
+    .idcard-corner-bl { bottom: -4px; left: -4px; border: 3px solid var(--idc-gold); border-color: transparent transparent var(--idc-gold) var(--idc-gold); }
+    .idcard-header { display: flex; align-items: center; gap: 10px; padding: 16px 14px 10px; position: relative; z-index: 1; width: 100%; box-sizing: border-box; }
+    .idcard-logo-wrapper { width: 82px; height: 82px; border-radius: 50%; border: 2px solid rgba(201,162,39,0.5); background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+    .idcard-logo { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; transform: scale(1.35); }
+    .idcard-titles { flex: 1; width: 100%; text-align: center; min-width: 0; }
+    .idcard-titles h4 { margin: 0; font-family: 'Ethiopia Lissan', 'Abyssinica SIL', 'Nyala', 'Power Ethiopic', sans-serif; font-weight: 700; font-size: 16px; line-height: 1.25; color: var(--idc-blue); letter-spacing: .02em; }
+    .idcard-titles span { display: block; font-family: 'Montserrat', 'Segoe UI', 'Poppins', sans-serif; font-size: 9.5px; line-height: 1.35; letter-spacing: .05em; color: var(--idc-gold); font-weight: 600; margin-top: 3px; }
+    .idcard-divider { height: 2px; margin: 0 14px; background: linear-gradient(90deg, transparent, var(--idc-gold), transparent); position: relative; z-index: 1; }
+    .idcard-body { display: flex; gap: 10px; padding: 8px 14px 2px; flex: 1; position: relative; z-index: 1; min-height: 0; }
+    .idcard-col-left { width: 112px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+    .idcard-photo-frame { position: relative; width: 108px; height: 108px; border-radius: 12px; border: 2px solid var(--idc-gold); box-shadow: 0 4px 10px -2px rgba(0,0,0,0.25); overflow: hidden; background: var(--idc-graybg); }
+    .idcard-photo { width: 100%; height: 100%; object-fit: cover; }
+    .idcard-photo-cross { position: absolute; top: -8px; left: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--idc-gold); color: var(--idc-white); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2; }
+    .idcard-mini-box { position: relative; width: 100%; margin-top: 8px; border: 1.5px solid var(--idc-gold); border-radius: 10px; padding: 8px 6px 5px; text-align: center; background: #ffffff; }
+    .idcard-mini-box .idcard-box-label { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: var(--idc-blue); color: var(--idc-white); font-size: 7px; font-weight: 700; letter-spacing: .04em; padding: 2px 9px; border-radius: 9px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .idcard-mini-box strong { display: block; font-size: 11.5px; font-weight: 700; color: var(--idc-navy); letter-spacing: .02em; }
+    .idcard-col-right { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6px; min-width: 0; }
+    .idcard-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px dotted rgba(18,58,122,0.25); }
+    .idcard-row:last-child { border-bottom: none; }
+    .idcard-icon { width: 20px; height: 20px; border-radius: 50%; background: var(--idc-blue); color: var(--idc-gold); font-size: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .idcard-front .idcard-icon { background: transparent !important; border: none !important; box-shadow: none !important; font-size: 14px; width: auto; height: auto; padding-right: 4px; justify-content: flex-start; }
+    .idcard-row-text { min-width: 0; flex: 1; line-height: 1.2; display: flex; flex-direction: column; gap: 1.5px; }
+    .idcard-row-label { display: block; font-weight: 500; color: rgba(18,58,122,0.55); font-size: 7.5px; letter-spacing: .04em; text-transform: uppercase; }
+    .idcard-value { display: block; font-size: 12.5px; font-weight: 700; color: var(--idc-navy); line-height: 1.2; }
+    .idcard-footer-wrap { position: relative; margin-top: auto; flex-shrink: 0; background: var(--idc-blue); border-top: 2px solid var(--idc-gold); padding: 9px 12px; border-radius: 0 0 24px 24px; z-index: 1; }
+    .idcard-footer-content { display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .idcard-footer-text { color: var(--idc-white); font-size: 10px; font-weight: 700; letter-spacing: .02em; text-align: center; }
+    .idcard-back-content { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 6px 0; min-height: 0; position: relative; }
+    .idcard-back-emergency-banner { margin: 0 14px; background: var(--idc-blue); border-top: 2px solid var(--idc-gold); border-radius: 10px; padding: 7px; text-align: center; position: relative; z-index: 1; }
+    .idcard-back-emergency-banner h5 { margin: 0; font-family: 'Montserrat', serif; font-size: 9px; letter-spacing: .05em; color: var(--idc-white); }
+    .idcard-back-rows { margin: 0 16px; position: relative; z-index: 1; }
+    .idcard-back-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+    .idcard-back-row .idcard-icon { background: var(--idc-white); border: 1.5px solid var(--idc-gold); color: var(--idc-blue); }
+    .idcard-back-row .idcard-value { display: block; border-bottom: 1px dotted rgba(18,58,122,0.3); padding-bottom: 3px; font-weight: 600; }
+    .idcard-stamp { position: absolute; top: 155px; right: 16px; width: 75px; height: 75px; object-fit: contain; background: transparent; transform: rotate(-12deg); opacity: 0.85; mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .idcard-barcode-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 1; }
+    .idcard-barcode-wrap svg { width: 86%; height: 52px; }
+    .idcard-barcode-id { font-family: 'Cinzel', monospace; font-size: 12px; font-weight: 700; letter-spacing: .16em; color: var(--idc-navy); margin-top: 2px; }
+
+    /* ==========================================
+         A4 LANDSCAPE PRINT GRID — one shared card size
+         (60mm x 76mm, same aspect ratio as the 300x380 screen
+         card above) and one shared grid for FRONT and BACK,
+         so the two rectangles are always identical.
+    =========================================== */
+    .print-page {
+        width: 297mm; height: 210mm;
+        background: #ffffff;
+        display: flex; align-items: center; justify-content: center;
+        box-sizing: border-box;
+        position: relative;
+        flex-shrink: 0;
+    }
+    .print-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 60mm);
+        grid-template-rows: repeat(2, 76mm);
+        column-gap: 8mm;
+        row-gap: 10mm;
+    }
+    .card-slot { width: 60mm; height: 76mm; position: relative; box-sizing: border-box; }
+    .card-slot .idcard { width: 60mm !important; height: 76mm !important; box-shadow: none !important; border-radius: 0.45cm; }
+    .card-slot.empty-slot { visibility: hidden; }
+    .cut-guide { position: absolute; width: 6mm; height: 6mm; pointer-events: none; z-index: 20; display: none; }
+    .show-cut-guides .cut-guide { display: block; }
+    .cut-guide.tl { top: -2.5mm; left: -2.5mm; border-top: 0.4mm dashed #999; border-left: 0.4mm dashed #999; }
+    .cut-guide.tr { top: -2.5mm; right: -2.5mm; border-top: 0.4mm dashed #999; border-right: 0.4mm dashed #999; }
+    .cut-guide.bl { bottom: -2.5mm; left: -2.5mm; border-bottom: 0.4mm dashed #999; border-left: 0.4mm dashed #999; }
+    .cut-guide.br { bottom: -2.5mm; right: -2.5mm; border-bottom: 0.4mm dashed #999; border-right: 0.4mm dashed #999; }
+
+    /* Live on-screen preview: exact same markup, just scaled down */
+    #previewViewport { overflow: hidden; border-radius: 12px; box-shadow: 0 20px 50px -15px rgba(0,0,0,.5); background:#ffffff; }
+    #previewScaler { transform-origin: top left; }
+
+    /* Hidden real print area (only visible to the print engine) */
+    #realPrintArea { display: none; }
+    @media print {
+        @page { size: A4 landscape; margin: 0; }
+        html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+        body.printing-bulk-id-cards * { visibility: hidden !important; }
+        body.printing-bulk-id-cards #realPrintArea,
+        body.printing-bulk-id-cards #realPrintArea * { visibility: visible !important; }
+        body.printing-bulk-id-cards #realPrintArea {
+            display: block !important; position: absolute; top: 0; left: 0; margin: 0; padding: 0;
+        }
+        body.printing-bulk-id-cards .print-page { page-break-after: always; break-after: page; }
+        body.printing-bulk-id-cards .print-page:last-child { page-break-after: auto; break-after: auto; }
+    }
+</style>
+</head>
+<body class="min-h-screen">
+
+<div id="root" class="no-print">
+    <!-- HEADER -->
+    <header class="glass-panel w-full px-6 py-5 md:px-10 md:py-6 flex flex-wrap items-center justify-between gap-4 border-b sticky top-0 z-30">
+        <div class="min-w-0">
+            <div class="flex items-center gap-3">
+                <a href="students.html" class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition flex items-center gap-1 text-sm font-semibold" style="color:var(--text-main)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    <span data-i18n="back">Back</span>
+                </a>
+                <div class="min-w-0">
+                    <h1 class="text-lg md:text-2xl font-bold" data-i18n="pageTitle">🪪 Student ID Card Printing</h1>
+                    <p class="text-xs md:text-sm" style="color:var(--text-muted)">
+                        <span id="hdrClassName" class="amharic font-semibold"></span>
+                        &nbsp;·&nbsp;
+                        <span id="hdrStudentCount">0</span> <span data-i18n="students">Students</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1500px] mx-auto p-4 md:p-8 grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-6">
+
+        <!-- LEFT: selection + settings -->
+        <section class="flex flex-col gap-5 min-w-0">
+            <div class="glass-panel rounded-2xl p-4">
+                <input type="text" id="searchInput" placeholder="Search name or ID..." data-i18n-ph="searchPlaceholder"
+                       class="lux-input w-full px-4 py-2 rounded-xl text-sm mb-3">
+                <div class="flex items-center gap-2 mb-3">
+                    <button onclick="setAllSelected(true)" class="flex-1 px-3 py-2 rounded-xl text-xs font-bold lux-input hover:brightness-110 transition" data-i18n="selectAll">☑ Select All</button>
+                    <button onclick="setAllSelected(false)" class="flex-1 px-3 py-2 rounded-xl text-xs font-bold lux-input hover:brightness-110 transition" data-i18n="deselectAll">☐ Deselect All</button>
+                </div>
+                <div class="text-xs font-semibold mb-2" style="color:var(--text-muted)">
+                    <span id="selectedCount">0</span> <span data-i18n="selected">selected</span>
+                </div>
+                <div id="studentListWrap" class="max-h-[420px] overflow-y-auto flex flex-col gap-1 pr-1"></div>
+                <p id="listEmptyMsg" class="hidden text-center text-xs py-8" style="color:var(--text-muted)">No students found.</p>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-4 flex flex-col gap-4">
+                <h3 class="text-sm font-bold" data-i18n="printSettings">Print Settings</h3>
+
+                <label class="flex items-center justify-between text-sm cursor-pointer">
+                    <span data-i18n="duplexPrinting">Duplex Printing</span>
+                    <input type="checkbox" id="duplexToggle" checked class="w-4 h-4 accent-yellow-500" onchange="onSettingsChanged()">
+                </label>
+
+                <div id="flipEdgeGroup" class="pl-1">
+                    <div class="text-xs font-semibold mb-1.5" style="color:var(--text-muted)" data-i18n="flipOn">Flip on</div>
+                    <label class="flex items-center gap-2 text-sm mb-1 cursor-pointer">
+                        <input type="radio" name="flipEdge" value="long" checked class="accent-yellow-500" onchange="onSettingsChanged()">
+                        <span data-i18n="longEdge">Long Edge</span>
+                    </label>
+                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="radio" name="flipEdge" value="short" class="accent-yellow-500" onchange="onSettingsChanged()">
+                        <span data-i18n="shortEdge">Short Edge</span>
+                    </label>
+                </div>
+
+                <label class="flex items-center justify-between text-sm cursor-pointer border-t pt-3" style="border-color:var(--border)">
+                    <span data-i18n="cuttingGuides">Show Cutting Guides</span>
+                    <input type="checkbox" id="cuttingGuidesToggle" checked class="w-4 h-4 accent-yellow-500" onchange="onSettingsChanged()">
+                </label>
+
+                <button id="printBtn" onclick="doPrint()" class="gold-btn w-full py-3 rounded-xl text-sm mt-1" data-i18n="printIdCardsBtn">🖨️ PRINT ID CARDS</button>
+            </div>
+        </section>
+
+        <!-- RIGHT: live preview -->
+        <section class="flex flex-col gap-4 min-w-0">
+            <div class="glass-panel rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
+                <div class="text-sm font-bold" id="previewPageLabel" data-i18n="pageOf">Page 1 of 1</div>
+                <div class="flex items-center gap-2">
+                    <button onclick="prevPreviewPage()" class="px-3 py-2 rounded-lg lux-input text-sm font-bold" data-i18n="prevPage">◀ Previous</button>
+                    <button onclick="nextPreviewPage()" class="px-3 py-2 rounded-lg lux-input text-sm font-bold" data-i18n="nextPage">Next ▶</button>
+                </div>
+            </div>
+            <div id="previewViewport" class="w-full" style="aspect-ratio: 297 / 210;">
+                <div id="previewScaler"></div>
+            </div>
+            <p id="noSelectionMsg" class="hidden text-center text-sm py-10" style="color:var(--text-muted)" data-i18n="noSelection">Select at least one student to see the print preview.</p>
+        </section>
+    </main>
+</div>
+
+<!-- Hidden area used for the real, full-size print output -->
+<div id="realPrintArea"></div>
+
+<script>
+    // ==========================================
+    // THEME / LANGUAGE — respects the existing global
+    // mh_theme / mh_lang settings. No second preference system.
+    // ==========================================
+    (function applyGlobalTheme() {
+        const saved = localStorage.getItem('mh_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', saved);
+    })();
+    const currentLang = localStorage.getItem('mh_lang') || 'en';
+    const I18N = {
+        en: {
+            back: 'Back', pageTitle: '🪪 Student ID Card Printing', students: 'Students',
+            searchPlaceholder: 'Search name or ID...', selectAll: '☑ Select All', deselectAll: '☐ Deselect All',
+            selected: 'selected', printSettings: 'Print Settings', duplexPrinting: 'Duplex Printing',
+            flipOn: 'Flip on', longEdge: 'Long Edge', shortEdge: 'Short Edge', cuttingGuides: 'Show Cutting Guides',
+            printIdCardsBtn: '🖨️ PRINT ID CARDS', prevPage: '◀ Previous', nextPage: 'Next ▶',
+            noSelection: 'Select at least one student to see the print preview.',
+            pageOfTpl: (p, t) => `Page ${p} of ${t}`
+        },
+        am: {
+            back: 'ተመለስ', pageTitle: '🪪 የተማሪዎች መታወቂያ ማተሚያ', students: 'ተማሪዎች',
+            searchPlaceholder: 'ስም ወይም መታወቂያ ፈልግ...', selectAll: '☑ ሁሉንም ምረጥ', deselectAll: '☐ ምርጫ አጥፋ',
+            selected: 'ተመርጠዋል', printSettings: 'የህትመት ማስተካከያ', duplexPrinting: 'ባለሁለት ገጽ ህትመት',
+            flipOn: 'መገልበጫ', longEdge: 'ረጅም ጫፍ', shortEdge: 'አጭር ጫፍ', cuttingGuides: 'የመቁረጫ መስመር አሳይ',
+            printIdCardsBtn: '🖨️ መታወቂያዎችን አትም', prevPage: '◀ ቀዳሚ', nextPage: 'ቀጣይ ▶',
+            noSelection: 'ቅድመ እይታውን ለማየት ቢያንስ አንድ ተማሪ ይምረጡ።',
+            pageOfTpl: (p, t) => `ገጽ ${p} ከ ${t}`
+        }
+    };
+    (function applyI18n() {
+        const dict = I18N[currentLang] || I18N.en;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (dict[key]) el.textContent = dict[key];
+        });
+        document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+            const key = el.getAttribute('data-i18n-ph');
+            if (dict[key]) el.setAttribute('placeholder', dict[key]);
+        });
+    })();
+
+    // ==========================================
+    // CLASS CONTEXT — the class is passed in from the
+    // existing Students page via the URL, and only that
+    // class's students are ever loaded here.
+    // ==========================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentClassStr = urlParams.get('class') || '';
+    document.getElementById('hdrClassName').textContent = currentClassStr || '—';
+
+    let studentsData = [];
+    let selectedIds = new Set();
+    let previewPageIndex = 0;
+
+    // ==========================================
+    // DATA HELPERS — identical mapping/formatting to students.html
+    // ==========================================
+    function mapFromDB(row) {
+        return {
+            id: row.id, name: row.name, christianName: row.christian_name, gender: row.gender,
+            phone: row.phone, className: row.class_name, grade: row.grade, fieldOfStudy: row.field_of_study,
+            dobDay: row.dob_day, dobMonth: row.dob_month, dobYear: row.dob_year, region: row.region,
+            subCity: row.sub_city, woreda: row.woreda, confessionFatherName: row.confession_father_name,
+            confessionFatherPhone: row.confession_father_phone, motherName: row.mother_name, motherPhone: row.mother_phone,
+            fatherName: row.father_name, fatherPhone: row.father_phone, emergencyName: row.emergency_name,
+            emergencyPhone: row.emergency_phone, regDate: row.reg_date, photo: row.photo
+        };
+    }
+    function getPhotoUrl(s) {
+        return s.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1e293b&color=FFD700&bold=true`;
+    }
+    function formatAddress(s) {
+        const parts = [s.region, s.subCity, s.woreda].filter(Boolean);
+        return parts.length ? parts.join(', ') : '-';
+    }
+    function escapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // Same Supabase client pattern as students.html — supabaseClient.js
+    // remains the single source of truth for the client instance.
+    let supabaseLoadFailure = null;
+    window.addEventListener('supabase-load-failed', (e) => { supabaseLoadFailure = e.detail || 'unknown error'; });
+    function waitForSupabase(timeoutMs = 5000) {
+        if (window.supabase) return Promise.resolve(window.supabase);
+        if (supabaseLoadFailure) return Promise.reject(new Error('Supabase client failed to load: ' + supabaseLoadFailure));
+        return new Promise((resolve, reject) => {
+            const onReady = () => { cleanup(); resolve(window.supabase); };
+            const onFailed = (e) => { cleanup(); reject(new Error('Supabase client failed to load: ' + (e.detail || 'unknown error'))); };
+            const timer = setTimeout(() => { cleanup(); reject(new Error('Supabase client did not initialize in time.')); }, timeoutMs);
+            function cleanup() { clearTimeout(timer); window.removeEventListener('supabase-ready', onReady); window.removeEventListener('supabase-load-failed', onFailed); }
+            window.addEventListener('supabase-ready', onReady);
+            window.addEventListener('supabase-load-failed', onFailed);
+        });
+    }
+    async function fetchStudentsForClass(className) {
+        let client;
+        try { client = await waitForSupabase(); }
+        catch (err) { console.error('Supabase not ready:', err); showListMessage('⚠️ Could not connect to the database.'); return false; }
+        try {
+            const { data, error } = await client.from('students').select('*').eq('class_name', className).order('created_at', { ascending: true });
+            if (error) { console.error('Error fetching students:', error); showListMessage('⚠️ Could not load students.'); return false; }
+            studentsData = (data || []).map(mapFromDB);
+            return true;
+        } catch (err) {
+            console.error('Supabase connection error:', err); showListMessage('⚠️ Connection error.'); return false;
+        }
+    }
+    function showListMessage(msg) {
+        document.getElementById('studentListWrap').innerHTML = '';
+        const el = document.getElementById('listEmptyMsg');
+        el.textContent = msg; el.classList.remove('hidden');
+    }
+
+    // ==========================================
+    // THE STUDENT ID CARD — copied verbatim from students.html.
+    // This is the single source of truth for front, back, photo,
+    // barcode, stamp, logo, Amharic/English text, borders, etc.
+    // ==========================================
+    function buildIdCardFrontHTML(s, uid) {
+        return `
+            <div class="idcard idcard-front">
+                <div class="idcard-guilloche"></div>
+                <div class="idcard-corner-tr"></div>
+                <div class="idcard-corner-bl"></div>
+                <div class="idcard-header">
+                    <div class="idcard-logo-wrapper">
+                        <img src="logo.png" class="idcard-logo" crossorigin="anonymous" onerror="this.parentElement.style.display='none'">
+                    </div>
+                    <div class="idcard-titles">
+                        <h4 class="idcard-amh">የመሠረተ ሕይወት ሰንበት ት/ቤት</h4>
+                        <span>MESERETE HIWOT SUNDAY SCHOOL</span>
+                    </div>
+                </div>
+                <div class="idcard-divider"></div>
+                <div class="idcard-body">
+                    <div class="idcard-col-left">
+                        <div class="idcard-photo-frame">
+                            <span class="idcard-photo-cross">✝</span>
+                            <img src="${getPhotoUrl(s)}" class="idcard-photo" alt="Student photo" crossorigin="anonymous">
+                        </div>
+                        <div class="idcard-mini-box"><span class="idcard-box-label">ID NO.</span><strong>${escapeHtml(s.id)}</strong></div>
+                        <div class="idcard-mini-box"><span class="idcard-box-label">ምድብ &nbsp;/&nbsp; Grade</span><strong class="idcard-amh">${escapeHtml(s.className || '-')}</strong></div>
+                    </div>
+                    <div class="idcard-col-right idcard-amh">
+                        <div class="idcard-row">
+                            <span class="idcard-icon">👤</span>
+                            <div class="idcard-row-text"><span class="idcard-row-label">የተማሪው ስም / Name</span><span class="idcard-value" style="font-size: 13.5px; color: var(--idc-blue);">${escapeHtml(s.name)}</span></div>
+                        </div>
+                        <div class="idcard-row">
+                            <span class="idcard-icon">⚧</span>
+                            <div class="idcard-row-text"><span class="idcard-row-label">ጾታ / Gender</span><span class="idcard-value" style="font-size: 12.5px;">${escapeHtml(s.gender || '-')}</span></div>
+                        </div>
+                        <div class="idcard-row">
+                            <span class="idcard-icon">✝️</span>
+                            <div class="idcard-row-text"><span class="idcard-row-label">የአባት ስም</span><span class="idcard-value">${escapeHtml(s.fatherName || '-')}</span></div>
+                        </div>
+                        <div class="idcard-row">
+                            <span class="idcard-icon">📞</span>
+                            <div class="idcard-row-text"><span class="idcard-row-label">ስልክ</span><span class="idcard-value">${escapeHtml(s.phone || '-')}</span></div>
+                        </div>
+                        <div class="idcard-row">
+                            <span class="idcard-icon">🏠</span>
+                            <div class="idcard-row-text"><span class="idcard-row-label">አድራሻ</span><span class="idcard-value">${escapeHtml(formatAddress(s))}</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="idcard-footer-wrap">
+                    <div class="idcard-footer-content">
+                        <span class="idcard-footer-text idcard-amh">የተማሪዎች መታወቂያ ካርድ | STUDENT ID CARD</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    function buildIdCardBackHTML(s, uid) {
+        const barcodeId = `idCardBarcodeSvg${uid ? '-' + uid : ''}`;
+        return `
+            <div class="idcard idcard-back">
+                <div class="idcard-guilloche"></div>
+                <div class="idcard-corner-tr"></div>
+                <div class="idcard-corner-bl"></div>
+                <div class="idcard-header">
+                    <div class="idcard-logo-wrapper">
+                        <img src="logo.png" class="idcard-logo" crossorigin="anonymous" onerror="this.parentElement.style.display='none'">
+                    </div>
+                    <div class="idcard-titles">
+                        <h4 class="idcard-amh">የመሠረተ ሕይወት ሰንበት ት/ቤት</h4>
+                        <span>MESERETE HIWOT SUNDAY SCHOOL</span>
+                    </div>
+                </div>
+                <div class="idcard-divider"></div>
+                <div class="idcard-back-content">
+                    <img src="stamp.png" alt="Stamp" class="idcard-stamp" crossorigin="anonymous" onerror="this.style.display='none'">
+                    <div class="idcard-back-emergency-banner idcard-amh">
+                        <h5>የአደጋ ጊዜ ተጠራ መረጃ</h5>
+                    </div>
+                    <div class="idcard-back-rows idcard-amh">
+                        <div class="idcard-back-row">
+                            <span class="idcard-icon">👤</span>
+                            <div class="idcard-row-text"><span class="idcard-value">${escapeHtml(s.emergencyName || '-')}</span></div>
+                        </div>
+                        <div class="idcard-back-row">
+                            <span class="idcard-icon">📞</span>
+                            <div class="idcard-row-text"><span class="idcard-value">${escapeHtml(s.emergencyPhone || '-')}</span></div>
+                        </div>
+                    </div>
+                    <div class="idcard-barcode-wrap">
+                        <svg id="${barcodeId}"></svg>
+                        <div class="idcard-barcode-id">${escapeHtml(s.id)}</div>
+                    </div>
+                    <div class="idcard-amh" style="color: var(--idc-blue); font-size: 13px; text-align: center; padding: 0 12px; margin-top: 2px; font-weight: bold;">
+                        ይህ መታወቂያ ጠፍቶ ወይም ወድቆ ካገኙ ለሰንበት/ቤቱ ጽሕፈት ቤት ያስረክቡ፡፡
+                    </div>
+                </div>
+                <div class="idcard-footer-wrap">
+                    <div class="idcard-footer-content">
+                        <span class="idcard-footer-text idcard-amh">የተማሪዎች መታወቂያ ካርድ | STUDENT ID CARD</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    function renderIdCardBarcode(s, uid) {
+        const barcodeId = `idCardBarcodeSvg${uid ? '-' + uid : ''}`;
+        try {
+            JsBarcode(`#${barcodeId}`, s.id, { format: 'CODE128', lineColor: '#1B1B2F', width: 2, height: 50, displayValue: false, margin: 0 });
+        } catch (e) { }
+    }
+
+    // ==========================================
+    // STUDENT LIST / SELECTION
+    // ==========================================
+    function renderStudentList() {
+        const wrap = document.getElementById('studentListWrap');
+        const emptyMsg = document.getElementById('listEmptyMsg');
+        const term = document.getElementById('searchInput').value.trim().toLowerCase();
+        const filtered = studentsData.filter(s =>
+            (s.name && s.name.toLowerCase().includes(term)) || (s.id && s.id.toLowerCase().includes(term))
+        );
+        emptyMsg.classList.toggle('hidden', filtered.length > 0 || studentsData.length === 0);
+        if (filtered.length === 0 && studentsData.length > 0) {
+            emptyMsg.textContent = 'No students match your search.';
+            emptyMsg.classList.remove('hidden');
+        }
+        wrap.innerHTML = filtered.map(s => `
+            <label class="flex items-center gap-3 px-2 py-2 rounded-lg cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition">
+                <input type="checkbox" class="student-check w-4 h-4 accent-yellow-500 flex-shrink-0" data-id="${escapeHtml(s.id)}" ${selectedIds.has(s.id) ? 'checked' : ''} onchange="onStudentCheckChange('${escapeHtml(s.id)}', this.checked)">
+                <img src="${getPhotoUrl(s)}" class="w-8 h-8 rounded-full object-cover flex-shrink-0" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}'">
+                <div class="min-w-0 flex-1">
+                    <div class="text-sm font-semibold amharic truncate">${escapeHtml(s.name)}</div>
+                    <div class="text-[11px] font-mono" style="color:var(--text-muted)">${escapeHtml(s.id)} · ${escapeHtml(s.className)}</div>
+                </div>
+            </label>
+        `).join('');
+        updateSelectedCount();
+    }
+    function onStudentCheckChange(id, checked) {
+        if (checked) selectedIds.add(id); else selectedIds.delete(id);
+        updateSelectedCount();
+        previewPageIndex = 0;
+        renderPreview();
+    }
+    function setAllSelected(state) {
+        studentsData.forEach(s => { if (state) selectedIds.add(s.id); else selectedIds.delete(s.id); });
+        renderStudentList();
+        previewPageIndex = 0;
+        renderPreview();
+    }
+    function updateSelectedCount() {
+        document.getElementById('selectedCount').textContent = selectedIds.size;
+    }
+    document.getElementById('searchInput').addEventListener('input', renderStudentList);
+
+    // ==========================================
+    // PAGE GENERATION — 3x2 A4-landscape pages, alternating
+    // ODD = FRONT / EVEN = BACK, one shared grid for both sides.
+    // ==========================================
+    function getSelectedStudentsOrdered() {
+        return studentsData.filter(s => selectedIds.has(s.id));
+    }
+    // For "flip on short edge" duplex, mirror each row horizontally on the
+    // BACK page so front/back line up after that particular flip motion.
+    // "Flip on long edge" keeps the identical grid position on both sides.
+    const SHORT_EDGE_MIRROR = [2, 1, 0, 5, 4, 3];
+
+    function computeChunks() {
+        const students = getSelectedStudentsOrdered();
+        const chunks = [];
+        for (let i = 0; i < students.length; i += 6) chunks.push(students.slice(i, i + 6));
+        return chunks;
+    }
+    // Returns a flat list of page descriptors: { side: 'front'|'back', slots: [student|null, ...6] }
+    function computePages() {
+        const flipEdge = document.querySelector('input[name="flipEdge"]:checked').value;
+        const chunks = computeChunks();
+        const pages = [];
+        chunks.forEach(chunk => {
+            const frontSlots = [0,1,2,3,4,5].map(i => chunk[i] || null);
+            let backSlots;
+            if (flipEdge === 'short') {
+                backSlots = SHORT_EDGE_MIRROR.map(i => chunk[i] || null);
+            } else {
+                backSlots = frontSlots.slice();
+            }
+            pages.push({ side: 'front', slots: frontSlots });
+            pages.push({ side: 'back', slots: backSlots });
+        });
+        return pages;
+    }
+    function renderPageHTML(page, uidPrefix, showGuides) {
+        const slotsHtml = page.slots.map((s, i) => {
+            if (!s) return `<div class="card-slot empty-slot"></div>`;
+            const uid = `${uidPrefix}${i}`;
+            const cardHtml = page.side === 'front' ? buildIdCardFrontHTML(s, uid) : buildIdCardBackHTML(s, uid);
+            return `<div class="card-slot">
+                ${cardHtml}
+                <span class="cut-guide tl"></span><span class="cut-guide tr"></span>
+                <span class="cut-guide bl"></span><span class="cut-guide br"></span>
+            </div>`;
+        }).join('');
+        return `<div class="print-page ${showGuides ? 'show-cut-guides' : ''}"><div class="print-grid">${slotsHtml}</div></div>`;
+    }
+    function renderBarcodesForPage(page, uidPrefix) {
+        if (page.side !== 'back') return;
+        page.slots.forEach((s, i) => { if (s) renderIdCardBarcode(s, `${uidPrefix}${i}`); });
+    }
+
+    // ==========================================
+    // LIVE PREVIEW — exact same markup as the real print pages,
+    // just visually scaled to fit the viewport.
+    // ==========================================
+    function renderPreview() {
+        const pages = computePages();
+        const total = pages.length;
+        const noSelMsg = document.getElementById('noSelectionMsg');
+        const viewport = document.getElementById('previewViewport');
+        if (total === 0) {
+            viewport.classList.add('hidden');
+            noSelMsg.classList.remove('hidden');
+            document.getElementById('previewPageLabel').textContent = (I18N[currentLang] || I18N.en).pageOfTpl(0, 0);
+            return;
+        }
+        viewport.classList.remove('hidden');
+        noSelMsg.classList.add('hidden');
+        if (previewPageIndex >= total) previewPageIndex = total - 1;
+        if (previewPageIndex < 0) previewPageIndex = 0;
+
+        const guides = document.getElementById('cuttingGuidesToggle').checked;
+        const scaler = document.getElementById('previewScaler');
+        scaler.innerHTML = renderPageHTML(pages[previewPageIndex], 'prev', guides);
+        renderBarcodesForPage(pages[previewPageIndex], 'prev');
+
+        document.getElementById('previewPageLabel').textContent =
+            (I18N[currentLang] || I18N.en).pageOfTpl(previewPageIndex + 1, total) +
+            (pages[previewPageIndex].side === 'front' ? '  ·  FRONT' : '  ·  BACK');
+
+        scalePreview();
+    }
+    function scalePreview() {
+        const viewport = document.getElementById('previewViewport');
+        const scaler = document.getElementById('previewScaler');
+        const pageEl = scaler.querySelector('.print-page');
+        if (!pageEl) return;
+        // A4 landscape physical size in CSS px at 96dpi
+        const pageWidthPx = 297 * 96 / 25.4;
+        const scale = viewport.clientWidth / pageWidthPx;
+        scaler.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', scalePreview);
+    function prevPreviewPage() { previewPageIndex--; renderPreview(); }
+    function nextPreviewPage() { previewPageIndex++; renderPreview(); }
+    function onSettingsChanged() {
+        const duplexOn = document.getElementById('duplexToggle').checked;
+        document.getElementById('flipEdgeGroup').style.opacity = duplexOn ? '1' : '.4';
+        document.querySelectorAll('input[name="flipEdge"]').forEach(r => r.disabled = !duplexOn);
+        previewPageIndex = 0;
+        renderPreview();
+    }
+
+    // ==========================================
+    // PRINT — builds every page at full physical size into the
+    // hidden print area, waits for images/fonts, then opens the
+    // browser print dialog. Only the ID card sheets are printed.
+    // ==========================================
+    async function waitForImages(root) {
+        const images = Array.from(root.querySelectorAll('img'));
+        await Promise.all(images.map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(resolve => {
+                const done = () => { img.removeEventListener('load', done); img.removeEventListener('error', done); resolve(); };
+                img.addEventListener('load', done, { once: true });
+                img.addEventListener('error', done, { once: true });
+            });
+        }));
+        if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+    }
+    async function doPrint() {
+        const pages = computePages();
+        if (!pages.length) { alert('Please select at least one student to print.'); return; }
+
+        const guides = document.getElementById('cuttingGuidesToggle').checked;
+        const area = document.getElementById('realPrintArea');
+        area.innerHTML = pages.map((p, idx) => renderPageHTML(p, `real${idx}_`, guides)).join('');
+        pages.forEach((p, idx) => renderBarcodesForPage(p, `real${idx}_`));
+
+        const btn = document.getElementById('printBtn');
+        const originalText = btn.textContent;
+        btn.disabled = true; btn.textContent = '⏳ Preparing...';
+        await waitForImages(area);
+        btn.disabled = false; btn.textContent = originalText;
+
+        document.body.classList.add('printing-bulk-id-cards');
+        setTimeout(() => { window.print(); }, 150);
+    }
+    window.addEventListener('afterprint', () => {
+        document.body.classList.remove('printing-bulk-id-cards');
+    });
+
+    // ==========================================
+    // INIT
+    // ==========================================
+    (async function init() {
+        if (!currentClassStr) {
+            showListMessage('No class selected. Please open this page from a class in Students.');
+            document.getElementById('printBtn').disabled = true;
+            return;
+        }
+        showListMessage('⏳ Loading students...');
+        const ok = await fetchStudentsForClass(currentClassStr);
+        document.getElementById('hdrStudentCount').textContent = studentsData.length;
+        if (!ok) return;
+        // Default: everyone in the class is selected, ready to print.
+        studentsData.forEach(s => selectedIds.add(s.id));
+        renderStudentList();
+        renderPreview();
+    })();
+</script>
+
+<!-- SUPABASE CLIENT: same single source of truth as students.html. -->
+<script type="module">
+    if (location.protocol === 'file:') {
+        console.error('[Supabase] This page was opened directly as a file:// URL. Serve it over http(s) instead.');
+        window.dispatchEvent(new CustomEvent('supabase-load-failed', { detail: 'file-protocol' }));
+    } else {
+        import('./supabaseClient.js')
+            .then(({ supabase }) => {
+                window.supabase = supabase;
+                window.dispatchEvent(new CustomEvent('supabase-ready'));
+            })
+            .catch(err => {
+                console.error('[Supabase] Failed to load supabaseClient.js:', err);
+                window.dispatchEvent(new CustomEvent('supabase-load-failed', { detail: err.message }));
+            });
+    }
+</script>
+</body>
+</html>
