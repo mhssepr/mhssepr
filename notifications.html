@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MHSS EPR — Notifications</title>
+<style>
+:root{--bg:#08090C;--surface:#111318;--surface2:#171A21;--border:#262A33;--gold:#C9A45C;--gold2:#E5CC91;--text:#F5F3EE;--muted:#8C919C;--success:#36C98F;--danger:#E45D68;--warning:#E7B84B}
+html[data-theme=light]{--bg:#F7F8FA;--surface:#FFF;--surface2:#F1F3F5;--border:#E2E6EC;--gold:#B8922E;--gold2:#D4AF37;--text:#172033;--muted:#596579;--success:#187A54;--danger:#B33440;--warning:#8A5D07}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif}body{overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}
+.app{min-height:100vh}.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);padding:14px clamp(14px,3vw,28px)}.topin{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:10px}.brand img{width:38px;height:38px;object-fit:contain;border-radius:10px}.brand h1{font-size:15px;margin:0}.brand p{font-size:11px;color:var(--muted);margin:3px 0 0}.actions{display:flex;gap:8px}.btn{min-height:40px;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:10px;padding:8px 13px;font-weight:700}.btn.primary{background:var(--gold);border-color:var(--gold);color:#17120a}.btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 35%,var(--border))}
+main{max-width:1200px;margin:auto;padding:22px clamp(14px,3vw,30px) 45px}.hero{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:18px}.hero h2{font-size:25px;margin:0}.hero p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.grid2{display:grid;grid-template-columns:380px 1fr;gap:16px;align-items:start}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.panel-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel-head h3{margin:0;font-size:14px}
+.panel-body{padding:16px}
+.field{margin-bottom:12px}.field label{display:block;font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 11px;min-height:42px;outline:none}
+.field textarea{min-height:110px;resize:vertical}
+.notice{padding:10px 12px;border-radius:10px;margin-bottom:12px;background:color-mix(in srgb,var(--danger) 10%,transparent);color:var(--danger);font-size:12px}
+.notice.success{background:color-mix(in srgb,var(--success) 10%,transparent);color:var(--success)}
+.thread-list{max-height:640px;overflow-y:auto}
+.thread-row{display:flex;align-items:flex-start;gap:10px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer}
+.thread-row:last-child{border-bottom:0}
+.thread-row:hover{background:var(--surface2)}
+.thread-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:6px;flex-shrink:0}
+.thread-row-main{flex:1;min-width:0}
+.thread-row-top{display:flex;align-items:center;gap:8px}
+.thread-subject{font-weight:800;font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.thread-time{font-size:11px;color:var(--muted);flex-shrink:0}
+.thread-snippet{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{display:inline-flex;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid var(--border);white-space:nowrap;margin-top:4px}
+.badge.broadcast{color:var(--gold2);background:color-mix(in srgb,var(--gold) 12%,transparent)}
+.badge.reply{color:var(--gold2);background:color-mix(in srgb,var(--gold) 8%,transparent)}
+.empty{padding:45px;text-align:center;color:var(--muted)}
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.62);display:grid;place-items:center;padding:14px}
+.overlay.hidden{display:none}
+.modal{width:min(640px,100%);max-height:88vh;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:0 25px 80px rgba(0,0,0,.35)}
+.modal-head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.modal-head h3{margin:0;font-size:15px}
+.modal-thread{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.bubble{max-width:82%;padding:.6rem .8rem;border-radius:12px;font-size:13px;line-height:1.45}
+.bubble-self{align-self:flex-end;background:var(--gold);color:#17120a}
+.bubble-other{align-self:flex-start;background:var(--surface2);color:var(--text)}
+.bubble-meta{display:block;font-size:10px;opacity:.75;margin-top:4px}
+.modal-reply{display:flex;gap:8px;padding:14px 18px;border-top:1px solid var(--border)}
+.modal-reply textarea{flex:1;min-height:44px;max-height:120px;resize:none}
+.hidden{display:none!important}
+.toast{position:fixed;right:16px;bottom:16px;z-index:100;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 14px;box-shadow:0 15px 40px rgba(0,0,0,.25);font-size:12px}
+
+/* ===================== Shared App Header (matches attendance.html) ===================== */
+.app-header{position:sticky;top:0;z-index:30;width:100%;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;background:var(--surface) !important;border-bottom:1px solid var(--border) !important;box-shadow:0 8px 28px rgba(23,32,51,.05);backdrop-filter:blur(18px);}
+html[data-theme="dark"] .app-header{box-shadow:0 18px 42px rgba(0,0,0,.20);}
+@media(min-width:769px){.app-header{flex-wrap:nowrap !important;gap:24px !important;padding:22px 32px !important;}}
+.app-header .header-brand{display:flex;align-items:center;gap:14px;min-width:0;}
+.app-header .header-brand img{width:52px;height:52px;border-radius:16px;background:var(--surface2);padding:6px;border:1px solid var(--border);box-shadow:0 8px 20px -8px rgba(184,146,46,.25);flex-shrink:0;object-fit:contain;}
+.app-header .header-brand h1{font-size:1.3rem;font-weight:800;margin:0;letter-spacing:-.01em;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.app-header .header-brand p{color:var(--gold);font-weight:600;margin:3px 0 0;font-size:.78rem;}
+.header-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+.header-date-block{text-align:right;margin-right:2px;}
+.header-date-block .header-date{font-size:.8rem;color:var(--muted);margin:0;}
+.header-date-block .header-admin{font-size:1rem;font-weight:600;margin:0;color:var(--text);}
+@media(max-width:1024px){.header-date-block{display:none;}}
+.lang-switch{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:3px;gap:2px;}
+.lang-switch button{border:none;background:transparent;font-size:12px;font-weight:700;letter-spacing:.03em;padding:6px 12px;border-radius:999px;color:var(--muted);cursor:pointer;transition:all .25s ease;}
+.lang-switch button.active{background:var(--gold);color:#fff;box-shadow:0 4px 12px -3px rgba(184,146,46,.4);}
+.theme-toggle{position:relative;width:52px;height:30px;border-radius:999px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;padding:0;flex-shrink:0;}
+.theme-toggle .knob{position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:var(--gold2);display:flex;align-items:center;justify-content:center;transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 6px rgba(0,0,0,.20);}
+html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
+.theme-toggle .knob svg{width:14px;height:14px;}
+.back-dash-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:700;background:var(--surface2);border:1px solid var(--border);color:var(--text);transition:all .2s ease;text-decoration:none;}
+.back-dash-btn:hover{background:var(--border);transform:translateY(-2px);border-color:var(--gold);color:var(--gold);}
+@media(max-width:768px){
+  .app-header{padding:1rem !important;align-items:center !important;}
+  .header-controls{width:100%;justify-content:space-between;gap:7px;}
+}
+@media(max-width:480px){
+  .app-header{padding:14px 16px !important;}
+  .app-header .header-brand h1{font-size:1.05rem !important;}
+  .app-header .header-brand p{font-size:.68rem !important;}
+  .app-header .header-brand img{width:44px !important;height:44px !important;}
+  .header-controls{gap:7px;}
+  .lang-switch button{padding:6px 9px;}
+  .back-dash-btn{padding:9px !important;}
+  .back-dash-btn span.label{display:none;}
+}
+</style>
+</head>
+<body>
+<div id="app" class="app hidden">
+<header class="app-header">
+<div class="header-brand">
+<img src="logo.png" alt="MHSS">
+<div><h1>MESERETE HIWOT</h1><p data-i18n="brandSub">Enterprise Management System · Notifications</p></div>
+</div>
+<div class="header-controls">
+<div class="header-date-block"><p class="header-date" id="dateDisplay">Loading date...</p><p class="header-admin">Admin Dashboard</p></div>
+<div class="lang-switch" role="group" aria-label="Language switcher">
+<button type="button" id="langBtnEn" class="active" aria-pressed="true">ENG</button>
+<button type="button" id="langBtnAm" aria-pressed="false">አማ</button>
+</div>
+<button type="button" class="theme-toggle" id="themeToggleBtn" aria-label="Toggle light/dark theme" aria-pressed="true">
+<span class="knob" id="themeKnob"><svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round"/></svg></span>
+</button>
+<a href="dashboard.html" class="back-dash-btn" id="backBtn" aria-label="Back to Dashboard">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+<span class="label" data-i18n="backToDashboard">Dashboard</span>
+</a>
+</div>
+</header>
+<main>
+<section class="hero"><div><h2 data-i18n="pageTitle">Notifications</h2><p data-i18n="pageDesc">Message a specific user or broadcast to everyone, and keep track of replies.</p></div></section>
+
+<div class="grid2">
+  <section class="panel">
+    <div class="panel-head"><h3 data-i18n="composeTitle">Compose</h3></div>
+    <div class="panel-body">
+      <div id="composeNotice" class="notice hidden"></div>
+      <form id="composeForm">
+        <div class="field">
+          <label data-i18n="fRecipient">Recipient</label>
+          <select id="fRecipient">
+            <option value="" data-i18n="fEveryone">Everyone (broadcast)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label data-i18n="fSubject">Subject</label>
+          <input id="fSubject" type="text" maxlength="140" data-i18n-placeholder="fSubjectPlaceholder" placeholder="Subject (optional)">
+        </div>
+        <div class="field">
+          <label data-i18n="fMessage">Message</label>
+          <textarea id="fBody" required data-i18n-placeholder="fMessagePlaceholder" placeholder="Write your message..."></textarea>
+        </div>
+        <button type="submit" class="btn primary" id="sendBtn" data-i18n="sendBtn">Send</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h3 data-i18n="threadsTitle">All Conversations</h3>
+      <button class="btn" id="refreshThreadsBtn" data-i18n="refresh">↻ Refresh</button>
+    </div>
+    <div id="threadList" class="thread-list">
+      <div class="empty" data-i18n="loading">Loading…</div>
+    </div>
+  </section>
+</div>
+</main>
+</div>
+
+<div class="overlay hidden" id="threadOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalSubject">Thread</h3>
+      <button class="btn" id="closeThreadModal">✕</button>
+    </div>
+    <div class="modal-thread" id="modalThreadBody"></div>
+    <div class="modal-reply">
+      <textarea id="modalReplyText" data-i18n-placeholder="replyPlaceholder" placeholder="Write a reply..."></textarea>
+      <button class="btn primary" id="modalReplySend" data-i18n="sendBtn">Send</button>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast hidden"></div>
+
+<script type="module">
+import { supabase } from './supabaseClient.js';
+import { initializeRBAC, isSuperAdmin } from './mhss-rbac.js';
+
+const $ = (id) => document.getElementById(id);
+let profiles = [];
+let threads = [];
+let activeThreadId = null;
+let callerId = null;
+
+function esc(v){ return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(message){ $('toast').textContent=message; $('toast').classList.remove('hidden'); setTimeout(()=>$('toast').classList.add('hidden'),2600); }
+function relativeTime(iso){
+  if(!iso) return '';
+  const mins = Math.round((Date.now() - new Date(iso).getTime())/60000);
+  if(mins < 1) return 'now';
+  if(mins < 60) return `${mins}m`;
+  const hrs = Math.round(mins/60);
+  if(hrs < 24) return `${hrs}h`;
+  const days = Math.round(hrs/24);
+  if(days < 7) return `${days}d`;
+  return new Date(iso).toLocaleDateString();
+}
+
+async function callNotifFn(action, payload = {}) {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  if (!token) throw new Error('Not signed in');
+  const url = `${supabase.supabaseUrl}/functions/v1/mhss-notifications`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, ...payload }),
+  });
+  let data; try { data = await res.json(); } catch { data = null; }
+  if (!res.ok) throw new Error((data && data.error) || `Request failed (${res.status})`);
+  return data;
+}
+
+/* ===================== i18n ===================== */
+const translations = {
+  en: {
+    brandSub:'Enterprise Management System · Notifications', backToDashboard:'Dashboard',
+    pageTitle:'Notifications', pageDesc:'Message a specific user or broadcast to everyone, and keep track of replies.',
+    composeTitle:'Compose', fRecipient:'Recipient', fEveryone:'Everyone (broadcast)', fSubject:'Subject',
+    fSubjectPlaceholder:'Subject (optional)', fMessage:'Message', fMessagePlaceholder:'Write your message...',
+    sendBtn:'Send', threadsTitle:'All Conversations', refresh:'↻ Refresh', loading:'Loading…',
+    noThreads:'No conversations yet.', replyPlaceholder:'Write a reply...', everyone:'Everyone', broadcastTag:'Broadcast',
+    replyTag:'Reply', sendSuccess:'Message sent.', sendFail:'Could not send message.', replySuccess:'Reply sent.',
+  },
+  am: {
+    brandSub:'የድርጅት አስተዳደር ስርዓት · ማሳወቂያዎች', backToDashboard:'ዳሽቦርድ',
+    pageTitle:'ማሳወቂያዎች', pageDesc:'ለተወሰነ ተጠቃሚ መልእክት ይላኩ ወይም ለሁሉም ያሰራጩ፣ ምላሾችንም ይከታተሉ።',
+    composeTitle:'መልእክት ፃፍ', fRecipient:'ተቀባይ', fEveryone:'ሁሉም (ስርጭት)', fSubject:'ርዕስ',
+    fSubjectPlaceholder:'ርዕስ (አማራጭ)', fMessage:'መልእክት', fMessagePlaceholder:'መልእክትዎን ይፃፉ...',
+    sendBtn:'ላክ', threadsTitle:'ሁሉም ውይይቶች', refresh:'↻ አድስ', loading:'በመጫን ላይ…',
+    noThreads:'እስካሁን ውይይት የለም።', replyPlaceholder:'ምላሽ ይፃፉ...', everyone:'ሁሉም', broadcastTag:'ስርጭት',
+    replyTag:'ምላሽ', sendSuccess:'መልእክት ተልኳል።', sendFail:'መልእክት መላክ አልተቻለም።', replySuccess:'ምላሽ ተልኳል።',
+  },
+};
+let currentLang = localStorage.getItem('mh_lang_pref') === 'am' ? 'am' : 'en';
+function t(key){ return (translations[currentLang]||translations.en)[key] || key; }
+function applyLanguage(lang){
+  currentLang = lang === 'am' ? 'am' : 'en';
+  document.documentElement.lang = currentLang;
+  syncHeaderLangButtons();
+  const dict = translations[currentLang];
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const key=el.dataset.i18n; if(dict[key]) el.textContent=dict[key]; });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ const key=el.dataset.i18nPlaceholder; if(dict[key]) el.placeholder=dict[key]; });
+  localStorage.setItem('mh_lang_pref', currentLang);
+  renderThreadList();
+}
+
+/* ===================== Header (lang switch, theme toggle, date) ===================== */
+function syncHeaderLangButtons(){
+  const en = $('langBtnEn'), am = $('langBtnAm');
+  if (en) { en.classList.toggle('active', currentLang === 'en'); en.setAttribute('aria-pressed', currentLang === 'en'); }
+  if (am) { am.classList.toggle('active', currentLang === 'am'); am.setAttribute('aria-pressed', currentLang === 'am'); }
+}
+$('langBtnEn').addEventListener('click', ()=> applyLanguage('en'));
+$('langBtnAm').addEventListener('click', ()=> applyLanguage('am'));
+$('backBtn').addEventListener('click', ()=> { location.href = 'dashboard.html'; });
+
+function applyHeaderTheme(theme){
+  const t = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  const btn = $('themeToggleBtn');
+  if (btn) btn.setAttribute('aria-pressed', t === 'light' ? 'true' : 'false');
+  localStorage.setItem('mh_theme', t);
+}
+$('themeToggleBtn').addEventListener('click', ()=>{
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  applyHeaderTheme(current === 'light' ? 'dark' : 'light');
+});
+(function initHeaderTheme(){
+  const saved = localStorage.getItem('mh_theme');
+  applyHeaderTheme(saved === 'dark' ? 'dark' : 'light');
+})();
+
+(function initHeaderDate(){
+  const etMonths = ['መስከረም','ጥቅምት','ህዳር','ታህሳስ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜ'];
+  const JD_EPOCH_OFFSET = 1723856;
+  function gToJdn(year, month, day){
+    const y = month <= 2 ? year - 1 : year, m = month <= 2 ? month + 12 : month;
+    const a = Math.floor(y / 100), b = 2 - a + Math.floor(a / 4);
+    return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524;
+  }
+  function toEthiopian(d){
+    const jdn = gToJdn(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    const r = (jdn - JD_EPOCH_OFFSET) % 1461;
+    const n = (r % 365) + 365 * Math.floor(r / 1460);
+    const etYear = 4 * Math.floor((jdn - JD_EPOCH_OFFSET) / 1461) + Math.floor(r / 365) - Math.floor(r / 1460);
+    return { etYear, etMonth: etMonths[Math.floor(n / 30)], etDay: (n % 30) + 1 };
+  }
+  const gc = new Date(), e = toEthiopian(gc), el = $('dateDisplay');
+  if (el) el.textContent = gc.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ` | ${e.etMonth} ${e.etDay}, ${e.etYear}`;
+})();
+
+/* ===================== Recipients ===================== */
+async function loadProfiles(){
+  const { data, error } = await supabase.from('mhss_user_profiles').select('user_id,name,email').order('name');
+  if (error) { console.error(error); return; }
+  profiles = data || [];
+  const sel = $('fRecipient');
+  profiles.forEach(p=>{
+    const opt = document.createElement('option');
+    opt.value = p.user_id;
+    opt.textContent = `${p.name || p.email} (${p.email || ''})`;
+    sel.appendChild(opt);
+  });
+}
+function profileName(userId){
+  const p = profiles.find(x=>x.user_id === userId);
+  return p ? (p.name || p.email) : 'User';
+}
+
+/* ===================== Compose ===================== */
+$('composeForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const notice = $('composeNotice');
+  notice.classList.add('hidden');
+  const recipientId = $('fRecipient').value || null;
+  const subject = $('fSubject').value.trim();
+  const body = $('fBody').value.trim();
+  if (!body) return;
+  $('sendBtn').disabled = true;
+  try {
+    await callNotifFn('send_notification', { recipient_id: recipientId, subject, body });
+    $('fSubject').value = '';
+    $('fBody').value = '';
+    toast(t('sendSuccess'));
+    await loadThreads();
+  } catch (err) {
+    notice.textContent = err.message || t('sendFail');
+    notice.classList.remove('hidden');
+  } finally {
+    $('sendBtn').disabled = false;
+  }
+});
+
+/* ===================== Thread list ===================== */
+function threadDisplaySubject(thread){
+  if (thread.origin_broadcast_id) return `Re: ${thread.origin_broadcast_subject || thread.subject || 'Broadcast'}`;
+  return thread.subject || (thread.is_broadcast ? t('everyone') : 'Message');
+}
+function threadTag(thread){
+  if (thread.is_broadcast) return `<span class="badge broadcast">${esc(t('broadcastTag'))}</span>`;
+  if (thread.origin_broadcast_id) return `<span class="badge reply">${esc(t('replyTag'))}</span>`;
+  return '';
+}
+function renderThreadList(){
+  const listEl = $('threadList');
+  if (!threads.length){
+    listEl.innerHTML = `<div class="empty">${esc(t('noThreads'))}</div>`;
+    return;
+  }
+  const sorted = [...threads].sort((a,b)=>{
+    const at = a.latest_message ? a.latest_message.created_at : a.created_at;
+    const bt = b.latest_message ? b.latest_message.created_at : b.created_at;
+    return new Date(bt) - new Date(at);
+  });
+  listEl.innerHTML = '';
+  sorted.forEach(thread=>{
+    const row = document.createElement('div');
+    row.className = 'thread-row';
+    const who = thread.is_broadcast ? t('everyone') : (thread.recipient ? (thread.recipient.name || thread.recipient.email) : profileName(thread.recipient_id));
+    const snippet = thread.latest_message ? thread.latest_message.body : '';
+    const time = thread.latest_message ? thread.latest_message.created_at : thread.created_at;
+    row.innerHTML = `
+      ${thread.unread ? '<span class="thread-unread-dot"></span>' : '<span style="width:8px"></span>'}
+      <div class="thread-row-main">
+        <div class="thread-row-top">
+          <span class="thread-subject">${esc(threadDisplaySubject(thread))}</span>
+          <span class="thread-time">${relativeTime(time)}</span>
+        </div>
+        <div class="thread-snippet">${esc(who)} — ${esc(snippet)}</div>
+        ${threadTag(thread)}
+      </div>
+    `;
+    row.addEventListener('click', ()=> openThreadModal(thread.id));
+    listEl.appendChild(row);
+  });
+}
+
+async function loadThreads(){
+  const result = await callNotifFn('list_threads');
+  threads = result.threads || [];
+  renderThreadList();
+}
+$('refreshThreadsBtn').addEventListener('click', loadThreads);
+
+/* ===================== Thread modal ===================== */
+function senderLabel(msg, thread){
+  if (msg.sender_id === callerId) return 'You';
+  return thread.is_broadcast ? 'You' : (thread.recipient ? (thread.recipient.name || thread.recipient.email) : profileName(thread.recipient_id));
+}
+function renderThreadModal(thread){
+  $('modalSubject').textContent = threadDisplaySubject(thread);
+  const body = $('modalThreadBody');
+  body.innerHTML = '';
+  (thread.messages || []).forEach(m=>{
+    const mine = m.sender_id === callerId;
+    const bubble = document.createElement('div');
+    bubble.className = `bubble ${mine ? 'bubble-self' : 'bubble-other'}`;
+    bubble.innerHTML = `${esc(m.body)}<span class="bubble-meta">${esc(senderLabel(m, thread))} · ${relativeTime(m.created_at)}</span>`;
+    body.appendChild(bubble);
+  });
+  requestAnimationFrame(()=> { body.scrollTop = body.scrollHeight; });
+  if (thread.unread) {
+    callNotifFn('mark_read', { thread_id: thread.id }).then(()=>{ thread.unread = false; renderThreadList(); }).catch(()=>{});
+  }
+}
+function openThreadModal(id){
+  activeThreadId = id;
+  const thread = threads.find(t=>t.id === id);
+  if (!thread) return;
+  renderThreadModal(thread);
+  $('threadOverlay').classList.remove('hidden');
+  $('modalReplyText').value = '';
+  $('modalReplyText').focus();
+}
+function closeThreadModal(){
+  $('threadOverlay').classList.add('hidden');
+  activeThreadId = null;
+}
+$('closeThreadModal').addEventListener('click', closeThreadModal);
+$('threadOverlay').addEventListener('click', (e)=>{ if (e.target.id === 'threadOverlay') closeThreadModal(); });
+document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && !$('threadOverlay').classList.contains('hidden')) closeThreadModal(); });
+
+async function sendModalReply(){
+  const text = $('modalReplyText').value.trim();
+  if (!text || !activeThreadId) return;
+  $('modalReplySend').disabled = true;
+  try {
+    await callNotifFn('reply', { thread_id: activeThreadId, body: text });
+    $('modalReplyText').value = '';
+    toast(t('replySuccess'));
+    await loadThreads();
+    const thread = threads.find(t=>t.id === activeThreadId);
+    if (thread) renderThreadModal(thread);
+  } catch (err) {
+    toast(err.message || t('sendFail'));
+  } finally {
+    $('modalReplySend').disabled = false;
+  }
+}
+$('modalReplySend').addEventListener('click', sendModalReply);
+$('modalReplyText').addEventListener('keydown', (e)=>{ if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendModalReply(); } });
+
+/* ===================== Boot ===================== */
+(async()=>{
+  const r = await initializeRBAC({ supabase });
+  if (!r?.allowed || !isSuperAdmin()) { location.href = 'dashboard.html'; return; }
+  const { data: userData } = await supabase.auth.getUser();
+  callerId = userData?.user?.id || null;
+  $('app').classList.remove('hidden');
+  applyLanguage(currentLang);
+  await loadProfiles();
+  await loadThreads();
+  setInterval(loadThreads, 60 * 1000);
+})();
+</script>
+</body>
+</html>
