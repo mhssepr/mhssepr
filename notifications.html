@@ -111,7 +111,13 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
 </div>
 </header>
 <main>
-<section class="hero"><div><h2 data-i18n="pageTitle">Notifications</h2><p data-i18n="pageDesc">Message a specific user or broadcast to everyone, and keep track of replies.</p></div></section>
+<section class="hero">
+  <div>
+    <h2 data-i18n="pageTitle">Notifications</h2>
+    <p data-i18n="pageDesc">Message a specific user or broadcast to everyone, and keep track of replies.</p>
+  </div>
+  <div id="unreadSummary" class="badge" aria-live="polite">0 unread</div>
+</section>
 
 <div class="grid2">
   <section class="panel">
@@ -177,7 +183,19 @@ let activeThreadId = null;
 let callerId = null;
 
 function esc(v){ return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function toast(message){ $('toast').textContent=message; $('toast').classList.remove('hidden'); setTimeout(()=>$('toast').classList.add('hidden'),2600); }
+function toast(message){
+  $('toast').textContent = message;
+  $('toast').classList.remove('hidden');
+  clearTimeout(window.__mhToastTimer);
+  window.__mhToastTimer = setTimeout(()=>$('toast').classList.add('hidden'),2600);
+}
+function setNotice(el, message, type='error'){
+  if(!el) return;
+  el.textContent = message;
+  el.classList.toggle('success', type === 'success');
+  el.classList.remove('hidden');
+}
+function hideNotice(el){ if(el) el.classList.add('hidden'); }
 function relativeTime(iso){
   if(!iso) return '';
   const mins = Math.round((Date.now() - new Date(iso).getTime())/60000);
@@ -215,6 +233,7 @@ const translations = {
     sendBtn:'Send', threadsTitle:'All Conversations', refresh:'↻ Refresh', loading:'Loading…',
     noThreads:'No conversations yet.', replyPlaceholder:'Write a reply...', everyone:'Everyone', broadcastTag:'Broadcast',
     replyTag:'Reply', sendSuccess:'Message sent.', sendFail:'Could not send message.', replySuccess:'Reply sent.',
+    loadFail:'Could not load notifications.', unread:'unread',
   },
   am: {
     brandSub:'የድርጅት አስተዳደር ስርዓት · ማሳወቂያዎች', backToDashboard:'ዳሽቦርድ',
@@ -224,6 +243,7 @@ const translations = {
     sendBtn:'ላክ', threadsTitle:'ሁሉም ውይይቶች', refresh:'↻ አድስ', loading:'በመጫን ላይ…',
     noThreads:'እስካሁን ውይይት የለም።', replyPlaceholder:'ምላሽ ይፃፉ...', everyone:'ሁሉም', broadcastTag:'ስርጭት',
     replyTag:'ምላሽ', sendSuccess:'መልእክት ተልኳል።', sendFail:'መልእክት መላክ አልተቻለም።', replySuccess:'ምላሽ ተልኳል።',
+    loadFail:'ማሳወቂያዎችን መጫን አልተቻለም።', unread:'ያልተነበቡ'
   },
 };
 let currentLang = localStorage.getItem('mh_lang_pref') === 'am' ? 'am' : 'en';
@@ -445,7 +465,8 @@ $('modalReplyText').addEventListener('keydown', (e)=>{ if (e.key === 'Enter' && 
   applyLanguage(currentLang);
   await loadProfiles();
   await loadThreads();
-  setInterval(loadThreads, 60 * 1000);
+  if (window.__mhThreadRefreshTimer) clearInterval(window.__mhThreadRefreshTimer);
+  window.__mhThreadRefreshTimer = setInterval(loadThreads, 60 * 1000);
 })();
 </script>
 </body>

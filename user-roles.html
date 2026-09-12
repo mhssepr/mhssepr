@@ -167,7 +167,7 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
 <label class="module"><input type="checkbox" data-module="attendance"> <span data-i18n="modAttendance">Attendance Management</span></label>
 <label class="module"><input type="checkbox" data-module="begena"> <span data-i18n="modBegena">Begena Management</span></label>
 <label class="module"><input type="checkbox" data-module="equipment"> <span data-i18n="modEquipment">Equipment Management</span></label>
-</div></div>
+</div><small style="display:block;color:var(--muted);font-size:10px;margin-top:9px">For Custom roles, System Access controls module View access. Add, Edit, Delete and Print/Export are controlled in the Custom Permissions table below.</small></div>
 <div class="section" id="roleTypeSection"><h4 data-i18n="roleTypeHeading">Role Type</h4>
 <div class="grid">
 <div class="field"><label data-i18n="roleTypeLabel">Role Type</label><select id="fRole"><option value="full_access" data-i18n="roleFull">Full Access</option><option value="manage" data-i18n="roleManage">Manage</option><option value="view_only" data-i18n="roleView">View Only</option><option value="custom" data-i18n="roleCustom">Custom</option></select></div>
@@ -263,16 +263,66 @@ async function loadUsers(){
   }catch(e){ console.error(e); toast('Could not load users: '+e.message); }
   finally{$('refreshBtn').disabled=false;}
 }
+function getPermissionState(){
+  const state={};
+  document.querySelectorAll('[data-perm]').forEach(c=>{
+    const [module,action]=String(c.dataset.perm||'').split(':');
+    if(!module||!action)return;
+    if(!state[module])state[module]={};
+    state[module][action]=!!c.checked;
+  });
+  return state;
+}
 function buildPermissionRows(existing=[]){
   const map=new Map(existing.map(p=>[p.module,p]));
+  const current=getPermissionState();
   $('permissionBody').innerHTML=MODULES.map(([m])=>{
     const p=map.get(m)||{};
-    return `<tr><td>${moduleLabel(m)}</td>${['view','add','edit','delete','print_export'].map(a=>`<td><input type="checkbox" data-perm="${m}:${a}" ${p[a]?'checked':''}></td>`).join('')}</tr>`;
+    const c=current[m]||{};
+    return `<tr>
+      <td>${moduleLabel(m)}</td>
+      ${['view','add','edit','delete','print_export'].map(a=>{
+        const checked=Object.prototype.hasOwnProperty.call(c,a)?c[a]:!!p[a];
+        return `<td><input type="checkbox" data-perm="${m}:${a}" ${checked?'checked':''} aria-label="${esc(moduleLabel(m)+' '+a)}"></td>`;
+      }).join('')}
+    </tr>`;
   }).join('');
+  syncSystemAccessFromPermissions();
+}
+function syncSystemAccessFromPermissions(){
+  const viewSet=new Set(
+    [...document.querySelectorAll('[data-perm]')]
+      .filter(c=>c.dataset.perm?.endsWith(':view') && c.checked)
+      .map(c=>c.dataset.perm.split(':')[0])
+  );
+  document.querySelectorAll('[data-module]').forEach(c=>{
+    c.checked=viewSet.has(c.dataset.module);
+  });
+}
+function syncPermissionView(module, checked){
+  const view=document.querySelector(`[data-perm="${module}:view"]`);
+  if(view)view.checked=!!checked;
 }
 function setModuleChecks(existing=[]){
   const set=new Set(existing.filter(p=>p.view).map(p=>p.module));
   document.querySelectorAll('[data-module]').forEach(c=>c.checked=set.has(c.dataset.module));
+  document.querySelectorAll('[data-module]').forEach(c=>{
+    syncPermissionView(c.dataset.module,c.checked);
+  });
+}
+function resetPermissionChecks(){
+  document.querySelectorAll('[data-module]').forEach(c=>c.checked=false);
+  document.querySelectorAll('[data-perm]').forEach(c=>c.checked=false);
+}
+function normalizeCustomPermissions(){
+  // Any write/print permission requires View access to the same module.
+  MODULES.forEach(([m])=>{
+    const actions=['add','edit','delete','print_export'];
+    const hasAction=actions.some(a=>document.querySelector(`[data-perm="${m}:${a}"]`)?.checked);
+    const view=document.querySelector(`[data-perm="${m}:view"]`);
+    if(view && hasAction)view.checked=true;
+  });
+  syncSystemAccessFromPermissions();
 }
 function openModal(user=null, ownerProfile=false){
   editingId=user?.user_id||null;
@@ -287,11 +337,13 @@ function openModal(user=null, ownerProfile=false){
   $('profilePhotoField').classList.toggle('hidden',false);
   $('systemAccessSection').classList.toggle('hidden',isOwnerProfile);
   $('roleTypeSection').classList.toggle('hidden',isOwnerProfile);
-  $('customSection').classList.toggle('hidden',isOwnerProfile || $('fRole').value!=='custom');
   $('fEmail').disabled=isOwnerProfile; $('fRole').disabled=isOwnerProfile; $('fStatus').disabled=isOwnerProfile;
   $('fName').disabled=false; $('fWork').disabled=false;
-  $('fRole').value=user?.role_type||'full_access';$('fStatus').value=user?.status||'active';
-  setModuleChecks(user?.permissions||[]);buildPermissionRows(user?.permissions||[]);updateCustom();
+  $('fRole').value=user?.role_type||'full_access';
+  $('fStatus').value=user?.status||'active';
+  buildPermissionRows(user?.permissions||[]);
+  setModuleChecks(user?.permissions||[]);
+  updateCustom();
   document.getElementById('userForm').dataset.ownerProfile=isOwnerProfile?'true':'false';
   $('formNotice').classList.add('hidden');$('modalOverlay').classList.remove('hidden');
 }
@@ -351,19 +403,47 @@ async function openActivity(user){
 }
 $('closeActivity').onclick=closeActivity;
 $('activityOverlay').addEventListener('click',e=>{if(e.target.id==='activityOverlay')closeActivity()});
-function updateCustom(){$('customSection').classList.toggle('hidden',$('fRole').value!=='custom');}
+function updateCustom(){
+  const isCustom=$('fRole').value==='custom';
+  $('customSection').classList.toggle('hidden',!isCustom);
+  // System Access is useful for every non-owner role. For Custom, it mirrors View.
+  if(isCustom)syncSystemAccessFromPermissions();
+}
 function collectPayload(){
   const role=$('fRole').value;
   let permissions=MODULES.map(([m])=>({module:m,view:false,add:false,edit:false,delete:false,print_export:false}));
-  if(role==='full_access') permissions=permissions.map(p=>({...p,view:true,add:true,edit:true,delete:true,print_export:true}));
-  else if(role==='manage') permissions=permissions.map(p=>({...p,view:true,add:true,edit:true,print_export:true}));
-  else if(role==='view_only') permissions=permissions.map(p=>({...p,view:true}));
-  else {
-    const checked=new Map([...document.querySelectorAll('[data-perm]')].map(c=>[c.dataset.perm,c.checked]));
-    permissions=permissions.map(p=>({...p,...Object.fromEntries(['view','add','edit','delete','print_export'].map(a=>[a,!!checked.get(`${p.module}:${a}`)]))}));
+
+  if(role==='full_access'){
+    permissions=permissions.map(p=>({...p,view:true,add:true,edit:true,delete:true,print_export:true}));
+  } else if(role==='manage'){
+    permissions=permissions.map(p=>({...p,view:true,add:true,edit:true,print_export:true}));
+  } else if(role==='view_only'){
+    permissions=permissions.map(p=>({...p,view:true}));
+  } else if(role==='custom'){
+    normalizeCustomPermissions();
+    const checked=new Map(
+      [...document.querySelectorAll('[data-perm]')].map(c=>[c.dataset.perm,!!c.checked])
+    );
+    permissions=permissions.map(p=>({
+      ...p,
+      ...Object.fromEntries(
+        ['view','add','edit','delete','print_export']
+          .map(a=>[a,checked.get(`${p.module}:${a}`)===true])
+      )
+    }));
   }
-  return {name:$('fName').value.trim(),email:$('fEmail').value.trim(),password:$('fPassword').value,
-    sunday_school_work:$('fWork').value,phone:$('fPhone').value.trim(),role_type:role,status:$('fStatus').value,permissions,profile_photo_url:$('fPhotoPreview').dataset.photoUrl||''};
+
+  return {
+    name:$('fName').value.trim(),
+    email:$('fEmail').value.trim(),
+    password:$('fPassword').value,
+    sunday_school_work:$('fWork').value,
+    phone:$('fPhone').value.trim(),
+    role_type:role,
+    status:$('fStatus').value,
+    permissions,
+    profile_photo_url:$('fPhotoPreview').dataset.photoUrl||''
+  };
 }
 async function callAdmin(action,payload){
   const {data:{session}}=await supabase.auth.getSession();
@@ -428,7 +508,44 @@ $('rows').addEventListener('click',async e=>{
     if(del){const u=users.find(x=>x.user_id===del.dataset.delete);if(!u)return;if(!confirm(`Permanently delete ${u.name}? This cannot be undone.`))return;await callAdmin('delete_user',{user_id:u.user_id});toast('User permanently deleted.');await loadUsers()}
   }catch(err){toast(err.message)}
 });
-$('addBtn').onclick=()=>openModal();$('closeModal').onclick=closeModal;$('cancelBtn').onclick=closeModal;$('fRole').onchange=updateCustom;$('refreshBtn').onclick=loadUsers;$('backBtn').onclick=()=>location.href='dashboard.html';
+$('addBtn').onclick=()=>openModal();
+$('closeModal').onclick=closeModal;
+$('cancelBtn').onclick=closeModal;
+$('fRole').onchange=()=>{
+  updateCustom();
+  if($('fRole').value!=='custom') return;
+  // When switching to Custom, preserve current permission choices if present.
+  syncSystemAccessFromPermissions();
+};
+$('refreshBtn').onclick=loadUsers;
+$('backBtn').onclick=()=>location.href='dashboard.html';
+
+$('systemAccessSection').addEventListener('change',e=>{
+  const control=e.target.closest('[data-module]');
+  if(!control)return;
+  syncPermissionView(control.dataset.module,control.checked);
+  normalizeCustomPermissions();
+});
+
+$('permissionBody').addEventListener('change',e=>{
+  const control=e.target.closest('[data-perm]');
+  if(!control)return;
+  const [module,action]=String(control.dataset.perm||'').split(':');
+  if(!module||!action)return;
+
+  if(action!=='view' && control.checked){
+    syncPermissionView(module,true);
+  }
+  if(action==='view' && !control.checked){
+    // Removing View also removes every action that depends on View.
+    ['add','edit','delete','print_export'].forEach(a=>{
+      const box=document.querySelector(`[data-perm="${module}:${a}"]`);
+      if(box)box.checked=false;
+    });
+  }
+  syncSystemAccessFromPermissions();
+});
+
 ['search','workFilter','roleFilter','statusFilter'].forEach(id=>$(id).addEventListener('input',renderRows));
 
 /* ================= Language switcher (EN / AM) — shared with dashboard.html via mh_lang_pref ================= */
@@ -489,7 +606,21 @@ function applyLanguage(lang){
   if(users.length || $('rows').children.length) renderRows();
   if(!$('modalOverlay').classList.contains('hidden')){
     $('modalTitle').textContent = editingId ? dict.editUserTitle : dict.addUserTitle;
-    buildPermissionRows(users.find(u=>u.user_id===editingId)?.permissions||[]);
+    // Do not overwrite unsaved permission selections while changing language.
+    const currentRole=$('fRole').value;
+    if(currentRole==='custom'){
+      const state=getPermissionState();
+      buildPermissionRows([]);
+      Object.entries(state).forEach(([module,actions])=>{
+        Object.entries(actions).forEach(([action,value])=>{
+          const box=document.querySelector(`[data-perm="${module}:${action}"]`);
+          if(box)box.checked=!!value;
+        });
+      });
+      syncSystemAccessFromPermissions();
+    } else {
+      buildPermissionRows(users.find(u=>u.user_id===editingId)?.permissions||[]);
+    }
   }
 }
 

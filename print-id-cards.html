@@ -100,8 +100,8 @@
     .idcard-mini-box { position: relative; width: 100%; margin-top: 8px; border: 1.5px solid var(--idc-gold); border-radius: 10px; padding: 8px 6px 5px; text-align: center; background: #ffffff; }
     .idcard-mini-box .idcard-box-label { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: var(--idc-blue); color: var(--idc-white); font-size: 7px; font-weight: 700; letter-spacing: .04em; padding: 2px 9px; border-radius: 9px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     .idcard-mini-box strong { display: block; font-size: 11.5px; font-weight: 700; color: var(--idc-navy); letter-spacing: .02em; }
-    .idcard-col-right { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6px; min-width: 0; }
-    .idcard-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px dotted rgba(18,58,122,0.25); }
+    .idcard-col-right { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 8px; min-width: 0; }
+    .idcard-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px dotted rgba(18,58,122,0.25); }
     .idcard-row:last-child { border-bottom: none; }
     .idcard-icon { width: 20px; height: 20px; border-radius: 50%; background: var(--idc-blue); color: var(--idc-gold); font-size: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .idcard-front .idcard-icon { background: transparent !important; border: none !important; box-shadow: none !important; font-size: 14px; width: auto; height: auto; padding-right: 4px; justify-content: flex-start; }
@@ -139,13 +139,24 @@
     }
     .print-grid {
         display: grid;
-        grid-template-columns: repeat(3, 60mm);
-        grid-template-rows: repeat(2, 76mm);
-        column-gap: 8mm;
+        grid-template-columns: repeat(3, 72mm);
+        grid-template-rows: repeat(2, 91.2mm);
+        column-gap: 10mm;
         row-gap: 10mm;
     }
-    .card-slot { width: 60mm; height: 76mm; position: relative; box-sizing: border-box; }
-    .card-slot .idcard { width: 60mm !important; height: 76mm !important; box-shadow: none !important; border-radius: 0.45cm; }
+    .card-slot { width: 72mm; height: 91.2mm; position: relative; box-sizing: border-box; overflow: hidden; }
+    /* Scale the full-size (300x380) card design up/down to the print slot as a single
+       unit, instead of stretching the outer box while keeping the same fixed font/padding
+       sizes. Same aspect ratio (300:380 = 72:91.2), so this is a pure zoom: every element
+       keeps its correct proportions and nothing overflows or overlaps, matching the
+       on-screen preview exactly. */
+    .card-slot .idcard {
+        width: 300px !important;
+        height: 380px !important;
+        box-shadow: none !important;
+        transform: scale(calc(72mm / 300px));
+        transform-origin: top left;
+    }
     .card-slot.empty-slot { visibility: hidden; }
     .cut-guide { position: absolute; width: 6mm; height: 6mm; pointer-events: none; z-index: 20; display: none; }
     .show-cut-guides .cut-guide { display: block; }
@@ -163,12 +174,11 @@
     @media print {
         @page { size: A4 landscape; margin: 0; }
         html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
-        body.printing-bulk-id-cards * { visibility: hidden !important; }
-        body.printing-bulk-id-cards #realPrintArea,
-        body.printing-bulk-id-cards #realPrintArea * { visibility: visible !important; }
-        body.printing-bulk-id-cards #realPrintArea {
-            display: block !important; position: absolute; top: 0; left: 0; margin: 0; padding: 0;
-        }
+        /* display:none fully removes the rest of the app from the page layout, so its
+           height can't add a stray blank page during pagination — visibility:hidden
+           alone would keep it in the flow (just invisible) and was doing exactly that. */
+        body.printing-bulk-id-cards #root { display: none !important; }
+        body.printing-bulk-id-cards #realPrintArea { display: block !important; margin: 0; padding: 0; }
         body.printing-bulk-id-cards .print-page { page-break-after: always; break-after: page; }
         body.printing-bulk-id-cards .print-page:last-child { page-break-after: auto; break-after: auto; }
     }
@@ -197,7 +207,7 @@
         </div>
     </header>
 
-    <main class="max-w-[1500px] mx-auto p-4 md:p-8 grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-6">
+    <main class="max-w-[1100px] mx-auto p-4 md:p-6 grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-5">
 
         <!-- LEFT: selection + settings -->
         <section class="flex flex-col gap-5 min-w-0">
@@ -229,11 +239,15 @@
                         <input type="radio" name="flipEdge" value="long" checked class="accent-yellow-500" onchange="onSettingsChanged()">
                         <span data-i18n="longEdge">Long Edge</span>
                     </label>
+                    <p class="text-[11px] leading-snug mb-2 pl-6" style="color:var(--text-muted)" data-i18n="longEdgeHint">Take the printed stack, flip it top‑to‑bottom (like turning a notepad page), and reload it the same way up.</p>
                     <label class="flex items-center gap-2 text-sm cursor-pointer">
                         <input type="radio" name="flipEdge" value="short" class="accent-yellow-500" onchange="onSettingsChanged()">
                         <span data-i18n="shortEdge">Short Edge</span>
                     </label>
+                    <p class="text-[11px] leading-snug pl-6" style="color:var(--text-muted)" data-i18n="shortEdgeHint">Take the printed stack, flip it left‑to‑right (like turning a book page), and reload it the same way up.</p>
                 </div>
+
+                <p class="text-[11px] leading-snug" style="color:var(--text-muted)" data-i18n="flipTip">Tip: print one test sheet first — print the fronts, flip the same sheet using the option above, print the backs, then hold it up to the light to confirm each card's front and back line up.</p>
 
                 <label class="flex items-center justify-between text-sm cursor-pointer border-t pt-3" style="border-color:var(--border)">
                     <span data-i18n="cuttingGuides">Show Cutting Guides</span>
@@ -280,6 +294,9 @@
             searchPlaceholder: 'Search name or ID...', selectAll: '☑ Select All', deselectAll: '☐ Deselect All',
             selected: 'selected', printSettings: 'Print Settings', duplexPrinting: 'Duplex Printing',
             flipOn: 'Flip on', longEdge: 'Long Edge', shortEdge: 'Short Edge', cuttingGuides: 'Show Cutting Guides',
+            longEdgeHint: "Take the printed stack, flip it top-to-bottom (like turning a notepad page), and reload it the same way up.",
+            shortEdgeHint: "Take the printed stack, flip it left-to-right (like turning a book page), and reload it the same way up.",
+            flipTip: "Tip: print one test sheet first — print the fronts, flip the same sheet using the option above, print the backs, then hold it up to the light to confirm each card's front and back line up.",
             printIdCardsBtn: '🖨️ PRINT ID CARDS', prevPage: '◀ Previous', nextPage: 'Next ▶',
             noSelection: 'Select at least one student to see the print preview.',
             pageOfTpl: (p, t) => `Page ${p} of ${t}`
@@ -289,6 +306,9 @@
             searchPlaceholder: 'ስም ወይም መታወቂያ ፈልግ...', selectAll: '☑ ሁሉንም ምረጥ', deselectAll: '☐ ምርጫ አጥፋ',
             selected: 'ተመርጠዋል', printSettings: 'የህትመት ማስተካከያ', duplexPrinting: 'ባለሁለት ገጽ ህትመት',
             flipOn: 'መገልበጫ', longEdge: 'ረጅም ጫፍ', shortEdge: 'አጭር ጫፍ', cuttingGuides: 'የመቁረጫ መስመር አሳይ',
+            longEdgeHint: 'የታተመውን ወረቀት ከላይ ወደ ታች ገልብጠው (እንደ ማስታወሻ ደብተር ገጽ) በተመሳሳይ አቅጣጫ መልሰው ይጫኑት፡፡',
+            shortEdgeHint: 'የታተመውን ወረቀት ከግራ ወደ ቀኝ ገልብጠው (እንደ መጽሐፍ ገጽ) በተመሳሳይ አቅጣጫ መልሰው ይጫኑት፡፡',
+            flipTip: 'ምክር፡ መጀመሪያ አንድ የሙከራ ወረቀት ያትሙ — የፊት ገጽን አትመው፣ ከላይ በተመረጠው መንገድ ገልብጠው፣ የኋላ ገጽን አትመው፣ ከዚያም ወደ ብርሃን ይዘው በማየት እያንዳንዱ ካርድ ፊትና ኋላ በትክክል መጣጣማቸውን ያረጋግጡ፡፡',
             printIdCardsBtn: '🖨️ መታወቂያዎችን አትም', prevPage: '◀ ቀዳሚ', nextPage: 'ቀጣይ ▶',
             noSelection: 'ቅድመ እይታውን ለማየት ቢያንስ አንድ ተማሪ ይምረጡ።',
             pageOfTpl: (p, t) => `ገጽ ${p} ከ ${t}`
@@ -546,10 +566,17 @@
     function getSelectedStudentsOrdered() {
         return studentsData.filter(s => selectedIds.has(s.id));
     }
-    // For "flip on short edge" duplex, mirror each row horizontally on the
-    // BACK page so front/back line up after that particular flip motion.
-    // "Flip on long edge" keeps the identical grid position on both sides.
-    const SHORT_EDGE_MIRROR = [2, 1, 0, 5, 4, 3];
+    // Manual duplex (no auto-duplexer): you print the FRONT page, physically pick
+    // up the same sheet, flip it over by hand, and feed it back in to print the BACK.
+    // Which grid position each card lands on after that flip depends on which edge
+    // of the paper you flip it around:
+    //   - Flip on the SHORT edge (turn it like a book page, left-to-right):
+    //     rotating around a vertical edge mirrors LEFT <-> RIGHT, rows stay put.
+    //   - Flip on the LONG edge (turn it like a notepad page, top-to-bottom):
+    //     rotating around a horizontal edge mirrors TOP <-> BOTTOM, columns stay put.
+    // Slots are numbered 0,1,2 = top row (L,M,R) and 3,4,5 = bottom row (L,M,R).
+    const SHORT_EDGE_MIRROR = [2, 1, 0, 5, 4, 3]; // mirror columns within each row
+    const LONG_EDGE_MIRROR = [3, 4, 5, 0, 1, 2];  // swap the two rows
 
     function computeChunks() {
         const students = getSelectedStudentsOrdered();
@@ -564,12 +591,8 @@
         const pages = [];
         chunks.forEach(chunk => {
             const frontSlots = [0,1,2,3,4,5].map(i => chunk[i] || null);
-            let backSlots;
-            if (flipEdge === 'short') {
-                backSlots = SHORT_EDGE_MIRROR.map(i => chunk[i] || null);
-            } else {
-                backSlots = frontSlots.slice();
-            }
+            const mirror = flipEdge === 'short' ? SHORT_EDGE_MIRROR : LONG_EDGE_MIRROR;
+            const backSlots = mirror.map(i => chunk[i] || null);
             pages.push({ side: 'front', slots: frontSlots });
             pages.push({ side: 'back', slots: backSlots });
         });

@@ -59,67 +59,31 @@
         @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes toastOut { to { opacity: 0; transform: translateY(-8px); } }
 
-        /* ============ ORBITAL ERP CORE ============ */
-        .orbital-shell { position: relative; border-radius: 28px; padding: 28px; overflow: hidden; }
-        .orbital-shell::before { content:''; position:absolute; inset:0; background: radial-gradient(120% 90% at 50% 0%, rgba(56,189,248,0.07), transparent 60%), radial-gradient(80% 60% at 50% 100%, rgba(255,215,0,0.05), transparent 60%); pointer-events:none; }
-        .orbital-topline { display:flex; align-items:center; justify-content:space-between; gap:12px; position:relative; z-index:2; margin-bottom: 10px; }
-        .orbital-status-badge { font-size:.62rem; letter-spacing:.14em; font-weight:800; padding:5px 12px; border-radius:999px; background:rgba(74,222,128,0.12); border:1px solid rgba(74,222,128,0.4); color:#4ade80; display:inline-flex; align-items:center; gap:6px; }
-        .orbital-status-badge .pulse-dot { width:6px; height:6px; border-radius:999px; background:#4ade80; animation: pulseDot 2s ease-in-out infinite; }
+        .premium-score-card{position:relative;overflow:hidden;}
+        .premium-score-card::after{content:"";position:absolute;inset:-80%;background:conic-gradient(from 0deg,transparent,rgba(255,215,0,.12),transparent 22%);animation:scoreSweep 7s linear infinite;pointer-events:none;}
+        .score-track{height:7px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;position:relative;z-index:1;}
+        .score-track span{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#b8860b,#ffd700,#fff2a8);box-shadow:0 0 18px rgba(255,215,0,.35);transition:width 1.4s cubic-bezier(.22,1,.36,1);}
+        .lux-chart-card{position:relative;overflow:hidden;}
+        .lux-chart-card::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 0%,rgba(255,215,0,.055) 45%,transparent 55%);transform:translateX(-120%);animation:luxSweep 5.5s ease-in-out infinite;pointer-events:none;}
+        .lux-chart-card .chart-box{position:relative;z-index:1;}
+        .dashboard-reveal{animation:dashboardReveal .8s cubic-bezier(.22,1,.36,1) both;}
+        @keyframes dashboardReveal{from{opacity:0;transform:translateY(18px) scale(.985);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+        @keyframes luxSweep{0%,55%{transform:translateX(-120%)}75%,100%{transform:translateX(120%)}}
+        @keyframes scoreSweep{to{transform:rotate(360deg)}}
+        @media (prefers-reduced-motion:reduce){.premium-score-card::after,.lux-chart-card::before,.dashboard-reveal{animation:none!important}}
 
-        .orbital-wrap { position: relative; width: 100%; max-width: 620px; margin: 6px auto 0; aspect-ratio: 1 / 1; perspective: 1400px; z-index: 2; }
-        .orbit-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; overflow: visible; }
-        .orbit-line-base { stroke: rgba(255,255,255,0.10); stroke-width: 0.5; fill: none; }
-        .orbit-line-flow { stroke-width: 0.7; fill: none; stroke-linecap: round; stroke-dasharray: 3 5; animation: flowDash 1.8s linear infinite; }
-        .orbit-line-flow.gold { stroke: rgba(255,215,0,0.85); }
-        .orbit-line-flow.blue { stroke: rgba(56,189,248,0.85); }
-        .orbit-line-flow.dim { stroke: rgba(148,163,184,0.35); animation: none; stroke-dasharray: 2 6; }
-        @keyframes flowDash { to { stroke-dashoffset: -16; } }
 
-        .core-orb { position: absolute; top: 50%; left: 50%; width: 36%; aspect-ratio: 1/1; border-radius: 50%; transform: translate(-50%, -50%); z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8%; background: radial-gradient(circle at 34% 28%, rgba(255,215,0,0.22), rgba(15,23,42,0.94) 68%); border: 1px solid rgba(255,215,0,0.4); box-shadow: 0 0 70px -12px rgba(255,215,0,0.35), inset 0 0 34px rgba(56,189,248,0.14); backdrop-filter: blur(6px); animation: orbFadeIn .7s cubic-bezier(.22,1,.36,1) both; }
-        .core-orb::before, .core-orb::after { content:''; position:absolute; border-radius:50%; pointer-events:none; }
-        .core-orb::before { inset: -13%; border: 1px solid rgba(56,189,248,0.22); border-top-color: rgba(255,215,0,0.55); animation: coreSpin 16s linear infinite; }
-        .core-orb::after { inset: -24%; border: 1px dashed rgba(255,215,0,0.14); animation: coreSpin 30s linear infinite reverse; }
-        @keyframes coreSpin { to { transform: rotate(360deg); } }
-        @keyframes orbFadeIn { from { opacity:0; transform: translate(-50%,-50%) scale(.75); } to { opacity:1; transform: translate(-50%,-50%) scale(1); } }
-        .core-orb .core-brand { font-size: .58rem; letter-spacing:.16em; text-transform:uppercase; color:#93c5fd; }
-        .core-orb .core-title { font-size: 1rem; font-weight: 800; color:#FFD700; letter-spacing:.02em; text-shadow: 0 0 14px rgba(255,215,0,0.5); line-height:1.15; margin-top:2px; }
-        .core-orb .core-sub { font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; color:#7dd3fc; margin-top:4px; }
-        .core-orb .core-status-pill { margin-top:8px; font-size:.55rem; font-weight:700; letter-spacing:.06em; padding:3px 9px; border-radius:999px; background:rgba(74,222,128,0.14); border:1px solid rgba(74,222,128,0.4); color:#4ade80; }
-
-        .orbit-node { position: absolute; top: 50%; left: 50%; width: 27%; transform: translate(-50%, -50%); z-index: 4; cursor: pointer; opacity: 0; animation: nodeFadeIn .55s cubic-bezier(.22,1,.36,1) forwards; }
-        @keyframes nodeFadeIn { from { opacity:0; transform: translate(-50%, -50%) scale(.55); } to { opacity:1; transform: translate(-50%, -50%) scale(1); } }
-        .orbit-node .node-card { position: relative; padding: 12px 8px; border-radius: 16px; text-align: center; background: linear-gradient(155deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015)); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 10px 26px -12px rgba(0,0,0,0.6); transition: transform .35s cubic-bezier(.4,0,.2,1), border-color .35s, box-shadow .35s; animation: nodeFloat 6s ease-in-out infinite; }
-        .orbit-node[data-node="sunday_school"] .node-card { animation-delay: .5s; }
-        .orbit-node[data-node="begena"] .node-card { animation-delay: 1s; }
-        @keyframes nodeFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-        .orbit-node:hover .node-card, .orbit-node.selected .node-card { animation-play-state: paused; transform: translateY(-9px); border-color: rgba(255,215,0,0.5); box-shadow: 0 20px 42px -14px rgba(255,215,0,0.28); }
-        .orbit-node.selected .node-card { border-color: rgba(56,189,248,0.6); box-shadow: 0 20px 42px -14px rgba(56,189,248,0.3); }
-        .orbit-node .node-icon { font-size: 1.25rem; }
-        .orbit-node .node-name { font-size: .64rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; margin-top: 4px; color: #e5e7eb; }
-        .orbit-node .node-status { font-size: .52rem; letter-spacing: .04em; margin-top: 4px; padding: 2px 7px; border-radius: 999px; display: inline-block; }
-        .orbit-node .node-status.live { background: rgba(74,222,128,0.14); border: 1px solid rgba(74,222,128,0.4); color: #4ade80; }
-        .orbit-node .node-status.seed { background: rgba(56,189,248,0.14); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; }
-        .orbit-node .node-status.pending { background: rgba(148,163,184,0.14); border: 1px solid rgba(148,163,184,0.35); color: #94a3b8; }
-
-        .orbital-panel { position: relative; z-index: 2; margin-top: 18px; border-radius: 20px; padding: 0; max-height: 0; opacity: 0; overflow: hidden; transition: max-height .45s cubic-bezier(.4,0,.2,1), opacity .35s ease, padding .45s; }
-        .orbital-panel.open { max-height: 340px; opacity: 1; padding: 18px 20px; background: linear-gradient(155deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015)); border: 1px solid rgba(56,189,248,0.22); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
-        .orbital-panel-hint { text-align:center; font-size:.72rem; color:#64748b; margin-top:14px; position:relative; z-index:2; }
-
-        @media (prefers-reduced-motion: reduce) {
-            .core-orb, .core-orb::before, .core-orb::after, .orbit-node, .orbit-node .node-card, .orbit-line-flow, .pulse-dot { animation: none !important; opacity: 1 !important; transform: translate(-50%, -50%) !important; }
-        }
-
-        @media (max-width: 1024px) { .orbital-wrap { max-width: 440px; } }
-
-        @media (max-width: 640px) {
-            .orbital-wrap { max-width: 100%; aspect-ratio: auto; height: auto; display: flex; flex-direction: column; gap: 12px; }
-            .orbit-svg { display: none; }
-            .core-orb { position: static; transform: none; width: 100%; max-width: 200px; margin: 0 auto; animation: orbFadeIn .7s cubic-bezier(.22,1,.36,1) both; padding: 10%; }
-            .orbit-node { position: static; transform: none; width: 100%; }
-            .orbit-node .node-card { display:flex; align-items:center; gap:10px; text-align:left; animation: none; }
-            .orbit-node .node-icon { font-size:1.1rem; }
-            .orbit-node .node-name, .orbit-node .node-status { margin-top:0; }
-        }
+        /* ============ AI EXECUTIVE INTELLIGENCE ============ */
+        .ai-intelligence-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.85fr);gap:18px}
+        .ai-card,.alert-center{position:relative;overflow:hidden;border:1px solid var(--report-border);background:var(--report-card);border-radius:24px;box-shadow:0 18px 45px rgba(15,23,42,.08)}
+        .ai-card::before,.alert-center::before{content:"";position:absolute;inset:-45%;background:conic-gradient(from 180deg,transparent 0 35%,rgba(212,175,55,.10),transparent 58% 100%);animation:aiHalo 9s linear infinite;pointer-events:none}
+        .ai-card-inner,.alert-center-inner{position:relative;z-index:1}.ai-orb{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(212,175,55,.24),rgba(212,175,55,.05));border:1px solid rgba(212,175,55,.35);box-shadow:0 0 28px rgba(212,175,55,.13)}
+        .ai-summary-text{font-size:.92rem;line-height:1.75;color:var(--report-text)}.ai-summary-line{display:flex;gap:10px;align-items:flex-start;padding:9px 0}.ai-summary-line .bullet{flex:none;margin-top:7px;width:7px;height:7px;border-radius:50%;background:#d4af37;box-shadow:0 0 10px rgba(212,175,55,.45)}
+        .ai-meta{font-size:.68rem;color:var(--report-muted);letter-spacing:.05em;text-transform:uppercase}.ai-refresh{border:1px solid var(--report-border);background:var(--report-bg);color:var(--report-text);padding:8px 12px;border-radius:10px;font-size:.72rem;font-weight:800;transition:.2s}.ai-refresh:hover{border-color:var(--report-accent);color:var(--report-accent);transform:translateY(-1px)}
+        .alert-list{display:flex;flex-direction:column;gap:9px}.alert-item{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:14px;border:1px solid var(--report-border);background:var(--report-bg);animation:alertIn .45s cubic-bezier(.22,1,.36,1) both}.alert-icon{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;flex:none}.alert-item.critical .alert-icon{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25)}.alert-item.warning .alert-icon{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25)}.alert-item.info .alert-icon{background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25)}
+        .alert-title{font-size:.78rem;font-weight:800}.alert-detail{font-size:.68rem;color:var(--report-muted);margin-top:2px;line-height:1.45}.alert-count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;background:var(--report-bg);border:1px solid var(--report-border)}.ai-thinking{animation:aiPulse 1.1s ease-in-out infinite}
+        @keyframes aiHalo{to{transform:rotate(360deg)}}@keyframes alertIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}@keyframes aiPulse{50%{opacity:.55;transform:scale(.99)}}
+        @media(max-width:900px){.ai-intelligence-grid{grid-template-columns:1fr}}
 
         /* ============ ROYAL 3D EXECUTIVE COMMAND CENTER ============ */
 
@@ -340,7 +304,7 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
   #mobileInsightGrid{grid-template-columns:1fr 1fr;gap:10px}
   .insight-card{padding:13px;border-radius:14px}
   .insight-value{font-size:1.05rem}
-  .chart-grid-new{grid-template-columns:1fr;gap:12px}
+  .chart-grid-new{grid-template-columns:1fr;gap:12px}.ai-intelligence-grid{grid-template-columns:1fr;gap:12px}.ai-card,.alert-center{border-radius:18px}.ai-card-inner,.alert-center-inner{padding:15px!important}
   .new-chart-card{padding:13px;border-radius:15px}
   .new-chart-card .chart-box{height:210px}
   .tab-btn{font-size:.76rem!important;padding:8px!important}
@@ -384,16 +348,16 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
         <div class="flex items-center gap-6">
             <img src="logo.png" alt="Logo" class="w-20 h-20 rounded-2xl bg-white/5 p-2 border border-white/10 shadow-xl shadow-yellow-500/10">
             <div>
-                <h1 class="text-4xl font-bold tracking-tight">Meserete Hiwot EPR System</h1>
-                <p class="text-yellow-500 font-medium mt-1">Report &amp; Analytics Management System <span class="amharic text-sm ml-2">(የሪፖርት እና ትንተና ማዕከል)</span></p>
-                <span class="exec-mode-badge cmd-status-live mt-2"><span class="pulse-dot" style="width:6px;height:6px;border-radius:999px;background:#4ade80;"></span> EXECUTIVE MODE</span>
+                <h1 class="text-4xl font-bold tracking-tight" data-i18n="appTitle">Meserete Hiwot EPR System</h1>
+                <p class="text-yellow-500 font-medium mt-1" data-i18n="appSubtitle">Report &amp; Analytics Management System</p>
+                <span class="exec-mode-badge cmd-status-live mt-2"><span class="pulse-dot" style="width:6px;height:6px;border-radius:999px;background:#4ade80;"></span> <span data-i18n="executiveMode">EXECUTIVE MODE</span></span>
             </div>
         </div>
         <div class="header-controls mb-2">
-            <span class="cmd-status-live exec-hide hidden lg:inline-flex"><span class="pulse-dot" style="width:6px;height:6px;border-radius:999px;background:#4ade80;"></span> SYSTEM LIVE</span>
+            <span class="cmd-status-live exec-hide hidden lg:inline-flex"><span class="pulse-dot" style="width:6px;height:6px;border-radius:999px;background:#4ade80;"></span> <span data-i18n="systemLive">SYSTEM LIVE</span></span>
             <div class="text-right mr-2 hidden lg:block exec-hide">
-                <p class="text-sm text-gray-400" id="dateDisplay">Loading date...</p>
-                <p class="text-lg font-semibold">Admin Dashboard</p>
+                <p class="text-sm text-gray-400" id="dateDisplay" data-i18n="loadingDate">Loading date...</p>
+                <p class="text-lg font-semibold" data-i18n="adminDashboard">Admin Dashboard</p>
             </div>
             <div class="lang-switch exec-hide" role="group" aria-label="Language switcher">
                 <button type="button" id="langBtnEn" class="active" aria-pressed="true">ENG</button>
@@ -404,7 +368,7 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
                     <svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round"/></svg>
                 </span>
             </button>
-                        <a href="dashboard.html" class="back-dash-btn cmd-pressable exec-hide">🏠 <span class="label">Home</span></a>
+                        <a href="dashboard.html" class="back-dash-btn cmd-pressable exec-hide">🏠 <span class="label" data-i18n="home">Home</span></a>
         </div>
     </header>
 
@@ -412,88 +376,32 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
 
         <!-- Data Source Sync Panel -->
         <div class="glass-panel rounded-2xl p-4 mb-6 flex flex-wrap items-center gap-6 no-print exec-hide">
-            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide">🔗 Live Data Sources:</p>
-            <div class="flex items-center gap-2 text-sm"><span class="source-dot bg-green-400"></span> Financial System <span class="text-gray-500 text-xs">· synced</span></div>
-            <div class="flex items-center gap-2 text-sm"><span class="source-dot bg-green-400"></span> Sunday School System <span class="text-gray-500 text-xs">· synced</span></div>
-            <div class="flex items-center gap-2 text-sm"><span class="source-dot bg-green-400"></span> Begena System <span class="text-gray-500 text-xs">· synced</span></div>
-            <p class="text-xs text-gray-500 ml-auto" id="lastSyncLabel">Last updated just now</p>
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide" data-i18n="liveDataSources">🔗 Live Data Sources:</p>
+            <div class="flex items-center gap-2 text-sm"><span class="source-dot bg-green-400"></span> <span data-i18n="financialSystem">Financial System</span> <span class="text-gray-500 text-xs" data-i18n="synced">· synced</span></div>
+            <div class="flex items-center gap-2 text-sm"><span class="source-dot bg-green-400"></span> <span data-i18n="sundaySchoolSystem">Sunday School System</span> <span class="text-gray-500 text-xs" data-i18n="synced">· synced</span></div>
+            <div class="flex items-center gap-2 text-sm"><span class="source-dot bg-green-400"></span> <span data-i18n="begenaSystem">Begena System</span> <span class="text-gray-500 text-xs" data-i18n="synced">· synced</span></div>
+            <p class="text-xs text-gray-500 ml-auto" id="lastSyncLabel" data-i18n="lastUpdatedJustNow">Last updated just now</p>
         </div>
 
         <!-- Tab Navigation -->
         <div class="flex flex-wrap items-center gap-3 border-b border-white/10 mb-6 no-print">
-            <button id="tabDashboard" onclick="switchTab('dashboard')" class="tab-btn active px-2 pb-3 text-sm font-semibold whitespace-nowrap">📊 Dashboard <span class="amharic">ዳሽቦርድ</span></button>
-            <button id="tabReports" onclick="switchTab('reports')" class="tab-btn px-2 pb-3 text-sm font-semibold whitespace-nowrap">📄 Report Generator <span class="amharic">ሪፖርት ማመንጫ</span></button>
+            <button id="tabDashboard" onclick="switchTab('dashboard')" class="tab-btn active px-2 pb-3 text-sm font-semibold whitespace-nowrap">📊 <span data-i18n="dashboard">Dashboard</span></button>
+            <button id="tabReports" onclick="switchTab('reports')" class="tab-btn px-2 pb-3 text-sm font-semibold whitespace-nowrap">📄 <span data-i18n="reportGenerator">Report Generator</span></button>
         </div>
 
         <!-- ============ DASHBOARD TAB ============ -->
         <div id="dashboardTab">
 
-            <!-- Orbital ERP Core Visualization -->
-            <div class="glass-panel-gold orbital-shell mb-6 no-print">
-                <div class="orbital-topline">
-                    <div>
-                        <p class="section-title mb-1">🛰️ Orbital ERP Core <span class="amharic normal-case font-normal text-gray-400">የስርዓት ማዕከል</span></p>
-                        <p class="text-xs text-gray-500">Live view of connected modules · click a node for details</p>
-                    </div>
-                    <span class="orbital-status-badge"><span class="pulse-dot"></span> SYSTEM ONLINE</span>
-                </div>
-
-                <div class="orbital-wrap" id="orbitalWrap">
-                    <svg class="orbit-svg" viewBox="0 0 100 100" preserveAspectRatio="none" id="orbitSvg">
-                        <line class="orbit-line-base" x1="50" y1="50" x2="50" y2="12"></line>
-                        <line class="orbit-line-base" x1="50" y1="50" x2="82.9" y2="69"></line>
-                        <line class="orbit-line-base" x1="50" y1="50" x2="17.1" y2="69"></line>
-                        <line class="orbit-line-flow gold" id="flowFinancial" x1="50" y1="50" x2="50" y2="12"></line>
-                        <line class="orbit-line-flow blue" id="flowSundaySchool" x1="50" y1="50" x2="82.9" y2="69"></line>
-                        <line class="orbit-line-flow blue" id="flowBegena" x1="50" y1="50" x2="17.1" y2="69"></line>
-                    </svg>
-
-                    <div class="core-orb">
-                        <p class="core-brand">Meserete Hiwot</p>
-                        <p class="core-title">ERP CORE</p>
-                        <p class="core-sub">Data Nucleus</p>
-                        <span class="core-status-pill" id="coreStatusPill">ONLINE</span>
-                    </div>
-
-                    <div class="orbit-node" data-node="financial" style="top:12%; left:50%; animation-delay:.15s;" onclick="selectOrbitalNode('financial')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectOrbitalNode('financial');}" role="button" tabindex="0" aria-label="Financial System module">
-                        <div class="node-card">
-                            <div class="node-icon">💰</div>
-                            <div class="node-name">Finance</div>
-                            <div class="node-status" id="nodeStatusFinancial"></div>
-                        </div>
-                    </div>
-                    <div class="orbit-node" data-node="sunday_school" style="top:69%; left:82.9%; animation-delay:.35s;" onclick="selectOrbitalNode('sunday_school')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectOrbitalNode('sunday_school');}" role="button" tabindex="0" aria-label="Sunday School System module">
-                        <div class="node-card">
-                            <div class="node-icon">🎓</div>
-                            <div class="node-name">Sunday School</div>
-                            <div class="node-status" id="nodeStatusSundaySchool"></div>
-                        </div>
-                    </div>
-                    <div class="orbit-node" data-node="begena" style="top:69%; left:17.1%; animation-delay:.55s;" onclick="selectOrbitalNode('begena')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectOrbitalNode('begena');}" role="button" tabindex="0" aria-label="Begena System module">
-                        <div class="node-card">
-                            <div class="node-icon">🎼</div>
-                            <div class="node-name">Begena</div>
-                            <div class="node-status" id="nodeStatusBegena"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="orbital-panel" id="orbitalPanel">
-                    <div id="orbitalPanelContent"></div>
-                </div>
-                <p class="orbital-panel-hint" id="orbitalHint">Select a module above to see its live statistics.</p>
-            </div>
-
             <!-- Global View Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 no-print">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6 no-print">
                 <div class="kpi-card-3d">
                     <div class="kpi-inner glass-panel-gold p-6 rounded-3xl border border-yellow-500/20">
                         <div class="flex items-start justify-between">
-                            <p class="text-gray-400 text-sm">💰 Total Financial Capacity <span class="amharic block text-[10px]">ጠቅላላ የገንዘብ አቅም</span></p>
+                            <p class="text-gray-400 text-sm">💰 <span data-i18n="totalFinancialCapacity">Total Financial Capacity</span></p>
                             <span id="kpiNetTrend" class="kpi-trend flat">—</span>
                         </div>
                         <h3 id="statNetCapacity" class="text-3xl font-bold mt-2 text-yellow-400">0 ETB</h3>
-                        <p class="text-xs text-gray-500 mt-1">Net balance (income − expense), all sources</p>
+                        <p class="text-xs text-gray-500 mt-1" data-i18n="netBalanceDesc">Net balance (income − expense), all sources</p>
                         <div class="kpi-mini-bar" title="Income vs expense share">
                             <span id="kpiNetBarIncome" style="width:50%; background:#4ade80;"></span>
                             <span id="kpiNetBarExpense" style="width:50%; background:#f87171;"></span>
@@ -503,7 +411,7 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
                 <div class="kpi-card-3d">
                     <div class="kpi-inner glass-panel-gold p-6 rounded-3xl border border-blue-500/20">
                         <div class="flex items-start justify-between gap-2">
-                            <p class="text-gray-400 text-sm">🎓 Total Students <span class="amharic block text-[10px]">ጠቅላላ ተማሪዎች</span></p>
+                            <p class="text-gray-400 text-sm">🎓 <span data-i18n="totalStudents">Total Students</span></p>
                             <div class="kpi-mini-ring shrink-0">
                                 <svg width="46" height="46" viewBox="0 0 46 46">
                                     <circle cx="23" cy="23" r="19" stroke="rgba(255,255,255,0.08)"></circle>
@@ -512,36 +420,49 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
                             </div>
                         </div>
                         <h3 id="statTotalStudents" class="text-3xl font-bold mt-2 text-blue-400">0</h3>
-                        <p class="text-xs text-gray-500 mt-1"><span id="statSundaySchoolCount">0</span> Sunday School · <span id="statBegenaCount">0</span> Begena</p>
+                        <p class="text-xs text-gray-500 mt-1"><span id="statSundaySchoolCount">0</span> <span data-i18n="sundaySchool">Sunday School</span> · <span id="statBegenaCount">0</span> <span data-i18n="begena">Begena</span></p>
                     </div>
                 </div>
                 <div class="kpi-card-3d">
                     <div class="kpi-inner glass-panel-gold p-6 rounded-3xl border border-green-500/20">
                         <div class="flex items-start justify-between">
-                            <p class="text-gray-400 text-sm">✅ Payment / Attendance Performance <span class="amharic block text-[10px]">የክፍያ አፈጻጸም</span></p>
+                            <p class="text-gray-400 text-sm">✅ <span data-i18n="paymentAttendancePerf">Payment / Attendance Performance</span></p>
                             <span id="kpiPerfTrend" class="kpi-trend flat">—</span>
                         </div>
                         <h3 id="statPerformance" class="text-3xl font-bold mt-2 text-green-400">0%</h3>
-                        <p class="text-xs text-gray-500 mt-1">Blended fee-collection and attendance rate</p>
+                        <p class="text-xs text-gray-500 mt-1" data-i18n="blendedRateDesc">Blended fee-collection and attendance rate</p>
                         <div class="kpi-mini-bar" title="Blended performance">
                             <span id="kpiPerfBar" style="width:0%; background:#4ade80;"></span>
                         </div>
+                    </div>
+                </div>
+                <div class="kpi-card-3d">
+                    <div class="kpi-inner glass-panel-gold p-6 rounded-3xl border border-yellow-500/20 premium-score-card">
+                        <div class="flex items-start justify-between">
+                            <p class="text-gray-400 text-sm">🏆 <span data-i18n="mhssScoreLabelTitle">MHSS Performance Score</span></p>
+                            <span id="scoreBadge" class="status-pill status-blue" data-i18n="live">LIVE</span>
+                        </div>
+                        <div class="flex items-end gap-3 mt-2">
+                            <h3 id="mhssScore" class="text-4xl font-bold text-yellow-400">0</h3><span class="text-gray-500 text-sm mb-1">/ 100</span>
+                        </div>
+                        <p id="mhssScoreLabel" class="text-xs text-gray-500 mt-1" data-i18n="calculatingPerf">Calculating organizational performance</p>
+                        <div class="score-track mt-4"><span id="mhssScoreBar"></span></div>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 no-print">
                 <div class="chamber glass-panel p-6 rounded-3xl">
-                    <p class="text-gray-400 text-sm mb-4 chamber-label">📊 Sunday School vs Begena - Income Comparison <span class="amharic">የገቢ ንፅፅር</span></p>
+                    <p class="text-gray-400 text-sm mb-4 chamber-label">📊 <span data-i18n="incomeComparisonTitle">Sunday School vs Begena - Income Comparison</span></p>
                     <div class="chamber-canvas-wrap"><canvas id="compareChart" height="200"></canvas></div>
                 </div>
                 <div class="chamber glass-panel p-6 rounded-3xl">
                     <div class="flex justify-between items-center mb-4">
-                        <p class="text-gray-400 text-sm chamber-label">📈 Income &amp; Expense Trend <span class="amharic">የገቢ እና ወጪ አዝማሚያ</span></p>
+                        <p class="text-gray-400 text-sm chamber-label">📈 <span data-i18n="incomeExpenseTrend">Income &amp; Expense Trend</span></p>
                         <select id="trendGranularity" onchange="renderTrendChart()" class="lux-input bg-[#1e293b] border border-white/10 rounded-lg px-3 py-1.5 text-xs">
-                            <option value="week">Weekly</option>
-                            <option value="month" selected>Monthly</option>
-                            <option value="year">Yearly</option>
+                            <option value="week" data-i18n="weekly">Weekly</option>
+                            <option value="month" selected data-i18n="monthly">Monthly</option>
+                            <option value="year" data-i18n="yearly">Yearly</option>
                         </select>
                     </div>
                     <div class="chamber-canvas-wrap"><canvas id="trendChart" height="200"></canvas></div>
@@ -554,35 +475,49 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             <section class="mb-6">
                 <div class="flex items-center justify-between gap-3 mb-3">
                     <div>
-                        <h2 class="text-lg font-bold">Smart Insights <span class="amharic">ዘመናዊ ግንዛቤዎች</span></h2>
-                        <p class="text-xs text-gray-500">Automatically calculated from your live Supabase records.</p>
+                        <h2 class="text-lg font-bold" data-i18n="smartInsights">Smart Insights</h2>
+                        <p class="text-xs text-gray-500"><span data-i18n="autoCalculatedDesc">Automatically calculated from your live Supabase records.</span> <span id="ethiopianPeriodLabel" class="text-yellow-500/80"></span></p>
                     </div>
                     <div class="quick-actions no-print">
-                        <button onclick="quickReport('month')">This Month</button>
-                        <button onclick="quickReport('year')">This Year</button>
-                        <button onclick="quickReport('all')">All Time</button>
+                        <button onclick="quickReport('month')" data-i18n="thisMonth">This Month</button>
+                        <button onclick="quickReport('year')" data-i18n="thisYear">This Year</button>
+                        <button onclick="quickReport('all')" data-i18n="allTime">All Time</button>
                     </div>
                 </div>
                 <div id="mobileInsightGrid">
-                    <div class="insight-card"><div class="insight-label">Income</div><div id="smartIncome" class="insight-value text-green-400">0 ETB</div></div>
-                    <div class="insight-card"><div class="insight-label">Expenses</div><div id="smartExpense" class="insight-value text-red-400">0 ETB</div></div>
-                    <div class="insight-card"><div class="insight-label">Net</div><div id="smartNet" class="insight-value">0 ETB</div></div>
-                    <div class="insight-card"><div class="insight-label">Attendance</div><div id="smartAttendance" class="insight-value">0%</div></div>
+                    <div class="insight-card"><div class="insight-label" data-i18n="income">Income</div><div id="smartIncome" class="insight-value text-green-400">0 ETB</div></div>
+                    <div class="insight-card"><div class="insight-label" data-i18n="expenses">Expenses</div><div id="smartExpense" class="insight-value text-red-400">0 ETB</div></div>
+                    <div class="insight-card"><div class="insight-label" data-i18n="net">Net</div><div id="smartNet" class="insight-value">0 ETB</div></div>
+                    <div class="insight-card"><div class="insight-label" data-i18n="attendance">Attendance</div><div id="smartAttendance" class="insight-value">0%</div></div>
                 </div>
+            </section>
+
+
+            <!-- ============ AI EXECUTIVE SUMMARY + SMART ALERTS ============ -->
+            <section class="ai-intelligence-grid mb-6 dashboard-reveal">
+                <div class="ai-card"><div class="ai-card-inner p-6">
+                    <div class="flex items-center justify-between gap-3 mb-4"><div class="flex items-center gap-3"><div class="ai-orb">✦</div><div><h2 class="text-lg font-bold" data-i18n="aiExecutiveSummary">AI Executive Summary</h2><p class="ai-meta" id="aiSummaryPeriod" data-i18n="liveOrgIntelligence">Live organizational intelligence</p></div></div><button class="ai-refresh" onclick="renderExecutiveIntelligence()">↻ <span data-i18n="refresh">Refresh</span></button></div>
+                    <div id="aiSummaryBody" class="ai-summary-text"><div class="ai-summary-line"><span class="bullet"></span><span data-i18n="analyzingRecords">Analyzing live financial, student and attendance records...</span></div></div>
+                    <div class="mt-4 pt-3 border-t border-white/10 flex flex-wrap justify-between gap-2"><span class="ai-meta" data-i18n="generatedFromSupabase">Generated from live Supabase records</span><span id="aiSummaryStatus" class="status-pill status-blue" data-i18n="analyzing">ANALYZING</span></div>
+                </div></div>
+                <div class="alert-center"><div class="alert-center-inner p-6">
+                    <div class="flex items-center justify-between gap-3 mb-4"><div><h2 class="text-lg font-bold" data-i18n="smartAlertsCenter">Smart Alerts Center</h2><p class="text-xs text-gray-500" data-i18n="prioritySignalsDesc">Priority signals detected from live records.</p></div><span id="alertCount" class="alert-count">0</span></div>
+                    <div id="smartAlertsList" class="alert-list"><div class="text-sm text-gray-500 py-4" data-i18n="scanningLiveData">Scanning live data...</div></div>
+                </div></div>
             </section>
 
             <!-- Advanced live charts -->
             <section class="chart-grid-new mb-6">
-                <div class="new-chart-card">
-                    <div class="mb-3"><h3 class="font-bold">Income Mix</h3><p class="text-xs text-gray-500">Where recorded income comes from.</p></div>
+                <div class="new-chart-card lux-chart-card dashboard-reveal">
+                    <div class="mb-3"><h3 class="font-bold" data-i18n="incomeMix">Income Mix</h3><p class="text-xs text-gray-500" data-i18n="incomeMixDesc">Where recorded income comes from.</p></div>
                     <div class="chart-box"><canvas id="incomeMixChart"></canvas></div>
                 </div>
-                <div class="new-chart-card">
-                    <div class="mb-3"><h3 class="font-bold">Attendance Overview</h3><p class="text-xs text-gray-500">Present, late and absent records.</p></div>
+                <div class="new-chart-card lux-chart-card dashboard-reveal" style="animation-delay:.12s">
+                    <div class="mb-3"><h3 class="font-bold" data-i18n="attendanceOverview">Attendance Overview</h3><p class="text-xs text-gray-500" data-i18n="attendanceOverviewDesc">Present, late and absent records.</p></div>
                     <div class="chart-box"><canvas id="attendanceChart"></canvas></div>
                 </div>
-                <div class="new-chart-card">
-                    <div class="mb-3"><h3 class="font-bold">Financial Pulse</h3><p class="text-xs text-gray-500">Income versus expenses over time.</p></div>
+                <div class="new-chart-card lux-chart-card dashboard-reveal" style="animation-delay:.24s">
+                    <div class="mb-3"><h3 class="font-bold" data-i18n="financialPulse">Financial Pulse</h3><p class="text-xs text-gray-500" data-i18n="financialPulseDesc">Income versus expenses over time.</p></div>
                     <div class="chart-box"><canvas id="pulseChart"></canvas></div>
                 </div>
             </section>
@@ -591,49 +526,49 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
         <div id="reportsTab" class="hidden">
             <!-- Custom Report Builder -->
             <div class="glass-panel-gold rounded-3xl p-6 mb-6 no-print">
-                <p class="section-title mb-4">🛠️ Custom Report Builder <span class="amharic normal-case font-normal text-gray-400">የራስ ሪፖርት ገንቢ</span></p>
+                <p class="section-title mb-4">🛠️ <span data-i18n="customReportBuilder">Custom Report Builder</span></p>
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">From</label>
+                        <label class="block text-xs text-gray-400 mb-1" data-i18n="from">From</label>
                         <input type="date" id="rbStart" onchange="renderReportTable()" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">To</label>
+                        <label class="block text-xs text-gray-400 mb-1" data-i18n="to">To</label>
                         <input type="date" id="rbEnd" onchange="renderReportTable()" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1 amharic">ክፍል / ምንጭ (Source)</label>
+                        <label class="block text-xs text-gray-400 mb-1" data-i18n="sourceLabel">Source</label>
                         <select id="rbSource" onchange="renderReportTable()" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
-                            <option value="">All Sources</option>
-                            <option value="financial">Financial System</option>
-                            <option value="sunday_school">Sunday School System</option>
-                            <option value="begena">Begena System</option>
+                            <option value="" data-i18n="allSources">All Sources</option>
+                            <option value="financial" data-i18n="financialSystem">Financial System</option>
+                            <option value="sunday_school" data-i18n="sundaySchoolSystem">Sunday School System</option>
+                            <option value="begena" data-i18n="begenaSystem">Begena System</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1 amharic">የገቢ አይነት (Category)</label>
+                        <label class="block text-xs text-gray-400 mb-1" data-i18n="categoryLabel">Category</label>
                         <select id="rbCategory" onchange="renderReportTable()" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
-                            <option value="">All Categories</option>
+                            <option value="" data-i18n="allCategories">All Categories</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Type</label>
+                        <label class="block text-xs text-gray-400 mb-1" data-i18n="type">Type</label>
                         <select id="rbType" onchange="renderReportTable()" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
-                            <option value="">Income &amp; Expense</option>
-                            <option value="income">Income Only</option>
-                            <option value="expense">Expense Only</option>
+                            <option value="" data-i18n="incomeAndExpense">Income &amp; Expense</option>
+                            <option value="income" data-i18n="incomeOnly">Income Only</option>
+                            <option value="expense" data-i18n="expenseOnly">Expense Only</option>
                         </select>
                     </div>
                 </div>
                 <div class="flex flex-wrap justify-between items-center gap-3 mt-5 pt-4 border-t border-white/10">
                     <div class="flex gap-4 text-sm">
-                        <p>Income: <span id="rbTotalIncome" class="text-green-400 font-bold">0 ETB</span></p>
-                        <p>Expense: <span id="rbTotalExpense" class="text-red-400 font-bold">0 ETB</span></p>
-                        <p>Net: <span id="rbTotalNet" class="text-yellow-400 font-bold">0 ETB</span></p>
+                        <p><span data-i18n="income">Income</span>: <span id="rbTotalIncome" class="text-green-400 font-bold">0 ETB</span></p>
+                        <p><span data-i18n="expenses">Expense</span>: <span id="rbTotalExpense" class="text-red-400 font-bold">0 ETB</span></p>
+                        <p><span data-i18n="net">Net</span>: <span id="rbTotalNet" class="text-yellow-400 font-bold">0 ETB</span></p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="exportReportPdf()" class="px-5 py-2.5 glass-panel rounded-xl hover:bg-white/10 transition font-semibold text-sm">📄 Export PDF</button>
-                        <button onclick="exportReportExcel()" class="px-5 py-2.5 glass-panel rounded-xl hover:bg-white/10 transition font-semibold text-sm">📊 Export Excel/CSV</button>
+                        <button onclick="exportReportPdf()" class="px-5 py-2.5 glass-panel rounded-xl hover:bg-white/10 transition font-semibold text-sm">📄 <span data-i18n="exportPdf">Export PDF</span></button>
+                        <button onclick="exportReportExcel()" class="px-5 py-2.5 glass-panel rounded-xl hover:bg-white/10 transition font-semibold text-sm">📊 <span data-i18n="exportExcel">Export Excel/CSV</span></button>
                     </div>
                 </div>
             </div>
@@ -641,8 +576,8 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             <!-- Scheduled Reporting -->
             <div class="glass-panel rounded-3xl p-6 mb-6 no-print flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <p class="section-title mb-1">📬 Scheduled Reporting <span class="amharic normal-case font-normal text-gray-400">ራስ-ሰር ሪፖርት መላኪያ</span></p>
-                    <p class="text-xs text-gray-400">Automatically email a full report to leadership at the end of every month.</p>
+                    <p class="section-title mb-1">📬 <span data-i18n="scheduledReporting">Scheduled Reporting</span></p>
+                    <p class="text-xs text-gray-400" data-i18n="scheduledReportingDesc">Automatically email a full report to leadership at the end of every month.</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <input type="email" id="scheduleEmail" placeholder="leader@church.org" class="lux-input bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none w-56">
@@ -655,17 +590,17 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
                 <table class="w-full text-sm">
                     <thead class="bg-white/5 text-gray-400 uppercase text-xs">
                         <tr>
-                            <th class="p-4 text-left">Date</th>
-                            <th class="p-4 text-left">Source</th>
-                            <th class="p-4 text-left">Category</th>
-                            <th class="p-4 text-left">Description</th>
-                            <th class="p-4 text-center">Type</th>
-                            <th class="p-4 text-right">Amount (ETB)</th>
+                            <th class="p-4 text-left" data-i18n="date">Date</th>
+                            <th class="p-4 text-left" data-i18n="sourceLabel">Source</th>
+                            <th class="p-4 text-left" data-i18n="categoryLabel">Category</th>
+                            <th class="p-4 text-left" data-i18n="description">Description</th>
+                            <th class="p-4 text-center" data-i18n="type">Type</th>
+                            <th class="p-4 text-right" data-i18n="amountEtb">Amount (ETB)</th>
                         </tr>
                     </thead>
                     <tbody id="reportTableBody"></tbody>
                 </table>
-                <p id="reportEmptyMsg" class="hidden text-center text-gray-500 py-16">No records match this filter.</p>
+                <p id="reportEmptyMsg" class="hidden text-center text-gray-500 py-16" data-i18n="noRecordsMatch">No records match this filter.</p>
             </div>
         </div>
     </main>
@@ -699,11 +634,159 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
         import { supabase } from './supabaseClient.js';
 
         const etMonths = ['መስከረም','ጥቅምት','ህዳር','ታህሳስ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜ'];
-        const SOURCE_LABELS = {
-            financial: 'Financial',
-            sunday_school: 'Sunday School',
-            begena: 'Begena'
+        const SOURCE_LABELS_I18N = {
+            financial: { en: 'Financial', am: 'የፋይናንስ' },
+            sunday_school: { en: 'Sunday School', am: 'የሰንበት ትምህርት ቤት' },
+            begena: { en: 'Begena', am: 'በገና' }
         };
+
+        // ============ LANGUAGE / TRANSLATION ENGINE ============
+        let currentLang = 'en';
+        const SOURCE_LABELS = new Proxy({}, { get: (_, key) => (SOURCE_LABELS_I18N[key] ? SOURCE_LABELS_I18N[key][currentLang] || SOURCE_LABELS_I18N[key].en : key) });
+
+        const I18N = {
+            appTitle: { en: 'Meserete Hiwot EPR System', am: 'መሰረተ ህይወት ኢ.አር.ፒ ሲስተም' },
+            appSubtitle: { en: 'Report & Analytics Management System', am: 'የሪፖርት እና ትንተና አስተዳደር ስርዓት' },
+            executiveMode: { en: 'EXECUTIVE MODE', am: 'የአስፈፃሚ ሁነታ' },
+            systemLive: { en: 'SYSTEM LIVE', am: 'ስርዓቱ ቀጥታ ነው' },
+            loadingDate: { en: 'Loading date...', am: 'ቀን በመጫን ላይ...' },
+            adminDashboard: { en: 'Admin Dashboard', am: 'የአስተዳደር ዳሽቦርድ' },
+            home: { en: 'Home', am: 'መነሻ' },
+            liveDataSources: { en: '🔗 Live Data Sources:', am: '🔗 የቀጥታ የመረጃ ምንጮች፦' },
+            financialSystem: { en: 'Financial System', am: 'የፋይናንስ ስርዓት' },
+            sundaySchoolSystem: { en: 'Sunday School System', am: 'የሰንበት ትምህርት ቤት ስርዓት' },
+            begenaSystem: { en: 'Begena System', am: 'የበገና ስርዓት' },
+            synced: { en: '· synced', am: '· ተመሳስሏል' },
+            lastUpdatedJustNow: { en: 'Last updated just now', am: 'አሁን ላይ ተዘምኗል' },
+            dashboard: { en: 'Dashboard', am: 'ዳሽቦርድ' },
+            reportGenerator: { en: 'Report Generator', am: 'ሪፖርት ማመንጫ' },
+            totalFinancialCapacity: { en: 'Total Financial Capacity', am: 'ጠቅላላ የገንዘብ አቅም' },
+            netBalanceDesc: { en: 'Net balance (income − expense), all sources', am: 'ተጣራ ሂሳብ (ገቢ − ወጪ)፣ ከሁሉም ምንጮች' },
+            totalStudents: { en: 'Total Students', am: 'ጠቅላላ ተማሪዎች' },
+            sundaySchool: { en: 'Sunday School', am: 'ሰንበት ትምህርት ቤት' },
+            begena: { en: 'Begena', am: 'በገና' },
+            paymentAttendancePerf: { en: 'Payment / Attendance Performance', am: 'የክፍያ / ተገኝነት አፈጻጸም' },
+            blendedRateDesc: { en: 'Blended fee-collection and attendance rate', am: 'የክፍያ አሰባሰብ እና ተገኝነት አማካይ መጠን' },
+            mhssScoreLabelTitle: { en: 'MHSS Performance Score', am: 'የኤምኤችኤስኤስ አፈጻጸም ውጤት' },
+            live: { en: 'LIVE', am: 'ቀጥታ' },
+            calculatingPerf: { en: 'Calculating organizational performance', am: 'የድርጅቱን አፈጻጸም በማስላት ላይ' },
+            incomeComparisonTitle: { en: 'Sunday School vs Begena - Income Comparison', am: 'ሰንበት ትምህርት ቤት እና በገና - የገቢ ንፅፅር' },
+            incomeExpenseTrend: { en: 'Income & Expense Trend', am: 'የገቢ እና ወጪ አዝማሚያ' },
+            weekly: { en: 'Weekly', am: 'ሳምንታዊ' },
+            monthly: { en: 'Monthly', am: 'ወርሃዊ' },
+            yearly: { en: 'Yearly', am: 'ዓመታዊ' },
+            smartInsights: { en: 'Smart Insights', am: 'ዘመናዊ ግንዛቤዎች' },
+            autoCalculatedDesc: { en: 'Automatically calculated from your live Supabase records.', am: 'ከቀጥታ የሱፓቤዝ መዝገቦችዎ በራስ-ሰር የተሰላ።' },
+            thisMonth: { en: 'This Month', am: 'ይህ ወር' },
+            thisYear: { en: 'This Year', am: 'ይህ ዓመት' },
+            allTime: { en: 'All Time', am: 'ሁሉም ጊዜ' },
+            income: { en: 'Income', am: 'ገቢ' },
+            expenses: { en: 'Expenses', am: 'ወጪ' },
+            net: { en: 'Net', am: 'ተጣራ' },
+            attendance: { en: 'Attendance', am: 'ተገኝነት' },
+            aiExecutiveSummary: { en: 'AI Executive Summary', am: 'የ AI አስፈፃሚ ማጠቃለያ' },
+            liveOrgIntelligence: { en: 'Live organizational intelligence', am: 'የቀጥታ ድርጅታዊ ትንተና' },
+            refresh: { en: 'Refresh', am: 'አድስ' },
+            analyzingRecords: { en: 'Analyzing live financial, student and attendance records...', am: 'የቀጥታ የፋይናንስ፣ የተማሪ እና የተገኝነት መዝገቦችን በመተንተን ላይ...' },
+            generatedFromSupabase: { en: 'Generated from live Supabase records', am: 'ከቀጥታ የሱፓቤዝ መዝገቦች የተገኘ' },
+            analyzing: { en: 'ANALYZING', am: 'በመተንተን ላይ' },
+            smartAlertsCenter: { en: 'Smart Alerts Center', am: 'ዘመናዊ ማስጠንቀቂያ ማዕከል' },
+            prioritySignalsDesc: { en: 'Priority signals detected from live records.', am: 'ከቀጥታ መዝገቦች የተገኙ ቅድሚያ የሚሰጣቸው ምልክቶች።' },
+            scanningLiveData: { en: 'Scanning live data...', am: 'የቀጥታ መረጃን በመቃኘት ላይ...' },
+            incomeMix: { en: 'Income Mix', am: 'የገቢ ድርሻ' },
+            incomeMixDesc: { en: 'Where recorded income comes from.', am: 'የተመዘገበው ገቢ ከየት እንደሚመጣ።' },
+            attendanceOverview: { en: 'Attendance Overview', am: 'የተገኝነት አጠቃላይ እይታ' },
+            attendanceOverviewDesc: { en: 'Present, late and absent records.', am: 'የተገኙ፣ የዘገዩ እና ያልተገኙ መዝገቦች።' },
+            financialPulse: { en: 'Financial Pulse', am: 'የገንዘብ እንቅስቃሴ' },
+            financialPulseDesc: { en: 'Income versus expenses over time.', am: 'ገቢ እና ወጪ በጊዜ ሂደት።' },
+            customReportBuilder: { en: 'Custom Report Builder', am: 'የራስ ሪፖርት ገንቢ' },
+            from: { en: 'From', am: 'ከ' },
+            to: { en: 'To', am: 'እስከ' },
+            sourceLabel: { en: 'Source', am: 'ምንጭ' },
+            categoryLabel: { en: 'Category', am: 'የገቢ አይነት' },
+            type: { en: 'Type', am: 'አይነት' },
+            allSources: { en: 'All Sources', am: 'ሁሉም ምንጮች' },
+            allCategories: { en: 'All Categories', am: 'ሁሉም ዓይነቶች' },
+            incomeAndExpense: { en: 'Income & Expense', am: 'ገቢ እና ወጪ' },
+            incomeOnly: { en: 'Income Only', am: 'ገቢ ብቻ' },
+            expenseOnly: { en: 'Expense Only', am: 'ወጪ ብቻ' },
+            exportPdf: { en: 'Export PDF', am: 'PDF አውጣ' },
+            exportExcel: { en: 'Export Excel/CSV', am: 'Excel/CSV አውጣ' },
+            scheduledReporting: { en: 'Scheduled Reporting', am: 'ራስ-ሰር ሪፖርት መላኪያ' },
+            scheduledReportingDesc: { en: 'Automatically email a full report to leadership at the end of every month.', am: 'በየወሩ መጨረሻ ላይ ሙሉ ሪፖርት በራስ-ሰር ለአመራሩ በኢሜይል ይላካል።' },
+            date: { en: 'Date', am: 'ቀን' },
+            description: { en: 'Description', am: 'መግለጫ' },
+            amountEtb: { en: 'Amount (ETB)', am: 'መጠን (ብር)' },
+            noRecordsMatch: { en: 'No records match this filter.', am: 'ከዚህ ማጣሪያ ጋር የሚስማማ መዝገብ የለም።' },
+            noRecordsToExport: { en: 'No records to export.', am: 'ለማውጣት መዝገብ የለም።' },
+            excelUnavailable: { en: 'Excel library is not available.', am: 'የExcel ላይብረሪ አይገኝም።' },
+            reportPrefEnabled: { en: 'Report preference enabled.', am: 'የሪፖርት ምርጫ ነቅቷል።' },
+            reportPrefDisabled: { en: 'Report preference disabled.', am: 'የሪፖርት ምርጫ ጠፍቷል።' },
+            noDataToast: { en: 'Report could not load live data. Check Supabase permissions/network.', am: 'ሪፖርቱ የቀጥታ መረጃ መጫን አልቻለም። የሱፓቤዝ ፍቃዶችን/ኔትወርክን ያረጋግጡ።' },
+            liveDataUpdated: { en: 'Live data · updated ', am: 'ቀጥታ መረጃ · ተዘምኗል ' },
+            noRecords: { en: 'No records', am: 'መዝገብ የለም' },
+            recordsSuffix: { en: 'records', am: 'መዝገቦች' },
+            studentsSuffix: { en: 'students', am: 'ተማሪዎች' },
+            liveSupabase: { en: 'LIVE · SUPABASE', am: 'ቀጥታ · ሱፓቤዝ' },
+            liveNoData: { en: 'LIVE · NO DATA', am: 'ቀጥታ · መረጃ የለም' },
+            openDetailedRecords: { en: 'Open detailed records →', am: 'ዝርዝር መዝገቦችን ክፈት →' },
+            expenseWord: { en: 'Expense', am: 'ወጪ' },
+            liveWord: { en: '● live', am: '● ቀጥታ' },
+            noTransactions: { en: '— no transactions', am: '— ምንም ግብይት የለም' },
+            exceptionalPerf: { en: 'Exceptional organizational performance', am: 'ላቅ ያለ ድርጅታዊ አፈጻጸም' },
+            strongPerf: { en: 'Strong organizational performance', am: 'ጠንካራ ድርጅታዊ አፈጻጸም' },
+            stablePerf: { en: 'Stable — improvement opportunities detected', am: 'የተረጋጋ — መሻሻል የሚያስፈልጋቸው ቦታዎች ተገኝተዋል' },
+            needsAttentionPerf: { en: 'Needs attention — review key indicators', am: 'ትኩረት ይፈልጋል — ዋና ዋና አመልካቾችን ይገምግሙ' },
+            noLiveDataSummary: { en: 'No live records are currently available for a meaningful executive assessment.', am: 'ለትርጉም ያለው የአስፈፃሚ ግምገማ በአሁኑ ጊዜ ምንም የቀጥታ መዝገቦች የሉም።' },
+            perfScoreLine: { en: (score, period) => `The organization is currently operating at an overall performance score of ${score}/100 for ${period}.`, am: (score, period) => `ድርጅቱ በአሁኑ ጊዜ ለ${period} በጠቅላላ የ${score}/100 አፈጻጸም ውጤት እየሰራ ነው።` },
+            netPositiveLine: { en: (income, expense, net) => `Financial position is positive, with ${income} in recorded income against ${expense} in expenses, leaving a net of ${net}.`, am: (income, expense, net) => `የገንዘብ ሁኔታ አዎንታዊ ነው፤ የተመዘገበው ገቢ ${income} በወጪ ${expense} ላይ ሲሆን ተጣራ ${net} ትርፍ ቀርቷል።` },
+            netNegativeLine: { en: (income, expense, diff) => `Financial pressure is visible: recorded expenses of ${expense} exceed income of ${income} by ${diff}.`, am: (income, expense, diff) => `የገንዘብ ጫና ይታያል፦ የተመዘገበው ወጪ ${expense} ከገቢ ${income} በ${diff} ይበልጣል።` },
+            attendanceLine: { en: (rate, count, absent) => `Attendance is ${rate}% across ${count} recorded attendance events, with ${absent} absences.`, am: (rate, count, absent) => `ተገኝነት ${rate}% ሲሆን ከ${count} የተመዘገቡ የተገኝነት ክንውኖች ውስጥ ${absent} ቀሪ ቀናት አሉ።` },
+            attendanceInsufficientLine: { en: 'There are not enough attendance records yet to calculate a reliable attendance signal.', am: 'ትክክለኛ የተገኝነት ምልክት ለማስላት በቂ የተገኝነት መዝገቦች እስካሁን የሉም።' },
+            studentsCountLine: { en: (n) => `The live system currently contains ${n} students across Sunday School and Begena.`, am: (n) => `የቀጥታ ስርዓቱ በአሁኑ ጊዜ በሰንበት ትምህርት ቤት እና በበገና ${n} ተማሪዎችን ይዟል።` },
+            attendanceLowRecommend: { en: 'Priority recommendation: review attendance by class and identify recurring absence patterns.', am: 'ቅድሚያ የሚሰጠው ምክር፦ ተገኝነትን በክፍል ደረጃ ይገምግሙ እና ተደጋጋሚ የመቅረት ሁኔታዎችን ይለዩ።' },
+            attendanceHighPraise: { en: 'Attendance is a strong area; maintain the current engagement and follow-up practices.', am: 'ተገኝነት ጠንካራ ጎን ነው፤ የአሁኑን ተሳትፎ እና ክትትል አሰራር ይቀጥሉ።' },
+            expenseHighRecommend: { en: 'Priority recommendation: review major expense categories before the next reporting period.', am: 'ቅድሚያ የሚሰጠው ምክር፦ ከቀጣዩ የሪፖርት ወቅት በፊት ዋና ዋና የወጪ ዓይነቶችን ይገምግሙ።' },
+            incomeStrongerNote: { en: 'Financial activity is currently stronger than expense activity; continue monitoring the income-to-expense balance.', am: 'የገንዘብ እንቅስቃሴ በአሁኑ ጊዜ ከወጪ እንቅስቃሴ የተሻለ ነው፤ የገቢ-ወደ-ወጪ ሚዛንን መከታተል ይቀጥሉ።' },
+            liveIntelligencePeriod: { en: (p) => `Live intelligence · ${p}`, am: (p) => `የቀጥታ ትንተና · ${p}` },
+            liveAnalysis: { en: 'LIVE ANALYSIS', am: 'ቀጥታ ትንተና' },
+            noData: { en: 'NO DATA', am: 'መረጃ የለም' },
+            waitingForData: { en: 'Waiting for live data', am: 'የቀጥታ መረጃ በመጠበቅ ላይ' },
+            waitingForDataDetail: { en: 'No financial, student or attendance records are available yet.', am: 'እስካሁን ምንም የፋይናንስ፣ የተማሪ ወይም የተገኝነት መዝገቦች የሉም።' },
+            negativeNetTitle: { en: 'Negative net position', am: 'አሉታዊ ተጣራ ሁኔታ' },
+            negativeNetDetail: { en: (n) => `Expenses exceed recorded income by ${n}.`, am: (n) => `ወጪ ከተመዘገበው ገቢ በ${n} ይበልጣል።` },
+            attendanceCriticalTitle: { en: 'Attendance requires attention', am: 'ተገኝነት ትኩረት ይፈልጋል' },
+            attendanceCriticalDetail: { en: (a) => `Current attendance performance is ${a}%, below the 70% critical threshold.`, am: (a) => `የአሁኑ የተገኝነት አፈጻጸም ${a}% ሲሆን ከ70% ወሳኝ ገደብ በታች ነው።` },
+            attendanceWarningTitle: { en: 'Attendance below target', am: 'ተገኝነት ከታለመው በታች ነው' },
+            attendanceWarningDetail: { en: (a) => `Current attendance is ${a}%. Consider class-level follow-up.`, am: (a) => `የአሁኑ ተገኝነት ${a}% ነው። በክፍል ደረጃ ክትትል ማድረግን ያስቡ።` },
+            highExpenseTitle: { en: 'High expense ratio', am: 'ከፍተኛ የወጪ መጠን' },
+            highExpenseDetail: { en: (p) => `Expenses are ${p}% of recorded income.`, am: (p) => `ወጪ ከተመዘገበው ገቢ ${p}% ነው።` },
+            attendanceMissingTitle: { en: 'Attendance data missing', am: 'የተገኝነት መረጃ ጠፍቷል' },
+            attendanceMissingDetail: { en: 'Students exist in the system but no attendance events are available for analysis.', am: 'ተማሪዎች በስርዓቱ ውስጥ አሉ ነገር ግን ለትንተና የሚሆኑ የተገኝነት ክንውኖች የሉም።' },
+            financialStableTitle: { en: 'Financial position stable', am: 'የገንዘብ ሁኔታ የተረጋጋ ነው' },
+            financialStableDetail: { en: (n) => `Recorded income currently exceeds expenses by ${n}.`, am: (n) => `የተመዘገበው ገቢ በአሁኑ ጊዜ ከወጪ በ${n} ይበልጣል።` },
+            excellentAttendanceTitle: { en: 'Excellent attendance signal', am: 'ግሩም የተገኝነት ምልክት' },
+            excellentAttendanceDetail: { en: (a) => `Attendance performance is ${a}%, above the 90% excellence threshold.`, am: (a) => `የተገኝነት አፈጻጸም ${a}% ሲሆን ከ90% ልቀት ገደብ በላይ ነው።` },
+            preparedBy: { en: 'Prepared By', am: 'ያዘጋጀው' },
+            approvedBy: { en: 'Approved By (Signature)', am: 'ያጸደቀው (ፊርማ)' },
+            liveReportTitle: { en: 'Meserete Hiwot ERP - Live Report', am: 'መሰረተ ህይወት ኢ.አር.ፒ - ቀጥታ ሪፖርት' },
+            generatedOn: { en: 'Generated', am: 'የተመነጨው' },
+            period: { en: 'Period:', am: 'ጊዜ፦' },
+            all: { en: 'All', am: 'ሁሉም' },
+        };
+
+        function t(key, ...args) {
+            const entry = I18N[key];
+            if (!entry) return key;
+            const val = entry[currentLang] || entry.en;
+            return typeof val === 'function' ? val(...args) : val;
+        }
+        function applyStaticTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (I18N[key]) el.textContent = t(key);
+            });
+        }
 
         let financeTx = [];
         let live = {
@@ -840,7 +923,7 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
                 gc.toLocaleDateString('en-US', {
                     weekday:'long', year:'numeric', month:'long', day:'numeric'
                 }) + ` | ${etMonth} ${etDay}, ${etYear}`;
-            $('lastSyncLabel').textContent = 'Live data · updated ' + gc.toLocaleTimeString();
+            $('lastSyncLabel').textContent = t('liveDataUpdated') + gc.toLocaleTimeString();
         }
 
         function attendanceRate(rows) {
@@ -892,18 +975,28 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             $('statPerformance').textContent = performance + '%';
             $('kpiPerfBar').style.width = performance + '%';
 
+            // Executive score: attendance 50%, financial health 30%, live-data coverage 20%.
+            const financialHealth = (income + expense) > 0 ? Math.max(0, Math.min(100, Math.round((income / (income + expense)) * 100))) : 0;
+            const coverage = (financeTx.length + live.students.length + live.begenaStudents.length + attendanceRows) > 0 ? 100 : 0;
+            const mhssScore = Math.round((performance * .5) + (financialHealth * .3) + (coverage * .2));
+            $('mhssScore').textContent = mhssScore;
+            $('mhssScoreBar').style.width = mhssScore + '%';
+            $('mhssScoreLabel').textContent = mhssScore >= 90 ? t('exceptionalPerf') : mhssScore >= 75 ? t('strongPerf') : mhssScore >= 60 ? t('stablePerf') : t('needsAttentionPerf');
+
+
             const flow = income + expense;
             const incomeShare = flow ? Math.round(income / flow * 100) : 0;
             $('kpiNetBarIncome').style.width = incomeShare + '%';
             $('kpiNetBarExpense').style.width = (100-incomeShare) + '%';
 
-            $('kpiNetTrend').textContent = financeTx.length ? '● live' : '— no transactions';
+            $('kpiNetTrend').textContent = financeTx.length ? t('liveWord') : t('noTransactions');
             $('kpiNetTrend').className = financeTx.length ? 'kpi-trend up' : 'kpi-trend flat';
 
             renderCompareChart();
             renderTrendChart();
-            refreshOrbitalStatuses();
             renderSmartInsights();
+            renderExecutiveIntelligence();
+            const periodEl=$('ethiopianPeriodLabel'); if(periodEl) periodEl.textContent='· '+ethiopianLabel(new Date());
             renderAdvancedCharts();
         }
 
@@ -916,9 +1009,9 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             compareChartInstance = new Chart(ctx, {
                 type:'bar',
                 data:{
-                    labels:['Sunday School','Begena'],
+                    labels:[SOURCE_LABELS.sunday_school, SOURCE_LABELS.begena],
                     datasets:[{
-                        label:'Income (ETB)',
+                        label:`${t('income')} (ETB)`,
                         data:[totals.sunday_school.income, totals.begena.income]
                     }]
                 },
@@ -950,7 +1043,7 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
                 else if (gran === 'week') {
                     const one = new Date(d.getFullYear(),0,1);
                     key = `${d.getFullYear()}-W${String(Math.ceil((((d-one)/86400000)+one.getDay()+1)/7)).padStart(2,'0')}`;
-                } else key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                } else { const e=gregorianToEthiopian(d); key = `${e.year}-${String(e.month).padStart(2,'0')}`; }
                 buckets[key] ||= {income:0,expense:0};
                 buckets[key][t.type] += num(t.amount);
             });
@@ -960,8 +1053,8 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
                 data:{
                     labels,
                     datasets:[
-                        {label:'Income', data:labels.map(k=>buckets[k].income), tension:.35},
-                        {label:'Expense', data:labels.map(k=>buckets[k].expense), tension:.35}
+                        {label:t('income'), data:labels.map(k=>buckets[k].income), tension:.35},
+                        {label:t('expenseWord'), data:labels.map(k=>buckets[k].expense), tension:.35}
                     ]
                 },
                 options:{
@@ -978,13 +1071,13 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
 
         function refreshOrbitalStatuses() {
             const set = (id, text) => { if ($(id)) $(id).textContent = text; };
-            const financial = financeTx.filter(t=>t.source==='financial').length;
+            const financial = financeTx.filter(tx=>tx.source==='financial').length;
             const ss = live.students.length;
             const bg = live.begenaStudents.length;
-            set('nodeStatusFinancial', financial ? `${financial} records` : 'No records');
-            set('nodeStatusSundaySchool', `${ss} students`);
-            set('nodeStatusBegena', `${bg} students`);
-            if ($('coreStatusPill')) $('coreStatusPill').textContent = financeTx.length ? 'LIVE · SUPABASE' : 'LIVE · NO DATA';
+            set('nodeStatusFinancial', financial ? `${financial} ${t('recordsSuffix')}` : t('noRecords'));
+            set('nodeStatusSundaySchool', `${ss} ${t('studentsSuffix')}`);
+            set('nodeStatusBegena', `${bg} ${t('studentsSuffix')}`);
+            if ($('coreStatusPill')) $('coreStatusPill').textContent = financeTx.length ? t('liveSupabase') : t('liveNoData');
         }
 
         function selectOrbitalNode(node) {
@@ -1000,19 +1093,19 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             const title = SOURCE_LABELS[node] || node;
             content.innerHTML = `
                 <div class="p-5">
-                    <div class="text-xs uppercase tracking-widest text-gray-500">${esc(title)} · Live</div>
+                    <div class="text-xs uppercase tracking-widest text-gray-500">${esc(title)} · ${esc(t('live'))}</div>
                     <div class="grid grid-cols-2 gap-3 mt-4">
                         <div class="glass-panel rounded-2xl p-4">
-                            <div class="text-xs text-gray-500">Income</div>
+                            <div class="text-xs text-gray-500">${esc(t('income'))}</div>
                             <div class="text-xl font-bold text-green-400">${money(data.income)}</div>
                         </div>
                         <div class="glass-panel rounded-2xl p-4">
-                            <div class="text-xs text-gray-500">Expense</div>
+                            <div class="text-xs text-gray-500">${esc(t('expenseWord'))}</div>
                             <div class="text-xl font-bold text-red-400">${money(data.expense)}</div>
                         </div>
                     </div>
                     <button class="mt-4 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm"
-                        onclick="jumpToFilteredReport('${esc(node)}')">Open detailed records →</button>
+                        onclick="jumpToFilteredReport('${esc(node)}')">${esc(t('openDetailedRecords'))}</button>
                 </div>`;
             if (hint) hint.textContent = `${title}: live information loaded from Supabase.`;
         }
@@ -1052,17 +1145,17 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             populateCategoryFilter();
             const rows = filteredTx();
             $('reportEmptyMsg').classList.toggle('hidden', rows.length > 0);
-            $('reportTableBody').innerHTML = rows.map(t => `
+            $('reportTableBody').innerHTML = rows.map(row => `
                 <tr class="row-in border-t border-white/5 hover:bg-white/5 transition">
-                    <td data-label="Date" class="p-4 text-gray-400">${esc(t.date)}</td>
-                    <td data-label="Source" class="p-4"><span class="id-chip text-yellow-400 font-mono text-xs px-2 py-0.5 rounded-full">${esc(SOURCE_LABELS[t.source] || t.source)}</span></td>
-                    <td data-label="Category" class="p-4 text-gray-300">${esc(t.category)}</td>
-                    <td data-label="Description" class="p-4 text-gray-400">${esc(t.description)}</td>
-                    <td data-label="Type" class="p-4 text-center">${t.type==='income'
-                        ? '<span class="status-pill status-green">Income</span>'
-                        : '<span class="status-pill status-red">Expense</span>'}</td>
-                    <td data-label="Amount" class="p-4 text-right font-semibold ${t.type==='income'?'text-green-400':'text-red-400'}">
-                        ${t.type==='income'?'+':'-'}${num(t.amount).toLocaleString()}
+                    <td data-label="${esc(t('date'))}" class="p-4 text-gray-400">${esc(row.date)}</td>
+                    <td data-label="${esc(t('sourceLabel'))}" class="p-4"><span class="id-chip text-yellow-400 font-mono text-xs px-2 py-0.5 rounded-full">${esc(SOURCE_LABELS[row.source] || row.source)}</span></td>
+                    <td data-label="${esc(t('categoryLabel'))}" class="p-4 text-gray-300">${esc(row.category)}</td>
+                    <td data-label="${esc(t('description'))}" class="p-4 text-gray-400">${esc(row.description)}</td>
+                    <td data-label="${esc(t('type'))}" class="p-4 text-center">${row.type==='income'
+                        ? `<span class="status-pill status-green">${esc(t('income'))}</span>`
+                        : `<span class="status-pill status-red">${esc(t('expenseWord'))}</span>`}</td>
+                    <td data-label="${esc(t('amountEtb'))}" class="p-4 text-right font-semibold ${row.type==='income'?'text-green-400':'text-red-400'}">
+                        ${row.type==='income'?'+':'-'}${num(row.amount).toLocaleString()}
                     </td>
                 </tr>`).join('');
 
@@ -1085,15 +1178,15 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
 
         function exportReportExcel() {
             const rows = filteredTx();
-            if (!rows.length) return toast('No records to export.', 'info');
-            if (!window.XLSX) return toast('Excel library is not available.', 'error');
-            const data = rows.map(t => ({
-                Date:t.date,
-                Source:SOURCE_LABELS[t.source] || t.source,
-                Category:t.category,
-                Description:t.description,
-                Type:t.type,
-                'Amount (ETB)':num(t.amount)
+            if (!rows.length) return toast(t('noRecordsToExport'), 'info');
+            if (!window.XLSX) return toast(t('excelUnavailable'), 'error');
+            const data = rows.map(row => ({
+                Date:row.date,
+                Source:SOURCE_LABELS[row.source] || row.source,
+                Category:row.category,
+                Description:row.description,
+                Type:row.type,
+                'Amount (ETB)':num(row.amount)
             }));
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.json_to_sheet(data);
@@ -1103,25 +1196,25 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
 
         function exportReportPdf() {
             const rows = filteredTx();
-            const income = rows.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-            const expense = rows.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+            const income = rows.filter(row=>row.type==='income').reduce((s,row)=>s+row.amount,0);
+            const expense = rows.filter(row=>row.type==='expense').reduce((s,row)=>s+row.amount,0);
             $('printArea').innerHTML = `
                 <div class="print-header">
                     <img src="logo.png" onerror="this.style.display='none'">
-                    <div><h2>Meserete Hiwot ERP - Live Report</h2><p>Generated ${new Date().toLocaleString()}</p></div>
+                    <div><h2>${esc(t('liveReportTitle'))}</h2><p>${esc(t('generatedOn'))} ${new Date().toLocaleString()}</p></div>
                 </div>
                 <div class="print-meta">
-                    <span>Period: ${esc($('rbStart').value || 'All')} to ${esc($('rbEnd').value || 'All')}</span>
-                    <span>Income: ${income.toLocaleString()} ETB | Expense: ${expense.toLocaleString()} ETB | Net: ${(income-expense).toLocaleString()} ETB</span>
+                    <span>${esc(t('period'))} ${esc($('rbStart').value || t('all'))} ${currentLang==='am'?'እስከ':'to'} ${esc($('rbEnd').value || t('all'))}</span>
+                    <span>${esc(t('income'))}: ${income.toLocaleString()} ETB | ${esc(t('expenseWord'))}: ${expense.toLocaleString()} ETB | ${esc(t('net'))}: ${(income-expense).toLocaleString()} ETB</span>
                 </div>
                 <table class="print-table">
-                    <thead><tr><th>Date</th><th>Source</th><th>Category</th><th>Description</th><th>Type</th><th>Amount</th></tr></thead>
-                    <tbody>${rows.map(t=>`
-                        <tr><td>${esc(t.date)}</td><td>${esc(SOURCE_LABELS[t.source]||t.source)}</td>
-                        <td>${esc(t.category)}</td><td>${esc(t.description)}</td>
-                        <td>${esc(t.type)}</td><td>${num(t.amount).toLocaleString()} ETB</td></tr>`).join('')}</tbody>
+                    <thead><tr><th>${esc(t('date'))}</th><th>${esc(t('sourceLabel'))}</th><th>${esc(t('categoryLabel'))}</th><th>${esc(t('description'))}</th><th>${esc(t('type'))}</th><th>${esc(t('amountEtb'))}</th></tr></thead>
+                    <tbody>${rows.map(row=>`
+                        <tr><td>${esc(row.date)}</td><td>${esc(SOURCE_LABELS[row.source]||row.source)}</td>
+                        <td>${esc(row.category)}</td><td>${esc(row.description)}</td>
+                        <td>${esc(row.type==='income'?t('income'):t('expenseWord'))}</td><td>${num(row.amount).toLocaleString()} ETB</td></tr>`).join('')}</tbody>
                 </table>
-                <div class="print-signature"><div class="line">Prepared By</div><div class="line">Approved By (Signature)</div></div>`;
+                <div class="print-signature"><div class="line">${esc(t('preparedBy'))}</div><div class="line">${esc(t('approvedBy'))}</div></div>`;
             setTimeout(()=>window.print(),100);
         }
 
@@ -1136,7 +1229,7 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             localStorage.setItem('mh_reports_schedule_v1', JSON.stringify({
                 on:scheduleOn, email:$('scheduleEmail').value.trim()
             }));
-            toast(scheduleOn ? 'Report preference enabled.' : 'Report preference disabled.', scheduleOn?'success':'info');
+            toast(scheduleOn ? t('reportPrefEnabled') : t('reportPrefDisabled'), scheduleOn?'success':'info');
         }
 
         function restorePreferences() {
@@ -1152,8 +1245,8 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
 
         // Inline handlers in the existing HTML need global functions.
         Object.assign(window, {
-            switchTab, selectOrbitalNode, jumpToFilteredReport, quickReport, setLanguage,
-            renderTrendChart, renderReportTable, exportReportExcel,
+            switchTab, jumpToFilteredReport, quickReport, setLanguage,
+            renderTrendChart, renderReportTable, renderExecutiveIntelligence, exportReportExcel,
             exportReportPdf, toggleExecutiveMode, toggleSchedule
         });
 
@@ -1184,7 +1277,7 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
                 type:'doughnut',
                 data:{labels:['Financial','Sunday School','Begena'],
                     datasets:[{data:[totals.financial.income,totals.sunday_school.income,totals.begena.income]}]},
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
+                options:{responsive:true,maintainAspectRatio:false,animation:{duration:1600,easing:'easeOutQuart'},plugins:{legend:{position:'bottom'}}}
             });
 
             const allAtt=[...live.attendance,...live.begenaAttendance];
@@ -1193,13 +1286,13 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             const absent=allAtt.filter(r=>String(r.status).toLowerCase()==='absent').length;
             attendanceChartInstance=new Chart(attCtx,{
                 type:'bar',data:{labels:['Present','Late','Absent'],datasets:[{label:'Records',data:[present,late,absent]}]},
-                options:chartDefaults()
+                options:{...chartDefaults(),animation:{duration:1600,easing:'easeOutQuart'}}
             });
 
             const buckets={};
             financeTx.forEach(t=>{
                 const d=new Date(t.date+'T00:00:00'); if(isNaN(d)) return;
-                const key=d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+                const key=ethiopianLabel(d);
                 buckets[key] ||= {income:0,expense:0,sort:d.getTime()};
                 buckets[key][t.type]+=num(t.amount);
             });
@@ -1208,8 +1301,42 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
                 type:'line',data:{labels:keys,datasets:[
                     {label:'Income',data:keys.map(k=>buckets[k].income),tension:.35},
                     {label:'Expense',data:keys.map(k=>buckets[k].expense),tension:.35}
-                ]},options:chartDefaults()
+                ]},options:{...chartDefaults(),animation:{duration:1800,easing:'easeOutQuart'}}
             });
+        }
+
+
+        function renderExecutiveIntelligence() {
+            const income=financeTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0), expense=financeTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0), net=income-expense;
+            const att=[...live.attendance,...live.begenaAttendance], valid=att.filter(r=>['present','late','absent'].includes(String(r.status).toLowerCase()));
+            const present=valid.filter(r=>['present','late'].includes(String(r.status).toLowerCase())).length, absent=valid.filter(r=>String(r.status).toLowerCase()==='absent').length;
+            const attendance=valid.length?Math.round(present/valid.length*100):0, students=live.students.length+live.begenaStudents.length, score=Number($('mhssScore')?.textContent||0), period=ethiopianLabel(new Date());
+            const summary=[];
+            if(!financeTx.length&&!students&&!valid.length) summary.push(t('noLiveDataSummary'));
+            else {
+                summary.push(t('perfScoreLine', score, period));
+                summary.push(net>=0?t('netPositiveLine', money(income), money(expense), money(net)):t('netNegativeLine', money(expense), money(income), money(Math.abs(net))));
+                summary.push(valid.length?t('attendanceLine', attendance, valid.length.toLocaleString(), absent.toLocaleString()):t('attendanceInsufficientLine'));
+                summary.push(t('studentsCountLine', students.toLocaleString()));
+                if(attendance<75) summary.push(t('attendanceLowRecommend')); else if(attendance>=90) summary.push(t('attendanceHighPraise'));
+                if(expense>income&&income+expense>0) summary.push(t('expenseHighRecommend')); else if(income>0) summary.push(t('incomeStrongerNote'));
+            }
+            const body=$('aiSummaryBody'); if(body){body.classList.add('ai-thinking');body.innerHTML=summary.map(x=>`<div class="ai-summary-line"><span class="bullet"></span><span>${esc(x)}</span></div>`).join('');setTimeout(()=>body.classList.remove('ai-thinking'),500)}
+            if($('aiSummaryPeriod')) $('aiSummaryPeriod').textContent=t('liveIntelligencePeriod', period); if($('aiSummaryStatus')){$('aiSummaryStatus').textContent=financeTx.length||students||valid.length?t('liveAnalysis'):t('noData');$('aiSummaryStatus').className=financeTx.length||students||valid.length?'status-pill status-green':'status-pill status-blue'}
+            renderSmartAlerts({income,expense,net,attendance,validCount:valid.length,students});
+        }
+        function renderSmartAlerts(m){const {income,expense,net,attendance,validCount,students}=m,alerts=[];
+            if(!financeTx.length&&!students&&!validCount) alerts.push({type:'info',icon:'ℹ️',title:t('waitingForData'),detail:t('waitingForDataDetail')});
+            else {
+                if(net<0) alerts.push({type:'critical',icon:'🔴',title:t('negativeNetTitle'),detail:t('negativeNetDetail', money(Math.abs(net)))});
+                if(validCount&&attendance<70) alerts.push({type:'critical',icon:'⚠️',title:t('attendanceCriticalTitle'),detail:t('attendanceCriticalDetail', attendance)}); else if(validCount&&attendance<80) alerts.push({type:'warning',icon:'🟡',title:t('attendanceWarningTitle'),detail:t('attendanceWarningDetail', attendance)});
+                if(income>0&&expense>income*.8) alerts.push({type:'warning',icon:'💸',title:t('highExpenseTitle'),detail:t('highExpenseDetail', Math.round(expense/income*100))});
+                if(students>0&&!validCount) alerts.push({type:'warning',icon:'👥',title:t('attendanceMissingTitle'),detail:t('attendanceMissingDetail')});
+                if(financeTx.length>0&&net>=0) alerts.push({type:'info',icon:'✓',title:t('financialStableTitle'),detail:t('financialStableDetail', money(net))});
+                if(validCount&&attendance>=90) alerts.push({type:'info',icon:'★',title:t('excellentAttendanceTitle'),detail:t('excellentAttendanceDetail', attendance)});
+            }
+            const list=$('smartAlertsList'); if(list) list.innerHTML=alerts.slice(0,5).map((a,i)=>`<div class="alert-item ${a.type}" style="animation-delay:${i*70}ms"><div class="alert-icon">${a.icon}</div><div class="min-w-0"><div class="alert-title">${esc(a.title)}</div><div class="alert-detail">${esc(a.detail)}</div></div></div>`).join('');
+            if($('alertCount')) $('alertCount').textContent=alerts.length;
         }
 
         function renderSmartInsights() {
@@ -1226,48 +1353,61 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             $('smartNet').className='insight-value '+(income-expense>=0?'text-green-400':'text-red-400');
         }
 
+        // Ethiopian calendar helpers: Gregorian is retained internally for database filtering; all month labels and quick periods use Ethiopian calendar.
+        const ETH_MONTHS = ['መስከረም','ጥቅምት','ኅዳር','ታኅሣሥ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜን'];
+        function gregorianToEthiopian(date){
+            const d=new Date(date); d.setHours(0,0,0,0);
+            const gYear=d.getFullYear(), gMonth=d.getMonth()+1, gDay=d.getDate();
+            const a=Math.floor((14-gMonth)/12), y=gYear+4800-a, m=gMonth+12*a-3;
+            const jd=gDay+Math.floor((153*m+2)/5)+365*y+Math.floor(y/4)-Math.floor(y/100)+Math.floor(y/400)-32045;
+            const jdn=jd; const eYear=Math.floor((4*(jdn-1723856)+1463)/1461);
+            const eMonth=1+Math.floor((jdn-(1723856+365*(eYear-1)+Math.floor(eYear/4)))/30);
+            const eDay=jdn-(1723856+365*(eYear-1)+Math.floor(eYear/4)+30*(eMonth-1))+1;
+            return {year:eYear,month:eMonth,day:eDay};
+        }
+        function ethiopianLabel(date,withDay=false){
+            const e=gregorianToEthiopian(date); return withDay ? `${e.day} ${ETH_MONTHS[e.month-1]} ${e.year}` : `${ETH_MONTHS[e.month-1]} ${e.year}`;
+        }
+        function ethiopianMonthRange(date=new Date()){
+            const e=gregorianToEthiopian(date);
+            const start=new Date(date); start.setHours(0,0,0,0);
+            // Find Gregorian date corresponding to Ethiopian month start by walking locally; max 31 days.
+            for(let i=0;i<35;i++){ const x=new Date(start); x.setDate(x.getDate()-i); const ex=gregorianToEthiopian(x); if(ex.year===e.year&&ex.month===e.month&&ex.day===1){ const end=new Date(x); end.setDate(end.getDate()+(e.month===13?5:30)-1); return {start:x,end}; }}
+            return null;
+        }
+
         function quickReport(period) {
             const now=new Date(), pad=n=>String(n).padStart(2,'0');
             if(period==='all'){ $('rbStart').value=''; $('rbEnd').value=''; }
             else if(period==='month'){
-                $('rbStart').value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;
-                $('rbEnd').value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(new Date(now.getFullYear(),now.getMonth()+1,0).getDate())}`;
+                const r=ethiopianMonthRange(now);
+                if(r){ $('rbStart').value=r.start.toISOString().slice(0,10); $('rbEnd').value=r.end.toISOString().slice(0,10); }
             } else {
-                $('rbStart').value=`${now.getFullYear()}-01-01`;
-                $('rbEnd').value=`${now.getFullYear()}-12-31`;
+                const e=gregorianToEthiopian(now);
+                const start=new Date(now); for(let i=0;i<370;i++){const x=new Date(start);x.setDate(x.getDate()-i);const ex=gregorianToEthiopian(x);if(ex.year===e.year&&ex.month===1&&ex.day===1){$('rbStart').value=x.toISOString().slice(0,10);break;}}
+                const next=new Date(now); next.setDate(next.getDate()+370); let found=null; for(let i=0;i<740;i++){const x=new Date(now);x.setDate(x.getDate()+i);const ex=gregorianToEthiopian(x);if(ex.year===e.year+1&&ex.month===1&&ex.day===1){found=x;break;}}
+                if(found){found.setDate(found.getDate()-1);$('rbEnd').value=found.toISOString().slice(0,10);}
             }
             switchTab('reports'); renderReportTable();
         }
 
         function setLanguage(lang) {
             const am=lang==='am';
+            currentLang = am ? 'am' : 'en';
             document.documentElement.lang=am?'am':'en';
             $('langBtnEn').classList.toggle('active',!am);
             $('langBtnAm').classList.toggle('active',am);
             $('langBtnEn').setAttribute('aria-pressed',String(!am));
             $('langBtnAm').setAttribute('aria-pressed',String(am));
             localStorage.setItem('mh_report_lang',lang);
+            document.body.classList.toggle('lang-am', am);
 
-            const map={
-              'Report & Analytics Management System (የሪፖርት እና ትንተና ማዕከል)':am?'የሪፖርት እና ትንተና ማዕከል':'Report & Analytics Management System',
-              'Admin Dashboard':am?'የአስተዳደር ዳሽቦርድ':'Admin Dashboard',
-              '🔗 Live Data Sources:':am?'🔗 የቀጥታ የመረጃ ምንጮች፦':'🔗 Live Data Sources:',
-              '📄 Report Generator ሪፖርት ማመንጫ':am?'📄 ሪፖርት ማመንጫ':'📄 Report Generator',
-              'Smart Insights':am?'ዘመናዊ ግንዛቤዎች':'Smart Insights',
-              'Income':am?'ገቢ':'Income','Expenses':am?'ወጪ':'Expenses','Net':am?'ተጣራ':'Net','Attendance':am?'ተገኝነት':'Attendance',
-              'Income Mix':am?'የገቢ ድርሻ':'Income Mix','Attendance Overview':am?'የተገኝነት አጠቃላይ እይታ':'Attendance Overview',
-              'Financial Pulse':am?'የገንዘብ እንቅስቃሴ':'Financial Pulse',
-              '🛠️ Custom Report Builder የራስ ሪፖርት ገንቢ':am?'🛠️ የራስ ሪፖርት ገንቢ':'🛠️ Custom Report Builder',
-              'From':am?'ከ':'From','To':am?'እስከ':'To','Type':am?'አይነት':'Type',
-              '📄 Export PDF':am?'📄 PDF አውጣ':'📄 Export PDF',
-              '📊 Export Excel/CSV':am?'📊 Excel/CSV አውጣ':'📊 Export Excel/CSV',
-              'No records match this filter.':am?'ከዚህ ማጣሪያ ጋር የሚስማማ መዝገብ የለም።':'No records match this filter.'
-            };
-            document.querySelectorAll('h1,h2,h3,p,label,button').forEach(el=>{
-                const txt=el.textContent.trim();
-                if(map[txt] && !el.querySelector('.amharic')) el.textContent=map[txt];
-            });
-            document.querySelectorAll('.amharic').forEach(el=>el.style.display=am?'inline':'inline');
+            applyStaticTranslations();
+
+            // Re-render everything that generates its own text dynamically in JS.
+            if (typeof renderDashboard === 'function') renderDashboard();
+            if (typeof renderReportTable === 'function') renderReportTable();
+            if (typeof refreshOrbitalStatuses === 'function') refreshOrbitalStatuses();
         }
 
         async function init() {
@@ -1290,7 +1430,7 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             document.addEventListener('visibilitychange', async () => {
                 if (!document.hidden) {
                     await loadLiveData();
-                    $('lastSyncLabel').textContent = 'Live data · updated ' + new Date().toLocaleTimeString();
+                    $('lastSyncLabel').textContent = t('liveDataUpdated') + new Date().toLocaleTimeString();
                 }
             });
 
@@ -1298,14 +1438,14 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             setInterval(async () => {
                 if (!document.hidden) {
                     await loadLiveData();
-                    $('lastSyncLabel').textContent = 'Live data · updated ' + new Date().toLocaleTimeString();
+                    $('lastSyncLabel').textContent = t('liveDataUpdated') + new Date().toLocaleTimeString();
                 }
             }, 60000);
         }
 
         init().catch(err => {
             console.error('[Report] initialization failed:', err);
-            toast('Report could not load live data. Check Supabase permissions/network.', 'error');
+            toast(t('noDataToast'), 'error');
         });
     </script>
 </body>

@@ -1849,7 +1849,7 @@ html[data-theme="dark"] .view-lux-modal{
          3. STUDENT REGISTRATION POPUP (Medium, Luxury)
     =========================================== -->
     <div id="addStudentModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto no-print">
-        <div class="modal-panel luxury-modal w-11/12 max-w-2xl rounded-2xl relative overflow-hidden my-8 max-h-[90vh] flex flex-col">
+        <div class="modal-panel luxury-modal w-11/12 max-w-4xl rounded-2xl relative overflow-hidden my-6 max-h-[94vh] flex flex-col">
 
             <div class="p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5 flex-shrink-0">
                 <h2 class="text-lg font-bold flex items-center gap-2">
@@ -1878,131 +1878,307 @@ html[data-theme="dark"] .view-lux-modal{
                             <button type="button" onclick="removePhoto()" class="photo-mini-btn bg-red-500/10 text-red-400 hover:bg-red-500/20" title="Remove Photo" aria-label="Remove Photo">🗑️</button>
                         </div>
                         <p id="photoError" class="hidden text-[10px] text-red-400 text-center max-w-[140px]"></p>
-                        <div class="w-full max-w-[140px]">
-                            <label class="block text-[10px] text-gray-400 mb-1 amharic text-center">🪪 መለያ ቁጥር</label>
-                            <input type="text" id="formIdDisplay" readonly class="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-yellow-500 font-mono text-center font-bold outline-none text-sm">
+                        <div class="w-full max-w-[150px] space-y-2">
+                            <div>
+                                <label class="block text-[10px] text-gray-400 mb-1 amharic text-center" data-i18n="systemStudentId">🪪 Student ID / መለያ ቁጥር</label>
+                                <input type="text" id="formIdDisplay" readonly class="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-yellow-500 font-mono text-center font-bold outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-gray-400 mb-1 amharic text-center" data-i18n="fileNumber">📁 File Number / የፋይል ቁጥር</label>
+                                <input type="text" id="sFileNumber" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none text-center" placeholder="Optional">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-gray-400 mb-1 amharic text-center" data-i18n="idNumber">🪪 ID Number / መታወቂያ ቁጥር</label>
+                                <input type="text" id="sIdNumber" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none text-center" placeholder="Optional">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Form Details -->
-                    <div class="w-full flex flex-col gap-4">
-                        <p class="section-title">👤 መሰረታዊ መረጃ (Basic Information)</p>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1 amharic">ሙሉ ስም</label>
-                                <input type="text" id="sName" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1 amharic">✝️ የክርስትና ስም</label>
-                                <input type="text" id="sChristianName" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1 amharic">ጾታ</label>
-                                <select id="sGender" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
-                                    <option value="ወንድ">ወንድ</option>
-                                    <option value="ሴት">ሴት</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1 amharic">ስልክ ቁጥር</label>
-                                <input type="tel" id="sPhone" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
-                            </div>
+                    <!-- Form Details: clean grouped sections -->
+                    <div class="student-form-groups w-full">
 
-                            <div class="col-span-2">
-                                <label class="block text-xs text-gray-400 mb-1 amharic">የትውልድ ቀን (የኢትዮጵያ ካላንደር)</label>
-                                <div class="flex gap-1">
-                                    <select id="dobDay" class="lux-input w-1/3 bg-[#1e293b] border border-white/10 rounded-lg p-2 text-xs">
-                                        <option>ቀን</option>
-                                        <script>for(let i=1;i<=30;i++) document.write(`<option>${i}</option>`);</script>
+                        <!-- PERSONAL INFORMATION -->
+                        <section class="form-group-card">
+                            <div class="form-group-heading">
+                                <div class="form-group-icon">👤</div>
+                                <div>
+                                    <h3 data-i18n="formPersonalInfo">Personal Information</h3>
+                                    <p data-i18n="formPersonalHelp">Basic identity and contact information</p>
+                                </div>
+                            </div>
+                            <div class="form-group-grid">
+                                <div class="form-field">
+                                    <label data-i18n="fieldFullName">Full Name / ሙሉ ስም <span class="required-mark">*</span></label>
+                                    <input type="text" id="sName" class="lux-input" required>
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="fieldChristianNameNew">Christian Name / የክርስትና ስም</label>
+                                    <input type="text" id="sChristianName" class="lux-input">
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="fieldGenderNew">Gender / ጾታ</label>
+                                    <select id="sGender" class="lux-input bg-[#1e293b]">
+                                        <option value="ወንድ">ወንድ</option>
+                                        <option value="ሴት">ሴት</option>
                                     </select>
-                                    <select id="dobMonth" class="lux-input w-1/3 bg-[#1e293b] border border-white/10 rounded-lg p-2 text-xs amharic">
-                                        <option>ወር</option>
-                                        <option>መስከረም</option><option>ጥቅምት</option><option>ህዳር</option><option>ታህሳስ</option><option>ጥር</option><option>የካቲት</option><option>መጋቢት</option><option>ሚያዝያ</option><option>ግንቦት</option><option>ሰኔ</option><option>ሐምሌ</option><option>ነሐሴ</option><option>ጳጉሜ</option>
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="fieldPhoneNew">Phone Number / ስልክ ቁጥር</label>
+                                    <input type="tel" id="sPhone" class="lux-input">
+                                </div>
+                                <div class="form-field form-field-wide">
+                                    <label data-i18n="fieldDobNew">Date of Birth / የትውልድ ቀን (የኢትዮጵያ ካላንደር)</label>
+                                    <div class="form-dob-row">
+                                        <select id="dobDay" class="lux-input">
+                                            <option>ቀን</option>
+                                            <script>for(let i=1;i<=30;i++) document.write(`<option>${i}</option>`);</script>
+                                        </select>
+                                        <select id="dobMonth" class="lux-input amharic bg-[#1e293b]">
+                                            <option>ወር</option>
+                                            <option>መስከረም</option><option>ጥቅምት</option><option>ህዳር</option><option>ታህሳስ</option><option>ጥር</option><option>የካቲት</option><option>መጋቢት</option><option>ሚያዝያ</option><option>ግንቦት</option><option>ሰኔ</option><option>ሐምሌ</option><option>ነሐሴ</option><option>ጳጉሜ</option>
+                                        </select>
+                                        <input type="number" id="dobYear" placeholder="ዓ.ም" min="1" max="9999" class="lux-input">
+                                    </div>
+                                    <div class="form-age-row">
+                                        <span class="form-age-label">ዕድሜ / Age</span>
+                                        <output id="dobAgeDisplay" aria-live="polite">-</output>
+                                        <span class="form-age-help">በራስ-ሰር ይሰላል</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- EDUCATION -->
+                        <section class="form-group-card">
+                            <div class="form-group-heading">
+                                <div class="form-group-icon">🎓</div>
+                                <div>
+                                    <h3 data-i18n="formEducation">Education</h3>
+                                    <p data-i18n="formEducationHelp">Current academic level and field of study</p>
+                                </div>
+                            </div>
+                            <div class="form-group-grid">
+                                <div class="form-field">
+                                    <label data-i18n="fieldGradeNew">Education Level / የአለማዊ ትምህርት ደረጃ</label>
+                                    <select id="sGrade" class="lux-input bg-[#1e293b]">
+                                        <option>1ኛ ክፍል</option><option>2ተኛ ክፍል</option><option>3ኛ ክፍል</option><option>4ኛ ክፍል</option>
+                                        <option>5ኛ ክፍል</option><option>6ኛ ክፍል</option><option>7ኛ ክፍል</option><option>8ኛ ክፍል</option>
+                                        <option>9ኛ ክፍል</option><option>10ኛ ክፍል</option><option>11ኛ ክፍል</option><option>12ኛ ክፍል</option>
+                                        <option>ዲግሪ (Degree)</option><option>ዲፕሎማ (Diploma)</option><option>ማስተርስ (Masters)</option>
                                     </select>
-                                    <input type="number" id="dobYear" placeholder="ዓ.ም" min="1" max="9999" class="lux-input w-1/3 bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none">
                                 </div>
-                                <div class="mt-2 flex items-center gap-2">
-                                    <span class="text-[11px] text-gray-400 amharic whitespace-nowrap">ዕድሜ / Age</span>
-                                    <output id="dobAgeDisplay" class="flex-1 rounded-lg border border-yellow-500/20 bg-yellow-500/5 px-3 py-2 text-sm font-bold text-yellow-500" aria-live="polite">-</output>
-                                    <span class="text-[10px] text-gray-500 amharic">በራስ-ሰር ይሰላል</span>
+                                <div id="fieldOfStudyWrap" class="form-field field-study-hidden">
+                                    <label data-i18n="fieldStudyNew">Field of Study / የትምህርት መስክ <span class="optional-mark">Optional</span></label>
+                                    <input type="text" id="sFieldOfStudy" class="lux-input">
                                 </div>
                             </div>
+                        </section>
 
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1 amharic">🙏 የንስሃ አባት ስም</label>
-                                <input type="text" id="sConfessionFatherName" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1 amharic">🙏 የንስሃ አባት ስልክ</label>
-                                <input type="tel" id="sConfessionFatherPhone" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
-                            </div>
-
-                            <div class="col-span-2">
-                                <label class="block text-xs text-gray-400 mb-1 amharic">🏠 አድራሻ</label>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <input type="text" id="sRegion" value="አዲስ አበባ" placeholder="ክልል" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none">
-                                    <input type="text" id="sSubCity" value="ለሚ ኩራ" placeholder="ክ/ከተማ" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none">
-                                    <input type="text" id="sWoreda" value="8" placeholder="ወረዳ" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none">
+                        <!-- CHURCH INFORMATION -->
+                        <section class="form-group-card">
+                            <div class="form-group-heading">
+                                <div class="form-group-icon">⛪</div>
+                                <div>
+                                    <h3 data-i18n="formChurchInfo">Church Information</h3>
+                                    <p data-i18n="formChurchHelp">Sunday School class and spiritual information</p>
                                 </div>
                             </div>
+                            <div class="form-group-grid">
+                                <div class="form-field">
+                                    <label data-i18n="fieldSundaySchoolGrade">Sunday School Education Level / የሰንበት ት/ቤት የትምህርት ደረጃ</label>
+                                    <select id="sSundaySchoolGrade" class="lux-input bg-[#1e293b]">
+                                        <option value="ቅድመ መደበኛ">ቅድመ መደበኛ</option>
+                                        <option value="1ኛ ክፍል">1</option>
+                                        <option value="2ኛ ክፍል">2</option>
+                                        <option value="3ኛ ክፍል">3</option>
+                                        <option value="4ኛ ክፍል">4</option>
+                                        <option value="5ኛ ክፍል">5</option>
+                                        <option value="6ኛ ክፍል">6</option>
+                                        <option value="7ኛ ክፍል">7</option>
+                                        <option value="8ኛ ክፍል">8</option>
+                                        <option value="9ኛ ክፍል">9</option>
+                                        <option value="10ኛ ክፍል">10</option>
+                                        <option value="11ኛ ክፍል">11</option>
+                                        <option value="12ኛ ክፍል">12</option>
+                                    </select>
+                                    <input type="hidden" id="sClassInternal" value="">
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="studentStatus">Student Status / የተማሪ ሁኔታ</label>
+                                    <select id="sStatus" class="lux-input bg-[#1e293b]">
+                                        <option value="Active" data-i18n="statusActive">Active / ንቁ</option>
+                                        <option value="Inactive" data-i18n="statusInactive">Inactive / ንቁ ያልሆነ</option>
+                                        <option value="Transferred" data-i18n="statusTransferred">Transferred / የተዛወረ</option>
+                                        <option value="Graduated" data-i18n="statusGraduated">Graduated / የተመረቀ</option>
+                                        <option value="Left Sunday School" data-i18n="statusLeft">Left Sunday School / ከሰንበት ት/ቤት የወጣ</option>
+                                        <option value="Temporarily Absent" data-i18n="statusAbsent">Temporarily Absent / ለጊዜው የቀረ</option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="fieldConfessionFatherNameNew">Confession Father Name / የንስሐ አባት ስም</label>
+                                    <input type="text" id="sConfessionFatherName" class="lux-input">
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="fieldConfessionFatherPhoneNew">Confession Father Phone / የንስሐ አባት ስልክ</label>
+                                    <input type="tel" id="sConfessionFatherPhone" class="lux-input">
+                                </div>
+                            </div>
+                        </section>
 
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1 amharic">🎓 የአለማዊ ትምህርት ደረጃ</label>
-                                <select id="sGrade" class="lux-input w-full bg-[#1e293b] border border-white/10 rounded-lg p-2 text-sm outline-none">
-                                    <option>1ኛ ክፍል</option><option>2ተኛ ክፍል</option><option>3ኛ ክፍል</option><option>4ኛ ክፍል</option>
-                                    <option>5ኛ ክፍል</option><option>6ኛ ክፍል</option><option>7ኛ ክፍል</option><option>8ኛ ክፍል</option>
-                                    <option>9ኛ ክፍል</option><option>10ኛ ክፍል</option><option>11ኛ ክፍል</option><option>12ኛ ክፍል</option>
-                                    <option>ዲግሪ (Degree)</option><option>ዲፕሎማ (Diploma)</option><option>ማስተርስ (Masters)</option>
-                                </select>
+                        <!-- ADDRESS -->
+                        <section class="form-group-card">
+                            <div class="form-group-heading">
+                                <div class="form-group-icon">📍</div>
+                                <div>
+                                    <h3 data-i18n="formAddress">Address</h3>
+                                    <p data-i18n="formAddressHelp">Current residential location</p>
+                                </div>
                             </div>
-                            <div id="fieldOfStudyWrap" class="field-study-hidden">
-                                <label class="block text-xs text-gray-400 mb-1 amharic">📚 የተማሩበት ዘርፍ <span class="text-gray-600">(Optional)</span></label>
-                                <input type="text" id="sFieldOfStudy" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                            <div class="form-group-grid form-group-grid-3">
+                                <div class="form-field">
+                                    <label data-i18n="fieldRegionNew">Region / ክልል</label>
+                                    <input type="text" id="sRegion" value="አዲስ አበባ" placeholder="ክልል" class="lux-input">
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="fieldSubCityNew">Sub City / ክ/ከተማ</label>
+                                    <input type="text" id="sSubCity" value="ለሚ ኩራ" placeholder="ክ/ከተማ" class="lux-input">
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="fieldWoredaNew">Woreda / ወረዳ</label>
+                                    <input type="text" id="sWoreda" value="8" placeholder="ወረዳ" class="lux-input">
+                                </div>
                             </div>
-                        </div>
+                        </section>
 
-                        <p class="section-title mt-1">👪 የወላጅ መረጃ (Parent Info)</p>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1 amharic">👩 የእናት ስም</label>
-                                <input type="text" id="mName" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                        <!-- FAMILY -->
+                        <section class="form-group-card">
+                            <div class="form-group-heading">
+                                <div class="form-group-icon">👪</div>
+                                <div>
+                                    <h3 data-i18n="formFamily">Family Information</h3>
+                                    <p data-i18n="formFamilyHelp">Parent and family contact details</p>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1 amharic">👩 የእናት ስልክ</label>
-                                <input type="tel" id="mPhone" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                            <div class="form-group-grid">
+                                <div class="form-field">
+                                    <label data-i18n="fieldMotherNameNew">Mother Name / የእናት ስም</label>
+                                    <input type="text" id="mName" class="lux-input">
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="fieldMotherPhoneNew">Mother Phone / የእናት ስልክ</label>
+                                    <input type="tel" id="mPhone" class="lux-input">
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="fieldFatherNameNew">Father Name / የአባት ስም</label>
+                                    <input type="text" id="fName" class="lux-input">
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="fieldFatherPhoneNew">Father Phone / የአባት ስልክ</label>
+                                    <input type="tel" id="fPhone" class="lux-input">
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1 amharic">👨 የአባት ስም</label>
-                                <input type="text" id="fName" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1 amharic">👨 የአባት ስልክ</label>
-                                <input type="tel" id="fPhone" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
-                            </div>
-                        </div>
+                        </section>
 
-                        <hr class="border-white/5">
+                        <!-- EMERGENCY -->
+                        <section class="form-group-card emergency-group-card">
+                            <div class="form-group-heading">
+                                <div class="form-group-icon emergency-group-icon">🚨</div>
+                                <div>
+                                    <h3 data-i18n="secEmergency">Emergency Information</h3>
+                                    <p data-i18n="formEmergencyHelp">Person to contact in an emergency</p>
+                                </div>
+                            </div>
+                            <div class="form-group-grid">
+                                <div class="form-field">
+                                    <label data-i18n="fieldEmergencyNameNew">Emergency Contact Name / የአደጋ ጊዜ ተጠሪ ስም</label>
+                                    <input type="text" id="eName" class="lux-input emergency-input">
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="fieldEmergencyPhoneNew">Emergency Contact Phone / የአደጋ ጊዜ ተጠሪ ስልክ</label>
+                                    <input type="tel" id="ePhone" class="lux-input emergency-input">
+                                </div>
+                            </div>
+                        </section>
 
-                        <p class="section-title mt-1" style="color:#f87171">🚨 የአደጋ ጊዜ መረጃ (Emergency Info)</p>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs text-red-400 mb-1 amharic">የአደጋ ጊዜ ተጠሪ ስም</label>
-                                <input type="text" id="eName" class="lux-input w-full bg-white/5 border border-red-500/30 rounded-lg p-2 text-sm outline-none">
+                        <!-- SERVICE DEPARTMENTS -->
+                        <section class="form-group-card service-group-card">
+                            <div class="form-group-heading">
+                                <div class="form-group-icon service-group-icon">🤝</div>
+                                <div>
+                                    <h3 data-i18n="serviceDepartmentsTitle">ማገልገል የሚፈልጉበት ክፍል</h3>
+                                    <p data-i18n="serviceDepartmentsHelp">Choose up to 3 departments / እስከ 3 ክፍሎች ይምረጡ</p>
+                                </div>
+                                <div id="serviceCount" class="selection-count">0 / 3</div>
                             </div>
-                            <div>
-                                <label class="block text-xs text-red-400 mb-1 amharic">የአደጋ ጊዜ ተጠሪ ስልክ</label>
-                                <input type="tel" id="ePhone" class="lux-input w-full bg-white/5 border border-red-500/30 rounded-lg p-2 text-sm outline-none">
+                            <div class="service-choice-grid modern-service-grid" id="serviceDepartmentsGrid">
+                                <label class="service-choice"><input type="checkbox" name="serviceDepartments" value="Finance & Property Management"><span>ሒሳብ እና ንብረት አስተዳደር</span></label>
+                                <label class="service-choice"><input type="checkbox" name="serviceDepartments" value="Human Resources Management Department"><span>የሰው ሀብት አስተዳደር ክፍል</span></label>
+                                <label class="service-choice"><input type="checkbox" name="serviceDepartments" value="Information & Internal Communication Department"><span>መረጃና የውስጥ ግንኙነት ክፍል</span></label>
+                                <label class="service-choice"><input type="checkbox" name="serviceDepartments" value="Programs & Conferences Department"><span>መርሐግብር እና ጉባኤያት ክፍል</span></label>
+                                <label class="service-choice"><input type="checkbox" name="serviceDepartments" value="Development & Planning Department"><span>ልማት እና እቅድ ክፍል</span></label>
+                                <label class="service-choice"><input type="checkbox" name="serviceDepartments" value="Education & Training Department"><span>ትምህርትና ስልጠና ክፍል</span></label>
+                                <label class="service-choice"><input type="checkbox" name="serviceDepartments" value="Hymns & Arts Department"><span>መዝሙርና ኪነጥበብ ክፍል</span></label>
+                                <label class="service-choice"><input type="checkbox" name="serviceDepartments" value="Music & Instruments Department"><span>የዜማና መሳሪያ ክፍል</span></label>
                             </div>
-                        </div>
+                        </section>
+
+                        <!-- SKILLS & TALENTS -->
+                        <section class="form-group-card skills-group-card">
+                            <div class="form-group-heading">
+                                <div class="form-group-icon skills-group-icon">✦</div>
+                                <div>
+                                    <h3 data-i18n="skillsTalents">Skills &amp; Talents</h3>
+                                    <p data-i18n="skillsHelp">Select all that apply / የሚመለከቱትን ሁሉ ይምረጡ</p>
+                                </div>
+                            </div>
+                            <div class="modern-skill-grid clean-skill-grid" id="skillsTalentsGrid">
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Singing"><span>Singing</span><small>ዝማሬ</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Instrument"><span>Instrument</span><small>የዜማ መሳሪያ</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Preaching"><span>Preaching</span><small>ስብከት</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Bible Knowledge"><span>Bible Knowledge</span><small>የመጽሐፍ ቅዱስ እውቀት</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Prayer/Intercession"><span>Prayer / Intercession</span><small>ጸሎት / ምልጃ</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Teaching"><span>Teaching</span><small>ትምህርት ማስተማር</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Evangelism"><span>Evangelism</span><small>ወንጌል ማስተላለፍ</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="IT"><span>IT</span><small>ኢንፎርሜሽን ቴክኖሎጂ</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Art"><span>Art</span><small>ሥነ ጥበብ</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Sports"><span>Sports</span><small>ስፖርት</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Leadership"><span>Leadership</span><small>አመራር</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Drama/Acting"><span>Drama / Acting</span><small>ድራማ / ትወና</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Writing"><span>Writing</span><small>ጽሑፍ</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Public Speaking"><span>Public Speaking</span><small>የሕዝብ ንግግር</small></label>
+                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Photography/Video"><span>Photography / Video</span><small>ፎቶግራፍ / ቪዲዮ</small></label>
+                                <label class="modern-choice"><input type="checkbox" id="skillOtherTalent" name="skillsTalents" value="Other Talent"><span>Other Talent</span><small>ሌላ ተሰጥኦ</small></label>
+                            </div>
+                            <div id="otherTalentWrap" class="hidden other-talent-box">
+                                <label data-i18n="otherTalentName">Other Talent Name / ሌላ ተሰጥኦ ይግለጹ</label>
+                                <input type="text" id="sOtherTalent" class="lux-input" placeholder="Optional">
+                            </div>
+                        </section>
+
+                        <!-- MEDICAL -->
+                        <section class="form-group-card medical-group-card">
+                            <div class="form-group-heading">
+                                <div class="form-group-icon medical-group-icon">+</div>
+                                <div>
+                                    <h3 data-i18n="medicalAccessibility">Medical Information</h3>
+                                    <p data-i18n="medicalHelp">Optional — add only important information</p>
+                                </div>
+                            </div>
+                            <div class="form-field form-field-wide">
+                                <label data-i18n="importantMedicalNotes">Important Medical Notes / አስፈላጊ የጤና ማስታወሻ <span class="optional-mark">Optional</span></label>
+                                <textarea id="sMedicalNotes" rows="3" class="lux-input medical-textarea" placeholder="Optional"></textarea>
+                            </div>
+                        </section>
                     </div>
                 </div>
 
-                <!-- Actions -->
-                <div class="flex justify-end gap-3 pt-2 border-t border-white/5">
-                    <button type="button" onclick="closeAddStudentModal()" class="px-5 py-2 rounded-lg border border-white/20 hover:bg-white/10 text-sm font-bold transition" data-i18n="cancel">Cancel</button>
-                    <button type="submit" id="studentSaveBtn" class="px-6 py-2 rounded-lg bg-yellow-500 text-black hover:bg-yellow-400 text-sm font-bold shadow-lg shadow-yellow-500/20 transition" data-i18n="save">💾 Save</button>
-                </div>
             </form>
+
+            <!-- Fixed bottom actions: same bottom placement on PC and mobile -->
+            <div class="student-form-actions flex justify-end gap-3 flex-shrink-0">
+                <button type="button" onclick="closeAddStudentModal()" class="px-5 py-2.5 rounded-xl border border-white/20 hover:bg-white/10 text-sm font-bold transition" data-i18n="cancel">Cancel</button>
+                <button type="submit" id="studentSaveBtn" form="studentForm" class="px-6 py-2.5 rounded-xl bg-yellow-500 text-black hover:bg-yellow-400 text-sm font-bold shadow-lg shadow-yellow-500/20 transition" data-i18n="save">💾 Save</button>
+            </div>
         </div>
     </div>
 
@@ -2352,6 +2528,7 @@ html[data-theme="dark"] .view-lux-modal{
                 studentProfile: 'Student Profile',
                 studentIdCardTitle: 'Student ID Card',
                 secPersonal: 'Personal Information',
+                formPersonalInfo: 'Personal Information', formPersonalHelp: 'Basic identity and contact information', formEducation: 'Education', formEducationHelp: 'Current academic level and field of study', formChurchInfo: 'Church Information', formChurchHelp: 'Sunday School class and spiritual information', formAddress: 'Address', formAddressHelp: 'Current residential location', formFamily: 'Family Information', formFamilyHelp: 'Parent and family contact details', formEmergencyHelp: 'Person to contact in an emergency', fieldFullName: 'Full Name / ሙሉ ስም', fieldChristianNameNew: 'Christian Name / የክርስትና ስም', fieldGenderNew: 'Gender / ጾታ', fieldPhoneNew: 'Phone Number / ስልክ ቁጥር', fieldDobNew: 'Date of Birth / የትውልድ ቀን (የኢትዮጵያ ካላንደር)', fieldGradeNew: 'Education Level / የአለማዊ ትምህርት ደረጃ', fieldStudyNew: 'Field of Study / የትምህርት መስክ', fieldSundaySchoolGrade: 'Sunday School Education Level / የሰንበት ት/ቤት የትምህርት ደረጃ', fieldConfessionFatherNameNew: 'Confession Father Name / የንስሐ አባት ስም', fieldConfessionFatherPhoneNew: 'Confession Father Phone / የንስሐ አባት ስልክ', fieldRegionNew: 'Region / ክልል', fieldSubCityNew: 'Sub City / ክ/ከተማ', fieldWoredaNew: 'Woreda / ወረዳ', fieldMotherNameNew: 'Mother Name / የእናት ስም', fieldMotherPhoneNew: 'Mother Phone / የእናት ስልክ', fieldFatherNameNew: 'Father Name / የአባት ስም', fieldFatherPhoneNew: 'Father Phone / የአባት ስልክ', fieldEmergencyNameNew: 'Emergency Contact Name / የአደጋ ጊዜ ተጠሪ ስም', fieldEmergencyPhoneNew: 'Emergency Contact Phone / የአደጋ ጊዜ ተጠሪ ስልክ',
                 secChurch: 'Church Information',
                 secParent: 'Parent Information',
                 secEmergency: 'Emergency Information',
@@ -2366,6 +2543,7 @@ html[data-theme="dark"] .view-lux-modal{
                 sdActive: 'Active', sdIdTag: 'Student ID', sdFullName: 'Full Name', sdPhoneNumber: 'Phone Number',
                 sdSection2Title: 'Family & Emergency', sdSection1Desc: 'Student identity and contact details', sdSection2Desc: 'Parent, confession father and emergency contacts',
                 sdConfessionFatherPhone: 'Confession Father Phone', sdMotherPhone: 'Mother Phone', sdFatherPhone: 'Father Phone', sdEmergencyContact: 'Emergency Contact', sdEmergencyPhone: 'Emergency Phone',
+                studentStatusSection: 'Student Status', studentStatus: 'Student Status / Status', statusActive: 'Active / ንቁ', statusInactive: 'Inactive / ንቁ ያልሆነ', statusTransferred: 'Transferred / የተዛወረ', statusGraduated: 'Graduated / የተመረቀ', statusLeft: 'Left Sunday School / ከሰንበት ት/ቤት የወጣ', statusAbsent: 'Temporarily Absent / ለጊዜው የቀረ', skillsTalents: 'Skills & Talents', skillsHelp: 'Select all that apply / የሚመለከቱትን ሁሉ ይምረጡ', otherTalentName: 'Other Talent Name / ሌላ ተሰጥኦ ይግለጹ', medicalAccessibility: 'Medical Information', importantMedicalNotes: 'Important Medical Notes / አስፈላጊ የጤና ማስታወሻ', medicalHelp: 'Optional — add only important information', serviceDepartmentsTitle: 'Preferred Service Departments', serviceDepartmentsHelp: 'Choose up to 3 departments / እስከ 3 ክፍሎች ይምረጡ',
                 globalScan: '🔍 Global Scan', scanId: '🔍 Scan ID', scanIdLabel: 'Student ID', scanIdPlaceholder: 'Scan or type Student ID, then press Enter', scanIdInlinePlaceholder: 'Scan ID or type + Enter', scanScopeGlobal: 'Searches across all classes', scanScopeClass: 'Searches only',
             },
             am: {
@@ -2405,6 +2583,7 @@ html[data-theme="dark"] .view-lux-modal{
                 studentProfile: 'የተማሪ መረጃ',
                 studentIdCardTitle: 'የተማሪ መታወቂያ ካርድ',
                 secPersonal: 'የግል መረጃ',
+                formPersonalInfo: 'የግል መረጃ', formPersonalHelp: 'የተማሪው መሰረታዊ ማንነት እና የመገኛ መረጃ', formEducation: 'ትምህርት', formEducationHelp: 'የትምህርት ደረጃ እና የትምህርት መስክ', formChurchInfo: 'የቤተ ክርስቲያን መረጃ', formChurchHelp: 'የሰንበት ት/ቤት ክፍል እና መንፈሳዊ መረጃ', formAddress: 'አድራሻ', formAddressHelp: 'የአሁኑ የመኖሪያ አድራሻ', formFamily: 'የቤተሰብ መረጃ', formFamilyHelp: 'የወላጆች እና የቤተሰብ መገኛ መረጃ', formEmergencyHelp: 'በአደጋ ጊዜ የሚጠራ ሰው', fieldFullName: 'ሙሉ ስም', fieldChristianNameNew: 'የክርስትና ስም', fieldGenderNew: 'ጾታ', fieldPhoneNew: 'ስልክ ቁጥር', fieldDobNew: 'የትውልድ ቀን (የኢትዮጵያ ካላንደር)', fieldGradeNew: 'የአለማዊ ትምህርት ደረጃ', fieldStudyNew: 'የትምህርት መስክ', fieldSundaySchoolGrade: 'የሰንበት ት/ቤት የትምህርት ደረጃ', fieldConfessionFatherNameNew: 'የንስሐ አባት ስም', fieldConfessionFatherPhoneNew: 'የንስሐ አባት ስልክ', fieldRegionNew: 'ክልል', fieldSubCityNew: 'ክ/ከተማ', fieldWoredaNew: 'ወረዳ', fieldMotherNameNew: 'የእናት ስም', fieldMotherPhoneNew: 'የእናት ስልክ', fieldFatherNameNew: 'የአባት ስም', fieldFatherPhoneNew: 'የአባት ስልክ', fieldEmergencyNameNew: 'የአደጋ ጊዜ ተጠሪ ስም', fieldEmergencyPhoneNew: 'የአደጋ ጊዜ ተጠሪ ስልክ',
                 secChurch: 'የቤተ ክርስቲያን መረጃ',
                 secParent: 'የወላጅ መረጃ',
                 secEmergency: 'የአደጋ ጊዜ መረጃ',
@@ -2419,6 +2598,7 @@ html[data-theme="dark"] .view-lux-modal{
                 sdActive: 'ንቁ', sdIdTag: 'የተማሪ መታወቂያ', sdFullName: 'ሙሉ ስም', sdPhoneNumber: 'ስልክ ቁጥር',
                 sdSection2Title: 'የቤተሰብ እና የአደጋ ጊዜ መረጃ', sdSection1Desc: 'የተማሪ ማንነት እና የመገኛ አድራሻ ዝርዝሮች', sdSection2Desc: 'የወላጅ፣ የንስሐ አባት እና የአደጋ ጊዜ ተጠሪ መረጃ',
                 sdConfessionFatherPhone: 'የንስሐ አባት ስልክ', sdMotherPhone: 'የእናት ስልክ', sdFatherPhone: 'የአባት ስልክ', sdEmergencyContact: 'የአደጋ ጊዜ ተጠሪ', sdEmergencyPhone: 'የአደጋ ጊዜ ስልክ',
+                studentStatusSection: 'የተማሪ ሁኔታ', studentStatus: 'የተማሪ ሁኔታ', statusActive: 'ንቁ', statusInactive: 'ንቁ ያልሆነ', statusTransferred: 'የተዛወረ', statusGraduated: 'የተመረቀ', statusLeft: 'ከሰንበት ት/ቤት የወጣ', statusAbsent: 'ለጊዜው የቀረ', skillsTalents: 'ክህሎቶች እና ተሰጥኦዎች', skillsHelp: 'የሚመለከቱትን ሁሉ ይምረጡ', otherTalentName: 'ሌላ ተሰጥኦ ይግለጹ', medicalAccessibility: 'የጤና መረጃ', importantMedicalNotes: 'አስፈላጊ የጤና ማስታወሻ', medicalHelp: 'አማራጭ — አስፈላጊ መረጃ ብቻ ያስገቡ', serviceDepartmentsTitle: 'ማገልገል የሚፈልጉበት ክፍል', serviceDepartmentsHelp: 'እስከ 3 ክፍሎች ይምረጡ',
                 globalScan: '🔍 አጠቃላይ ፍለጋ', scanId: '🔍 መለያ ቃኝ', scanIdLabel: 'የተማሪ መለያ', scanIdPlaceholder: 'መለያ ይቃኙ ወይም ይተይቡ፣ ከዚያ Enter ይጫኑ', scanIdInlinePlaceholder: 'መለያ ይቃኙ ወይም ይተይቡ + Enter', scanScopeGlobal: 'በሁሉም ክፍሎች ውስጥ ይፈልጋል', scanScopeClass: 'የሚፈልገው በ',
             }
         };
@@ -2453,6 +2633,14 @@ html[data-theme="dark"] .view-lux-modal{
             document.getElementById('langBtnEn')?.setAttribute('aria-pressed', currentLang === 'en');
             document.getElementById('langBtnAm')?.setAttribute('aria-pressed', currentLang === 'am');
             document.documentElement.lang = currentLang;
+            updateSundaySchoolGradeLabels();
+        }
+
+        function updateSundaySchoolGradeLabels() {
+            const sel = document.getElementById('sSundaySchoolGrade');
+            if (!sel) return;
+            const pre = sel.querySelector('option[value="ቅድመ መደበኛ"]');
+            if (pre) pre.textContent = currentLang === 'am' ? 'ቅድመ መደበኛ' : 'Preschool';
         }
 
         function setLanguage(lang) {
@@ -2530,6 +2718,7 @@ html[data-theme="dark"] .view-lux-modal{
                 phone: row.phone,
                 className: row.class_name,
                 grade: row.grade,
+                sundaySchoolGrade: row.sunday_school_grade,
                 fieldOfStudy: row.field_of_study,
                 dobDay: row.dob_day,
                 dobMonth: row.dob_month,
@@ -2546,7 +2735,14 @@ html[data-theme="dark"] .view-lux-modal{
                 emergencyName: row.emergency_name,
                 emergencyPhone: row.emergency_phone,
                 regDate: row.reg_date,
-                photo: row.photo
+                photo: row.photo,
+                fileNumber: row.file_number,
+                idNumber: row.id_number,
+                status: row.status || 'Active',
+                skillsTalents: row.skills_talents || [],
+                otherTalent: row.other_talent,
+                medicalNotes: row.medical_notes,
+                serviceDepartments: row.service_departments || []
             };
         }
 
@@ -2560,6 +2756,7 @@ html[data-theme="dark"] .view-lux-modal{
                 phone: s.phone,
                 class_name: s.className,
                 grade: s.grade,
+                sunday_school_grade: s.sundaySchoolGrade || null,
                 field_of_study: s.fieldOfStudy,
                 dob_day: s.dobDay,
                 dob_month: s.dobMonth,
@@ -2576,7 +2773,14 @@ html[data-theme="dark"] .view-lux-modal{
                 emergency_name: s.emergencyName,
                 emergency_phone: s.emergencyPhone,
                 reg_date: s.regDate,
-                photo: s.photo
+                photo: s.photo,
+                file_number: s.fileNumber || null,
+                id_number: s.idNumber || null,
+                status: s.status || 'Active',
+                skills_talents: Array.isArray(s.skillsTalents) ? s.skillsTalents : [],
+                other_talent: s.otherTalent || null,
+                medical_notes: s.medicalNotes || null,
+                service_departments: Array.isArray(s.serviceDepartments) ? s.serviceDepartments : []
             };
         }
 
@@ -2905,6 +3109,36 @@ html[data-theme="dark"] .view-lux-modal{
                 }
             });
         }
+
+        // Skills & talents: clean selection cards + Other Talent field.
+        document.querySelectorAll('input[name="skillsTalents"]').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const other = document.getElementById('skillOtherTalent');
+                document.getElementById('otherTalentWrap').classList.toggle('hidden', !other.checked);
+                if (!other.checked) document.getElementById('sOtherTalent').value = '';
+            });
+        });
+
+        // Preferred service departments: each student may choose a maximum of 3.
+        const serviceCheckboxes = Array.from(document.querySelectorAll('input[name="serviceDepartments"]'));
+        function updateServiceSelectionUI() {
+            const selected = serviceCheckboxes.filter(cb => cb.checked).length;
+            const count = document.getElementById('serviceCount');
+            if (count) count.textContent = `${selected} / 3`;
+            serviceCheckboxes.forEach(cb => {
+                cb.disabled = !cb.checked && selected >= 3;
+                cb.closest('.service-choice')?.classList.toggle('is-disabled', cb.disabled);
+            });
+        }
+        serviceCheckboxes.forEach(cb => cb.addEventListener('change', () => {
+            const selected = serviceCheckboxes.filter(x => x.checked).length;
+            if (selected > 3) {
+                cb.checked = false;
+                alert(currentLang === 'am' ? 'ከ3 የሚበልጡ ክፍሎችን መምረጥ አይችሉም።' : 'You can choose a maximum of 3 departments.');
+            }
+            updateServiceSelectionUI();
+        }));
+        updateServiceSelectionUI();
 
         // 7. Photo Upload Logic
         const photoInput = document.getElementById('photoInput');
@@ -3248,6 +3482,11 @@ html[data-theme="dark"] .view-lux-modal{
         function openAddStudentModal() {
             editModeId = null;
             document.getElementById('studentForm').reset();
+            document.getElementById('sStatus').value = 'Active';
+            document.getElementById('sSundaySchoolGrade').value = 'ቅድመ መደበኛ';
+            document.getElementById('otherTalentWrap').classList.add('hidden');
+            serviceCheckboxes.forEach(cb => cb.checked = false);
+            updateServiceSelectionUI();
             document.getElementById('regModalTitle').textContent = t('studentRegistration');
             removePhoto();
             updateDobAgePreview();
@@ -3327,6 +3566,7 @@ html[data-theme="dark"] .view-lux-modal{
             const gender = document.getElementById('sGender').value;
             const phone = document.getElementById('sPhone').value;
             const grade = document.getElementById('sGrade').value;
+            const sundaySchoolGrade = document.getElementById('sSundaySchoolGrade').value;
             const fieldOfStudy = document.getElementById('sFieldOfStudy').value;
             const dobDay = document.getElementById('dobDay').value;
             const dobMonth = document.getElementById('dobMonth').value;
@@ -3342,6 +3582,13 @@ html[data-theme="dark"] .view-lux-modal{
             const fatherPhone = document.getElementById('fPhone').value;
             const emergencyName = document.getElementById('eName').value;
             const emergencyPhone = document.getElementById('ePhone').value;
+            const fileNumber = document.getElementById('sFileNumber').value.trim();
+            const idNumber = document.getElementById('sIdNumber').value.trim();
+            const status = document.getElementById('sStatus').value;
+            const skillsTalents = Array.from(document.querySelectorAll('input[name="skillsTalents"]:checked')).map(el => el.value);
+            const otherTalent = document.getElementById('sOtherTalent').value.trim();
+            const medicalNotes = document.getElementById('sMedicalNotes').value.trim();
+            const serviceDepartments = serviceCheckboxes.filter(cb => cb.checked).map(cb => cb.value).slice(0, 3);
 
             // Required-field validation (id, name, class_name are never null in the DB)
             if (!name) { alert('Name is required.'); document.getElementById('sName').focus(); return; }
@@ -3375,10 +3622,10 @@ html[data-theme="dark"] .view-lux-modal{
                     id,
                     className: currentClassStr,
                     regDate: previousStudent ? previousStudent.regDate : new Date().toISOString().slice(0, 10),
-                    name, christianName, gender, phone, grade, fieldOfStudy,
+                    name, christianName, gender, phone, grade, sundaySchoolGrade, fieldOfStudy,
                     dobDay, dobMonth, dobYear, confessionFatherName, confessionFatherPhone,
                     region, subCity, woreda, motherName, motherPhone, fatherName, fatherPhone,
-                    emergencyName, emergencyPhone, photo: photoUrl
+                    emergencyName, emergencyPhone, photo: photoUrl, fileNumber, idNumber, status, skillsTalents, otherTalent, medicalNotes, serviceDepartments
                 };
 
                 const dbRecord = mapToDB(payload);
@@ -3448,6 +3695,7 @@ html[data-theme="dark"] .view-lux-modal{
                 document.getElementById('sGender').value = student.gender;
                 document.getElementById('sPhone').value = student.phone || '';
                 document.getElementById('sGrade').value = student.grade || document.getElementById('sGrade').options[0].value;
+                document.getElementById('sSundaySchoolGrade').value = student.sundaySchoolGrade || 'ቅድመ መደበኛ';
                 document.getElementById('sFieldOfStudy').value = student.fieldOfStudy || '';
                 document.getElementById('dobDay').value = student.dobDay || 'ቀን';
                 document.getElementById('dobMonth').value = student.dobMonth || 'ወር';
@@ -3463,6 +3711,15 @@ html[data-theme="dark"] .view-lux-modal{
                 document.getElementById('fPhone').value = student.fatherPhone || '';
                 document.getElementById('eName').value = student.emergencyName || '';
                 document.getElementById('ePhone').value = student.emergencyPhone || '';
+                document.getElementById('sFileNumber').value = student.fileNumber || '';
+                document.getElementById('sIdNumber').value = student.idNumber || '';
+                document.getElementById('sStatus').value = student.status || 'Active';
+                document.getElementById('sOtherTalent').value = student.otherTalent || '';
+                document.getElementById('sMedicalNotes').value = student.medicalNotes || '';
+                document.querySelectorAll('input[name="skillsTalents"]').forEach(cb => { cb.checked = Array.isArray(student.skillsTalents) && student.skillsTalents.includes(cb.value); });
+                document.getElementById('otherTalentWrap').classList.toggle('hidden', !document.getElementById('skillOtherTalent').checked);
+                serviceCheckboxes.forEach(cb => { cb.checked = Array.isArray(student.serviceDepartments) && student.serviceDepartments.includes(cb.value); });
+                updateServiceSelectionUI();
 
                 if (student.photo) setPhotoPreview(student.photo); else removePhoto();
                 updateDobAgePreview();
@@ -4381,15 +4638,20 @@ html[data-theme="dark"] .view-lux-modal{
         }
 
         function buildDatabaseClassCard(c,index){
-            const group=groupForClass(c);
+            // NOTE: this now mirrors the static built-in-class-card markup exactly (same icon box,
+            // same "Edit"/"Delete" buttons, no name truncation) so that a class you Add or Edit
+            // always looks identical to the pre-existing cards — no more mismatched styling.
             const icon=CUSTOM_CLASS_ICONS[index%CUSTOM_CLASS_ICONS.length];
             const editFn=c.is_system?`openBuiltInClassEdit('${jsAttr(c.name)}','${jsAttr(c.code)}')`:`openEditClassModal(${dbClassCache.indexOf(c)})`;
             const deleteFn=c.is_system?`deleteBuiltInClass('${jsAttr(c.name)}','${jsAttr(c.code)}')`:`deleteCustomClass(${dbClassCache.indexOf(c)})`;
-            return `<div class="class-card-lux glass-panel-gold rounded-3xl text-left relative overflow-hidden group database-class-card cursor-pointer" data-class-db-id="${classHtmlSafe(c.id)}" data-base-id="${classHtmlSafe(c.code)}" data-base-name="${classHtmlSafe(c.name)}">
-                <button type="button" class="class-scan-btn" title="${classHtmlSafe(t('scanId'))}" aria-label="${classHtmlSafe(t('scanId'))}" onclick="event.stopPropagation(); openClassScanModal('${jsAttr(c.name)}','${jsAttr(c.code)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5v14M8 5v14M11 5v14M14 5v9M17 5v14M20 5v14"/></svg></button>
-                <div class="flex items-center justify-between p-6 gap-3">
-                    <button type="button" onclick="openClass('${jsAttr(c.name)}','${jsAttr(c.code)}')" class="flex-1 min-w-0 text-left"><div class="flex items-center gap-4 min-w-0"><div class="class-icon-wrap w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0">${icon}</div><div class="min-w-0"><h3 class="text-lg font-bold amharic class-name-light leading-tight truncate">${classHtmlSafe(c.name)}</h3><p class="text-[11px] text-gray-400 mt-1">${t('tapToView')}</p><p class="text-[10px] text-gray-500 font-mono mt-1 tracking-wide">${classHtmlSafe(c.code)}</p></div></div></button>
-                    <div class="flex items-center gap-1.5 flex-shrink-0"><button type="button" onclick="event.stopPropagation();${editFn}" class="custom-class-edit-btn px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 hover:bg-yellow-500/20">✎ <span class="hidden sm:inline">${t('editClass')}</span></button><button type="button" onclick="event.stopPropagation();${deleteFn}" class="custom-class-delete-btn px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-red-500/10 text-red-600 border border-red-500/20 hover:bg-red-500/20">🗑 <span class="hidden sm:inline">${t('deleteClass')}</span></button></div>
+            return `<div class="class-card-lux glass-panel-gold rounded-3xl text-left relative overflow-hidden group database-class-card cursor-pointer" data-class-db-id="${classHtmlSafe(c.id)}" data-base-id="${classHtmlSafe(c.code)}" data-base-name="${classHtmlSafe(c.name)}" onclick="openClass('${jsAttr(c.name)}','${jsAttr(c.code)}')">
+                <div class="flex items-center justify-between p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="class-icon-wrap w-14 h-14 rounded-2xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-yellow-400 flex-shrink-0">${icon}</div>
+                        <div><h3 class="text-lg font-bold amharic text-white leading-tight">${classHtmlSafe(c.name)}</h3><p class="text-[11px] text-gray-400 mt-1">${t('tapToView')}</p>
+                        <p class="text-[10px] text-gray-500 font-mono mt-1 tracking-wide">${classHtmlSafe(c.code)}</p></div>
+                    </div>
+                    <button type="button" class="built-in-class-edit-btn" title="Edit class" aria-label="Edit class" onclick="event.stopPropagation(); ${editFn}"><span aria-hidden="true">✎</span><span class="built-in-edit-label">Edit</span></button><button type="button" class="built-in-class-delete-btn" title="Delete class" aria-label="Delete class" onclick="event.stopPropagation(); ${deleteFn}"><span aria-hidden="true">🗑</span><span class="built-in-delete-label">Delete</span></button><button type="button" class="class-scan-btn" title="${classHtmlSafe(t('scanId'))}" aria-label="${classHtmlSafe(t('scanId'))}" onclick="event.stopPropagation(); openClassScanModal('${jsAttr(c.name)}','${jsAttr(c.code)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5v14M8 5v14M11 5v14M14 5v9M17 5v14M20 5v14"/></svg></button><span class="text-xl text-yellow-500 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">→</span>
                 </div>
             </div>`;
         }
@@ -4412,6 +4674,7 @@ html[data-theme="dark"] .view-lux-modal{
             // can also be edited by the user, and the static card's data-base-id never updates on
             // its own, so matching by code would permanently lose the card once its ID is edited.
             const builtInGroupMap={children:'catChildren',central:'catCentral',youth:'catYouth'};
+            const claimedClassIds=new Set(); // db class rows (even mislabeled non-system ones) reclaimed by a static card below
             Object.entries(builtInGroupMap).forEach(([slug,label])=>{
                 const heading=document.querySelector(`h3[data-i18n="${label}"]`),grid=heading?.nextElementSibling;
                 if(!grid)return;
@@ -4423,7 +4686,7 @@ html[data-theme="dark"] .view-lux-modal{
                 // elsewhere in the group, since it doesn't rely on position at all.
                 sectionCards.forEach(card=>{
                     const match=sectionClasses.find(c=>!usedClasses.has(c)&&c.code===card.dataset.baseId);
-                    if(match){usedClasses.add(match);usedCards.add(card);syncBuiltInCard(card,match);}
+                    if(match){usedClasses.add(match);usedCards.add(card);claimedClassIds.add(match.id);syncBuiltInCard(card,match);}
                 });
                 // Pass 2: anything left (e.g. a card whose code WAS edited) — pair the leftovers by
                 // their remaining relative order.
@@ -4431,8 +4694,14 @@ html[data-theme="dark"] .view-lux-modal{
                 const leftoverClasses=sectionClasses.filter(c=>!usedClasses.has(c));
                 leftoverCards.forEach((card,i)=>{
                     const c=leftoverClasses[i];
-                    if(!c){card.remove();return;}
-                    syncBuiltInCard(card,c);
+                    if(c){claimedClassIds.add(c.id);syncBuiltInCard(card,c);return;}
+                    // Nothing marked is_system matched this card's code — before giving up, check
+                    // the WHOLE group for a row with this exact code that's simply mislabeled
+                    // (is_system false when it shouldn't be). Re-sync it in place instead of
+                    // deleting the static card and letting it reappear as a mismatched "added" card.
+                    const mislabeled=group?dbClassCache.find(c=>!claimedClassIds.has(c.id)&&c.group_id===group.id&&c.code===card.dataset.baseId):null;
+                    if(mislabeled){claimedClassIds.add(mislabeled.id);syncBuiltInCard(card,mislabeled);return;}
+                    card.remove();
                 });
             });
 
@@ -4453,7 +4722,7 @@ html[data-theme="dark"] .view-lux-modal{
                 grid.querySelectorAll('.database-added-class-card').forEach(e=>e.remove());
                 const group=dbGroupCache.find(g=>g.slug===slug);
                 if(!group)return;
-                dbClassCache.filter(c=>c.group_id===group.id&&!c.is_system).forEach((c,i)=>{
+                dbClassCache.filter(c=>c.group_id===group.id&&!c.is_system&&!claimedClassIds.has(c.id)).forEach((c,i)=>{
                     const wrap=document.createElement('div');wrap.className='database-added-class-card';wrap.innerHTML=buildDatabaseClassCard(c,i);grid.appendChild(wrap.firstElementChild);
                 });
             });
@@ -4598,6 +4867,127 @@ html[data-theme="dark"] .student360-footer{background:var(--surface,#111c2e)}
 .student360-tabs{display:flex;gap:4px;padding:10px 14px;border-bottom:1px solid rgba(127,127,127,.15);overflow:auto}.student360-tabs button{border:0;background:transparent;padding:9px 13px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;color:inherit;white-space:nowrap}.student360-tabs button.active{background:rgba(184,146,46,.14);color:#a77c00}.student360-body{flex:1;overflow:auto;padding:18px}.s360-panel{display:none}.s360-panel.active{display:block}.s360-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.s360-stats>div{padding:13px;border-radius:15px;background:rgba(127,127,127,.07);border:1px solid rgba(127,127,127,.12)}.s360-stats small{display:block;font-size:9px;opacity:.58;text-transform:uppercase;letter-spacing:.7px}.s360-stats strong{display:block;margin-top:5px;font-size:14px}.s360-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.s360-card{padding:17px;border-radius:17px;border:1px solid rgba(127,127,127,.13);background:rgba(127,127,127,.035)}.s360-card h3{margin:0 0 12px;font-size:13px}.s360-wide{grid-column:1/-1}.s360-row{display:flex;justify-content:space-between;gap:15px;padding:7px 0;border-bottom:1px solid rgba(127,127,127,.1);font-size:11px}.s360-row:last-child{border-bottom:0}.s360-row span{opacity:.58}.s360-row strong{text-align:right;word-break:break-word}.s360-module-empty{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:35px;opacity:.8}.s360-module-icon{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:rgba(184,146,46,.12);font-size:24px;color:#a77c00;margin-bottom:12px}.s360-module-empty h3{margin:0 0 8px}.s360-module-empty p{max-width:560px;font-size:12px;line-height:1.7;opacity:.68}.s360-timeline-item{position:relative;padding:0 0 17px 28px;font-size:11px}.s360-timeline-item:before{content:'';position:absolute;left:5px;top:4px;width:10px;height:10px;border-radius:50%;background:#b8922e}.s360-timeline-item:after{content:'';position:absolute;left:9px;top:15px;bottom:0;width:1px;background:rgba(184,146,46,.25)}.s360-timeline-item:last-child:after{display:none}.s360-timeline-item strong{display:block;margin-bottom:3px}.s360-timeline-item span{opacity:.58}.student360-footer{padding:12px 16px;border-top:1px solid rgba(127,127,127,.15);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:10px;opacity:.9}.student360-footer>div{display:flex;gap:6px}.student360-footer button{border:1px solid rgba(127,127,127,.16);background:rgba(127,127,127,.06);border-radius:9px;padding:8px 11px;font-size:10px;font-weight:700;cursor:pointer;color:inherit}.student360-footer button.primary{background:#b8922e;color:#111;border-color:#b8922e}.student-360-btn{font-weight:800!important}
 @media(max-width:640px){.student360-overlay{padding:10px}.student360-modal{width:calc(100vw - 20px);height:calc(100dvh - 20px);border-radius:20px}.student360-head{grid-template-columns:62px 1fr;padding:18px 48px 15px 16px;min-height:120px}.student360-avatar{width:62px;height:62px}.student360-code{display:none}.student360-head h2{font-size:18px}.s360-stats{grid-template-columns:1fr 1fr}.s360-grid{grid-template-columns:1fr}.s360-wide{grid-column:auto}.student360-footer{flex-direction:column;align-items:stretch}.student360-footer>div{width:100%;display:grid;grid-template-columns:1fr 1fr 1fr}.student360-footer button{padding:9px 5px}.student360-body{padding:12px}}
 .s360-live-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}.s360-live-head h3{margin:0}.s360-live-head p{margin:4px 0 0;color:var(--text-muted,#64748b);font-size:12px}.s360-refresh{border:1px solid rgba(184,146,46,.28);background:var(--surface-soft,#f1f3f5);color:var(--text-main,#172033);padding:8px 12px;border-radius:10px;font-weight:800;cursor:pointer}.s360-live-list{display:flex;flex-direction:column;gap:7px}.s360-live-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 12px;border:1px solid var(--border,#e2e6ec);background:var(--surface-soft,#f1f3f5);border-radius:12px}.s360-live-row span{display:flex;flex-direction:column;gap:3px;min-width:0}.s360-live-row small{color:var(--text-muted,#64748b);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.s360-live-row b{white-space:nowrap}.s360-loading,.s360-empty{padding:22px;text-align:center;color:var(--text-muted,#64748b);font-size:12px}.s360-status-present{color:#16a34a}.s360-status-late{color:#ca8a04}.s360-status-absent{color:#dc2626}.s360-status-permission{color:#2563eb}
+
+/* Modern student skills / service choices */
+.student-form-section{border:1px solid rgba(127,127,127,.14);background:rgba(127,127,127,.035);border-radius:18px;padding:16px}
+.student-form-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px}
+.student-form-section-title{display:flex;align-items:center;gap:9px;margin:0;font-size:13px;font-weight:800;letter-spacing:.01em;color:var(--text-main,#f8fafc)}
+.student-form-section-help{margin:5px 0 0;font-size:10px;color:var(--text-muted,#94a3b8)}
+.section-icon{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(184,146,46,.13);color:#b8922e;font-weight:900}
+.medical-section{border-color:rgba(239,68,68,.16);background:rgba(239,68,68,.035)}
+.medical-icon{background:rgba(239,68,68,.10);color:#ef4444}
+.modern-skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.modern-choice{position:relative;display:grid;grid-template-columns:18px 1fr;grid-template-rows:auto auto;column-gap:9px;align-items:center;padding:11px 12px;border:1px solid rgba(127,127,127,.15);border-radius:12px;background:rgba(255,255,255,.025);cursor:pointer;transition:all .18s ease;min-width:0}
+.modern-choice:hover{border-color:rgba(184,146,46,.4);background:rgba(184,146,46,.06);transform:translateY(-1px)}
+.modern-choice input{grid-row:1 / span 2;appearance:none;width:18px;height:18px;border:1.5px solid #94a3b8;border-radius:5px;margin:0;display:grid;place-items:center;background:transparent;cursor:pointer}
+.modern-choice input:checked{background:#b8922e;border-color:#b8922e}
+.modern-choice input:checked::after{content:'✓';color:#111;font-size:12px;font-weight:900}
+.modern-choice:has(input:checked){border-color:rgba(184,146,46,.65);background:rgba(184,146,46,.10);box-shadow:0 5px 16px rgba(184,146,46,.08)}
+.modern-choice span{font-size:11px;font-weight:750;color:var(--text-main,#f8fafc);line-height:1.25;white-space:normal}
+.modern-choice small{font-size:10px;color:var(--text-muted,#94a3b8);line-height:1.3;margin-top:2px}
+.selection-count{font-size:10px;font-weight:800;padding:6px 9px;border-radius:999px;background:rgba(184,146,46,.10);color:#b8922e;border:1px solid rgba(184,146,46,.2);white-space:nowrap}
+.service-section{border-color:rgba(37,99,235,.15);background:rgba(37,99,235,.025)}
+.service-icon{background:rgba(37,99,235,.10);color:#3b82f6}
+.service-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.service-choice{display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 12px;border:1px solid rgba(127,127,127,.15);border-radius:12px;background:rgba(255,255,255,.025);cursor:pointer;transition:all .18s ease}
+.service-choice:hover{border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.06)}
+.service-choice input{appearance:none;width:18px;height:18px;flex:0 0 18px;border:1.5px solid #94a3b8;border-radius:5px;display:grid;place-items:center;margin:0}
+.service-choice input:checked{background:#2563eb;border-color:#2563eb}
+.service-choice input:checked::after{content:'✓';color:#fff;font-size:12px;font-weight:900}
+.service-choice:has(input:checked){border-color:rgba(37,99,235,.55);background:rgba(37,99,235,.08)}
+.service-choice span{font-size:11px;font-weight:700;color:var(--text-main,#f8fafc);line-height:1.45}
+@media(max-width:760px){.modern-skill-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.service-choice-grid{grid-template-columns:1fr}}
+@media(max-width:460px){.modern-skill-grid{grid-template-columns:1fr}.modern-choice{padding:10px}.student-form-section{padding:13px}}
+html[data-theme="light"] .student-form-section{background:rgba(15,23,42,.025);border-color:rgba(15,23,42,.10)}
+html[data-theme="light"] .modern-choice,html[data-theme="light"] .service-choice{background:#fff;border-color:rgba(15,23,42,.10)}
+html[data-theme="light"] .modern-choice span,html[data-theme="light"] .service-choice span,html[data-theme="light"] .student-form-section-title{color:#172033}
+html[data-theme="light"] .modern-choice small,html[data-theme="light"] .student-form-section-help{color:#64748b}
+
+
+.student-form-actions{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:10px;
+  padding:14px 24px calc(14px + env(safe-area-inset-bottom));
+  border-top:1px solid rgba(148,163,184,.16);
+  background:rgba(15,23,42,.96);
+  backdrop-filter:blur(14px);
+  box-shadow:0 -10px 28px rgba(0,0,0,.14);
+}
+#studentForm{min-height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+html[data-theme="light"] .student-form-actions{background:rgba(255,255,255,.97);border-top-color:rgba(15,23,42,.10);box-shadow:0 -10px 28px rgba(15,23,42,.08)}
+@media(max-width:700px){
+  .student-form-actions{padding:12px 16px calc(12px + env(safe-area-inset-bottom));}
+  .student-form-actions button{flex:1;min-height:44px}
+}
+
+/* ==========================================================
+   CLEAN MODERN STUDENT FORM — GROUPED INFORMATION SECTIONS
+   ========================================================== */
+.student-form-groups{display:flex;flex-direction:column;gap:14px}
+.form-group-card{position:relative;padding:18px;border:1px solid rgba(148,163,184,.18);border-radius:18px;background:rgba(255,255,255,.035);box-shadow:0 8px 26px rgba(0,0,0,.08);transition:border-color .18s ease,box-shadow .18s ease}
+.form-group-card:hover{border-color:rgba(148,163,184,.28);box-shadow:0 12px 32px rgba(0,0,0,.11)}
+.form-group-heading{display:flex;align-items:center;gap:12px;margin-bottom:16px;min-width:0}
+.form-group-heading>div:nth-child(2){min-width:0;flex:1}
+.form-group-heading h3{margin:0;font-size:14px;line-height:1.35;font-weight:800;letter-spacing:.01em;color:var(--text-main,#f8fafc)}
+.form-group-heading p{margin:3px 0 0;font-size:11px;line-height:1.45;color:#94a3b8}
+.form-group-icon{width:38px;height:38px;flex:0 0 38px;border-radius:12px;display:grid;place-items:center;background:rgba(234,179,8,.11);border:1px solid rgba(234,179,8,.18);font-size:17px}
+.form-group-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.form-group-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.form-field{min-width:0}
+.form-field-wide{grid-column:1/-1}
+.form-field label{display:block;margin:0 0 6px;font-size:11px;line-height:1.45;color:#94a3b8;font-weight:600}
+.form-field .lux-input{width:100%;min-height:42px;padding:10px 12px;border-radius:11px;border:1px solid rgba(148,163,184,.18);background:rgba(255,255,255,.045);color:inherit;outline:none;font-size:13px;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease}
+.form-field .lux-input:focus{border-color:rgba(234,179,8,.55);background:rgba(255,255,255,.065);box-shadow:0 0 0 3px rgba(234,179,8,.08)}
+.form-readonly-value{min-height:42px;display:flex;align-items:center;padding:10px 12px;border-radius:11px;border:1px solid rgba(148,163,184,.15);background:rgba(255,255,255,.035);color:#cbd5e1;font-size:13px;font-weight:700}
+.required-mark{color:#f87171}.optional-mark{color:#64748b;font-weight:500;margin-left:3px}
+.form-dob-row{display:grid;grid-template-columns:1fr 1.8fr 1fr;gap:7px}
+.form-age-row{display:flex;align-items:center;gap:9px;margin-top:8px}
+.form-age-label{font-size:11px;color:#94a3b8;white-space:nowrap}
+.form-age-row output{flex:1;border:1px solid rgba(234,179,8,.18);background:rgba(234,179,8,.055);border-radius:10px;padding:8px 11px;color:#eab308;font-size:13px;font-weight:800}
+.form-age-help{font-size:10px;color:#64748b;white-space:nowrap}
+.emergency-group-card{border-color:rgba(248,113,113,.18);background:rgba(248,113,113,.025)}
+.emergency-group-icon{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.18)}
+.emergency-input:focus{border-color:rgba(248,113,113,.5)!important;box-shadow:0 0 0 3px rgba(248,113,113,.07)!important}
+.service-group-card{border-color:rgba(59,130,246,.18);background:rgba(59,130,246,.025)}
+.service-group-icon{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.18)}
+.skills-group-card{border-color:rgba(234,179,8,.18)}
+.skills-group-icon{background:rgba(234,179,8,.1);border-color:rgba(234,179,8,.18)}
+.medical-group-card{border-color:rgba(239,68,68,.15);background:rgba(239,68,68,.022)}
+.medical-group-icon{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.16);color:#f87171;font-weight:900}
+.clean-skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.clean-skill-grid .modern-choice{min-height:54px;padding:10px 11px;border:1px solid rgba(148,163,184,.16);border-radius:12px;background:rgba(255,255,255,.025);display:grid;grid-template-columns:18px 1fr;grid-template-rows:auto auto;column-gap:9px;align-items:center;cursor:pointer;transition:all .18s ease}
+.clean-skill-grid .modern-choice:hover{border-color:rgba(234,179,8,.35);background:rgba(234,179,8,.045);transform:translateY(-1px)}
+.clean-skill-grid .modern-choice input{grid-row:1/3;width:18px;height:18px;margin:0;accent-color:#eab308}
+.clean-skill-grid .modern-choice span{font-size:12px;font-weight:750;color:#e2e8f0;line-height:1.25}
+.clean-skill-grid .modern-choice small{font-size:10px;color:#94a3b8;line-height:1.25;margin-top:2px}
+.clean-skill-grid .modern-choice:has(input:checked){border-color:rgba(234,179,8,.58);background:rgba(234,179,8,.08);box-shadow:0 5px 18px rgba(234,179,8,.08)}
+.other-talent-box{margin-top:10px;padding:12px;border-radius:12px;border:1px dashed rgba(234,179,8,.25);background:rgba(234,179,8,.035)}
+.other-talent-box label{display:block;margin-bottom:6px;font-size:11px;color:#94a3b8}
+.modern-service-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.modern-service-grid .service-choice{min-height:52px;padding:10px 12px;border:1px solid rgba(148,163,184,.16);border-radius:12px;background:rgba(255,255,255,.025);display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .18s ease}
+.modern-service-grid .service-choice:hover{border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.055)}
+.modern-service-grid .service-choice input{appearance:none;width:18px;height:18px;flex:0 0 18px;border:1.5px solid #64748b;border-radius:5px;display:grid;place-items:center;margin:0}
+.modern-service-grid .service-choice input:checked{background:#3b82f6;border-color:#3b82f6}
+.modern-service-grid .service-choice input:checked::after{content:'✓';color:#fff;font-size:12px;font-weight:900}
+.modern-service-grid .service-choice:has(input:checked){border-color:rgba(59,130,246,.55);background:rgba(59,130,246,.08);box-shadow:0 5px 18px rgba(59,130,246,.07)}
+.modern-service-grid .service-choice.is-disabled{opacity:.42}
+.selection-count{margin-left:auto;flex:0 0 auto;min-width:48px;text-align:center;padding:5px 9px;border-radius:999px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.18);color:#60a5fa;font-size:11px;font-weight:800}
+.medical-textarea{min-height:100px;resize:vertical!important}
+@media(max-width:700px){
+  .form-group-grid,.form-group-grid-3{grid-template-columns:1fr}
+  .form-field-wide{grid-column:auto}
+  .clean-skill-grid{grid-template-columns:1fr 1fr}
+  .modern-service-grid{grid-template-columns:1fr}
+  .form-group-card{padding:14px}
+  .form-group-heading{align-items:flex-start}
+  .form-group-heading h3{font-size:13px}
+  .form-group-heading p{font-size:10px}
+  .form-dob-row{grid-template-columns:1fr 1.5fr 1fr}
+  .form-age-help{display:none}
+}
+@media(max-width:420px){.clean-skill-grid{grid-template-columns:1fr}.form-group-icon{width:34px;height:34px;flex-basis:34px}}
 </style>
 
 <script>
