@@ -86,6 +86,53 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
   .back-dash-btn{padding:9px !important;}
   .back-dash-btn span.label{display:none;}
 }
+
+/* ===== Real Messaging Center Upgrade ===== */
+.rich-compose{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface2)}
+.rich-toolbar{display:flex;align-items:center;gap:4px;padding:7px;overflow-x:auto;border-bottom:1px solid var(--border);background:var(--surface)}
+.rich-toolbar::-webkit-scrollbar{height:4px}
+.rich-tool{width:34px;height:32px;flex:0 0 auto;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--text);font-weight:800;display:grid;place-items:center}
+.rich-tool:hover,.rich-tool.active{background:var(--surface2);border-color:var(--border);color:var(--gold)}
+.rich-editor{min-height:170px;max-height:340px;overflow:auto;padding:13px 14px;outline:none;line-height:1.6;background:var(--surface2);color:var(--text)}
+.rich-editor:empty:before{content:attr(data-placeholder);color:var(--muted)}
+.rich-editor blockquote{margin:10px 0;padding:8px 12px;border-left:3px solid var(--gold);background:color-mix(in srgb,var(--gold) 8%,transparent);border-radius:6px}
+.rich-editor img{max-width:100%;height:auto;border-radius:10px}
+.compose-files{display:flex;flex-wrap:wrap;gap:8px;padding:8px 10px;border-top:1px solid var(--border)}
+.file-chip{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.file-chip .file-remove{border:0;background:transparent;color:var(--danger);font-weight:900}
+.message-card{max-width:88%;padding:12px 14px;border-radius:16px;background:var(--surface2);border:1px solid var(--border);box-shadow:0 8px 22px rgba(0,0,0,.05)}
+.bubble-self .message-card{background:color-mix(in srgb,var(--gold) 17%,var(--surface));border-color:color-mix(in srgb,var(--gold) 45%,var(--border))}
+.msg-head{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.msg-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#17120a;font-weight:900;overflow:hidden}
+.msg-avatar img{width:100%;height:100%;object-fit:cover}
+.msg-name{font-weight:900;font-size:12px}.msg-role,.msg-time{font-size:10px;color:var(--muted)}
+.msg-content{font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.msg-content blockquote{margin:9px 0;padding:8px 12px;border-left:3px solid var(--gold);background:color-mix(in srgb,var(--gold) 9%,transparent);border-radius:6px}
+.msg-content img{display:block;max-width:min(420px,100%);max-height:360px;object-fit:contain;border-radius:12px;margin-top:8px;cursor:zoom-in}
+.attach-card{display:flex;align-items:center;gap:10px;margin-top:9px;padding:9px;border:1px solid var(--border);border-radius:11px;background:color-mix(in srgb,var(--surface) 80%,transparent)}
+.attach-icon{font-size:22px}.attach-info{min-width:0;flex:1}.attach-name{font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.attach-meta{font-size:10px;color:var(--muted)}
+.attach-actions{display:flex;gap:5px}.attach-actions a{font-size:10px;font-weight:800;color:var(--gold);text-decoration:none}
+.compose-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.compose-actions{display:flex;gap:7px;flex-wrap:wrap}
+.attachment-input{display:none}
+.preview-overlay{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.86);display:grid;place-items:center;padding:18px}
+.preview-overlay.hidden{display:none}
+.preview-overlay img{max-width:95vw;max-height:88vh;border-radius:14px}
+.preview-close{position:absolute;right:18px;top:18px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-size:20px}
+
+/* ===== Message detail popup ===== */
+.detail-subject{font-size:17px;font-weight:900;margin:0}.detail-meta{font-size:11px;color:var(--muted);margin-top:3px}.modal-thread{background:var(--bg)}.modal-thread .message-card{max-width:100%;width:min(560px,100%);margin:0 auto}.modal-thread .bubble{max-width:100%;padding:0;background:transparent;color:var(--text);align-self:stretch}.modal-thread .bubble-self,.modal-thread .bubble-other{align-self:stretch}.modal-thread .msg-content,.modal-thread .media-caption{white-space:pre-wrap;overflow-wrap:anywhere}.modal-thread .message-image{display:block;width:100%;max-height:420px;object-fit:contain;background:#111;cursor:zoom-in}.modal-thread .media-stack{display:flex;flex-direction:column;gap:3px;background:#111}.modal-thread .document-list{padding-top:8px}.modal-reply.hidden-reply{display:none!important}
+.receipt-bar{margin:0 18px 10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;background:var(--surface2);font-size:11px;color:var(--muted)}
+.receipt-bar strong{color:var(--text)}
+.receipt-list{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px}
+.receipt-pill{padding:4px 7px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:10px}
+@media(max-width:700px){
+  .message-card{max-width:94%}.rich-editor{min-height:145px}.compose-footer{align-items:stretch;flex-direction:column}.compose-actions{justify-content:space-between}
+}
+
+
+.thread-participant{display:flex;align-items:center;gap:8px;margin-bottom:4px}.mini-avatar{width:28px;height:28px;border-radius:50%;background:var(--gold);display:grid;place-items:center;overflow:hidden;flex:0 0 auto;font-weight:900;font-size:11px;color:#17120a}.mini-avatar img{width:100%;height:100%;object-fit:cover}.participant-name{font-size:12px;font-weight:800}.participant-sub{font-size:10px;color:var(--muted)}
+.media-stack.bottom{margin-top:10px}.media-caption.top{margin-bottom:0}.message-card .msg-head{position:relative}.chat-participants{display:flex;align-items:center;gap:6px;margin-top:3px}.chat-participants .mini-avatar{width:24px;height:24px}.chat-arrow{color:var(--muted);font-size:11px}
 </style>
 </head>
 <body>
@@ -137,9 +184,35 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
         </div>
         <div class="field">
           <label data-i18n="fMessage">Message</label>
-          <textarea id="fBody" required data-i18n-placeholder="fMessagePlaceholder" placeholder="Write your message..."></textarea>
+          <div class="rich-compose">
+            <div class="rich-toolbar" id="composeToolbar">
+              <button type="button" class="rich-tool" data-cmd="bold" title="Bold"><b>B</b></button>
+              <button type="button" class="rich-tool" data-cmd="italic" title="Italic"><i>I</i></button>
+              <button type="button" class="rich-tool" data-cmd="underline" title="Underline"><u>U</u></button>
+              <button type="button" class="rich-tool" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
+              <button type="button" class="rich-tool" data-cmd="formatBlock" data-value="blockquote" title="Quote">❝</button>
+              <button type="button" class="rich-tool" data-cmd="justifyLeft" title="Align left">≡</button>
+              <button type="button" class="rich-tool" data-cmd="justifyCenter" title="Center">≣</button>
+              <button type="button" class="rich-tool" data-cmd="justifyRight" title="Align right">≡</button>
+              <button type="button" class="rich-tool" data-cmd="insertUnorderedList" title="Bulleted list">•</button>
+              <button type="button" class="rich-tool" data-cmd="insertOrderedList" title="Numbered list">1.</button>
+              <button type="button" class="rich-tool" id="linkBtn" title="Link">🔗</button>
+              <button type="button" class="rich-tool" id="emojiBtn" title="Emoji">😊</button>
+              <button type="button" class="rich-tool" id="attachBtn" title="Attach">📎</button>
+              <input id="attachmentInput" class="attachment-input" type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+              <select id="attachmentPosition" class="btn" style="min-height:32px;padding:5px 9px;font-size:11px" title="Image position"><option value="top">🖼️ Image above message</option><option value="bottom">🖼️ Image below message</option></select>
+            </div>
+            <div id="fBody" class="rich-editor" contenteditable="true" data-placeholder="Write your message..." aria-label="Message editor"></div>
+            <div id="composeFiles" class="compose-files hidden"></div>
+          </div>
         </div>
-        <button type="submit" class="btn primary" id="sendBtn" data-i18n="sendBtn">Send</button>
+        <div class="compose-footer">
+          <div class="compose-actions">
+            <button type="button" class="btn" id="previewBtn">Preview</button>
+            <button type="button" class="btn" id="draftBtn">Save Draft</button>
+          </div>
+          <button type="submit" class="btn primary" id="sendBtn" data-i18n="sendBtn">Send</button>
+        </div>
       </form>
     </div>
   </section>
@@ -164,13 +237,29 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
       <button class="btn" id="closeThreadModal">✕</button>
     </div>
     <div class="modal-thread" id="modalThreadBody"></div>
-    <div class="modal-reply">
-      <textarea id="modalReplyText" data-i18n-placeholder="replyPlaceholder" placeholder="Write a reply..."></textarea>
+    <div class="modal-reply" style="align-items:flex-end;flex-wrap:wrap">
+      <div class="rich-compose" style="flex:1;min-width:220px">
+        <div class="rich-toolbar" id="replyToolbar">
+          <button type="button" class="rich-tool" data-cmd="bold" title="Bold"><b>B</b></button>
+          <button type="button" class="rich-tool" data-cmd="italic" title="Italic"><i>I</i></button>
+          <button type="button" class="rich-tool" data-cmd="underline" title="Underline"><u>U</u></button>
+          <button type="button" class="rich-tool" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
+          <button type="button" class="rich-tool" data-cmd="formatBlock" data-value="blockquote" title="Quote">❝</button>
+          <button type="button" class="rich-tool" data-cmd="justifyLeft" title="Align left">≡</button>
+          <button type="button" class="rich-tool" data-cmd="justifyCenter" title="Center">≣</button>
+          <button type="button" class="rich-tool" data-cmd="justifyRight" title="Align right">≡</button>
+        </div>
+        <div id="modalReplyText" class="rich-editor" contenteditable="true" data-placeholder="Write a reply..."></div>
+      </div>
       <button class="btn primary" id="modalReplySend" data-i18n="sendBtn">Send</button>
     </div>
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
+<div class="preview-overlay hidden" id="imagePreviewOverlay">
+  <button class="preview-close" id="imagePreviewClose">✕</button>
+  <img id="imagePreviewImg" alt="Preview">
+</div>
 
 <script type="module">
 import { supabase } from './supabaseClient.js';
@@ -181,6 +270,7 @@ let profiles = [];
 let threads = [];
 let activeThreadId = null;
 let callerId = null;
+let isAdminUser = false;
 
 function esc(v){ return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function toast(message){
@@ -198,14 +288,22 @@ function setNotice(el, message, type='error'){
 function hideNotice(el){ if(el) el.classList.add('hidden'); }
 function relativeTime(iso){
   if(!iso) return '';
-  const mins = Math.round((Date.now() - new Date(iso).getTime())/60000);
+  const d = new Date(iso);
+  if(Number.isNaN(d.getTime())) return '';
+  const mins = Math.max(0, Math.round((Date.now() - d.getTime())/60000));
   if(mins < 1) return 'now';
   if(mins < 60) return `${mins}m`;
   const hrs = Math.round(mins/60);
   if(hrs < 24) return `${hrs}h`;
   const days = Math.round(hrs/24);
   if(days < 7) return `${days}d`;
-  return new Date(iso).toLocaleDateString();
+  return d.toLocaleDateString();
+}
+function formatDateTime(iso){
+  if(!iso) return 'Date unavailable';
+  const d = new Date(iso);
+  if(Number.isNaN(d.getTime())) return 'Date unavailable';
+  return d.toLocaleString();
 }
 
 async function callNotifFn(action, payload = {}) {
@@ -221,6 +319,24 @@ async function callNotifFn(action, payload = {}) {
   let data; try { data = await res.json(); } catch { data = null; }
   if (!res.ok) throw new Error((data && data.error) || `Request failed (${res.status})`);
   return data;
+}
+
+async function uploadNotifFile(file) {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  if (!token) throw new Error('Not signed in');
+  const url = `${supabase.supabaseUrl}/functions/v1/mhss-notifications`;
+  const form = new FormData();
+  form.append('action', 'upload_attachment');
+  form.append('file', file);
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  let data; try { data = await res.json(); } catch { data = null; }
+  if (!res.ok) throw new Error((data && data.error) || `Upload failed (${res.status})`);
+  return data?.attachment;
 }
 
 /* ===================== i18n ===================== */
@@ -306,7 +422,7 @@ $('themeToggleBtn').addEventListener('click', ()=>{
 
 /* ===================== Recipients ===================== */
 async function loadProfiles(){
-  const { data, error } = await supabase.from('mhss_user_profiles').select('user_id,name,email').order('name');
+  const { data, error } = await supabase.from('mhss_user_profiles').select('user_id,name,email,profile_photo_url').order('name');
   if (error) { console.error(error); return; }
   profiles = data || [];
   const sel = $('fRecipient');
@@ -323,29 +439,6 @@ function profileName(userId){
 }
 
 /* ===================== Compose ===================== */
-$('composeForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const notice = $('composeNotice');
-  notice.classList.add('hidden');
-  const recipientId = $('fRecipient').value || null;
-  const subject = $('fSubject').value.trim();
-  const body = $('fBody').value.trim();
-  if (!body) return;
-  $('sendBtn').disabled = true;
-  try {
-    await callNotifFn('send_notification', { recipient_id: recipientId, subject, body });
-    $('fSubject').value = '';
-    $('fBody').value = '';
-    toast(t('sendSuccess'));
-    await loadThreads();
-  } catch (err) {
-    notice.textContent = err.message || t('sendFail');
-    notice.classList.remove('hidden');
-  } finally {
-    $('sendBtn').disabled = false;
-  }
-});
-
 /* ===================== Thread list ===================== */
 function threadDisplaySubject(thread){
   if (thread.origin_broadcast_id) return `Re: ${thread.origin_broadcast_subject || thread.subject || 'Broadcast'}`;
@@ -358,35 +451,22 @@ function threadTag(thread){
 }
 function renderThreadList(){
   const listEl = $('threadList');
-  if (!threads.length){
-    listEl.innerHTML = `<div class="empty">${esc(t('noThreads'))}</div>`;
-    return;
-  }
-  const sorted = [...threads].sort((a,b)=>{
-    const at = a.latest_message ? a.latest_message.created_at : a.created_at;
-    const bt = b.latest_message ? b.latest_message.created_at : b.created_at;
-    return new Date(bt) - new Date(at);
-  });
-  listEl.innerHTML = '';
+  const sorted = [...threads].sort((a,b)=>new Date(b.latest_message?.created_at||b.created_at)-new Date(a.latest_message?.created_at||a.created_at));
+  listEl.innerHTML='';
+  if(!sorted.length){ listEl.innerHTML='<div class="empty">No conversations yet.</div>'; return; }
   sorted.forEach(thread=>{
-    const row = document.createElement('div');
-    row.className = 'thread-row';
-    const who = thread.is_broadcast ? t('everyone') : (thread.recipient ? (thread.recipient.name || thread.recipient.email) : profileName(thread.recipient_id));
-    const snippet = thread.latest_message ? thread.latest_message.body : '';
-    const time = thread.latest_message ? thread.latest_message.created_at : thread.created_at;
-    row.innerHTML = `
-      ${thread.unread ? '<span class="thread-unread-dot"></span>' : '<span style="width:8px"></span>'}
-      <div class="thread-row-main">
-        <div class="thread-row-top">
-          <span class="thread-subject">${esc(threadDisplaySubject(thread))}</span>
-          <span class="thread-time">${relativeTime(time)}</span>
-        </div>
-        <div class="thread-snippet">${esc(who)} — ${esc(snippet)}</div>
-        ${threadTag(thread)}
-      </div>
-    `;
-    row.addEventListener('click', ()=> openThreadModal(thread.id));
-    listEl.appendChild(row);
+    const row=document.createElement('div'); row.className='thread-row';
+    const person=participantForThread(thread);
+    const snippet=thread.latest_message ? plainFromRich(thread.latest_message.body||'') : '';
+    const hasImage=(thread.latest_message?.attachments||[]).some(a=>(a.mime_type||a.type||'').startsWith('image/'));
+    const hasAttach=!!(thread.latest_message?.attachments?.length);
+    const time=thread.latest_message?.created_at||thread.created_at;
+    row.innerHTML=`${thread.unread?'<span class="thread-unread-dot"></span>':'<span style="width:8px"></span>'}
+      ${avatarHtml(person, 'U','mini-avatar')}
+      <div class="thread-row-main"><div class="thread-participant"><div><div class="participant-name">${esc(person.name||person.email||'User')}</div><div class="participant-sub">${thread.is_broadcast?'Broadcast':'Conversation'}</div></div></div>
+      <div class="thread-row-top"><span class="thread-subject">${esc(threadDisplaySubject(thread))}</span><span class="thread-time">${relativeTime(time)}</span></div>
+      <div class="thread-snippet">${hasImage?'🖼️ Image · ':''}${esc(snippet)}${hasAttach&&!hasImage?' · 📎':''}</div>${threadTag(thread)}</div>`;
+    row.addEventListener('click',()=>openThreadModal(thread.id)); listEl.appendChild(row);
   });
 }
 
@@ -398,9 +478,28 @@ async function loadThreads(){
 $('refreshThreadsBtn').addEventListener('click', loadThreads);
 
 /* ===================== Thread modal ===================== */
+function getProfile(userId, thread){
+  if(!userId) return null;
+  if(thread?.sender?.user_id===userId) return thread.sender;
+  if(thread?.recipient?.user_id===userId) return thread.recipient;
+  return profiles.find(p=>p.user_id===userId) || msgProfileCache.get(userId) || null;
+}
+const msgProfileCache = new Map();
+function avatarHtml(profile, fallback='U', cls='msg-avatar'){
+  const url=profile?.profile_photo_url || '';
+  const name=profile?.name || profile?.email || fallback;
+  return `<div class="${cls}">${url?`<img src="${esc(url)}" alt="${esc(name)}" loading="lazy">`:esc((name||fallback).charAt(0).toUpperCase())}</div>`;
+}
+function participantForThread(thread){
+  if(thread.is_broadcast) return {name:'MHSS Administration', email:'Broadcast', photo:thread.sender?.profile_photo_url||''};
+  if(thread.recipient_id===callerId) return thread.sender || {name:'User'};
+  return thread.recipient || {name:'User'};
+}
 function senderLabel(msg, thread){
-  if (msg.sender_id === callerId) return 'You';
-  return thread.is_broadcast ? 'You' : (thread.recipient ? (thread.recipient.name || thread.recipient.email) : profileName(thread.recipient_id));
+  if (msg.sender_id === callerId) return profiles.find(p=>p.user_id===callerId)?.name || 'You';
+  if (thread.sender && (thread.sender.name || thread.sender.email) && msg.sender_id === thread.sender.user_id) return thread.sender.name || thread.sender.email;
+  const sender = profiles.find(p=>p.user_id===msg.sender_id);
+  return sender ? (sender.name || sender.email) : (thread.is_broadcast ? 'MHSS Administration' : 'User');
 }
 function renderThreadModal(thread){
   $('modalSubject').textContent = threadDisplaySubject(thread);
@@ -424,7 +523,9 @@ function openThreadModal(id){
   if (!thread) return;
   renderThreadModal(thread);
   $('threadOverlay').classList.remove('hidden');
-  $('modalReplyText').value = '';
+  $('modalReplyText').innerHTML = '';
+  const replyBox = $('modalReplyText').closest('.modal-reply');
+  if (replyBox) replyBox.classList.remove('hidden-reply');
   $('modalReplyText').focus();
 }
 function closeThreadModal(){
@@ -441,7 +542,7 @@ async function sendModalReply(){
   $('modalReplySend').disabled = true;
   try {
     await callNotifFn('reply', { thread_id: activeThreadId, body: text });
-    $('modalReplyText').value = '';
+    $('modalReplyText').innerHTML = '';
     toast(t('replySuccess'));
     await loadThreads();
     const thread = threads.find(t=>t.id === activeThreadId);
@@ -452,18 +553,251 @@ async function sendModalReply(){
     $('modalReplySend').disabled = false;
   }
 }
-$('modalReplySend').addEventListener('click', sendModalReply);
-$('modalReplyText').addEventListener('keydown', (e)=>{ if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendModalReply(); } });
+
+$('modalReplyText').addEventListener('keydown', (e)=>{ if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); sendModalReply(); } });
+
+
+/* ===================== Rich Messaging ===================== */
+let composeAttachments = [];
+
+function formatBytes(bytes){
+  if(!bytes) return '0 B';
+  const units=['B','KB','MB','GB']; let i=0, n=bytes;
+  while(n>=1024 && i<units.length-1){n/=1024;i++;}
+  return `${n.toFixed(i?1:0)} ${units[i]}`;
+}
+function fileIcon(type,name){
+  if((type||'').startsWith('image/')) return '🖼️';
+  if((type||'').includes('pdf') || /\.pdf$/i.test(name)) return '📕';
+  if(/\.(doc|docx)$/i.test(name)) return '📘';
+  if(/\.(xls|xlsx)$/i.test(name)) return '📗';
+  if(/\.(ppt|pptx)$/i.test(name)) return '📙';
+  return '📄';
+}
+function renderComposeFiles(){
+  const el=$('composeFiles');
+  if(!composeAttachments.length){el.classList.add('hidden');el.innerHTML='';return;}
+  el.classList.remove('hidden');
+  el.innerHTML=composeAttachments.map((f,i)=>`
+    <div class="file-chip">
+      <span>${fileIcon(f.type,f.name)}</span>
+      <span style="font-size:11px;font-weight:800;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.name)}</span>
+      <span style="font-size:10px;color:var(--muted)">${formatBytes(f.size)}</span>
+      <button type="button" class="file-remove" data-remove="${i}">✕</button>
+    </div>`).join('');
+  el.querySelectorAll('[data-remove]').forEach(b=>b.addEventListener('click',()=>{
+    composeAttachments.splice(Number(b.dataset.remove),1); renderComposeFiles();
+  }));
+}
+function setupEditor(toolbarId, editorId){
+  const toolbar=$(toolbarId), editor=$(editorId);
+  if(!toolbar || !editor) return;
+  toolbar.querySelectorAll('[data-cmd]').forEach(btn=>{
+    btn.addEventListener('mousedown',e=>e.preventDefault());
+    btn.addEventListener('click',()=>{
+      editor.focus();
+      const cmd=btn.dataset.cmd, val=btn.dataset.value;
+      if(cmd==='formatBlock') document.execCommand(cmd,false,val||'p');
+      else document.execCommand(cmd,false,null);
+      editor.dispatchEvent(new Event('input'));
+    });
+  });
+}
+setupEditor('composeToolbar','fBody');
+setupEditor('replyToolbar','modalReplyText');
+
+$('linkBtn')?.addEventListener('click',()=>{
+  const url=prompt('Enter URL');
+  if(url){ $('fBody').focus(); document.execCommand('createLink',false,url); }
+});
+$('emojiBtn')?.addEventListener('click',()=>{
+  $('fBody').focus();
+  document.execCommand('insertText',false,'😊 ');
+});
+$('attachBtn')?.addEventListener('click',()=>$('attachmentInput').click());
+$('attachmentInput')?.addEventListener('change',e=>{
+  composeAttachments.push(...Array.from(e.target.files||[]));
+  renderComposeFiles();
+  e.target.value='';
+});
+$('imagePreviewClose')?.addEventListener('click',()=>$('imagePreviewOverlay').classList.add('hidden'));
+$('imagePreviewOverlay')?.addEventListener('click',e=>{
+  if(e.target.id==='imagePreviewOverlay') e.currentTarget.classList.add('hidden');
+});
+
+function sanitizeRichHtml(html){
+  const template=document.createElement('template'); template.innerHTML=html;
+  template.content.querySelectorAll('script,style,iframe,object,embed,form,meta,link').forEach(n=>n.remove());
+  template.content.querySelectorAll('*').forEach(el=>{
+    [...el.attributes].forEach(a=>{
+      if(/^on/i.test(a.name)) el.removeAttribute(a.name);
+      if((a.name==='href'||a.name==='src') && /^(javascript|data):/i.test(a.value)) el.removeAttribute(a.name);
+    });
+  });
+  return template.innerHTML.trim();
+}
+function plainFromRich(html){
+  const d=document.createElement('div'); d.innerHTML=html;
+  return (d.innerText||'').trim();
+}
+function renderMessageContent(html){
+  return sanitizeRichHtml(html || '').replace(/<img\b([^>]*?)>/gi,(m,attrs)=>{
+    const src=(attrs.match(/\bsrc=["']([^"']+)["']/i)||[])[1];
+    if(!src || /^(javascript|data):/i.test(src)) return '';
+    return `<img ${attrs}>`;
+  });
+}
+function renderAttachments(attachments=[]){
+  return attachments.map(a=>{
+    const url=a.url || a.public_url || a.file_url || a.path || '';
+    const name=a.file_name || a.name || 'Attachment';
+    const type=a.mime_type || a.file_type || '';
+    const size=a.file_size ? formatBytes(Number(a.file_size)) : '';
+    if(type.startsWith('image/') && url){
+      return `<img src="${esc(url)}" alt="${esc(name)}" data-image-preview="${esc(url)}" loading="lazy">`;
+    }
+    return `<div class="attach-card">
+      <div class="attach-icon">${fileIcon(type,name)}</div>
+      <div class="attach-info"><div class="attach-name">${esc(name)}</div><div class="attach-meta">${esc(type||'File')} ${size?'· '+esc(size):''}</div></div>
+      <div class="attach-actions">${url?`<a href="${esc(url)}" target="_blank" rel="noopener">Open</a><a href="${esc(url)}" download>Download</a>`:''}</div>
+    </div>`;
+  }).join('');
+}
+function renderRichMessage(mine,m,thread){
+  const senderProfile = m.sender || getProfile(m.sender_id,thread) || {};
+  const recipientProfile = thread.recipient || {};
+  const sender = senderProfile.name || senderProfile.email || senderLabel(m,thread);
+  const attachments = m.attachments || m.message_attachments || [];
+  const images = attachments.filter(a=>((a.mime_type||a.file_type||a.type||'').startsWith('image/')) && (a.url||a.public_url||a.file_url||a.path));
+  const files = attachments.filter(a=>!images.includes(a));
+  const rawContent = m.body ?? m.content ?? '';
+  const content = m.content_format === 'html'
+    ? renderMessageContent(rawContent)
+    : esc(String(rawContent)).replace(/\n/g,'<br>');
+  const topImages=images.filter(a=>(a.position||'top')!=='bottom');
+  const bottomImages=images.filter(a=>a.position==='bottom');
+  const imageStack = (arr, cls='') => arr.length ? `<div class="media-stack ${cls}">${arr.map(a=>{const url=a.url||a.public_url||a.file_url||a.path;const name=a.file_name||a.name||'Image';return `<img class="message-image" src="${esc(url)}" alt="${esc(name)}" data-image-preview="${esc(url)}" loading="lazy">`;}).join('')}</div>` : '';
+  const wrap=document.createElement('div'); wrap.className=`bubble ${mine?'bubble-self':'bubble-other'}`;
+  wrap.innerHTML=`<div class="message-card">
+    <div class="msg-head">${avatarHtml(senderProfile,sender,'msg-avatar')}<div style="min-width:0"><div class="msg-name">${esc(sender)}</div><div class="msg-role">${mine?'Sender':'Receiver'} · <span class="msg-time">${formatDateTime(m.created_at)}</span></div></div></div>
+    ${imageStack(topImages)}
+    ${content?`<div class="media-caption">${content}</div>`:(files.length||images.length?'':'<div class="media-caption"><span style="color:var(--muted)">No message content</span></div>')}
+    ${imageStack(bottomImages,'bottom')}
+    ${files.length?`<div class="document-list">${renderAttachments(files)}</div>`:''}
+  </div>`;
+  wrap.querySelectorAll('[data-image-preview]').forEach(img=>img.addEventListener('click',()=>{ $('imagePreviewImg').src=img.dataset.imagePreview; $('imagePreviewOverlay').classList.remove('hidden'); }));
+  return wrap;
+}
+
+/* Rich message detail popup */
+renderThreadModal = function(thread){
+  $('modalSubject').innerHTML = `<div class="detail-subject">${esc(threadDisplaySubject(thread))}</div><div class="detail-meta">${esc(thread.is_broadcast ? 'Broadcast' : ((thread.sender?.name || thread.sender?.email || 'Sender') + ' → ' + (thread.recipient?.name || thread.recipient?.email || 'Receiver')))}</div>`;
+  const body = $('modalThreadBody'); body.innerHTML='';
+  if (thread.receipt_summary) {
+    const r=thread.receipt_summary;
+    const bar=document.createElement('div'); bar.className='receipt-bar';
+    bar.innerHTML=`<strong>Delivery & Read</strong> · ${esc(String(r.delivered??0))} delivered · ${esc(String(r.read??0))} read · ${esc(String(r.unread??0))} unread`;
+    if(Array.isArray(r.users)&&r.users.length){const list=document.createElement('div');list.className='receipt-list';list.innerHTML=r.users.map(u=>`<span class="receipt-pill">${esc(u.name||u.email||'User')} · ${u.read?'✓✓ Read':'○ Unread'}</span>`).join('');bar.appendChild(list);}
+    body.appendChild(bar);
+  }
+  (thread.messages||[]).forEach(m=>body.appendChild(renderRichMessage(m,m.sender_id===callerId,thread)));
+  requestAnimationFrame(()=>{body.scrollTop=body.scrollHeight;});
+  if(thread.unread){callNotifFn('mark_read',{thread_id:thread.id}).then(()=>{thread.unread=false;renderThreadList();}).catch(()=>{});}
+};
+
+/* Send rich HTML while retaining compatibility with the current Edge Function. */
+const __oldComposeSubmit = $('composeForm').onsubmit;
+$('composeForm').removeEventListener('submit', __oldComposeSubmit);
+$('composeForm').addEventListener('submit', async(e)=>{
+  e.preventDefault();
+  const notice=$('composeNotice'); hideNotice(notice);
+  const recipientId=$('fRecipient').value||null;
+  const subject=$('fSubject').value.trim();
+  const rich=sanitizeRichHtml($('fBody').innerHTML);
+  const body=plainFromRich(rich);
+  if(!body && !composeAttachments.length) return;
+  $('sendBtn').disabled=true;
+  try{
+    /* Send rich content. If backend accepts content/html, it is used;
+       otherwise body remains backward-compatible. */
+    const uploadedAttachments = [];
+    for (const file of composeAttachments) {
+      const uploaded = await uploadNotifFile(file);
+      if (uploaded) uploadedAttachments.push({...uploaded, position: $('attachmentPosition')?.value === 'bottom' ? 'bottom' : 'top'});
+    }
+    await callNotifFn('send_notification',{
+      recipient_id:recipientId,subject,body:rich,content:rich,content_format:'html',
+      attachments: uploadedAttachments
+    });
+    $('fSubject').value=''; $('fBody').innerHTML=''; composeAttachments=[];
+    renderComposeFiles();
+    toast(t('sendSuccess'));
+    await loadThreads();
+  }catch(err){
+    notice.textContent=err.message||t('sendFail');notice.classList.remove('hidden');
+  }finally{$('sendBtn').disabled=false;}
+});
+
+$('draftBtn')?.addEventListener('click',()=>{
+  const draft={recipient:$('fRecipient').value,subject:$('fSubject').value,body:sanitizeRichHtml($('fBody').innerHTML),saved_at:new Date().toISOString()};
+  localStorage.setItem('mh_message_draft',JSON.stringify(draft));
+  toast('Draft saved');
+});
+$('previewBtn')?.addEventListener('click',()=>{
+  const rich=sanitizeRichHtml($('fBody').innerHTML);
+  const win=document.createElement('div');
+  win.className='overlay'; win.innerHTML=`<div class="modal">
+    <div class="modal-head"><h3>${esc($('fSubject').value||'Message Preview')}</h3><button class="btn">✕</button></div>
+    <div class="modal-thread"><div class="message-card" style="max-width:100%"><div class="msg-head"><div class="msg-avatar">O</div><div><div class="msg-name">Owner / Sender</div><div class="msg-role">Preview</div></div></div><div class="msg-content">${rich||'<span style="color:var(--muted)">Empty message</span>'}</div></div></div>
+  </div>`;
+  document.body.appendChild(win);
+  win.querySelector('.modal-head .btn').onclick=()=>win.remove();
+  win.addEventListener('click',e=>{if(e.target===win)win.remove();});
+});
+
+const oldSendModalReply=sendModalReply;
+sendModalReply = async function(){
+  const text=plainFromRich(sanitizeRichHtml($('modalReplyText').innerHTML));
+  const rich=sanitizeRichHtml($('modalReplyText').innerHTML);
+  if(!text || !activeThreadId)return;
+  $('modalReplySend').disabled=true;
+  try{
+    await callNotifFn('reply',{thread_id:activeThreadId,body:rich,content:rich,content_format:'html'});
+    $('modalReplyText').innerHTML='';
+    toast(t('replySuccess')); await loadThreads();
+    const thread=threads.find(t=>t.id===activeThreadId); if(thread)renderThreadModal(thread);
+  }catch(err){toast(err.message||t('sendFail'))}
+  finally{$('modalReplySend').disabled=false}
+};
+$('modalReplySend').onclick=sendModalReply;
+
+const savedDraft=localStorage.getItem('mh_message_draft');
+if(savedDraft){
+  try{
+    const d=JSON.parse(savedDraft);
+    $('fRecipient').value=d.recipient||'';
+    $('fSubject').value=d.subject||'';
+    $('fBody').innerHTML=d.body||'';
+  }catch{}
+}
+
 
 /* ===================== Boot ===================== */
 (async()=>{
   const r = await initializeRBAC({ supabase });
-  if (!r?.allowed || !isSuperAdmin()) { location.href = 'dashboard.html'; return; }
+  if (!r?.allowed) { location.href = 'dashboard.html'; return; }
   const { data: userData } = await supabase.auth.getUser();
   callerId = userData?.user?.id || null;
+  const adminMode = isSuperAdmin();
+  isAdminUser = !!adminMode;
   $('app').classList.remove('hidden');
   applyLanguage(currentLang);
-  await loadProfiles();
+  if (!adminMode) {
+    document.querySelector('.grid2 > section:first-child')?.classList.add('hidden');
+    document.querySelector('.hero p')?.setAttribute('data-i18n','receiverDesc');
+  } else {
+    await loadProfiles();
+  }
   await loadThreads();
   if (window.__mhThreadRefreshTimer) clearInterval(window.__mhThreadRefreshTimer);
   window.__mhThreadRefreshTimer = setInterval(loadThreads, 60 * 1000);
