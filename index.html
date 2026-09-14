@@ -1054,6 +1054,147 @@
             max-height: 72%;
         }
 
+
+
+        /* ------------------------------------------------------------
+           Forgot password / password recovery
+           ------------------------------------------------------------ */
+        .forgot-link {
+            border: 0;
+            padding: 2px 0;
+            cursor: pointer;
+            color: var(--gold-bright);
+            background: transparent;
+            font: inherit;
+            font-size: 10px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: color .2s ease, opacity .2s ease;
+        }
+        .forgot-link:hover { color: #fff; }
+        body.light-mode .forgot-link:hover { color: var(--gold-deep); }
+        .forgot-link:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+        .auth-modal[hidden] { display: none !important; }
+        .auth-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            background: rgba(2, 5, 10, .76);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+        .auth-modal-card {
+            position: relative;
+            width: min(100%, 470px);
+            max-height: min(720px, calc(100svh - 32px));
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            background: var(--card);
+            box-shadow: 0 35px 90px rgba(0,0,0,.45), 0 0 0 1px rgba(212,175,55,.05);
+            animation: authModalIn .28s ease both;
+        }
+        @keyframes authModalIn {
+            from { opacity: 0; transform: translateY(12px) scale(.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .auth-modal-inner { padding: 28px; }
+        .auth-modal-close {
+            position: absolute;
+            top: 13px;
+            right: 13px;
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--text-soft);
+            background: var(--input);
+            font-size: 20px;
+            line-height: 1;
+        }
+        .auth-modal-close:hover { color: var(--text); border-color: var(--gold); }
+        .auth-modal-logo {
+            width: 58px;
+            height: 58px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 16px;
+            border: 1px solid rgba(212,175,55,.35);
+            border-radius: 18px;
+            background: rgba(212,175,55,.08);
+            box-shadow: 0 12px 30px rgba(212,175,55,.10);
+        }
+        .auth-modal-logo img { width: 40px; height: 40px; object-fit: contain; }
+        .auth-modal-title {
+            margin: 0;
+            color: var(--text);
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 29px;
+            line-height: 1.1;
+        }
+        .auth-modal-desc {
+            margin: 9px 0 20px;
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        .auth-modal-form .field { margin-top: 14px; }
+        .auth-modal-action { margin-top: 18px; }
+        .auth-secondary {
+            width: 100%;
+            min-height: 46px;
+            margin-top: 10px;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            cursor: pointer;
+            color: var(--text-soft);
+            background: transparent;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .auth-secondary:hover { border-color: var(--gold); color: var(--text); }
+        .auth-message {
+            margin-top: 14px;
+            padding: 12px 13px;
+            border-radius: 13px;
+            font-size: 11px;
+            line-height: 1.55;
+        }
+        .auth-message.success {
+            color: #166534;
+            background: rgba(220,252,231,.88);
+            border: 1px solid rgba(34,197,94,.25);
+        }
+        .auth-message.error {
+            color: #991b1b;
+            background: rgba(254,226,226,.88);
+            border: 1px solid rgba(239,68,68,.25);
+        }
+        .auth-message[hidden] { display: none; }
+        .auth-step[hidden] { display: none !important; }
+        .auth-hint {
+            margin: 4px 0 0;
+            color: var(--text-muted);
+            font-size: 9px;
+            line-height: 1.5;
+        }
+        @media (max-width: 640px) {
+            .forgot-link { font-size: 9px; }
+            .auth-modal { padding: 12px; }
+            .auth-modal-card { border-radius: 21px; max-height: calc(100svh - 24px); }
+            .auth-modal-inner { padding: 24px 18px 19px; }
+            .auth-modal-title { font-size: 26px; }
+            .auth-modal-desc { font-size: 11px; }
+        }
+
 </style>
 </head>
 
@@ -1118,6 +1259,61 @@
             </div>
         </div>
     </section>
+
+    <!-- Forgot Password / Password Recovery -->
+    <div id="authModal" class="auth-modal" hidden aria-hidden="true">
+        <div class="auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+            <button id="authModalClose" class="auth-modal-close" type="button" aria-label="Close">×</button>
+            <div class="auth-modal-inner">
+                <div class="auth-modal-logo"><img src="logo.png" alt="MHSS Logo"></div>
+
+                <div id="forgotStep" class="auth-step">
+                    <h3 id="authModalTitle" class="auth-modal-title">Forgot Password?</h3>
+                    <p id="forgotDesc" class="auth-modal-desc">Enter your account email and we will send you a secure password reset link.</p>
+                    <form id="forgotForm" class="auth-modal-form" novalidate>
+                        <div class="field">
+                            <label id="forgotEmailLabel" for="forgotEmail">Email Address</label>
+                            <div class="input-shell">
+                                <input id="forgotEmail" type="email" inputmode="email" autocomplete="email" placeholder="admin@mhss.com" required>
+                                <span class="input-icon" aria-hidden="true">✉</span>
+                            </div>
+                        </div>
+                        <button id="forgotSubmit" class="submit auth-modal-action" type="submit">
+                            <span id="forgotSubmitText">SEND RESET LINK <span>→</span></span>
+                        </button>
+                        <button id="forgotBack" class="auth-secondary" type="button"><span id="forgotBackText">Back to Login</span></button>
+                        <div id="forgotMessage" class="auth-message" hidden></div>
+                    </form>
+                </div>
+
+                <div id="resetStep" class="auth-step" hidden>
+                    <h3 id="resetTitle" class="auth-modal-title">Create New Password</h3>
+                    <p id="resetDesc" class="auth-modal-desc">Choose a strong new password for your MHSS ERP account.</p>
+                    <form id="resetForm" class="auth-modal-form" novalidate>
+                        <div class="field">
+                            <label id="newPasswordLabel" for="newPassword">New Password</label>
+                            <div class="input-shell">
+                                <input id="newPassword" type="password" autocomplete="new-password" placeholder="Enter new password" minlength="6" required>
+                                <button id="toggleNewPassword" class="password-toggle" type="button" aria-label="Show password" title="Show password">◉</button>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label id="confirmPasswordLabel" for="confirmPassword">Confirm Password</label>
+                            <div class="input-shell">
+                                <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirm new password" minlength="6" required>
+                                <button id="toggleConfirmPassword" class="password-toggle" type="button" aria-label="Show password" title="Show password">◉</button>
+                            </div>
+                        </div>
+                        <p id="passwordHint" class="auth-hint">Use at least 6 characters.</p>
+                        <button id="resetSubmit" class="submit auth-modal-action" type="submit">
+                            <span id="resetSubmitText">UPDATE PASSWORD <span>✓</span></span>
+                        </button>
+                        <div id="resetMessage" class="auth-message" hidden></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <main class="page">
         <!-- Desktop brand message -->
@@ -1215,7 +1411,7 @@
                                 <input id="rememberMe" type="checkbox">
                                 <span id="rememberText">Remember me</span>
                             </label>
-                            <span id="secureText" class="secure-label">Secure Login</span>
+                            <button id="forgotPasswordBtn" class="forgot-link" type="button"><span id="forgotPasswordText">Forgot Password?</span></button>
                         </div>
 
                         <button id="loginBtn" class="submit" type="submit">
@@ -1255,6 +1451,182 @@
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const rememberMe = document.getElementById('rememberMe');
+
+        const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+        const authModal = document.getElementById('authModal');
+        const authModalClose = document.getElementById('authModalClose');
+        const forgotStep = document.getElementById('forgotStep');
+        const resetStep = document.getElementById('resetStep');
+        const forgotForm = document.getElementById('forgotForm');
+        const forgotEmail = document.getElementById('forgotEmail');
+        const forgotSubmit = document.getElementById('forgotSubmit');
+        const forgotSubmitText = document.getElementById('forgotSubmitText');
+        const forgotMessage = document.getElementById('forgotMessage');
+        const forgotBack = document.getElementById('forgotBack');
+        const resetForm = document.getElementById('resetForm');
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const resetSubmit = document.getElementById('resetSubmit');
+        const resetSubmitText = document.getElementById('resetSubmitText');
+        const resetMessage = document.getElementById('resetMessage');
+
+        const recoveryFlow = () => /(?:^|[&#])type=recovery(?:&|#|$)/i.test(window.location.hash);
+
+        function setAuthMessage(el, message, type) {
+            el.textContent = message;
+            el.className = `auth-message ${type}`;
+            el.hidden = false;
+        }
+
+        function clearAuthMessage(el) {
+            el.hidden = true;
+            el.textContent = '';
+        }
+
+        function openAuthModal(step = 'forgot') {
+            authModal.hidden = false;
+            authModal.setAttribute('aria-hidden', 'false');
+            forgotStep.hidden = step !== 'forgot';
+            resetStep.hidden = step !== 'reset';
+            const currentLang = document.documentElement.lang === 'am' ? 'am' : 'en';
+            document.getElementById('authModalTitle').innerHTML = step === 'reset'
+                ? (currentLang === 'am' ? 'አዲስ የይለፍ ቃል ይፍጠሩ' : 'Create New Password')
+                : (currentLang === 'am' ? 'የይለፍ ቃልዎን ረሱ?' : 'Forgot Password?');
+            clearAuthMessage(forgotMessage);
+            clearAuthMessage(resetMessage);
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                (step === 'reset' ? newPassword : forgotEmail)?.focus();
+            }, 30);
+        }
+
+        function closeAuthModal() {
+            authModal.hidden = true;
+            authModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        forgotPasswordBtn.addEventListener('click', () => {
+            forgotEmail.value = emailInput.value.trim();
+            openAuthModal('forgot');
+        });
+        authModalClose.addEventListener('click', closeAuthModal);
+        forgotBack.addEventListener('click', closeAuthModal);
+        authModal.addEventListener('click', event => {
+            if (event.target === authModal) closeAuthModal();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && !authModal.hidden && !recoveryFlow()) closeAuthModal();
+        });
+
+        forgotForm.addEventListener('submit', async event => {
+            event.preventDefault();
+            clearAuthMessage(forgotMessage);
+            const email = forgotEmail.value.trim();
+            const lang = document.documentElement.lang === 'am' ? 'am' : 'en';
+
+            if (!email || !forgotEmail.checkValidity()) {
+                setAuthMessage(forgotMessage,
+                    lang === 'am' ? 'እባክዎ ትክክለኛ ኢሜይል ያስገቡ።' : 'Please enter a valid email address.',
+                    'error');
+                forgotEmail.focus();
+                return;
+            }
+
+            forgotSubmit.disabled = true;
+            forgotSubmitText.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>' +
+                (lang === 'am' ? 'በመላክ ላይ...' : 'SENDING...');
+
+            try {
+                const redirectTo = `${window.location.origin}${window.location.pathname}`;
+                const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+                if (error) throw error;
+
+                setAuthMessage(forgotMessage,
+                    lang === 'am'
+                        ? 'የይለፍ ቃል መቀየሪያ አገናኝ ወደ ኢሜይልዎ ተልኳል። ኢሜይልዎን ይመልከቱ።'
+                        : 'A secure password reset link has been sent to your email. Please check your inbox.',
+                    'success');
+                forgotSubmitText.innerHTML = lang === 'am' ? 'ተልኳል ✓' : 'RESET LINK SENT ✓';
+            } catch (err) {
+                const msg = (err && err.message ? err.message : '').toLowerCase();
+                let message = lang === 'am'
+                    ? 'የመቀየሪያ አገናኙን መላክ አልተቻለም። እባክዎ እንደገና ይሞክሩ።'
+                    : 'Could not send the reset link. Please try again.';
+                if (msg.includes('rate limit')) {
+                    message = lang === 'am'
+                        ? 'ብዙ ጊዜ ተጠይቋል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።'
+                        : 'Too many reset requests. Please wait a little and try again.';
+                }
+                setAuthMessage(forgotMessage, message, 'error');
+            } finally {
+                forgotSubmit.disabled = false;
+                if (!forgotMessage.classList.contains('success')) {
+                    forgotSubmitText.innerHTML = lang === 'am' ? 'የመቀየሪያ አገናኝ ላክ <span>→</span>' : 'SEND RESET LINK <span>→</span>';
+                }
+            }
+        });
+
+        function wirePasswordToggle(button, input) {
+            button.addEventListener('click', () => {
+                const showing = input.type === 'text';
+                input.type = showing ? 'password' : 'text';
+                button.textContent = showing ? '◉' : '○';
+                button.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+                button.setAttribute('title', showing ? 'Show password' : 'Hide password');
+            });
+        }
+        wirePasswordToggle(document.getElementById('toggleNewPassword'), newPassword);
+        wirePasswordToggle(document.getElementById('toggleConfirmPassword'), confirmPassword);
+
+        resetForm.addEventListener('submit', async event => {
+            event.preventDefault();
+            clearAuthMessage(resetMessage);
+            const lang = document.documentElement.lang === 'am' ? 'am' : 'en';
+
+            if (newPassword.value.length < 6) {
+                setAuthMessage(resetMessage,
+                    lang === 'am' ? 'የይለፍ ቃሉ ቢያንስ 6 ቁምፊዎች ሊኖሩት ይገባል።' : 'Your password must be at least 6 characters.', 'error');
+                newPassword.focus();
+                return;
+            }
+            if (newPassword.value !== confirmPassword.value) {
+                setAuthMessage(resetMessage,
+                    lang === 'am' ? 'የይለፍ ቃሎቹ አይመሳሰሉም።' : 'The passwords do not match.', 'error');
+                confirmPassword.focus();
+                return;
+            }
+
+            resetSubmit.disabled = true;
+            resetSubmitText.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>' +
+                (lang === 'am' ? 'በማዘመን ላይ...' : 'UPDATING...');
+            try {
+                const { error } = await supabase.auth.updateUser({ password: newPassword.value });
+                if (error) throw error;
+                setAuthMessage(resetMessage,
+                    lang === 'am' ? 'የይለፍ ቃልዎ በተሳካ ሁኔታ ተቀይሯል።' : 'Your password has been changed successfully.', 'success');
+                resetSubmitText.textContent = lang === 'am' ? 'ተሳክቷል ✓' : 'PASSWORD UPDATED ✓';
+                newPassword.value = '';
+                confirmPassword.value = '';
+                setTimeout(async () => {
+                    await supabase.auth.signOut();
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    closeAuthModal();
+                    emailInput.value = forgotEmail.value.trim() || emailInput.value;
+                    passwordInput.focus();
+                    resetSubmit.disabled = false;
+                    resetSubmitText.innerHTML = lang === 'am' ? 'የይለፍ ቃል አዘምን <span>✓</span>' : 'UPDATE PASSWORD <span>✓</span>';
+                }, 1400);
+            } catch (err) {
+                const msg = (err && err.message ? err.message : '').toLowerCase();
+                const message = msg.includes('same password')
+                    ? (lang === 'am' ? 'አዲሱ የይለፍ ቃል ከቀድሞው ይለያይ ይገባል።' : 'The new password must be different from your old password.')
+                    : (lang === 'am' ? 'የይለፍ ቃሉን ማዘመን አልተቻለም። እባክዎ እንደገና ይሞክሩ።' : 'Could not update the password. Please try again.');
+                setAuthMessage(resetMessage, message, 'error');
+                resetSubmit.disabled = false;
+                resetSubmitText.innerHTML = lang === 'am' ? 'የይለፍ ቃል አዘምን <span>✓</span>' : 'UPDATE PASSWORD <span>✓</span>';
+            }
+        });
 
         function showError(message) {
             errorText.textContent = message;
@@ -1299,6 +1671,96 @@
                 : 'ENTER ERP <span>→</span>';
         }
 
+        // ------------------------------------------------------------
+        // Login Attempt Protection
+        // ------------------------------------------------------------
+        // Keep a small, browser-side attempt record per email. This adds
+        // a temporary lock after repeated failed password attempts without
+        // storing passwords or Supabase sessions.
+        const LOGIN_MAX_ATTEMPTS = 5;
+        const LOGIN_LOCK_MS = 60 * 1000;
+        const LOGIN_ATTEMPT_KEY = 'mhss-login-attempt-protection';
+
+        function readLoginAttempts() {
+            try {
+                const raw = localStorage.getItem(LOGIN_ATTEMPT_KEY);
+                const data = raw ? JSON.parse(raw) : {};
+                return data && typeof data === 'object' ? data : {};
+            } catch {
+                return {};
+            }
+        }
+
+        function writeLoginAttempts(data) {
+            try {
+                localStorage.setItem(LOGIN_ATTEMPT_KEY, JSON.stringify(data));
+            } catch {
+                // Login protection must never prevent the normal login flow.
+            }
+        }
+
+        function getLoginAttemptState(email) {
+            const key = email.trim().toLowerCase();
+            const data = readLoginAttempts();
+            const state = data[key] || { count: 0, lockedUntil: 0 };
+
+            if (state.lockedUntil && Date.now() >= state.lockedUntil) {
+                delete data[key];
+                writeLoginAttempts(data);
+                return { count: 0, lockedUntil: 0 };
+            }
+
+            return state;
+        }
+
+        function clearLoginAttempts(email) {
+            const data = readLoginAttempts();
+            delete data[email.trim().toLowerCase()];
+            writeLoginAttempts(data);
+        }
+
+        function registerFailedLogin(email) {
+            const key = email.trim().toLowerCase();
+            const data = readLoginAttempts();
+            const current = data[key] || { count: 0, lockedUntil: 0 };
+            const count = Number(current.count || 0) + 1;
+
+            if (count >= LOGIN_MAX_ATTEMPTS) {
+                data[key] = {
+                    count: LOGIN_MAX_ATTEMPTS,
+                    lockedUntil: Date.now() + LOGIN_LOCK_MS
+                };
+            } else {
+                data[key] = { count, lockedUntil: 0 };
+            }
+
+            writeLoginAttempts(data);
+            return data[key];
+        }
+
+        function loginLockMessage(remainingMs) {
+            const lang = document.documentElement.lang === 'am' ? 'am' : 'en';
+            const seconds = Math.max(1, Math.ceil(remainingMs / 1000));
+
+            return lang === 'am'
+                ? `ብዙ የተሳሳቱ የመግቢያ ሙከራዎች ተገኝተዋል። ለ${seconds} ሰከንድ መግባት በጊዜያዊነት ተቆልፏል።`
+                : `Too many failed login attempts. Login is temporarily locked for ${seconds} second${seconds === 1 ? '' : 's'}.`;
+        }
+
+        function enforceLoginLock(email) {
+            const state = getLoginAttemptState(email);
+            if (!state.lockedUntil) return false;
+
+            const remaining = state.lockedUntil - Date.now();
+            if (remaining <= 0) {
+                clearLoginAttempts(email);
+                return false;
+            }
+
+            showError(loginLockMessage(remaining));
+            return true;
+        }
+
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             hideError();
@@ -1322,6 +1784,8 @@
                 return;
             }
 
+            if (enforceLoginLock(email)) return;
+
             btn.disabled = true;
             btnText.innerHTML =
                 '<span class="dots"><i></i><i></i><i></i></span>' +
@@ -1334,10 +1798,37 @@
                 });
 
                 if (error) {
-                    showError(friendlyError(error));
+                    // Count authentication failures, but do not punish users
+                    // for temporary network/server connectivity problems.
+                    const rawMessage = (error && error.message ? error.message : '').toLowerCase();
+                    const isCredentialFailure =
+                        rawMessage.includes('invalid login credentials') ||
+                        rawMessage.includes('invalid credentials') ||
+                        rawMessage.includes('email not confirmed');
+
+                    if (isCredentialFailure) {
+                        const state = registerFailedLogin(email);
+
+                        if (state.lockedUntil) {
+                            showError(loginLockMessage(state.lockedUntil - Date.now()));
+                        } else {
+                            const remainingAttempts = Math.max(0, LOGIN_MAX_ATTEMPTS - state.count);
+                            const baseMessage = friendlyError(error);
+                            const attemptMessage = lang === 'am'
+                                ? ` ${remainingAttempts} ሙከራ${remainingAttempts === 1 ? '' : 'ዎች'} ቀርተዋል።`
+                                : ` ${remainingAttempts} attempt${remainingAttempts === 1 ? '' : 's'} remaining.`;
+                            showError(baseMessage + attemptMessage);
+                        }
+                    } else {
+                        showError(friendlyError(error));
+                    }
+
                     resetButton();
                     return;
                 }
+
+                // A successful login clears the failed-attempt counter.
+                clearLoginAttempts(email);
 
                 if (rememberMe.checked) {
                     localStorage.setItem('mhss-remember-email', email);
@@ -1388,6 +1879,10 @@
         }
 
         async function protectLoginPage() {
+            // Supabase password-recovery redirects back to this page with a
+            // recovery session. Keep the recovery screen visible instead of
+            // redirecting the user to the dashboard.
+            if (recoveryFlow()) return;
             try {
                 const { data, error } = await supabase.auth.getSession();
 
@@ -1408,7 +1903,12 @@
 
         // React to sign-in/sign-out/token refresh events.
         supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_IN' && session) {
+            if (event === 'PASSWORD_RECOVERY') {
+                openAuthModal('reset');
+                return;
+            }
+
+            if (event === 'SIGNED_IN' && session && !recoveryFlow()) {
                 redirectToDashboard();
             }
 
@@ -1625,6 +2125,17 @@
                 passwordLabel: 'Password',
                 rememberText: 'Remember me',
                 secureText: 'Secure Login',
+                forgotPasswordText: 'Forgot Password?',
+                forgotDesc: 'Enter your account email and we will send you a secure password reset link.',
+                forgotEmailLabel: 'Email Address',
+                forgotSubmitText: 'SEND RESET LINK <span>→</span>',
+                forgotBackText: 'Back to Login',
+                resetTitle: 'Create New Password',
+                resetDesc: 'Choose a strong new password for your MHSS ERP account.',
+                newPasswordLabel: 'New Password',
+                confirmPasswordLabel: 'Confirm Password',
+                passwordHint: 'Use at least 6 characters.',
+                resetSubmitText: 'UPDATE PASSWORD <span>✓</span>',
                 loginBtnText: 'ENTER ERP <span>→</span>',
                 gatewaySub: 'ERP SYSTEM · SECURE ADMINISTRATIVE GATEWAY',
                 systemOnlineText: 'SYSTEM ONLINE',
@@ -1648,6 +2159,17 @@
                 passwordLabel: 'የይለፍ ቃል',
                 rememberText: 'አስታውሰኝ',
                 secureText: 'ደህንነቱ የተጠበቀ መግቢያ',
+                forgotPasswordText: 'የይለፍ ቃልዎን ረሱ?',
+                forgotDesc: 'የመለያዎን ኢሜይል ያስገቡ፤ የይለፍ ቃል መቀየሪያ አገናኝ እንልክልዎታለን።',
+                forgotEmailLabel: 'ኢሜይል አድራሻ',
+                forgotSubmitText: 'የመቀየሪያ አገናኝ ላክ <span>→</span>',
+                forgotBackText: 'ወደ መግቢያ ተመለስ',
+                resetTitle: 'አዲስ የይለፍ ቃል ይፍጠሩ',
+                resetDesc: 'ለ MHSS ERP መለያዎ ጠንካራ አዲስ የይለፍ ቃል ይምረጡ።',
+                newPasswordLabel: 'አዲስ የይለፍ ቃል',
+                confirmPasswordLabel: 'የይለፍ ቃል ያረጋግጡ',
+                passwordHint: 'ቢያንስ 6 ቁምፊዎችን ይጠቀሙ።',
+                resetSubmitText: 'የይለፍ ቃል አዘምን <span>✓</span>',
                 loginBtnText: 'ወደ ERP ግባ <span>→</span>',
                 gatewaySub: 'ERP ስርዓት · የተጠበቀ የአስተዳደር መግቢያ',
                 systemOnlineText: 'ስርዓቱ ንቁ ነው',
@@ -1676,6 +2198,18 @@
             if (ecLabelEl) ecLabelEl.textContent = t.ecLabel;
             if (tzLabelEl) tzLabelEl.textContent = t.tzLabel;
             renderLiveDateTime();
+
+            // Keep the password-recovery UI bilingual with the main login page.
+            if (forgotPasswordBtn) forgotPasswordBtn.querySelector('#forgotPasswordText').innerHTML = t.forgotPasswordText;
+            if (document.getElementById('authModalTitle') && !resetStep.hidden) document.getElementById('authModalTitle').innerHTML = t.resetTitle;
+            if (document.getElementById('authModalTitle') && !forgotStep.hidden) document.getElementById('authModalTitle').innerHTML = lang === 'am' ? 'የይለፍ ቃልዎን ረሱ?' : 'Forgot Password?';
+            if (document.getElementById('forgotDesc')) document.getElementById('forgotDesc').innerHTML = t.forgotDesc;
+            if (document.getElementById('forgotEmailLabel')) document.getElementById('forgotEmailLabel').innerHTML = t.forgotEmailLabel;
+            if (document.getElementById('forgotBackText')) document.getElementById('forgotBackText').innerHTML = t.forgotBackText;
+            if (document.getElementById('resetDesc')) document.getElementById('resetDesc').innerHTML = t.resetDesc;
+            if (document.getElementById('newPasswordLabel')) document.getElementById('newPasswordLabel').innerHTML = t.newPasswordLabel;
+            if (document.getElementById('confirmPasswordLabel')) document.getElementById('confirmPasswordLabel').innerHTML = t.confirmPasswordLabel;
+            if (document.getElementById('passwordHint')) document.getElementById('passwordHint').innerHTML = t.passwordHint;
 
             if (lang === 'am') {
                 document.body.classList.add('amharic');

@@ -285,6 +285,20 @@
                 </div>
             </div>
 
+            <!-- AI EXECUTIVE SUMMARY -->
+            <div class="glass-panel-gold rounded-3xl p-5 md:p-7 mb-8 no-print" id="aiExecutiveSummaryCard">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+                    <div>
+                        <div class="section-title">🤖 <span data-i18n="aiSummaryTitle">AI Executive Summary</span></div>
+                        <p class="text-xs text-gray-500 mt-1" data-i18n="aiSummarySubtitle">Smart financial insights based on your current records.</p>
+                    </div>
+                    <button onclick="refreshAIExecutiveSummary()" class="px-4 py-2 rounded-xl bg-yellow-500 text-black font-bold text-xs hover:bg-yellow-400 transition">↻ <span data-i18n="refreshSummary">Refresh</span></button>
+                </div>
+                <div id="aiSummaryBody" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                    <div class="glass-panel rounded-2xl p-4 text-sm text-gray-400 md:col-span-2 xl:col-span-4" data-i18n="aiSummaryLoading">Preparing your financial summary...</div>
+                </div>
+            </div>
+
             <div class="flex flex-wrap gap-3 mb-8 no-print">
                 <button onclick="openTxnModal('income')" class="px-5 py-3 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition" data-i18n="newIncome">+ New Income</button>
                 <button onclick="openTxnModal('expense')" class="px-5 py-3 glass-panel rounded-xl hover:bg-white/10 transition font-bold" data-i18n="newExpense">+ New Expense</button>
@@ -644,8 +658,8 @@
                     <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblAmount">Amount (ETB)</label>
                         <input type="number" step="0.01" id="txnAmount" required min="0" oninput="updateBudgetHint()" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
                     <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblMethod">Method</label>
-                        <select id="txnMethod" class="lux-input w-full rounded-lg p-2.5 outline-none">
-                            <option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option><option value="Digital">Digital</option>
+                        <select id="txnMethod" class="lux-input w-full rounded-lg p-2.5 outline-none" onchange="updateTxnBankFields()">
+                            <option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option>
                         </select></div>
                     <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblStatus">Status</label>
                         <select id="txnStatus" class="lux-input w-full rounded-lg p-2.5 outline-none">
@@ -653,10 +667,10 @@
                         </select></div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblRefId">Transaction / Receipt ID</label>
+                    <div id="txnRefWrap" class="hidden"><label class="block text-xs text-gray-400 mb-1" data-i18n="lblRefId">Transaction / Receipt ID</label>
                         <input type="text" id="txnRefId" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
                     <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblReceiver">Receiver Staff</label>
-                        <input type="text" id="txnReceiver" value="Admin" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
+                        <input type="text" id="txnReceiver" value="ኢየሩሳሌም ሀዲሽ" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
                 </div>
                 <p id="budgetHint" class="hidden text-xs px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-600"></p>
                 <p id="approvalHint" class="hidden text-xs px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500"></p>
@@ -772,9 +786,16 @@
                     <input type="hidden" id="payDate">
                     <p class="ec-date-hint" id="payEcHint"></p></div>
                 <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblMethod">Method</label>
-                    <select id="payMethod" class="lux-input w-full rounded-lg p-2.5 outline-none">
-                        <option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option><option value="Digital">Digital</option>
+                    <select id="payMethod" class="lux-input w-full rounded-lg p-2.5 outline-none" onchange="updatePayBankFields()">
+                        <option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option>
                     </select></div>
+                <div id="payRefWrap" class="hidden">
+                    <label class="block text-xs text-gray-400 mb-1" data-i18n="lblRefId">Transaction / Receipt ID</label>
+                    <input type="text" id="payRefId" class="lux-input w-full rounded-lg p-2.5 outline-none" autocomplete="off">
+                    <p class="text-[11px] text-gray-500 mt-1" data-i18n="bankRefRequired">Required for bank payments.</p>
+                </div>
+                <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblReceiver">Receiver Staff</label>
+                    <input type="text" id="payReceiver" value="ኢየሩሳሌም ሀዲሽ" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
                 <div><label class="block text-xs text-gray-400 mb-1" data-i18n="lblNote">Note</label>
                     <input type="text" id="payNote" class="lux-input w-full rounded-lg p-2.5 outline-none"></div>
                 <div class="flex justify-end gap-3 pt-2 border-t border-white/5">
@@ -805,6 +826,33 @@
             <div class="ec-picker-actions" id="ecPickerActions">
                 <button type="button" onclick="closeEcPicker()" data-i18n="cancel">Cancel</button>
                 <button type="button" class="primary" onclick="confirmEcPicker()" data-i18n="applyRange">Apply Range</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STUDENT PAYMENT HISTORY MODAL -->
+    <div id="studentHistoryModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[55] modal-overlay modal-hidden-state hidden flex justify-center items-center no-print">
+        <div class="modal-panel luxury-modal max-w-4xl rounded-2xl relative overflow-hidden my-8">
+            <div class="p-5 border-b border-yellow-500/15 flex justify-between items-center bg-white/5">
+                <div>
+                    <h2 class="text-lg md:text-xl font-bold">📜 <span data-i18n="paymentHistoryTitle">Student Payment History</span></h2>
+                    <p id="historyStudentSubtitle" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+                <button onclick="closeStudentPaymentHistory()" class="text-gray-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">&times;</button>
+            </div>
+            <div class="p-5 md:p-6">
+                <div id="historyStudentStats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5"></div>
+                <div class="glass-panel rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm responsive-table">
+                            <thead class="bg-white/5 text-gray-400 uppercase text-[10px] tracking-wide">
+                                <tr><th class="p-3 text-left" data-i18n="historyDate">Date</th><th class="p-3 text-left" data-i18n="historyPlan">Plan</th><th class="p-3 text-left" data-i18n="historyPeriod">Period</th><th class="p-3 text-right" data-i18n="historyAmount">Amount</th><th class="p-3 text-left" data-i18n="historyMethod">Method</th><th class="p-3 text-left" data-i18n="historyRef">Transaction / Receipt ID</th><th class="p-3 text-left" data-i18n="historyReceiver">Receiver Staff</th></tr>
+                            </thead>
+                            <tbody id="studentHistoryBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="studentHistoryEmpty" class="hidden text-center text-gray-500 py-12" data-i18n="noHistory">No payment history found.</div>
+                </div>
             </div>
         </div>
     </div>
@@ -881,7 +929,8 @@
                 addBankAccount: '🏦 Add Bank / Cash Account', lblAccountName: 'Account Name', lblType: 'Type', lblOpeningBalance: 'Opening Balance (ETB)', save: '💾 Save',
                 loanAgreement: '🤝 Loan Agreement', lblBorrower: 'Borrower Name', lblLoanAmount: 'Loan Amount (ETB)', lblInterest: 'Interest Rate (%)', lblDueDate: 'Due Date', approveSaveLoan: '✅ Approve & Save Loan',
                 recordInstallment: '💳 Record Installment', lblAmountPaid: 'Amount Paid (ETB)', lblPaymentDate: 'Payment Date', savePayment: '💾 Save Payment',
-                lblPeriod: 'Period', lblNote: 'Note', recordPayment: '💳 Record Payment',
+                lblPeriod: 'Period', lblNote: 'Note', recordPayment: '💳 Record Payment', bankRefRequired: 'Required for bank payments.',
+                aiSummaryTitle: 'AI Executive Summary', aiSummarySubtitle: 'Smart financial insights based on your current records.', refreshSummary: 'Refresh', aiSummaryLoading: 'Preparing your financial summary...', aiIncome: 'Income', aiExpense: 'Expense', aiNet: 'Net Balance', aiStudentCollected: 'Student Payments', aiOutstandingStudents: 'Students Needing Follow-up', aiCollectionRate: 'Collection Rate', aiInsight: 'Executive Insight', historyBtn: 'History', paymentHistoryTitle: 'Student Payment History', paymentHistorySubtitle: 'Complete payment timeline for this student.', noHistory: 'No payment history found.', historyDate: 'Date', historyPeriod: 'Period', historyAmount: 'Amount', historyMethod: 'Method', historyRef: 'Transaction / Receipt ID', historyReceiver: 'Receiver Staff', historyTotal: 'Total Paid', historyPlan: 'Plan', close: 'Close',
             },
             am: {
                 appTitle: 'መሠረተ ሕይወት ERP ስርዓት',
@@ -914,7 +963,8 @@
                 addBankAccount: '🏦 ባንክ/ጥሬ ገንዘብ ሂሳብ ጨምር', lblAccountName: 'የሂሳብ ስም', lblType: 'ዓይነት', lblOpeningBalance: 'የመክፈቻ ሂሳብ (ETB)', save: '💾 አስቀምጥ',
                 loanAgreement: '🤝 የብድር ውል', lblBorrower: 'የተበዳሪው ስም', lblLoanAmount: 'የብድር መጠን (ETB)', lblInterest: 'የወለድ መጠን (%)', lblDueDate: 'የመክፈያ ቀን', approveSaveLoan: '✅ ብድር ፍቀድ እና አስቀምጥ',
                 recordInstallment: '💳 ክፍያ መዝግብ', lblAmountPaid: 'የተከፈለ መጠን (ETB)', lblPaymentDate: 'የክፍያ ቀን', savePayment: '💾 ክፍያ አስቀምጥ',
-                lblPeriod: 'ወቅት', lblNote: 'ማስታወሻ', recordPayment: '💳 ክፍያ መዝግብ',
+                lblPeriod: 'ወቅት', lblNote: 'ማስታወሻ', recordPayment: '💳 ክፍያ መዝግብ', bankRefRequired: 'ለባንክ ክፍያ አስፈላጊ ነው።',
+                aiSummaryTitle: 'የAI አስፈፃሚ ማጠቃለያ', aiSummarySubtitle: 'በአሁኑ የገንዘብ መዝገቦች ላይ የተመሰረተ ዘመናዊ ግኝት።', refreshSummary: 'አድስ', aiSummaryLoading: 'የገንዘብ ማጠቃለያ እየተዘጋጀ ነው...', aiIncome: 'ገቢ', aiExpense: 'ወጪ', aiNet: 'የተጣራ ሂሳብ', aiStudentCollected: 'የተማሪ ክፍያ', aiOutstandingStudents: 'ክትትል የሚፈልጉ ተማሪዎች', aiCollectionRate: 'የክፍያ ምጣኔ', aiInsight: 'የአስፈፃሚ ግኝት', historyBtn: 'ታሪክ', paymentHistoryTitle: 'የተማሪ ክፍያ ታሪክ', paymentHistorySubtitle: 'የዚህ ተማሪ ሙሉ የክፍያ ታሪክ።', noHistory: 'ምንም የክፍያ ታሪክ አልተገኘም።', historyDate: 'ቀን', historyPeriod: 'ወቅት', historyAmount: 'መጠን', historyMethod: 'ዘዴ', historyRef: 'የግብይት / ደረሰኝ ቁጥር', historyReceiver: 'ተቀባይ ሰራተኛ', historyTotal: 'ጠቅላላ የተከፈለ', historyPlan: 'ዕቅድ', close: 'ዝጋ',
             }
         };
         let currentLang = localStorage.getItem('mh_finance_lang') || 'en';
@@ -937,6 +987,7 @@
             currentLang = lang;
             localStorage.setItem('mh_finance_lang', lang);
             applyTranslations();
+            refreshAIExecutiveSummary();
             renderAll();
         }
 
@@ -1214,7 +1265,7 @@
                 document.getElementById('section-' + s).classList.toggle('hidden', s !== name);
             });
             document.querySelectorAll('.nav-pill[data-section]').forEach(p => p.classList.toggle('active', p.dataset.section === name));
-            if (name === 'overview') { loadTransactions().then(renderTable); loadBankAccounts().then(() => { renderTopBar(); }); }
+            if (name === 'overview') { Promise.all([loadTransactions(), loadBankAccounts(), loadAIStudentPayments()]).then(() => { renderTable(); renderTopBar(); refreshAIExecutiveSummary(); }); }
             if (name === 'bank') renderBankAccounts();
             if (name === 'loans') renderLoans();
             if (name === 'students') { if (studentClassGrid_rendered !== true) renderStudentClassGrid(); }
@@ -1231,6 +1282,33 @@
         // TRANSACTIONS (Income & Expense)
         // ============================================================
         let pendingAttachment = null;
+        function updateTxnBankFields() {
+            const isBank = document.getElementById('txnMethod')?.value === 'Bank Transfer';
+            const wrap = document.getElementById('txnRefWrap');
+            const input = document.getElementById('txnRefId');
+            if (wrap) wrap.classList.toggle('hidden', !isBank);
+            if (input) {
+                input.required = isBank;
+                if (!isBank) input.value = '';
+            }
+        }
+
+        function updatePayBankFields() {
+            const isBank = document.getElementById('payMethod')?.value === 'Bank Transfer';
+            const wrap = document.getElementById('payRefWrap');
+            const input = document.getElementById('payRefId');
+            if (wrap) wrap.classList.toggle('hidden', !isBank);
+            if (input) input.required = isBank;
+        }
+
+        function studentPlanDefaultAmount(plan) {
+            const monthlyPrice = 50;
+            if (plan === '3month') return monthlyPrice * 3;
+            if (plan === '6month') return monthlyPrice * 6;
+            if (plan === 'yearly') return monthlyPrice * 12;
+            return monthlyPrice;
+        }
+
         function openTxnModal(type, editId) {
             document.getElementById('txnType').value = type;
             document.getElementById('txnEditId').value = editId || '';
@@ -1243,7 +1321,10 @@
             document.getElementById('txnType').value = type;
             document.getElementById('txnEditId').value = editId || '';
             document.getElementById('txnDate').value = todayStr();
-            document.getElementById('txnReceiver').value = 'Admin';
+            document.getElementById('txnReceiver').value = 'ኢየሩሳሌም ሀዲሽ';
+            document.getElementById('txnRefId').value = '';
+            document.getElementById('txnMethod').value = 'Cash';
+            updateTxnBankFields();
             pendingAttachment = null;
             document.getElementById('attachLabel').textContent = t('attachPrompt');
             document.getElementById('budgetHint').classList.add('hidden');
@@ -1261,7 +1342,8 @@
                     document.getElementById('txnMethod').value = tx.method;
                     document.getElementById('txnStatus').value = tx.status;
                     document.getElementById('txnRefId').value = tx.refId || '';
-                    document.getElementById('txnReceiver').value = tx.receiver || 'Admin';
+                    document.getElementById('txnReceiver').value = tx.receiver || 'ኢየሩሳሌም ሀዲሽ';
+                    updateTxnBankFields();
                     if (tx.attachment) { pendingAttachment = tx.attachment; document.getElementById('attachLabel').textContent = '✅ Attached'; }
                 }
             }
@@ -1308,13 +1390,20 @@
             const editId = document.getElementById('txnEditId').value;
             const dateVal = document.getElementById('txnDate').value;
             const ec = gregorianToEthiopian(dateVal);
+            const method = document.getElementById('txnMethod').value;
+            const refId = method === 'Bank Transfer' ? document.getElementById('txnRefId').value.trim() : '';
+            if (method === 'Bank Transfer' && !refId) {
+                showToast(currentLang === 'am' ? '⚠️ የባንክ ግብይት/ደረሰኝ ቁጥር ያስገቡ' : '⚠️ Enter the bank transaction / receipt ID', 'error');
+                document.getElementById('txnRefId').focus();
+                return;
+            }
             const record = {
                 id: editId || uid('TXN'), type, date: dateVal, ec_date: ec ? ec.label : null,
                 category: document.getElementById('txnCategory').value, description: document.getElementById('txnDescription').value,
                 payer_name: document.getElementById('txnPayerName').value, payer_phone: document.getElementById('txnPayerPhone').value,
-                amount: parseFloat(document.getElementById('txnAmount').value) || 0, method: document.getElementById('txnMethod').value,
-                status: document.getElementById('txnStatus').value, ref_id: document.getElementById('txnRefId').value,
-                receiver: document.getElementById('txnReceiver').value, attachment: pendingAttachment
+                amount: parseFloat(document.getElementById('txnAmount').value) || 0, method,
+                status: document.getElementById('txnStatus').value, ref_id: refId,
+                receiver: document.getElementById('txnReceiver').value.trim() || 'ኢየሩሳሌም ሀዲሽ', attachment: pendingAttachment
             };
             const { error } = editId ? await client.from('finance_transactions').update(record).eq('id', editId) : await client.from('finance_transactions').insert([record]);
             if (error) { console.error(error); showToast('⚠️ Save failed', 'error'); return; }
@@ -1729,6 +1818,7 @@
                     <td class="p-4" data-label="${t('thActions')}">
                         <div class="flex gap-2 justify-end md:justify-start">
                             <button onclick="openPayModal('student','${escapeHtml(s.id)}','${escapeHtml((s.name||'').replace(/'/g,"&#39;"))}','${escapeHtml(currentStudentClass)}','${currentStudentPlan}')" class="px-3 py-1.5 bg-yellow-500 text-black text-xs font-bold rounded-lg hover:bg-yellow-400 transition">${paid ? '✏️ Edit' : '+ Payment'}</button>
+                            <button onclick="openStudentPaymentHistory('${escapeHtml(s.id)}','${escapeHtml((s.name||'').replace(/'/g,"&#39;"))}')" class="px-3 py-1.5 glass-panel text-xs font-bold rounded-lg hover:bg-white/10 transition">📜 ${t('historyBtn')}</button>
                             ${paid ? `<button onclick="deletePayment('student_payments','${pay.id}')" class="icon-btn bg-red-500/10 text-red-500 hover:bg-red-500/20">🗑️</button>` : ''}
                         </div>
                     </td>
@@ -1964,10 +2054,17 @@
             const list = kind === 'student' ? studentPaymentsInClass : begenaPaymentsInGrade;
             const existing = list.find(p => p.student_id === studentId && (kind === 'begena' || p.plan === plan) && p.period === period);
             document.getElementById('payPeriod').value = period;
-            document.getElementById('payAmount').value = existing ? existing.amount : '';
+            // Student payment defaults: 50 ETB/month, calculated by plan.
+            // The amount remains editable, so staff can change the price when needed.
+            document.getElementById('payAmount').value = existing
+                ? existing.amount
+                : (kind === 'student' ? studentPlanDefaultAmount(plan) : '');
             document.getElementById('payDate').value = existing ? existing.paid_date : todayStr();
             document.getElementById('payMethod').value = existing ? existing.method : 'Cash';
+            document.getElementById('payRefId').value = existing ? (existing.transaction_ref_id || '') : '';
+            document.getElementById('payReceiver').value = existing ? (existing.receiver || 'ኢየሩሳሌም ሀዲሽ') : 'ኢየሩሳሌም ሀዲሽ';
             document.getElementById('payNote').value = existing ? (existing.note || '') : '';
+            updatePayBankFields();
             updateEcHint('payDate', 'payEcHint');
             document.getElementById('payModal').classList.remove('hidden');
             setTimeout(() => document.getElementById('payModal').classList.remove('modal-hidden-state'), 10);
@@ -1985,16 +2082,42 @@
             const period = document.getElementById('payPeriod').value;
             const dateVal = document.getElementById('payDate').value;
             const ec = gregorianToEthiopian(dateVal);
+            const method = document.getElementById('payMethod').value;
+            const transactionRef = method === 'Bank Transfer' ? document.getElementById('payRefId').value.trim() : '';
+            if (method === 'Bank Transfer' && !transactionRef) {
+                showToast(currentLang === 'am' ? '⚠️ የባንክ ግብይት/ደረሰኝ ቁጥር ያስገቡ' : '⚠️ Enter the bank transaction / receipt ID', 'error');
+                document.getElementById('payRefId').focus();
+                return;
+            }
+            const receiver = document.getElementById('payReceiver').value.trim() || 'ኢየሩሳሌም ሀዲሽ';
             const base = {
                 student_id: studentId, student_name: studentName, amount: parseFloat(document.getElementById('payAmount').value) || 0,
-                paid_date: dateVal, ec_paid_date: ec ? ec.label : null, method: document.getElementById('payMethod').value,
-                status: 'Paid', note: document.getElementById('payNote').value, period
+                paid_date: dateVal, ec_paid_date: ec ? ec.label : null, method,
+                status: 'Paid', note: document.getElementById('payNote').value, period,
+                transaction_ref_id: transactionRef, receiver
             };
             let error;
             if (kind === 'student') {
                 ({ error } = await client.from('student_payments').upsert([{ ...base, class_name: group, plan }], { onConflict: 'student_id,plan,period' }));
             } else {
                 ({ error } = await client.from('begena_student_payments').upsert([{ ...base, grade: group }], { onConflict: 'student_id,period' }));
+            }
+            // If an older Supabase table does not yet have the optional reference/receiver
+            // columns, retry with the original schema and preserve the bank reference in Note.
+            if (error && /column|schema cache|transaction_ref_id|receiver/i.test(error.message || '')) {
+                const fallbackNote = transactionRef
+                    ? `${document.getElementById('payNote').value ? document.getElementById('payNote').value + ' · ' : ''}Bank Transaction / Receipt ID: ${transactionRef} · Receiver: ${receiver}`
+                    : document.getElementById('payNote').value;
+                const fallback = {
+                    student_id: studentId, student_name: studentName, amount: parseFloat(document.getElementById('payAmount').value) || 0,
+                    paid_date: dateVal, ec_paid_date: ec ? ec.label : null, method,
+                    status: 'Paid', note: fallbackNote, period
+                };
+                if (kind === 'student') {
+                    ({ error } = await client.from('student_payments').upsert([{ ...fallback, class_name: group, plan }], { onConflict: 'student_id,plan,period' }));
+                } else {
+                    ({ error } = await client.from('begena_student_payments').upsert([{ ...fallback, grade: group }], { onConflict: 'student_id,period' }));
+                }
             }
             if (error) { console.error(error); showToast('⚠️ Save failed', 'error'); return; }
             await logAudit(kind === 'student' ? 'Student Payment' : 'Begena Payment', `${studentName} - ${formatCurrency(base.amount)} (${period})`);
@@ -2011,6 +2134,56 @@
             if (table === 'student_payments') { await loadClassStudentsAndPayments(); renderStudentPaymentList(); }
             else { await loadGradeStudentsAndPayments(); renderBegenaPaymentList(); }
         }
+
+        // ============================================================
+        // AI EXECUTIVE SUMMARY + STUDENT PAYMENT HISTORY
+        // ============================================================
+        let aiStudentPayments = [];
+        async function loadAIStudentPayments() {
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) { aiStudentPayments = []; return; }
+            const rows = await fetchOrError(client.from('student_payments').select('*').order('paid_date', { ascending: false }), 'Load AI student payments');
+            aiStudentPayments = rows || [];
+        }
+        function refreshAIExecutiveSummary() {
+            const income = financeData.transactions.filter(x => x.type === 'income').reduce((s,x)=>s+(Number(x.amount)||0),0);
+            const expense = financeData.transactions.filter(x => x.type === 'expense').reduce((s,x)=>s+(Number(x.amount)||0),0);
+            const net = income - expense;
+            const paid = aiStudentPayments.reduce((s,x)=>s+(Number(x.amount)||0),0);
+            const uniqueStudents = [...new Set(aiStudentPayments.map(x=>String(x.student_id||'')).filter(Boolean))];
+            const paidStudents = new Set(aiStudentPayments.filter(x=>String(x.status||'Paid').toLowerCase()==='paid').map(x=>String(x.student_id||'')));
+            const outstanding = Math.max(0, uniqueStudents.length - paidStudents.size);
+            const collectionRate = uniqueStudents.length ? Math.round((paidStudents.size / uniqueStudents.length) * 100) : 0;
+            let insight;
+            if (income + expense === 0 && paid === 0) insight = currentLang==='am' ? 'እስካሁን በቂ የገንዘብ መረጃ የለም። ግብይቶችን እና የተማሪ ክፍያዎችን ሲጨምሩ ይህ ማጠቃለያ ይዘምናል።' : 'There is not enough financial data yet. Add transactions and student payments to unlock stronger insights.';
+            else if (expense > income) insight = currentLang==='am' ? 'ወጪዎች ከገቢ በላይ ናቸው። የወጪ ምድቦችን ይገምግሙ እና ትልቅ ወጪዎችን በቅርብ ይከታተሉ።' : 'Expenses are higher than income. Review expense categories and monitor large spending closely.';
+            else if (collectionRate < 70) insight = currentLang==='am' ? `የተማሪ ክፍያ ምጣኔ ${collectionRate}% ነው። ያልከፈሉ ተማሪዎችን በቅርብ መከታተል ይመከራል።` : `Student collection is ${collectionRate}%. Follow up with students who still have outstanding payments.`;
+            else insight = currentLang==='am' ? `የገንዘብ አፈፃፀም ጥሩ ነው። የተጣራ ሂሳብ ${formatCurrency(net)} ሲሆን የተማሪ ክፍያ ምጣኔ ${collectionRate}% ነው።` : `Financial performance is healthy. Net balance is ${formatCurrency(net)} and student collection is ${collectionRate}%.`;
+            const cards = [
+                ['💰', t('aiIncome'), formatCurrency(income), 'text-green-500'],
+                ['💸', t('aiExpense'), formatCurrency(expense), 'text-red-500'],
+                ['📚', t('aiStudentCollected'), formatCurrency(paid), 'text-yellow-600'],
+                ['🎓', t('aiOutstandingStudents'), String(outstanding), 'text-orange-500']
+            ];
+            document.getElementById('aiSummaryBody').innerHTML = cards.map(c=>`<div class="glass-panel rounded-2xl p-4"><div class="flex items-center justify-between mb-2"><span class="text-xs text-gray-400">${c[1]}</span><span>${c[0]}</span></div><div class="text-lg font-bold ${c[3]}">${c[2]}</div></div>`).join('') + `<div class="glass-panel-gold rounded-2xl p-4 md:col-span-2 xl:col-span-4"><div class="text-xs font-bold text-yellow-600 uppercase tracking-wide mb-2">🤖 ${t('aiInsight')}</div><p class="text-sm leading-6">${escapeHtml(insight)}</p></div>`;
+        }
+        async function openStudentPaymentHistory(studentId, studentName) {
+            const client = await waitForSupabase().catch(() => null);
+            if (!client) { showToast(currentLang==='am' ? '⚠️ ዳታቤዝ አልተገናኘም' : '⚠️ Database not connected', 'error'); return; }
+            document.getElementById('historyStudentSubtitle').textContent = `${studentName} · ${studentId}`;
+            const rows = await fetchOrError(client.from('student_payments').select('*').eq('student_id', studentId).order('paid_date', { ascending: false }), 'Load student payment history');
+            const payments = rows || [];
+            const total = payments.reduce((s,p)=>s+(Number(p.amount)||0),0);
+            const paidCount = payments.filter(p=>String(p.status||'Paid').toLowerCase()==='paid').length;
+            document.getElementById('historyStudentStats').innerHTML = [
+                [t('historyTotal'), formatCurrency(total)], [t('historyPlan'), String(payments.length)], [t('historyMethod'), paidCount], [t('historyAmount'), payments.length ? formatCurrency(total/payments.length) : formatCurrency(0)]
+            ].map(x=>`<div class="glass-panel rounded-2xl p-4"><div class="text-[10px] uppercase text-gray-500 mb-1">${x[0]}</div><div class="font-bold">${x[1]}</div></div>`).join('');
+            const body=document.getElementById('studentHistoryBody'), empty=document.getElementById('studentHistoryEmpty');
+            empty.classList.toggle('hidden', payments.length>0);
+            body.innerHTML=payments.map(p=>`<tr class="border-t border-white/5"><td class="p-3 text-xs">${escapeHtml(p.ec_paid_date || p.paid_date || '—')}</td><td class="p-3 text-xs">${escapeHtml(p.plan || '—')}</td><td class="p-3 text-xs">${escapeHtml(p.period || '—')}</td><td class="p-3 text-right font-bold text-green-500">${formatCurrency(p.amount)}</td><td class="p-3 text-xs">${escapeHtml(p.method || '—')}</td><td class="p-3 text-xs font-mono">${escapeHtml(p.transaction_ref_id || '—')}</td><td class="p-3 text-xs">${escapeHtml(p.receiver || 'ኢየሩሳሌም ሀዲሽ')}</td></tr>`).join('');
+            const m=document.getElementById('studentHistoryModal'); m.classList.remove('hidden'); setTimeout(()=>m.classList.remove('modal-hidden-state'),10);
+        }
+        function closeStudentPaymentHistory(){ const m=document.getElementById('studentHistoryModal'); m.classList.add('modal-hidden-state'); setTimeout(()=>m.classList.add('hidden'),280); }
 
         // ============================================================
         // ANALYTICS & REPORTING
@@ -2085,8 +2258,8 @@
         // MASTER INIT
         // ============================================================
         async function renderAll() {
-            await Promise.all([loadTransactions(), loadBankAccounts(), loadReconciliations(), loadLoans(), loadAuditLog()]);
-            renderTopBar(); renderTable(); renderBankAccounts(); renderLoans(); renderChart(); renderAuditLog();
+            await Promise.all([loadTransactions(), loadBankAccounts(), loadReconciliations(), loadLoans(), loadAuditLog(), loadAIStudentPayments()]);
+            renderTopBar(); renderTable(); refreshAIExecutiveSummary(); renderBankAccounts(); renderLoans(); renderChart(); renderAuditLog();
         }
         applyTranslations();
         renderAll();

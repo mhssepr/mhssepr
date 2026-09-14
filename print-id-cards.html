@@ -182,6 +182,10 @@
         body.printing-bulk-id-cards .print-page { page-break-after: always; break-after: page; }
         body.printing-bulk-id-cards .print-page:last-child { page-break-after: auto; break-after: auto; }
     }
+
+    .mode-btn { border:1px solid var(--border); background:var(--surface); color:var(--text); transition:.15s; }
+    .mode-btn.active { background:var(--gold); color:#111827; border-color:var(--gold); }
+    .mode-btn:disabled { opacity:.45; cursor:not-allowed; }
 </style>
 </head>
 <body class="min-h-screen">
@@ -228,26 +232,45 @@
             <div class="glass-panel rounded-2xl p-4 flex flex-col gap-4">
                 <h3 class="text-sm font-bold" data-i18n="printSettings">Print Settings</h3>
 
-                <label class="flex items-center justify-between text-sm cursor-pointer">
-                    <span data-i18n="duplexPrinting">Duplex Printing</span>
-                    <input type="checkbox" id="duplexToggle" checked class="w-4 h-4 accent-yellow-500" onchange="onSettingsChanged()">
-                </label>
+                <div class="rounded-xl p-3 border" style="border-color:var(--border);background:rgba(200,158,58,.07)">
+                    <div class="text-sm font-bold mb-1">🖨️ <span data-i18n="epsonTitle">Epson L3252 — Manual Two-Sided Printing</span></div>
+                    <p class="text-[11px] leading-snug" style="color:var(--text-muted)" data-i18n="epsonDesc">This printer does not use an automatic duplex unit. The system prints the front sheets first, then waits for you to re-feed the same sheets before printing the backs.</p>
+                </div>
 
                 <div id="flipEdgeGroup" class="pl-1">
-                    <div class="text-xs font-semibold mb-1.5" style="color:var(--text-muted)" data-i18n="flipOn">Flip on</div>
+                    <div class="text-xs font-semibold mb-1.5" style="color:var(--text-muted)" data-i18n="flipOn">Re-feed / flip method</div>
                     <label class="flex items-center gap-2 text-sm mb-1 cursor-pointer">
                         <input type="radio" name="flipEdge" value="long" checked class="accent-yellow-500" onchange="onSettingsChanged()">
-                        <span data-i18n="longEdge">Long Edge</span>
+                        <span data-i18n="longEdge">Long Edge — recommended</span>
                     </label>
-                    <p class="text-[11px] leading-snug mb-2 pl-6" style="color:var(--text-muted)" data-i18n="longEdgeHint">Take the printed stack, flip it top‑to‑bottom (like turning a notepad page), and reload it the same way up.</p>
+                    <p class="text-[11px] leading-snug mb-2 pl-6" style="color:var(--text-muted)" data-i18n="longEdgeHint">After the front print finishes, flip the sheet stack over the long edge (top-to-bottom) without changing left/right order, then reload it into the rear paper feed.</p>
                     <label class="flex items-center gap-2 text-sm cursor-pointer">
                         <input type="radio" name="flipEdge" value="short" class="accent-yellow-500" onchange="onSettingsChanged()">
                         <span data-i18n="shortEdge">Short Edge</span>
                     </label>
-                    <p class="text-[11px] leading-snug pl-6" style="color:var(--text-muted)" data-i18n="shortEdgeHint">Take the printed stack, flip it left‑to‑right (like turning a book page), and reload it the same way up.</p>
+                    <p class="text-[11px] leading-snug pl-6" style="color:var(--text-muted)" data-i18n="shortEdgeHint">Use this only if your physical re-feed requires a left-to-right flip. The system will mirror the back layout accordingly.</p>
                 </div>
 
-                <p class="text-[11px] leading-snug" style="color:var(--text-muted)" data-i18n="flipTip">Tip: print one test sheet first — print the fronts, flip the same sheet using the option above, print the backs, then hold it up to the light to confirm each card's front and back line up.</p>
+                <div class="rounded-xl p-3 border" style="border-color:var(--border)">
+                    <div class="text-xs font-bold mb-2" data-i18n="printMode">Print mode</div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" id="modeBoth" onclick="setPrintMode('both')" class="mode-btn active px-2 py-2 rounded-lg text-[11px] font-bold">Front + Back</button>
+                        <button type="button" id="modeFront" onclick="setPrintMode('front')" class="mode-btn px-2 py-2 rounded-lg text-[11px] font-bold">Front Only</button>
+                        <button type="button" id="modeBack" onclick="setPrintMode('back')" class="mode-btn px-2 py-2 rounded-lg text-[11px] font-bold">Back Only</button>
+                    </div>
+                </div>
+
+                <div id="manualDuplexSteps" class="rounded-xl p-3 border text-[11px] leading-relaxed" style="border-color:var(--border)">
+                    <div class="font-bold mb-1" data-i18n="manualStepsTitle">Epson L3252 workflow</div>
+                    <ol class="list-decimal pl-4 space-y-1">
+                        <li data-i18n="step1">Print FRONT pages.</li>
+                        <li data-i18n="step2">Wait for the ink to dry, then collect the same sheets in order.</li>
+                        <li data-i18n="step3">Flip the stack using the selected edge and reload it in the Epson rear paper feed.</li>
+                        <li data-i18n="step4">The system automatically prints BACK pages using the matching mirrored positions.</li>
+                    </ol>
+                </div>
+
+                <p class="text-[11px] leading-snug" style="color:var(--text-muted)" data-i18n="flipTip">Important: test with one A4 sheet first. Epson recommends testing manual two-sided printing before the full job.</p>
 
                 <label class="flex items-center justify-between text-sm cursor-pointer border-t pt-3" style="border-color:var(--border)">
                     <span data-i18n="cuttingGuides">Show Cutting Guides</span>
@@ -292,8 +315,11 @@
         en: {
             back: 'Back', pageTitle: '🪪 Student ID Card Printing', students: 'Students',
             searchPlaceholder: 'Search name or ID...', selectAll: '☑ Select All', deselectAll: '☐ Deselect All',
-            selected: 'selected', printSettings: 'Print Settings', duplexPrinting: 'Duplex Printing',
-            flipOn: 'Flip on', longEdge: 'Long Edge', shortEdge: 'Short Edge', cuttingGuides: 'Show Cutting Guides',
+            selected: 'selected', printSettings: 'Print Settings', duplexPrinting: 'Manual Two-Sided Printing',
+            epsonTitle: 'Epson L3252 — Manual Two-Sided Printing', epsonDesc: 'The Epson L3252 has no automatic duplex unit. Print the front sheets first, re-feed them manually, then print the backs.',
+            flipOn: 'Re-feed / flip method', longEdge: 'Long Edge — recommended', shortEdge: 'Short Edge', printMode: 'Print mode',
+            manualStepsTitle: 'Epson L3252 workflow', step1: 'Print FRONT pages.', step2: 'Wait for the ink to dry, then collect the same sheets in order.', step3: 'Flip the stack using the selected edge and reload it in the Epson rear paper feed.', step4: 'The system automatically prints BACK pages using the matching mirrored positions.',
+            cuttingGuides: 'Show Cutting Guides',
             longEdgeHint: "Take the printed stack, flip it top-to-bottom (like turning a notepad page), and reload it the same way up.",
             shortEdgeHint: "Take the printed stack, flip it left-to-right (like turning a book page), and reload it the same way up.",
             flipTip: "Tip: print one test sheet first — print the fronts, flip the same sheet using the option above, print the backs, then hold it up to the light to confirm each card's front and back line up.",
@@ -304,8 +330,11 @@
         am: {
             back: 'ተመለስ', pageTitle: '🪪 የተማሪዎች መታወቂያ ማተሚያ', students: 'ተማሪዎች',
             searchPlaceholder: 'ስም ወይም መታወቂያ ፈልግ...', selectAll: '☑ ሁሉንም ምረጥ', deselectAll: '☐ ምርጫ አጥፋ',
-            selected: 'ተመርጠዋል', printSettings: 'የህትመት ማስተካከያ', duplexPrinting: 'ባለሁለት ገጽ ህትመት',
-            flipOn: 'መገልበጫ', longEdge: 'ረጅም ጫፍ', shortEdge: 'አጭር ጫፍ', cuttingGuides: 'የመቁረጫ መስመር አሳይ',
+            selected: 'ተመርጠዋል', printSettings: 'ባለሁለት ገጽ ማተሚያ', duplexPrinting: 'ባለሁለት ገጽ ማተሚያ',
+            epsonTitle: 'Epson L3252 — በእጅ ባለሁለት ገጽ ማተሚያ', epsonDesc: 'Epson L3252 አውቶማቲክ duplex የለውም። መጀመሪያ ፊት ገጾችን ያትሙ፣ በእጅ መልሰው ያስገቡ፣ ከዚያ ጀርባዎቹን ያትሙ።',
+            flipOn: 'የመመለሻ / መገልበጫ ዘዴ', longEdge: 'ረጅም ጫፍ — የሚመከር', shortEdge: 'አጭር ጫፍ', printMode: 'የህትመት ሁኔታ',
+            manualStepsTitle: 'የEpson L3252 የስራ ሂደት', step1: 'የFRONT ገጾችን ያትሙ።', step2: 'ቀለሙ እስኪደርቅ ይጠብቁ፣ ከዚያ ተመሳሳይ ወረቀቶችን በተራቸው ይሰብስቡ።', step3: 'በተመረጠው ጫፍ መሠረት ስታኩን ይገልብጡና በEpson የኋላ ወረቀት መግቢያ ይመልሱ።', step4: 'ሲስተሙ የBACK ገጾችን በተመሳሳይ ቦታ ማስተካከያ ያትማል።',
+            cuttingGuides: 'የመቁረጫ መስመር አሳይ',
             longEdgeHint: 'የታተመውን ወረቀት ከላይ ወደ ታች ገልብጠው (እንደ ማስታወሻ ደብተር ገጽ) በተመሳሳይ አቅጣጫ መልሰው ይጫኑት፡፡',
             shortEdgeHint: 'የታተመውን ወረቀት ከግራ ወደ ቀኝ ገልብጠው (እንደ መጽሐፍ ገጽ) በተመሳሳይ አቅጣጫ መልሰው ይጫኑት፡፡',
             flipTip: 'ምክር፡ መጀመሪያ አንድ የሙከራ ወረቀት ያትሙ — የፊት ገጽን አትመው፣ ከላይ በተመረጠው መንገድ ገልብጠው፣ የኋላ ገጽን አትመው፣ ከዚያም ወደ ብርሃን ይዘው በማየት እያንዳንዱ ካርድ ፊትና ኋላ በትክክል መጣጣማቸውን ያረጋግጡ፡፡',
@@ -560,23 +589,23 @@
     document.getElementById('searchInput').addEventListener('input', renderStudentList);
 
     // ==========================================
-    // PAGE GENERATION — 3x2 A4-landscape pages, alternating
-    // ODD = FRONT / EVEN = BACK, one shared grid for both sides.
+    // PAGE GENERATION — Epson L3252 manual duplex
+    // A4 landscape, 3 x 2 cards.
+    // FRONT is printed first. BACK is printed only after the user
+    // manually re-feeds the same sheets.
     // ==========================================
+    let printMode = 'both'; // both | front | back
+    let duplexPrintStage = null; // 'front' or 'back' during a two-stage job
+    let isPrinting = false;
+
     function getSelectedStudentsOrdered() {
         return studentsData.filter(s => selectedIds.has(s.id));
     }
-    // Manual duplex (no auto-duplexer): you print the FRONT page, physically pick
-    // up the same sheet, flip it over by hand, and feed it back in to print the BACK.
-    // Which grid position each card lands on after that flip depends on which edge
-    // of the paper you flip it around:
-    //   - Flip on the SHORT edge (turn it like a book page, left-to-right):
-    //     rotating around a vertical edge mirrors LEFT <-> RIGHT, rows stay put.
-    //   - Flip on the LONG edge (turn it like a notepad page, top-to-bottom):
-    //     rotating around a horizontal edge mirrors TOP <-> BOTTOM, columns stay put.
-    // Slots are numbered 0,1,2 = top row (L,M,R) and 3,4,5 = bottom row (L,M,R).
-    const SHORT_EDGE_MIRROR = [2, 1, 0, 5, 4, 3]; // mirror columns within each row
-    const LONG_EDGE_MIRROR = [3, 4, 5, 0, 1, 2];  // swap the two rows
+    // For A4 landscape: slots 0,1,2 are top row; 3,4,5 are bottom row.
+    // Long-edge re-feed: top/bottom swap.
+    // Short-edge re-feed: left/right swap within each row.
+    const SHORT_EDGE_MIRROR = [2,1,0,5,4,3];
+    const LONG_EDGE_MIRROR  = [3,4,5,0,1,2];
 
     function computeChunks() {
         const students = getSelectedStudentsOrdered();
@@ -584,20 +613,40 @@
         for (let i = 0; i < students.length; i += 6) chunks.push(students.slice(i, i + 6));
         return chunks;
     }
-    // Returns a flat list of page descriptors: { side: 'front'|'back', slots: [student|null, ...6] }
-    function computePages() {
+
+    function computeSheetPages(side) {
         const flipEdge = document.querySelector('input[name="flipEdge"]:checked').value;
         const chunks = computeChunks();
         const pages = [];
-        chunks.forEach(chunk => {
+        const mirror = flipEdge === 'short' ? SHORT_EDGE_MIRROR : LONG_EDGE_MIRROR;
+        chunks.forEach((chunk, sheetIndex) => {
             const frontSlots = [0,1,2,3,4,5].map(i => chunk[i] || null);
-            const mirror = flipEdge === 'short' ? SHORT_EDGE_MIRROR : LONG_EDGE_MIRROR;
             const backSlots = mirror.map(i => chunk[i] || null);
-            pages.push({ side: 'front', slots: frontSlots });
-            pages.push({ side: 'back', slots: backSlots });
+            const slots = side === 'back' ? backSlots : frontSlots;
+            pages.push({ side, slots, sheetIndex, flipEdge });
         });
         return pages;
     }
+
+    function computePages() {
+        if (printMode === 'front') return computeSheetPages('front');
+        if (printMode === 'back') return computeSheetPages('back');
+        // Preview for the full workflow shows front/back alternately.
+        const pages = [];
+        computeChunks().forEach((_, i) => {
+            pages.push(...computeSheetPages('front').filter(p => p.sheetIndex === i));
+            pages.push(...computeSheetPages('back').filter(p => p.sheetIndex === i));
+        });
+        return pages;
+    }
+
+    function setPrintMode(mode) {
+        printMode = mode;
+        ['both','front','back'].forEach(m => document.getElementById('mode' + m.charAt(0).toUpperCase() + m.slice(1)).classList.toggle('active', m === mode));
+        previewPageIndex = 0;
+        renderPreview();
+    }
+
     function renderPageHTML(page, uidPrefix, showGuides) {
         const slotsHtml = page.slots.map((s, i) => {
             if (!s) return `<div class="card-slot empty-slot"></div>`;
@@ -643,7 +692,7 @@
 
         document.getElementById('previewPageLabel').textContent =
             (I18N[currentLang] || I18N.en).pageOfTpl(previewPageIndex + 1, total) +
-            (pages[previewPageIndex].side === 'front' ? '  ·  FRONT' : '  ·  BACK');
+            (pages[previewPageIndex].side === 'front' ? '  ·  FRONT' : '  ·  BACK') + (pages[previewPageIndex].sheetIndex != null ? `  ·  SHEET ${pages[previewPageIndex].sheetIndex + 1}` : '');
 
         scalePreview();
     }
@@ -661,9 +710,6 @@
     function prevPreviewPage() { previewPageIndex--; renderPreview(); }
     function nextPreviewPage() { previewPageIndex++; renderPreview(); }
     function onSettingsChanged() {
-        const duplexOn = document.getElementById('duplexToggle').checked;
-        document.getElementById('flipEdgeGroup').style.opacity = duplexOn ? '1' : '.4';
-        document.querySelectorAll('input[name="flipEdge"]').forEach(r => r.disabled = !duplexOn);
         previewPageIndex = 0;
         renderPreview();
     }
@@ -685,26 +731,100 @@
         }));
         if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
     }
-    async function doPrint() {
-        const pages = computePages();
-        if (!pages.length) { alert('Please select at least one student to print.'); return; }
+    function getPrintPagesForStage(stage) {
+        return computeSheetPages(stage);
+    }
 
+    async function printStage(stage) {
+        const pages = getPrintPagesForStage(stage);
+        if (!pages.length) return false;
         const guides = document.getElementById('cuttingGuidesToggle').checked;
         const area = document.getElementById('realPrintArea');
-        area.innerHTML = pages.map((p, idx) => renderPageHTML(p, `real${idx}_`, guides)).join('');
-        pages.forEach((p, idx) => renderBarcodesForPage(p, `real${idx}_`));
+        area.innerHTML = pages.map((p, idx) => renderPageHTML(p, `real${stage}${idx}_`, guides)).join('');
+        pages.forEach((p, idx) => renderBarcodesForPage(p, `real${stage}${idx}_`));
+        await waitForImages(area);
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        document.body.classList.add('printing-bulk-id-cards');
+        window.print();
+        return true;
+    }
 
+    async function doPrint() {
+        if (isPrinting) return;
+        const students = getSelectedStudentsOrdered();
+        if (!students.length) { alert('Please select at least one student to print.'); return; }
+
+        isPrinting = true;
         const btn = document.getElementById('printBtn');
         const originalText = btn.textContent;
-        btn.disabled = true; btn.textContent = '⏳ Preparing...';
-        await waitForImages(area);
-        btn.disabled = false; btn.textContent = originalText;
+        btn.disabled = true;
 
-        document.body.classList.add('printing-bulk-id-cards');
-        setTimeout(() => { window.print(); }, 150);
+        try {
+            if (printMode === 'front') {
+                btn.textContent = '⏳ Preparing FRONT...';
+                duplexPrintStage = 'front';
+                await printStage('front');
+                return;
+            }
+            if (printMode === 'back') {
+                btn.textContent = '⏳ Preparing BACK...';
+                duplexPrintStage = 'back';
+                await printStage('back');
+                return;
+            }
+
+            // BOTH = two separate browser print jobs. The user manually
+            // re-feeds the printed A4 sheets between the two jobs.
+            btn.textContent = '⏳ Printing FRONT pages...';
+            duplexPrintStage = 'front';
+            await printStage('front');
+        } catch (err) {
+            console.error('ID-card printing error:', err);
+            alert('Printing could not be prepared. Please try again.');
+            document.body.classList.remove('printing-bulk-id-cards');
+            isPrinting = false;
+            duplexPrintStage = null;
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
     }
-    window.addEventListener('afterprint', () => {
+
+    window.addEventListener('afterprint', async () => {
         document.body.classList.remove('printing-bulk-id-cards');
+        const stage = duplexPrintStage;
+        const btn = document.getElementById('printBtn');
+        if (!isPrinting || !stage) return;
+
+        if (printMode === 'both' && stage === 'front') {
+            const proceed = confirm(
+                'FRONT pages are finished.\n\n' +
+                '1. Wait for the ink to dry.\n' +
+                '2. Keep the sheets in the same order.\n' +
+                '3. Flip/re-feed the stack using the selected ' + (document.querySelector('input[name="flipEdge"]:checked').value === 'long' ? 'LONG EDGE' : 'SHORT EDGE') + ' method.\n' +
+                '4. Put the sheets in the Epson L3252 rear paper feed.\n\n' +
+                'Click OK to print the BACK pages.'
+            );
+            if (!proceed) {
+                isPrinting = false; duplexPrintStage = null; btn.disabled = false; btn.textContent = (I18N[currentLang] || I18N.en).printIdCardsBtn; return;
+            }
+            try {
+                btn.textContent = '⏳ Preparing BACK pages...';
+                duplexPrintStage = 'back';
+                await new Promise(r => setTimeout(r, 250));
+                await printStage('back');
+            } catch (err) {
+                console.error('Back-page printing error:', err);
+                alert('The BACK pages could not be prepared.');
+                isPrinting = false; duplexPrintStage = null; btn.disabled = false; btn.textContent = (I18N[currentLang] || I18N.en).printIdCardsBtn;
+            }
+            return;
+        }
+
+        isPrinting = false;
+        duplexPrintStage = null;
+        document.getElementById('realPrintArea').innerHTML = '';
+        btn.disabled = false;
+        btn.textContent = (I18N[currentLang] || I18N.en).printIdCardsBtn;
     });
 
     // ==========================================

@@ -167,6 +167,7 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
 <label class="module"><input type="checkbox" data-module="attendance"> <span data-i18n="modAttendance">Attendance Management</span></label>
 <label class="module"><input type="checkbox" data-module="begena"> <span data-i18n="modBegena">Begena Management</span></label>
 <label class="module"><input type="checkbox" data-module="equipment"> <span data-i18n="modEquipment">Equipment Management</span></label>
+<label class="module"><input type="checkbox" data-module="id_print"> <span data-i18n="modIdPrint">Student ID Card Printing</span></label>
 </div><small style="display:block;color:var(--muted);font-size:10px;margin-top:9px">For Custom roles, System Access controls module View access. Add, Edit, Delete and Print/Export are controlled in the Custom Permissions table below.</small></div>
 <div class="section" id="roleTypeSection"><h4 data-i18n="roleTypeHeading">Role Type</h4>
 <div class="grid">
@@ -203,7 +204,8 @@ import { initializeRBAC, isSuperAdmin } from './mhss-rbac.js';
 
 const MODULES = [
   ['office','Office Management','የቢሮ አስተዳደር'],['finance','Finance Management','የገንዘብ አስተዳደር'],['students','Student Management','የተማሪ አስተዳደር'],
-  ['attendance','Attendance Management','የክትትል አስተዳደር'],['begena','Begena Management','የበገና አስተዳደር'],['equipment','Equipment Management','የመሳሪያ አስተዳደር']
+  ['attendance','Attendance Management','የክትትል አስተዳደር'],['begena','Begena Management','የበገና አስተዳደር'],['equipment','Equipment Management','የመሳሪያ አስተዳደር'],
+  ['id_print','Student ID Card Printing','የተማሪ መታወቂያ ካርድ ማተሚያ']
 ];
 function moduleLabel(code){ const m=MODULES.find(x=>x[0]===code); if(!m) return code; return currentLang==='am'?m[2]:m[1]; }
 const $ = id => document.getElementById(id);
@@ -565,6 +567,7 @@ const translations = {
     fWorkLabel:'Sunday School Work', systemAccess:'System Access',
     modOffice:'Office Management', modFinance:'Finance Management', modStudents:'Student Management',
     modAttendance:'Attendance Management', modBegena:'Begena Management', modEquipment:'Equipment Management',
+    modIdPrint:'Student ID Card Printing',
     roleTypeHeading:'Role Type', roleTypeLabel:'Role Type', statusLabel:'Status',
     customPerms:'Custom Permissions', permModule:'Module', permView:'View', permAdd:'Add', permEdit:'Edit', permDelete:'Delete', permPrint:'Print/Export',
     cancel:'Cancel', saveUser:'Save User',
@@ -586,6 +589,7 @@ const translations = {
     fWorkLabel:'የሰንበት ት/ቤት ስራ', systemAccess:'የስርዓት መዳረሻ',
     modOffice:'የቢሮ አስተዳደር', modFinance:'የገንዘብ አስተዳደር', modStudents:'የተማሪ አስተዳደር',
     modAttendance:'የክትትል አስተዳደር', modBegena:'የበገና አስተዳደር', modEquipment:'የመሳሪያ አስተዳደር',
+    modIdPrint:'የተማሪ መታወቂያ ካርድ ማተሚያ',
     roleTypeHeading:'የሚና አይነት', roleTypeLabel:'የሚና አይነት', statusLabel:'ሁኔታ',
     customPerms:'ብጁ ፍቃዶች', permModule:'ሞጁል', permView:'ይመልከቱ', permAdd:'ጨምር', permEdit:'አርትዕ', permDelete:'ሰርዝ', permPrint:'አትም/ላክ',
     cancel:'ይቅር', saveUser:'ተጠቃሚ አስቀምጥ',
