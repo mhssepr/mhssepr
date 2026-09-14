@@ -36,7 +36,14 @@ const CONFIG = {
   moduleColumn: 'module',
 };
 
-const MODULES = ['office', 'finance', 'students', 'attendance', 'begena', 'equipment', 'reports'];
+// FIX: 'id_print' (Student ID Card Printing) was missing here. This list
+// drives emptyPermissionSet()/fullPermissionSet() and applyRoleTypeDefaults()
+// below, so without it a preset-role user (full_access/manage/view_only)
+// would never get id_print defaulted client-side if the DB row were ever
+// absent. 'reports' is left as-is — it predates this fix, isn't wired to
+// any module list on the backend or in user-roles.html, and removing it
+// isn't part of this bug.
+const MODULES = ['office', 'finance', 'students', 'attendance', 'begena', 'equipment', 'id_print', 'reports'];
 
 // Module-level cache so every page that imports this file shares one
 // resolved state, and calling initializeRBAC() more than once (e.g. a

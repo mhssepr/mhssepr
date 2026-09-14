@@ -130,7 +130,7 @@
          so the two rectangles are always identical.
     =========================================== */
     .print-page {
-        width: 297mm; height: 210mm;
+        width: var(--print-page-w, 297mm); height: var(--print-page-h, 210mm);
         background: #ffffff;
         display: flex; align-items: center; justify-content: center;
         box-sizing: border-box;
@@ -143,6 +143,7 @@
         grid-template-rows: repeat(2, 91.2mm);
         column-gap: 10mm;
         row-gap: 10mm;
+        transform: translate(var(--print-offset-x, 0mm), var(--print-offset-y, 0mm));
     }
     .card-slot { width: 72mm; height: 91.2mm; position: relative; box-sizing: border-box; overflow: hidden; }
     /* Scale the full-size (300x380) card design up/down to the print slot as a single
@@ -154,7 +155,7 @@
         width: 300px !important;
         height: 380px !important;
         box-shadow: none !important;
-        transform: scale(calc(72mm / 300px));
+        transform: scale(0.9070866142);
         transform-origin: top left;
     }
     .card-slot.empty-slot { visibility: hidden; }
@@ -181,11 +182,41 @@
         body.printing-bulk-id-cards #realPrintArea { display: block !important; margin: 0; padding: 0; }
         body.printing-bulk-id-cards .print-page { page-break-after: always; break-after: page; }
         body.printing-bulk-id-cards .print-page:last-child { page-break-after: auto; break-after: auto; }
+        body.printing-test-page #root, body.printing-test-page #individualPreviewModal, body.printing-test-page #testPrintModal { display:none !important; }
+        body.printing-test-page #realPrintArea { display:block !important; }
+        body.printing-test-page .test-page-preview { page-break-after:auto; break-after:auto; }
     }
 
+    .id-filter-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px; }
+    .id-filter-label { display:block; font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:6px; }
+    .id-filter-select { width:100%; min-height:42px; border-radius:10px; padding:0 10px; background:var(--input-bg); color:var(--text-main); border:1px solid var(--input-border); font-size:13px; font-weight:600; }
+    .id-filter-select:focus { outline:none; border-color:var(--gold); }
+    .id-filter-help { font-size:10px; line-height:1.45; color:var(--text-muted); margin-top:6px; }
     .mode-btn { border:1px solid var(--border); background:var(--surface); color:var(--text); transition:.15s; }
     .mode-btn.active { background:var(--gold); color:#111827; border-color:var(--gold); }
     .mode-btn:disabled { opacity:.45; cursor:not-allowed; }
+    .feature-btn { border:1px solid var(--border); background:var(--surface); color:var(--text-main); transition:.15s; }
+    .feature-btn:hover { border-color:var(--gold); transform:translateY(-1px); }
+    .status-select { min-width:100px; }
+    .id-filter-select option, .settings-control option { background:#0f172a; color:#f8fafc; }
+    [data-theme="light"] .id-filter-select option, [data-theme="light"] .settings-control option { background:#ffffff; color:#111827; }
+    .settings-control { width:100%; min-height:38px; border-radius:9px; padding:0 9px; background:var(--input-bg); color:var(--text-main); border:1px solid var(--input-border); font-size:11px; font-weight:700; }
+    .settings-control:focus { outline:none; border-color:var(--gold); box-shadow:0 0 0 2px rgba(200,158,58,.15); }
+    .settings-number { text-align:right; }
+
+    .photo-missing-badge { font-size:9px; font-weight:800; padding:2px 6px; border-radius:999px; background:#FEF3C7; color:#92400E; border:1px solid #F59E0B; }
+    .replacement-ribbon { position:absolute; top:9px; right:-24px; z-index:30; transform:rotate(35deg); background:#B91C1C; color:#fff; font-size:9px; font-weight:900; letter-spacing:.08em; padding:4px 28px; box-shadow:0 2px 5px rgba(0,0,0,.25); }
+    .modal-backdrop { position:fixed; inset:0; z-index:100; background:rgba(2,6,23,.72); backdrop-filter:blur(7px); display:none; align-items:center; justify-content:center; padding:16px; }
+    .modal-backdrop.open { display:flex; }
+    .modal-card { width:min(1050px,100%); max-height:94vh; overflow:auto; background:var(--surface); color:var(--text-main); border:1px solid var(--border); border-radius:22px; box-shadow:0 30px 80px rgba(0,0,0,.45); }
+    .individual-preview-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; padding:18px; }
+    .individual-card-wrap { min-width:0; }
+    @media(max-width:800px){ .individual-preview-grid{grid-template-columns:1fr;} }
+    .test-page-preview { width:297mm; height:210mm; background:#fff; color:#111; padding:12mm; box-sizing:border-box; font-family:Arial,sans-serif; }
+    .test-grid { display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(2,1fr); gap:8mm; height:150mm; margin-top:10mm; }
+    .test-cell { border:1px solid #111; display:flex; align-items:center; justify-content:center; flex-direction:column; position:relative; }
+    .test-cell .cross{font-size:24px; font-weight:700;}
+    .test-cell .mm{font-size:11px; margin-top:6px;}
 </style>
 </head>
 <body class="min-h-screen">
@@ -195,7 +226,7 @@
     <header class="glass-panel w-full px-6 py-5 md:px-10 md:py-6 flex flex-wrap items-center justify-between gap-4 border-b sticky top-0 z-30">
         <div class="min-w-0">
             <div class="flex items-center gap-3">
-                <a href="students.html" class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition flex items-center gap-1 text-sm font-semibold" style="color:var(--text-main)">
+                <a href="dashboard.html" class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition flex items-center gap-1 text-sm font-semibold" style="color:var(--text-main)">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                     <span data-i18n="back">Back</span>
                 </a>
@@ -216,14 +247,32 @@
         <!-- LEFT: selection + settings -->
         <section class="flex flex-col gap-5 min-w-0">
             <div class="glass-panel rounded-2xl p-4">
+                <div class="id-filter-card mb-3">
+                    <label class="id-filter-label" for="groupSelect">Group / Division</label>
+                    <select id="groupSelect" class="id-filter-select" onchange="handleGroupChange()">
+                        <option value="">All Groups / ሁሉም ምድቦች</option>
+                    </select>
+                    <div class="mt-3">
+                        <label class="id-filter-label" for="classSelect">Class / Grade</label>
+                        <select id="classSelect" class="id-filter-select" onchange="handleClassChange()">
+                            <option value="">Select a Class / Grade</option>
+                        </select>
+                    </div>
+                    <p class="id-filter-help">Classes and groups are loaded from the same <b>student_groups</b> and <b>student_classes</b> database used by Students Management.</p>
+                </div>
                 <input type="text" id="searchInput" placeholder="Search name or ID..." data-i18n-ph="searchPlaceholder"
                        class="lux-input w-full px-4 py-2 rounded-xl text-sm mb-3">
                 <div class="flex items-center gap-2 mb-3">
                     <button onclick="setAllSelected(true)" class="flex-1 px-3 py-2 rounded-xl text-xs font-bold lux-input hover:brightness-110 transition" data-i18n="selectAll">☑ Select All</button>
                     <button onclick="setAllSelected(false)" class="flex-1 px-3 py-2 rounded-xl text-xs font-bold lux-input hover:brightness-110 transition" data-i18n="deselectAll">☐ Deselect All</button>
                 </div>
-                <div class="text-xs font-semibold mb-2" style="color:var(--text-muted)">
-                    <span id="selectedCount">0</span> <span data-i18n="selected">selected</span>
+                <div class="text-xs font-semibold mb-2 flex items-center justify-between gap-2" style="color:var(--text-muted)">
+                    <span><span id="selectedCount">0</span> <span data-i18n="selected">selected</span></span>
+                    <span id="missingPhotoSummary" class="photo-missing-badge hidden">0 missing photos</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="setMissingPhotoFilter()">📸 Missing Photos</button>
+                    <button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="clearStudentFilter()">↻ Show All</button>
                 </div>
                 <div id="studentListWrap" class="max-h-[420px] overflow-y-auto flex flex-col gap-1 pr-1"></div>
                 <p id="listEmptyMsg" class="hidden text-center text-xs py-8" style="color:var(--text-muted)">No students found.</p>
@@ -272,6 +321,38 @@
 
                 <p class="text-[11px] leading-snug" style="color:var(--text-muted)" data-i18n="flipTip">Important: test with one A4 sheet first. Epson recommends testing manual two-sided printing before the full job.</p>
 
+                <div class="rounded-xl p-3 border" style="border-color:var(--border)">
+                    <div class="text-xs font-bold mb-2">🪪 Card Type</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" id="cardModeNew" onclick="setCardPrintMode('new')" class="mode-btn active px-2 py-2 rounded-lg text-[11px] font-bold">New Card</button>
+                        <button type="button" id="cardModeReplacement" onclick="setCardPrintMode('replacement')" class="mode-btn px-2 py-2 rounded-lg text-[11px] font-bold">Replacement</button>
+                    </div>
+                    <p class="text-[10px] mt-2" style="color:var(--text-muted)">Replacement mode adds a clear REPLACEMENT mark to the printed card.</p>
+                </div>
+
+                <div class="rounded-xl p-3 border" style="border-color:var(--border)">
+                    <div class="text-xs font-bold mb-2">⚙️ Print Settings Panel</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="text-[10px] font-semibold"><span style="color:var(--text-muted)">Paper size</span><select id="paperSizeSetting" class="settings-control" onchange="onPrintLayoutSettingChanged()"><option value="A4">A4</option></select></label>
+                        <label class="text-[10px] font-semibold"><span style="color:var(--text-muted)">Orientation</span><select id="orientationSetting" class="settings-control" onchange="onPrintLayoutSettingChanged()"><option value="landscape">Landscape</option></select></label>
+                        <label class="text-[10px] font-semibold"><span style="color:var(--text-muted)">Cards / sheet</span><select id="cardsPerSheetSetting" class="settings-control" onchange="onPrintLayoutSettingChanged()"><option value="6">6 (3 × 2)</option></select></label>
+                        <label class="text-[10px] font-semibold"><span style="color:var(--text-muted)">Printer</span><input id="printerSetting" class="settings-control" value="Epson L3252" oninput="savePrintSettings()"></label>
+                        <label class="text-[10px] font-semibold"><span style="color:var(--text-muted)">Card scale %</span><input id="cardScaleSetting" class="settings-control settings-number" type="number" min="95" max="105" step="0.1" value="100" onchange="onPrintLayoutSettingChanged()"></label>
+                        <label class="text-[10px] font-semibold"><span style="color:var(--text-muted)">Horizontal offset (mm)</span><input id="offsetXSetting" class="settings-control settings-number" type="number" min="-5" max="5" step="0.1" value="0" onchange="onPrintLayoutSettingChanged()"></label>
+                        <label class="text-[10px] font-semibold"><span style="color:var(--text-muted)">Vertical offset (mm)</span><input id="offsetYSetting" class="settings-control settings-number" type="number" min="-5" max="5" step="0.1" value="0" onchange="onPrintLayoutSettingChanged()"></label>
+                        <label class="text-[10px] font-semibold"><span style="color:var(--text-muted)">Flip edge</span><select id="flipEdgeSetting" class="settings-control" onchange="setFlipEdgeFromPanel(this.value)"><option value="long">Long edge</option><option value="short">Short edge</option></select></label>
+                    </div>
+                    <div class="mt-2 text-[9px]" style="color:var(--text-muted)">Use scale and offsets only for printer alignment. The front and back use exactly the same settings.</div>
+                    <label class="flex items-center justify-between mt-3 pt-3 border-t text-[11px]" style="border-color:var(--border)">
+                        <span>Remember print settings</span><input id="rememberPrintSettings" type="checkbox" checked class="w-4 h-4 accent-yellow-500" onchange="savePrintSettings()">
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" class="feature-btn px-3 py-2.5 rounded-xl text-xs font-bold" onclick="openTestPrint()">🧪 Print Test Page</button>
+                    <button type="button" class="feature-btn px-3 py-2.5 rounded-xl text-xs font-bold" onclick="openSelectedPreview()">👁️ Individual Preview</button>
+                </div>
+
                 <label class="flex items-center justify-between text-sm cursor-pointer border-t pt-3" style="border-color:var(--border)">
                     <span data-i18n="cuttingGuides">Show Cutting Guides</span>
                     <input type="checkbox" id="cuttingGuidesToggle" checked class="w-4 h-4 accent-yellow-500" onchange="onSettingsChanged()">
@@ -298,8 +379,72 @@
     </main>
 </div>
 
+<!-- Individual ID preview modal -->
+<div id="individualPreviewModal" class="modal-backdrop" onclick="if(event.target===this) closeIndividualPreview()">
+  <div class="modal-card">
+    <div class="p-4 md:p-5 flex items-center justify-between gap-3 border-b" style="border-color:var(--border)">
+      <div><div class="font-bold">👁️ Individual ID Preview</div><div id="individualPreviewStudentMeta" class="text-xs mt-1" style="color:var(--text-muted)"></div></div>
+      <button type="button" onclick="closeIndividualPreview()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button>
+    </div>
+    <div id="individualPreviewGrid" class="individual-preview-grid"></div>
+  </div>
+</div>
+
+<!-- Print test page modal -->
+<div id="testPrintModal" class="modal-backdrop" onclick="if(event.target===this) closeTestPrint()">
+  <div class="modal-card">
+    <div class="p-4 flex items-center justify-between border-b" style="border-color:var(--border)">
+      <div><div class="font-bold">🧪 Epson L3252 Print Test</div><div class="text-xs mt-1" style="color:var(--text-muted)">Use one A4 sheet to verify scale and alignment before printing ID cards.</div></div>
+      <button type="button" onclick="closeTestPrint()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button>
+    </div>
+    <div class="p-4 overflow-auto"><div id="testPrintSheet" class="test-page-preview"><div style="font-size:18px;font-weight:800;text-align:center">MESERETE HIWOT — ID CARD ALIGNMENT TEST</div><div style="font-size:11px;text-align:center;margin-top:4px">A4 LANDSCAPE · 3 × 2 CARD POSITIONS · EPSON L3252</div><div class="test-grid">${Array.from({length:6},(_,i)=>`<div class="test-cell"><div class="cross">+</div><div style="font-weight:700">POSITION ${i+1}</div><div class="mm">72mm × 91.2mm slot</div><div style="position:absolute;inset:3mm;border:0.3mm dashed #777"></div></div>`).join('')}</div><div style="display:flex;justify-content:space-between;font-size:10px;margin-top:7mm"><span>LEFT / RIGHT CHECK</span><span>TOP / BOTTOM CHECK</span><span>100% SCALE — DO NOT FIT TO PAGE</span></div></div></div>
+    <div class="p-4 border-t flex justify-end gap-2" style="border-color:var(--border)"><button type="button" onclick="closeTestPrint()" class="feature-btn px-4 py-2 rounded-xl text-sm font-bold">Cancel</button><button type="button" onclick="printTestPage()" class="gold-btn px-4 py-2 rounded-xl text-sm">🧪 Print Test Page</button></div>
+  </div>
+</div>
+
 <!-- Hidden area used for the real, full-size print output -->
 <div id="realPrintArea"></div>
+
+<script type="module">
+  // Page-level RBAC guard: Student ID Card Printing is its own module.
+  // View access is required to open the page; Print/Export access controls printing.
+  import { supabase } from './supabaseClient.js';
+  import { initializeRBAC, hasModuleAccess, isSuperAdmin } from './mhss-rbac.js';
+
+  (async () => {
+    try {
+      const rbac = await initializeRBAC({ supabase });
+      if (!rbac || (!isSuperAdmin() && !hasModuleAccess('id_print', 'view'))) {
+        alert('You do not have permission to access Student ID Card Printing.');
+        window.location.replace('dashboard.html');
+        return;
+      }
+
+      // Prevent the actual print action unless Print/Export is granted.
+      window.__mhCanPrintIdCards = isSuperAdmin() || hasModuleAccess('id_print', 'print_export');
+      const printBtn = document.getElementById('printBtn');
+      if (printBtn && !window.__mhCanPrintIdCards) {
+        printBtn.disabled = true;
+        printBtn.title = 'Print/Export permission is required.';
+      }
+
+      const originalPrint = window.doPrint;
+      if (typeof originalPrint === 'function') {
+        window.doPrint = function () {
+          if (!window.__mhCanPrintIdCards) {
+            alert('You do not have Print/Export permission for Student ID Cards.');
+            return;
+          }
+          return originalPrint.apply(this, arguments);
+        };
+      }
+    } catch (err) {
+      console.error('[ID Cards RBAC] Guard failed:', err);
+      alert('Unable to verify your Student ID Card permissions.');
+      window.location.replace('dashboard.html');
+    }
+  })();
+</script>
 
 <script>
     // ==========================================
@@ -356,17 +501,134 @@
     })();
 
     // ==========================================
-    // CLASS CONTEXT — the class is passed in from the
-    // existing Students page via the URL, and only that
-    // class's students are ever loaded here.
+    // CLASS / GRADE SELECTION
+    // The selector uses the same Supabase tables and naming model as students.html.
+    // student_groups provides the group/division; student_classes provides the
+    // actual Class / Grade names used by students.class_name.
     // ==========================================
     const urlParams = new URLSearchParams(window.location.search);
-    const currentClassStr = urlParams.get('class') || '';
-    document.getElementById('hdrClassName').textContent = currentClassStr || '—';
-
+    const requestedClass = (urlParams.get('class') || '').trim();
+    let currentClassStr = '';
     let studentsData = [];
     let selectedIds = new Set();
     let previewPageIndex = 0;
+    let dbGroupCache = [];
+    let dbClassCache = [];
+    let studentClassCounts = new Map();
+    let allStudentsCache = [];
+
+    function setHeaderClass(name) {
+        currentClassStr = String(name || '').trim();
+        document.getElementById('hdrClassName').textContent = currentClassStr || '—';
+    }
+
+    async function loadClassDatabase() {
+        const client = await waitForSupabase();
+        const [groupsRes, classesRes] = await Promise.all([
+            client.from('student_groups')
+                .select('id,name,slug,is_system,sort_order')
+                .order('sort_order', { ascending: true })
+                .order('name', { ascending: true }),
+            client.from('student_classes')
+                .select('id,group_id,name,code,is_system,sort_order')
+                .order('sort_order', { ascending: true })
+                .order('name', { ascending: true })
+        ]);
+
+        if (groupsRes.error) throw groupsRes.error;
+        if (classesRes.error) throw classesRes.error;
+
+        dbGroupCache = groupsRes.data || [];
+        dbClassCache = classesRes.data || [];
+        renderClassSelectors();
+    }
+
+    function renderClassSelectors() {
+        const groupSelect = document.getElementById('groupSelect');
+        const classSelect = document.getElementById('classSelect');
+        if (!groupSelect || !classSelect) return;
+
+        groupSelect.innerHTML = '<option value="">All Groups / ሁሉም ምድቦች</option>' +
+            dbGroupCache.map(g =>
+                `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`
+            ).join('');
+
+        populateClassSelect('');
+    }
+
+    function populateClassSelect(groupId = '', preferredClassId = '') {
+        const select = document.getElementById('classSelect');
+        if (!select) return;
+
+        const classes = dbClassCache.filter(c =>
+            !groupId || String(c.group_id) === String(groupId)
+        );
+
+        select.innerHTML = '<option value="">Select a Class / Grade</option>' +
+            classes.map(c =>
+                `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}${c.code ? ' — ' + escapeHtml(c.code) : ''}</option>`
+            ).join('');
+
+        if (preferredClassId && classes.some(c => String(c.id) === String(preferredClassId))) {
+            select.value = preferredClassId;
+        }
+    }
+
+    function handleGroupChange() {
+        const groupId = document.getElementById('groupSelect')?.value || '';
+        clearStudentSelection();
+        studentsData = [];
+        setHeaderClass('');
+        document.getElementById('hdrStudentCount').textContent = '0';
+        populateClassSelect(groupId);
+        showListMessage('Select a Class / Grade to load students.');
+        renderPreview();
+    }
+
+    async function handleClassChange() {
+        const classId = document.getElementById('classSelect')?.value || '';
+        clearStudentSelection();
+        studentsData = [];
+
+        if (!classId) {
+            setHeaderClass('');
+            document.getElementById('hdrStudentCount').textContent = '0';
+            showListMessage('Select a Class / Grade to load students.');
+            renderPreview();
+            return;
+        }
+
+        // IMPORTANT: the value is the student_classes UUID. The actual
+        // student query uses student_classes.name -> students.class_name,
+        // exactly like students.html.
+        const selectedClass = dbClassCache.find(c => String(c.id) === String(classId));
+        if (!selectedClass) {
+            showListMessage('⚠️ The selected class could not be found in student_classes.');
+            return;
+        }
+
+        const className = String(selectedClass.name || '').trim();
+        setHeaderClass(className);
+        showListMessage(`⏳ Loading students in "${className}"...`);
+
+        const ok = await fetchStudentsForClass(className);
+        document.getElementById('hdrStudentCount').textContent = studentsData.length;
+
+        if (!ok) {
+            renderPreview();
+            return;
+        }
+
+        studentsData.forEach(st => selectedIds.add(st.id));
+        previewPageIndex = 0;
+        renderStudentList();
+        renderPreview();
+    }
+
+    function clearStudentSelection() {
+        selectedIds.clear();
+        previewPageIndex = 0;
+    }
 
     // ==========================================
     // DATA HELPERS — identical mapping/formatting to students.html
@@ -374,7 +636,7 @@
     function mapFromDB(row) {
         return {
             id: row.id, name: row.name, christianName: row.christian_name, gender: row.gender,
-            phone: row.phone, className: row.class_name, grade: row.grade, fieldOfStudy: row.field_of_study,
+            phone: row.phone, className: row.class_name, grade: row.grade, sundaySchoolGrade: row.sunday_school_grade, fieldOfStudy: row.field_of_study,
             dobDay: row.dob_day, dobMonth: row.dob_month, dobYear: row.dob_year, region: row.region,
             subCity: row.sub_city, woreda: row.woreda, confessionFatherName: row.confession_father_name,
             confessionFatherPhone: row.confession_father_phone, motherName: row.mother_name, motherPhone: row.mother_phone,
@@ -409,17 +671,89 @@
             window.addEventListener('supabase-load-failed', onFailed);
         });
     }
+    // Load students using the SAME source and class relationship as students.html.
+    // Primary: students.class_name === student_classes.name.
+    // Fallbacks only protect against old records containing case/spacing differences
+    // or legacy records that used grade/sunday_school_grade.
     async function fetchStudentsForClass(className) {
-        let client;
-        try { client = await waitForSupabase(); }
-        catch (err) { console.error('Supabase not ready:', err); showListMessage('⚠️ Could not connect to the database.'); return false; }
+        const client = await waitForSupabase();
+        const target = String(className || '').trim();
+        if (!target) {
+            studentsData = [];
+            return true;
+        }
+
         try {
-            const { data, error } = await client.from('students').select('*').eq('class_name', className).order('created_at', { ascending: true });
-            if (error) { console.error('Error fetching students:', error); showListMessage('⚠️ Could not load students.'); return false; }
+            // 1) EXACT students.html query — this is the canonical relationship.
+            let { data, error } = await client
+                .from('students')
+                .select('*')
+                .eq('class_name', target)
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                console.error('Primary student query error:', error);
+                studentsData = [];
+                showListMessage('⚠️ Could not load students: ' + (error.message || 'Database error'));
+                return false;
+            }
+
+            // 2) Case-insensitive fallback for old/migrated records.
+            if ((!data || data.length === 0) && target) {
+                const fallback = await client
+                    .from('students')
+                    .select('*')
+                    .ilike('class_name', target)
+                    .order('created_at', { ascending: true });
+                if (fallback.error) {
+                    console.warn('Case-insensitive student query failed:', fallback.error);
+                } else {
+                    data = fallback.data || [];
+                }
+            }
+
+            // 3) Final compatibility fallback: read the student records and match
+            // normalized class/grade values. This does NOT replace students.html;
+            // it only helps existing databases where old records were saved under
+            // grade or with extra whitespace/casing.
+            if ((!data || data.length === 0) && target) {
+                const allRes = await client
+                    .from('students')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+
+                if (!allRes.error) {
+                    const normalize = value => String(value ?? '')
+                        .trim()
+                        .replace(/\s+/g, ' ')
+                        .toLowerCase();
+                    const wanted = normalize(target);
+
+                    data = (allRes.data || []).filter(row => {
+                        const values = [row.class_name, row.grade, row.sunday_school_grade]
+                            .map(normalize)
+                            .filter(Boolean);
+                        return values.includes(wanted);
+                    });
+                }
+            }
+
             studentsData = (data || []).map(mapFromDB);
+
+            if (!studentsData.length) {
+                showListMessage(
+                    `No students are assigned to "${target}".\n\n` +
+                    `The ID Card page uses the same class name from student_classes and ` +
+                    `loads student records from the students table.`
+                );
+            }
+
             return true;
         } catch (err) {
-            console.error('Supabase connection error:', err); showListMessage('⚠️ Connection error.'); return false;
+            console.error('ID Card student loading error:', err);
+            studentsData = [];
+            showListMessage('⚠️ Could not load students: ' + (err?.message || 'Please try again.'));
+            return false;
         }
     }
     function showListMessage(msg) {
@@ -435,7 +769,7 @@
     // ==========================================
     function buildIdCardFrontHTML(s, uid) {
         return `
-            <div class="idcard idcard-front">
+            <div class="idcard idcard-front">${cardPrintMode === 'replacement' ? '<div class="replacement-ribbon">REPLACEMENT</div>' : ''}
                 <div class="idcard-guilloche"></div>
                 <div class="idcard-corner-tr"></div>
                 <div class="idcard-corner-bl"></div>
@@ -492,7 +826,7 @@
     function buildIdCardBackHTML(s, uid) {
         const barcodeId = `idCardBarcodeSvg${uid ? '-' + uid : ''}`;
         return `
-            <div class="idcard idcard-back">
+            <div class="idcard idcard-back">${cardPrintMode === 'replacement' ? '<div class="replacement-ribbon">REPLACEMENT</div>' : ''}
                 <div class="idcard-guilloche"></div>
                 <div class="idcard-corner-tr"></div>
                 <div class="idcard-corner-bl"></div>
@@ -547,30 +881,59 @@
     // ==========================================
     // STUDENT LIST / SELECTION
     // ==========================================
+    function hasStudentPhoto(s) {
+        const p = String(s?.photo || '').trim();
+        return !!p;
+    }
+    function getStudentStatus(s) { return studentStatusMap[s.id] || 'Not Printed'; }
+    function setStudentStatus(id, value) {
+        studentStatusMap[id] = value;
+        localStorage.setItem('mh_id_card_statuses', JSON.stringify(studentStatusMap));
+        renderStudentList();
+    }
+    function setMissingPhotoFilter() { missingPhotoOnly = true; renderStudentList(); }
+    function clearStudentFilter() { missingPhotoOnly = false; document.getElementById('searchInput').value=''; renderStudentList(); }
+
     function renderStudentList() {
         const wrap = document.getElementById('studentListWrap');
         const emptyMsg = document.getElementById('listEmptyMsg');
-        const term = document.getElementById('searchInput').value.trim().toLowerCase();
-        const filtered = studentsData.filter(s =>
-            (s.name && s.name.toLowerCase().includes(term)) || (s.id && s.id.toLowerCase().includes(term))
-        );
-        emptyMsg.classList.toggle('hidden', filtered.length > 0 || studentsData.length === 0);
-        if (filtered.length === 0 && studentsData.length > 0) {
-            emptyMsg.textContent = 'No students match your search.';
-            emptyMsg.classList.remove('hidden');
-        }
+        const term = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+        let filtered = studentsData.filter(s => {
+            if (missingPhotoOnly && hasStudentPhoto(s)) return false;
+            if (!term) return true;
+            return (s.name && s.name.toLowerCase().includes(term)) ||
+                   (s.id && s.id.toLowerCase().includes(term)) ||
+                   (s.idNumber && String(s.idNumber).toLowerCase().includes(term)) ||
+                   (s.fileNumber && String(s.fileNumber).toLowerCase().includes(term));
+        });
+        const missing = studentsData.filter(s => !hasStudentPhoto(s)).length;
+        const badge = document.getElementById('missingPhotoSummary');
+        badge.textContent = `${missing} missing photo${missing === 1 ? '' : 's'}`;
+        badge.classList.toggle('hidden', missing === 0);
+        if (!studentsData.length) { wrap.innerHTML=''; emptyMsg.textContent='No students loaded.'; emptyMsg.classList.remove('hidden'); updateSelectedCount(); return; }
+        if (!filtered.length) { wrap.innerHTML=''; emptyMsg.textContent = missingPhotoOnly ? 'No students are missing photos.' : 'No students match your search.'; emptyMsg.classList.remove('hidden'); updateSelectedCount(); return; }
+        emptyMsg.classList.add('hidden');
         wrap.innerHTML = filtered.map(s => `
-            <label class="flex items-center gap-3 px-2 py-2 rounded-lg cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition">
+            <div class="px-2 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition border-b" style="border-color:var(--border)">
+              <div class="flex items-center gap-3">
                 <input type="checkbox" class="student-check w-4 h-4 accent-yellow-500 flex-shrink-0" data-id="${escapeHtml(s.id)}" ${selectedIds.has(s.id) ? 'checked' : ''} onchange="onStudentCheckChange('${escapeHtml(s.id)}', this.checked)">
-                <img src="${getPhotoUrl(s)}" class="w-8 h-8 rounded-full object-cover flex-shrink-0" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}'">
-                <div class="min-w-0 flex-1">
-                    <div class="text-sm font-semibold amharic truncate">${escapeHtml(s.name)}</div>
-                    <div class="text-[11px] font-mono" style="color:var(--text-muted)">${escapeHtml(s.id)} · ${escapeHtml(s.className)}</div>
+                <button type="button" onclick="openIndividualPreview('${escapeHtml(s.id)}')" class="flex-shrink-0" title="Preview ID">
+                  <img src="${getPhotoUrl(s)}" class="w-9 h-9 rounded-full object-cover border" style="border-color:var(--border)" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}'">
+                </button>
+                <div class="min-w-0 flex-1 cursor-pointer" onclick="openIndividualPreview('${escapeHtml(s.id)}')">
+                  <div class="text-sm font-semibold amharic truncate">${escapeHtml(s.name)}</div>
+                  <div class="text-[10px] font-mono truncate" style="color:var(--text-muted)">${escapeHtml(s.id)} · ${escapeHtml(s.className)}</div>
                 </div>
-            </label>
+                ${!hasStudentPhoto(s) ? '<span class="photo-missing-badge">NO PHOTO</span>' : ''}
+                <select class="status-select lux-input text-[10px] rounded-lg px-1 py-1" onchange="setStudentStatus('${escapeHtml(s.id)}', this.value)" onclick="event.stopPropagation()">
+                  ${['Not Printed','Printed','Replacement Required','Lost','Damaged'].map(v => `<option value="${v}" ${getStudentStatus(s)===v?'selected':''}>${v}</option>`).join('')}
+                </select>
+              </div>
+            </div>
         `).join('');
         updateSelectedCount();
     }
+
     function onStudentCheckChange(id, checked) {
         if (checked) selectedIds.add(id); else selectedIds.delete(id);
         updateSelectedCount();
@@ -588,6 +951,77 @@
     }
     document.getElementById('searchInput').addEventListener('input', renderStudentList);
 
+    function setCardPrintMode(mode) {
+        cardPrintMode = mode;
+        localStorage.setItem('mh_id_card_print_mode', mode);
+        document.getElementById('cardModeNew').classList.toggle('active', mode==='new');
+        document.getElementById('cardModeReplacement').classList.toggle('active', mode==='replacement');
+        previewPageIndex = 0; renderPreview();
+    }
+    function openSelectedPreview() {
+        const s = getSelectedStudentsOrdered()[0] || studentsData[0];
+        if (!s) { alert('Please load a class first.'); return; }
+        openIndividualPreview(s.id);
+    }
+    function openIndividualPreview(id) {
+        const s = studentsData.find(x => x.id === id);
+        if (!s) return;
+        individualPreviewStudentId = id;
+        document.getElementById('individualPreviewStudentMeta').textContent = `${s.name} · ${s.id} · ${s.className || ''} · Status: ${getStudentStatus(s)}`;
+        const grid = document.getElementById('individualPreviewGrid');
+        grid.innerHTML = `<div class="individual-card-wrap"><div class="text-xs font-bold mb-2">FRONT</div>${buildIdCardFrontHTML(s,'individualFront')}</div><div class="individual-card-wrap"><div class="text-xs font-bold mb-2">BACK</div>${buildIdCardBackHTML(s,'individualBack')}</div>`;
+        renderIdCardBarcode(s,'individualBack');
+        document.getElementById('individualPreviewModal').classList.add('open');
+    }
+    function closeIndividualPreview() { document.getElementById('individualPreviewModal').classList.remove('open'); }
+    function openTestPrint() { document.getElementById('testPrintModal').classList.add('open'); }
+    function closeTestPrint() { document.getElementById('testPrintModal').classList.remove('open'); }
+    function printTestPage() {
+        const area = document.getElementById('realPrintArea');
+        area.innerHTML = document.getElementById('testPrintSheet').outerHTML;
+        document.body.classList.add('printing-test-page');
+        window.print();
+    }
+    function savePrintSettings() {
+        const remember = document.getElementById('rememberPrintSettings')?.checked ?? true;
+        const data = {
+            remember,
+            flipEdge: document.querySelector('input[name="flipEdge"]:checked')?.value || 'long',
+            cuttingGuides: document.getElementById('cuttingGuidesToggle')?.checked ?? true,
+            printer: document.getElementById('printerSetting')?.value || 'Epson L3252',
+            cardScale: Number(document.getElementById('cardScaleSetting')?.value || 100),
+            offsetX: Number(document.getElementById('offsetXSetting')?.value || 0),
+            offsetY: Number(document.getElementById('offsetYSetting')?.value || 0)
+        };
+        if (remember) localStorage.setItem('mh_id_card_print_settings', JSON.stringify(data));
+        else localStorage.removeItem('mh_id_card_print_settings');
+    }
+    function applyPrintLayoutSettings() {
+        const scale = Math.max(95, Math.min(105, Number(document.getElementById('cardScaleSetting')?.value || 100))) / 100;
+        const x = Number(document.getElementById('offsetXSetting')?.value || 0);
+        const y = Number(document.getElementById('offsetYSetting')?.value || 0);
+        document.documentElement.style.setProperty('--print-card-scale', scale);
+        document.documentElement.style.setProperty('--print-offset-x', `${x}mm`);
+        document.documentElement.style.setProperty('--print-offset-y', `${y}mm`);
+        // The fixed 72mm/300px ratio is multiplied by the user scale.
+        document.querySelectorAll('.card-slot .idcard').forEach(el => {
+            el.style.transform = `scale(${0.9070866142 * scale})`;
+        });
+    }
+    function onPrintLayoutSettingChanged() {
+        applyPrintLayoutSettings();
+        savePrintSettings();
+        previewPageIndex = 0;
+        renderPreview();
+    }
+    function setFlipEdgeFromPanel(value) {
+        const radio = document.querySelector(`input[name="flipEdge"][value="${value}"]`);
+        if (radio) radio.checked = true;
+        savePrintSettings();
+        previewPageIndex = 0;
+        renderPreview();
+    }
+
     // ==========================================
     // PAGE GENERATION — Epson L3252 manual duplex
     // A4 landscape, 3 x 2 cards.
@@ -597,6 +1031,10 @@
     let printMode = 'both'; // both | front | back
     let duplexPrintStage = null; // 'front' or 'back' during a two-stage job
     let isPrinting = false;
+    let cardPrintMode = localStorage.getItem('mh_id_card_print_mode') || 'new';
+    let studentStatusMap = JSON.parse(localStorage.getItem('mh_id_card_statuses') || '{}');
+    let missingPhotoOnly = false;
+    let individualPreviewStudentId = null;
 
     function getSelectedStudentsOrdered() {
         return studentsData.filter(s => selectedIds.has(s.id));
@@ -648,6 +1086,7 @@
     }
 
     function renderPageHTML(page, uidPrefix, showGuides) {
+        applyPrintLayoutSettings();
         const slotsHtml = page.slots.map((s, i) => {
             if (!s) return `<div class="card-slot empty-slot"></div>`;
             const uid = `${uidPrefix}${i}`;
@@ -711,6 +1150,7 @@
     function nextPreviewPage() { previewPageIndex++; renderPreview(); }
     function onSettingsChanged() {
         previewPageIndex = 0;
+        savePrintSettings();
         renderPreview();
     }
 
@@ -743,6 +1183,7 @@
         area.innerHTML = pages.map((p, idx) => renderPageHTML(p, `real${stage}${idx}_`, guides)).join('');
         pages.forEach((p, idx) => renderBarcodesForPage(p, `real${stage}${idx}_`));
         await waitForImages(area);
+        applyPrintLayoutSettings();
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
         document.body.classList.add('printing-bulk-id-cards');
         window.print();
@@ -790,6 +1231,12 @@
     }
 
     window.addEventListener('afterprint', async () => {
+        if (document.body.classList.contains('printing-test-page')) {
+            document.body.classList.remove('printing-test-page');
+            document.getElementById('realPrintArea').innerHTML = '';
+            closeTestPrint();
+            return;
+        }
         document.body.classList.remove('printing-bulk-id-cards');
         const stage = duplexPrintStage;
         const btn = document.getElementById('printBtn');
@@ -831,19 +1278,47 @@
     // INIT
     // ==========================================
     (async function init() {
-        if (!currentClassStr) {
-            showListMessage('No class selected. Please open this page from a class in Students.');
+        try {
+            setCardPrintMode(cardPrintMode);
+            const savedPS = JSON.parse(localStorage.getItem('mh_id_card_print_settings') || 'null');
+            if (savedPS) {
+                const flip = document.querySelector(`input[name="flipEdge"][value="${savedPS.flipEdge || 'long'}"]`);
+                if (flip) flip.checked = true;
+                if (typeof savedPS.cuttingGuides === 'boolean') document.getElementById('cuttingGuidesToggle').checked = savedPS.cuttingGuides;
+                if (typeof savedPS.remember === 'boolean') document.getElementById('rememberPrintSettings').checked = savedPS.remember;
+                if (document.getElementById('printerSetting')) document.getElementById('printerSetting').value = savedPS.printer || 'Epson L3252';
+                if (document.getElementById('cardScaleSetting')) document.getElementById('cardScaleSetting').value = savedPS.cardScale || 100;
+                if (document.getElementById('offsetXSetting')) document.getElementById('offsetXSetting').value = savedPS.offsetX || 0;
+                if (document.getElementById('offsetYSetting')) document.getElementById('offsetYSetting').value = savedPS.offsetY || 0;
+                if (document.getElementById('flipEdgeSetting')) document.getElementById('flipEdgeSetting').value = savedPS.flipEdge || 'long';
+            }
+            applyPrintLayoutSettings();
+            showListMessage('⏳ Loading Classes / Grades...');
+            await loadClassDatabase();
+
+            // Backward compatibility: if ?class=ClassName exists, find the
+            // matching student_classes row and select it by UUID.
+            if (requestedClass) {
+                const requested = dbClassCache.find(c =>
+                    String(c.name || '').trim() === requestedClass
+                );
+                if (requested) {
+                    const classSelect = document.getElementById('classSelect');
+                    classSelect.value = requested.id;
+                    await handleClassChange();
+                    return;
+                }
+            }
+
+            setHeaderClass('');
+            document.getElementById('hdrStudentCount').textContent = '0';
+            showListMessage('Select a Class / Grade to load students.');
+            renderPreview();
+        } catch (err) {
+            console.error('Could not initialize ID card class selector:', err);
+            showListMessage('⚠️ Could not load Classes / Grades from the database. ' + (err?.message || ''));
             document.getElementById('printBtn').disabled = true;
-            return;
         }
-        showListMessage('⏳ Loading students...');
-        const ok = await fetchStudentsForClass(currentClassStr);
-        document.getElementById('hdrStudentCount').textContent = studentsData.length;
-        if (!ok) return;
-        // Default: everyone in the class is selected, ready to print.
-        studentsData.forEach(s => selectedIds.add(s.id));
-        renderStudentList();
-        renderPreview();
     })();
 </script>
 

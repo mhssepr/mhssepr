@@ -742,6 +742,10 @@ html[data-theme="dark"] #mainContent .section-title{
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/></svg>
       <span data-i18n="navStudentsMgmt">Student Management</span>
     </a>
+    <a href="print-id-cards.html" class="nav-link" data-rbac-module="id_print" id="idCardPrintNav" aria-label="Student ID Card Management">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="2.2"/><path d="M13 9h5M13 12h5M6 15h12"/></svg>
+      <span>Student ID Cards</span>
+    </a>
     <a href="attendance.html" class="nav-link" data-rbac-module="attendance">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 3v3M16 3v3"/><path d="m8.5 14 2 2 4-4"/></svg>
       <span data-i18n="navAttendanceMgmt">Attendance Management</span>
@@ -1861,7 +1865,7 @@ function applyRBACToDashboard(rbac) {
 function filterCommandDataByRBAC() {
   if (isSuperAdmin()) return;
   const moduleByHref = {
-    'office.html':'office', 'finance.html':'finance', 'students.html':'students',
+    'office.html':'office', 'finance.html':'finance', 'students.html':'students', 'print-id-cards.html':'id_print',
     'attendance.html':'attendance', 'begena.html':'begena', 'equipment.html':'equipment', 'report.html':'reports', 'system-health.html':'__owner', 'audit-trail.html':'__owner'
   };
   for (let i = commandData.length - 1; i >= 0; i--) {
