@@ -122,6 +122,28 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
 
 /* ===== Message detail popup ===== */
 .detail-subject{font-size:17px;font-weight:900;margin:0}.detail-meta{font-size:11px;color:var(--muted);margin-top:3px}.modal-thread{background:var(--bg)}.modal-thread .message-card{max-width:100%;width:min(560px,100%);margin:0 auto}.modal-thread .bubble{max-width:100%;padding:0;background:transparent;color:var(--text);align-self:stretch}.modal-thread .bubble-self,.modal-thread .bubble-other{align-self:stretch}.modal-thread .msg-content,.modal-thread .media-caption{white-space:pre-wrap;overflow-wrap:anywhere}.modal-thread .message-image{display:block;width:100%;max-height:420px;object-fit:contain;background:#111;cursor:zoom-in}.modal-thread .media-stack{display:flex;flex-direction:column;gap:3px;background:#111}.modal-thread .document-list{padding-top:8px}.modal-reply.hidden-reply{display:none!important}
+.chat-row{display:flex;gap:8px;align-items:flex-end;max-width:100%}
+.chat-row.self{flex-direction:row-reverse}
+.chat-avatar{width:30px;height:30px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;background:var(--gold);color:#17120a;font-weight:900;font-size:12px;overflow:hidden}
+.chat-avatar img{width:100%;height:100%;object-fit:cover}
+.chat-col{display:flex;flex-direction:column;max-width:74%;min-width:0}
+.chat-row.self .chat-col{align-items:flex-end}
+.chat-row.other .chat-col{align-items:flex-start}
+.chat-sender{font-size:10.5px;font-weight:800;color:var(--muted);margin:0 4px 3px}
+.chat-bubble{padding:8px 12px;border-radius:16px;font-size:13px;line-height:1.45;overflow-wrap:anywhere;min-width:0}
+.chat-bubble.other{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--text)}
+.chat-bubble.self{background:var(--gold);border-bottom-right-radius:4px;color:#17120a}
+.chat-bubble .chat-text{white-space:pre-wrap}
+.chat-bubble.self a{color:#17120a}
+.chat-bubble .document-list{margin-top:6px}
+.chat-time{font-size:9.5px;color:var(--muted);margin:3px 4px 0}
+.chat-media{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+.chat-image{display:block;max-width:240px;max-height:240px;width:100%;object-fit:cover;border-radius:12px;cursor:zoom-in}
+@media(max-width:700px){.chat-col{max-width:86%}.chat-image{max-width:190px}}
+.chat-row.grouped{margin-top:-6px}
+.chat-row.grouped .chat-avatar{visibility:hidden}
+.chat-bubble.self.grouped{border-top-right-radius:6px}
+.chat-bubble.other.grouped{border-top-left-radius:6px}
 .receipt-bar{margin:0 18px 10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;background:var(--surface2);font-size:11px;color:var(--muted)}
 .receipt-bar strong{color:var(--text)}
 .receipt-list{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px}
@@ -133,6 +155,9 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
 
 .thread-participant{display:flex;align-items:center;gap:8px;margin-bottom:4px}.mini-avatar{width:28px;height:28px;border-radius:50%;background:var(--gold);display:grid;place-items:center;overflow:hidden;flex:0 0 auto;font-weight:900;font-size:11px;color:#17120a}.mini-avatar img{width:100%;height:100%;object-fit:cover}.participant-name{font-size:12px;font-weight:800}.participant-sub{font-size:10px;color:var(--muted)}
 .media-stack.bottom{margin-top:10px}.media-caption.top{margin-bottom:0}.message-card .msg-head{position:relative}.chat-participants{display:flex;align-items:center;gap:6px;margin-top:3px}.chat-participants .mini-avatar{width:24px;height:24px}.chat-arrow{color:var(--muted);font-size:11px}
+
+/* ===== Sunday School Message Center Features ===== */
+.feature-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(23,32,51,.04)}.feature-icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--gold) 13%,transparent);font-size:18px;flex:0 0 auto}.feature-card strong{font-size:11px;display:block}.feature-card span{font-size:10px;color:var(--muted);display:block;margin-top:2px}.settings-panel{margin:0 0 16px}.settings-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.setting-item{padding:11px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);display:flex;align-items:center;justify-content:space-between;gap:10px}.setting-copy strong{font-size:11px;display:block}.setting-copy span{font-size:9.5px;color:var(--muted);display:block;margin-top:2px}.switch{position:relative;width:42px;height:24px;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;border-radius:999px;background:var(--border);transition:.2s}.slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 5px rgba(0,0,0,.18)}.switch input:checked+.slider{background:var(--gold)}.switch input:checked+.slider:before{transform:translateX(18px)}.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.gallery-thumb{aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--surface2);cursor:pointer}.gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block}.message-reactions{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.message-tools{display:flex;gap:5px;margin-top:5px;opacity:.0;transition:.2s}.chat-row:hover .message-tools,.chat-row:focus-within .message-tools{opacity:1}.message-tool{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:3px 7px;font-size:10px;color:var(--muted)}.message-tool:hover{color:var(--gold);border-color:var(--gold)}.compose-mode{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.mode-btn{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:10px;padding:7px 10px;font-size:11px;font-weight:800}.mode-btn.active{background:var(--gold);border-color:var(--gold);color:#17120a}.special-card{margin-top:8px;padding:12px;border:1px solid var(--gold);border-radius:12px;background:color-mix(in srgb,var(--gold) 8%,var(--surface))}.special-card .special-title{font-weight:900;font-size:12px;margin-bottom:5px}.special-card .special-body{font-size:13px;line-height:1.5}.poll-option{display:flex;align-items:center;gap:7px;margin-top:7px;padding:7px 9px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}.poll-option button{margin-left:auto;border:0;background:var(--gold);color:#17120a;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:800}.typing-indicator{font-size:10px;color:var(--muted);padding:5px 18px;min-height:20px}.presence-panel{margin:0 0 16px}.presence-list{display:flex;flex-wrap:wrap;gap:7px}.presence-pill{display:flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid var(--border);border-radius:999px;background:var(--surface2);font-size:10px}.online-dot{width:7px;height:7px;border-radius:50%;background:var(--success)}.offline-dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}@media(max-width:700px){.message-tools{opacity:1}}.reaction-btn{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:4px 7px;font-size:11px;cursor:pointer}.reaction-btn:hover,.reaction-btn.active{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--surface))}.reaction-count{font-size:9px;color:var(--muted);margin-left:2px}.read-receipt{font-size:9px;color:var(--muted);display:inline-flex;align-items:center;gap:3px;margin-left:6px}.read-receipt.read{color:var(--success)}@media(max-width:900px){.feature-strip,.settings-grid{grid-template-columns:repeat(2,1fr)}.gallery-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:560px){.feature-strip,.settings-grid{grid-template-columns:1fr}.gallery-grid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -140,7 +165,7 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
 <header class="app-header">
 <div class="header-brand">
 <img src="logo.png" alt="MHSS">
-<div><h1>MESERETE HIWOT</h1><p data-i18n="brandSub">Enterprise Management System · Notifications</p></div>
+<div><h1>MESERETE HIWOT</h1><p data-i18n="brandSub">Enterprise Management System · Message Dashboard</p></div>
 </div>
 <div class="header-controls">
 <div class="header-date-block"><p class="header-date" id="dateDisplay">Loading date...</p><p class="header-admin">Admin Dashboard</p></div>
@@ -158,15 +183,8 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
 </div>
 </header>
 <main>
-<section class="hero">
-  <div>
-    <h2 data-i18n="pageTitle">Notifications</h2>
-    <p data-i18n="pageDesc">Message a specific user or broadcast to everyone, and keep track of replies.</p>
-  </div>
-  <div id="unreadSummary" class="badge" aria-live="polite">0 unread</div>
-</section>
-
-<div class="grid2">
+<section class="panel presence-panel hidden" id="presencePanel"><div class="panel-head"><h3>Online / Last Seen</h3><span class="badge">Owner View</span></div><div class="panel-body"><div id="presenceList" class="presence-list"></div></div></section>
+<section class="panel settings-panel"><div class="panel-head"><h3>Message Settings</h3><span class="badge">Personal</span></div><div class="panel-body settings-grid"><div class="setting-item"><div class="setting-copy"><strong>✓✓ Read Receipts</strong><span>Show read status for your account</span></div><label class="switch"><input id="prefRead" type="checkbox" checked><span class="slider"></span></label></div><div class="setting-item"><div class="setting-copy"><strong>🔔 Sound Notification</strong><span>Play new-message sound for your account</span></div><label class="switch"><input id="prefSound" type="checkbox" checked><span class="slider"></span></label></div><div class="setting-item"><div class="setting-copy"><strong>💖 Reactions</strong><span>Sunday School reactions for your account</span></div><label class="switch"><input id="prefReact" type="checkbox" checked><span class="slider"></span></label></div></div></section><div class="grid2">
   <section class="panel">
     <div class="panel-head"><h3 data-i18n="composeTitle">Compose</h3></div>
     <div class="panel-body">
@@ -184,6 +202,13 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
         </div>
         <div class="field">
           <label data-i18n="fMessage">Message</label>
+          <div class="compose-mode" id="composeModes">
+            <button type="button" class="mode-btn active" data-mode="normal">💬 Message</button>
+            <button type="button" class="mode-btn" data-mode="announcement">📢 Announcement</button>
+            <button type="button" class="mode-btn" data-mode="poll">📊 Poll</button>
+            <button type="button" class="mode-btn" data-mode="bible">📖 Bible Verse</button>
+          </div>
+          <div id="specialComposeFields"></div>
           <div class="rich-compose">
             <div class="rich-toolbar" id="composeToolbar">
               <button type="button" class="rich-tool" data-cmd="bold" title="Bold"><b>B</b></button>
@@ -236,7 +261,7 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
       <h3 id="modalSubject">Thread</h3>
       <button class="btn" id="closeThreadModal">✕</button>
     </div>
-    <div class="modal-thread" id="modalThreadBody"></div>
+    <div id="threadGallery" class="panel-body hidden" style="padding:10px 18px;border-bottom:1px solid var(--border)"><div class="gallery-grid" id="threadGalleryGrid"></div></div><div class="modal-thread" id="modalThreadBody"></div>
     <div class="modal-reply" style="align-items:flex-end;flex-wrap:wrap">
       <div class="rich-compose" style="flex:1;min-width:220px">
         <div class="rich-toolbar" id="replyToolbar">
@@ -271,6 +296,10 @@ let threads = [];
 let activeThreadId = null;
 let callerId = null;
 let isAdminUser = false;
+let isOwnerUser = false;
+const OWNER_EMAIL = 'mhssepr@gmail.com';
+const OWNER_NAME_FALLBACK = 'MHSS Administration';
+const OWNER_AVATAR = 'logo2.png';
 
 function esc(v){ return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function toast(message){
@@ -339,11 +368,42 @@ async function uploadNotifFile(file) {
   return data?.attachment;
 }
 
+/* ===== Message preferences, sound, reactions and gallery =====
+   Preferences are private to the currently signed-in user.
+   They never change another user's settings. */
+const MH_PREF_KEY='mh_message_preferences_v3';
+const defaultMessagePrefs={read:true,sound:true,reactions:true};
+let messagePrefs={...defaultMessagePrefs};
+function getUserPrefKey(){ return `${MH_PREF_KEY}_${callerId || 'local'}`; }
+function loadMessagePrefs(){
+  try{ const saved=JSON.parse(localStorage.getItem(getUserPrefKey())||'{}'); messagePrefs={...defaultMessagePrefs,...saved}; }
+  catch{ messagePrefs={...defaultMessagePrefs}; }
+}
+function saveMessagePrefs(){ try{ localStorage.setItem(getUserPrefKey(),JSON.stringify(messagePrefs)); }catch{} }
+function syncMessagePrefs(){
+  const m={prefRead:'read',prefSound:'sound',prefReact:'reactions'};
+  Object.entries(m).forEach(([id,k])=>{if($(id))$(id).checked=!!messagePrefs[k]});
+}
+function persistMessagePrefs(){ saveMessagePrefs(); }
+['prefRead','prefSound','prefReact'].forEach(id=>$(id)?.addEventListener('change',()=>{
+  const k={prefRead:'read',prefSound:'sound',prefReact:'reactions'}[id];
+  messagePrefs[k]=$(id).checked;
+  persistMessagePrefs();
+  if(k==='sound'&&messagePrefs.sound)playMessageSound(true);
+}));
+
+function playMessageSound(test=false){if(!messagePrefs.sound)return;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const c=new C(),o=c.createOscillator(),g=c.createGain();o.frequency.value=test?740:880;g.gain.setValueAtTime(.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(.07,c.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.22);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+.24)}catch{}}
+const SS_REACTIONS=[['🙏','Amen'],['🙌','Praise God'],['❤️','Love'],['🤲','Pray'],['📖','Bible'],['🌟','Blessed'],['😊','Joy']];
+function reactionKey(m){return 'mh_reactions_'+(m.id||`${m.thread_id}_${m.created_at}`)} function getLocalReactions(m){try{return JSON.parse(localStorage.getItem(reactionKey(m))||'{}')}catch{return {}}} function setLocalReaction(m,e){const r=getLocalReactions(m);r[e]=r[e]?0:1;localStorage.setItem(reactionKey(m),JSON.stringify(r))}
+async function sendReaction(m,e){setLocalReaction(m,e);try{await callNotifFn('react',{message_id:m.id,thread_id:m.thread_id,reaction:e})}catch{}}
+function renderReactions(m){if(!messagePrefs.reactions)return '';const r=getLocalReactions(m);return `<div class="message-reactions">${SS_REACTIONS.map(([e,l])=>`<button type="button" class="reaction-btn ${r[e]?'active':''}" data-react="${e}" title="${esc(l)}">${e}<span class="reaction-count">${r[e]||''}</span></button>`).join('')}</div>`}
+function buildThreadGallery(thread){const all=(thread.messages||[]).flatMap(m=>asArray(m.attachments||[]).map(normalizeAttachment)).filter(a=>((a.mime_type||a.type||'').startsWith('image/'))&&(a.url||a.path));const box=$('threadGallery'),grid=$('threadGalleryGrid');if(!box||!grid)return;if(!all.length){box.classList.add('hidden');grid.innerHTML='';return}box.classList.remove('hidden');grid.innerHTML=all.map((a,i)=>`<div class="gallery-thumb" title="Image ${i+1}"><img src="${esc(a.url||a.path)}" alt="${esc(a.name||'Image')}" data-image-preview="${esc(a.url||a.path)}"></div>`).join('');grid.querySelectorAll('[data-image-preview]').forEach(x=>x.addEventListener('click',()=>{$('imagePreviewImg').src=x.dataset.imagePreview;$('imagePreviewOverlay').classList.remove('hidden')}))}
+
 /* ===================== i18n ===================== */
 const translations = {
   en: {
-    brandSub:'Enterprise Management System · Notifications', backToDashboard:'Dashboard',
-    pageTitle:'Notifications', pageDesc:'Message a specific user or broadcast to everyone, and keep track of replies.',
+    brandSub:'Enterprise Management System · Message Dashboard', backToDashboard:'Dashboard',
+    pageTitle:'Notifications', pageDesc:'Send Sunday School messages, view conversations, media, reactions and read receipts.',
     composeTitle:'Compose', fRecipient:'Recipient', fEveryone:'Everyone (broadcast)', fSubject:'Subject',
     fSubjectPlaceholder:'Subject (optional)', fMessage:'Message', fMessagePlaceholder:'Write your message...',
     sendBtn:'Send', threadsTitle:'All Conversations', refresh:'↻ Refresh', loading:'Loading…',
@@ -439,6 +499,218 @@ function profileName(userId){
 }
 
 /* ===================== Compose ===================== */
+
+/* ===================== Reliable message/thread data ===================== */
+function asArray(value){
+  if (Array.isArray(value)) return value;
+  if (value == null) return [];
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : (parsed && typeof parsed === 'object' ? [parsed] : []);
+    } catch { return []; }
+  }
+  if (typeof value === 'object') return [value];
+  return [];
+}
+
+function firstValue(obj, keys){
+  for (const key of keys) {
+    const value = obj?.[key];
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return null;
+}
+
+function normalizeAttachment(a){
+  if (!a) return null;
+  if (typeof a === 'string') {
+    try { a = JSON.parse(a); } catch { return { name:a, url:a, type:'' }; }
+  }
+  if (a?.attachment && typeof a.attachment === 'object') a = {...a.attachment, ...a};
+  if (a?.data && typeof a.data === 'object' && !a.url && !a.path) a = {...a.data, ...a};
+  return {
+    ...a,
+    url: firstValue(a,['url','public_url','file_url','signed_url','signedUrl','download_url','downloadUrl','href','storage_url','storageUrl','path','storage_path','storagePath']) || '',
+    name: firstValue(a,['name','file_name','filename','original_name','originalName']) || 'Attachment',
+    file_name: firstValue(a,['file_name','filename','name','original_name','originalName']) || 'Attachment',
+    mime_type: firstValue(a,['mime_type','file_type','type','content_type']) || '',
+    file_size: firstValue(a,['file_size','size','bytes']) || 0
+  };
+}
+
+function normalizeMessage(input){
+  if (!input) return null;
+  let m = input;
+  // Some Edge Function versions wrap the real row inside message/data/item.
+  if (m.message && typeof m.message === 'object' && !Array.isArray(m.message)) m = {...m.message, ...m};
+  if (m.data && typeof m.data === 'object' && !Array.isArray(m.data) && !firstValue(m,['body','content','text','message_body','message_content'])) m = {...m.data, ...m};
+
+  const rawAttachments = firstValue(m,['attachments','message_attachments','files','attachment','attachment_urls','media','media_files','file_attachments','images']) || [];
+  const bodyValue = firstValue(m,[
+    'body','content','message','message_body','message_content','text','message_text','body_html','content_html','description','html','html_body','rich_body'
+  ]);
+  const body = bodyValue == null ? '' : (typeof bodyValue === 'object' ? String(firstValue(bodyValue,['html','body','content','text','value']) || '') : String(bodyValue));
+  const senderId = firstValue(m,['sender_id','senderId','user_id','userId','author_id','authorId','from_user_id','fromUserId','created_by']);
+  const createdAt = firstValue(m,['created_at','createdAt','sent_at','sentAt','timestamp','date','updated_at','updatedAt','inserted_at']);
+  const threadId = firstValue(m,['thread_id','threadId','conversation_id','conversationId','notification_id','notificationId']);
+  const senderProfile = firstValue(m,['sender','sender_profile','senderProfile','from','from_profile','author','author_profile']);
+
+  return {
+    ...m,
+    id: firstValue(m,['id','message_id','messageId']),
+    thread_id: threadId,
+    sender_id: senderId,
+    sender: senderProfile || m.sender || null,
+    body,
+    content: firstValue(m,['content']) != null ? String(firstValue(m,['content'])) : body,
+    content_format: firstValue(m,['content_format','contentFormat','format']) || (/<[a-z][\\s\\S]*>/i.test(body) ? 'html' : 'text'),
+    created_at: createdAt,
+    attachments: asArray(rawAttachments).map(normalizeAttachment).filter(Boolean)
+  };
+}
+
+function normalizeThread(t){
+  if (!t) return null;
+  const rawMessages = firstValue(t,[
+    'messages','message_history','history','notification_messages','message_rows','messages_data','items','data'
+  ]) || t?.data?.messages || [];
+  let messages = asArray(rawMessages).map(normalizeMessage).filter(Boolean);
+
+  // If the API returns a single message directly on the thread object, keep it.
+  if (!messages.length) {
+    const single = firstValue(t,['latest_message','last_message','message','latestMessage','lastMessage']);
+    if (single && typeof single === 'object') messages = [normalizeMessage(single)].filter(Boolean);
+    else if (firstValue(t,['body','content','message_body','message_content','text'])) messages = [normalizeMessage(t)].filter(Boolean);
+  }
+
+  const latestRaw = firstValue(t,['latest_message','last_message','latestMessage','lastMessage']) || messages[messages.length-1] || null;
+  return {
+    ...t,
+    id: firstValue(t,['id','thread_id','threadId','conversation_id','conversationId','notification_id','notificationId']),
+    subject: firstValue(t,['subject','title','message_subject','messageSubject']) || '',
+    messages,
+    latest_message: normalizeMessage(latestRaw),
+    sender: firstValue(t,['sender','sender_profile','senderProfile','from_profile','from']) || null,
+    recipient: firstValue(t,['recipient','recipient_profile','recipientProfile','to_profile','to']) || null,
+    sender_id: firstValue(t,['sender_id','senderId','from_user_id','fromUserId']) || null,
+    recipient_id: firstValue(t,['recipient_id','recipientId','to_user_id','toUserId']) || null
+  };
+}
+
+function extractThreads(result){
+  const raw = result?.threads ?? result?.conversations ?? result?.items ?? result?.data ?? [];
+  const list = asArray(raw);
+  return list.map(normalizeThread).filter(t=>t && t.id);
+}
+
+function extractMessagesFromResponse(result, threadId){
+  const candidates = [
+    ...(asArray(result?.messages)),
+    ...(asArray(result?.message_history)),
+    ...(asArray(result?.history)),
+    ...(asArray(result?.message_rows)),
+    ...(asArray(result?.items)),
+    ...(result?.message && typeof result.message === 'object' ? [result.message] : []),
+    ...(result?.thread ? [result.thread] : []),
+    ...(result?.data?.messages ? asArray(result.data.messages) : []),
+    ...(result?.data?.message_history ? asArray(result.data.message_history) : []),
+    ...(Array.isArray(result?.data) ? result.data : []),
+    ...(result?.data?.message_rows ? asArray(result.data.message_rows) : []),
+    ...(result?.result?.messages ? asArray(result.result.messages) : []),
+    ...(result?.result?.data ? asArray(result.result.data) : [])
+  ];
+  return candidates.map(normalizeMessage).filter(Boolean).map(m=>({...m,thread_id:m.thread_id||threadId}));
+}
+
+function mergeMessages(...groups){
+  const map = new Map();
+  groups.flat().map(normalizeMessage).filter(Boolean).forEach(m => {
+    const key = m.id || `${m.thread_id||''}|${m.sender_id||''}|${m.created_at||''}|${m.body}`;
+    map.set(key, m);
+  });
+  return [...map.values()].sort((a,b)=>{
+    const aa = new Date(a.created_at || 0).getTime();
+    const bb = new Date(b.created_at || 0).getTime();
+    return aa - bb;
+  });
+}
+
+async function fetchThreadMessagesDirect(threadId){
+  const attempts = [
+    {column:'thread_id', value:threadId},
+    {column:'notification_id', value:threadId},
+    {column:'conversation_id', value:threadId}
+  ];
+  let lastError = null;
+  for (const attempt of attempts) {
+    try {
+      const { data, error } = await supabase
+        .from('mhss_notification_messages')
+        .select('*')
+        .eq(attempt.column, attempt.value)
+        .order('created_at', { ascending:true });
+      if (error) { lastError = error; continue; }
+      if (data?.length) return data.map(normalizeMessage);
+    } catch (e) { lastError = e; }
+  }
+  if (lastError) throw lastError;
+  return [];
+}
+
+async function hydrateThread(threadId){
+  const cached = normalizeThread(threads.find(t=>t.id===threadId) || {id:threadId});
+
+  // The Edge Function only implements list_threads; it already embeds each
+  // thread's full message list, so that's the single source of truth here.
+  let remote = null;
+  let remoteMessages = [];
+  try {
+    const r = await callNotifFn('list_threads');
+    const candidates = extractThreads(r);
+    const found = candidates.find(x=>x.id===threadId);
+    if (found) remote = found;
+    remoteMessages.push(...extractMessagesFromResponse(r,threadId));
+    if (found?.messages?.length) remoteMessages.push(...found.messages);
+  } catch (e) { console.warn('list_threads refresh failed:', e); }
+
+  const combined = normalizeThread({...cached, ...(remote || {})});
+
+  let direct = [];
+  try { direct = await fetchThreadMessagesDirect(threadId); }
+  catch (e) { console.warn('Direct notification history read failed:', e); }
+
+  combined.messages = mergeMessages(
+    cached.messages || [],
+    remote?.messages || [],
+    remoteMessages,
+    direct
+  );
+
+  if (!combined.latest_message && combined.messages.length) combined.latest_message = combined.messages[combined.messages.length - 1];
+  if (combined.latest_message) combined.latest_message = normalizeMessage(combined.latest_message);
+
+  const ids = [...new Set([
+    combined.sender_id, combined.recipient_id,
+    combined.sender?.user_id, combined.recipient?.user_id,
+    ...combined.messages.map(m=>m.sender_id)
+  ].filter(Boolean))];
+  if (ids.length) {
+    try {
+      const { data: ps } = await supabase.from('mhss_user_profiles').select('*').in('user_id', ids);
+      (ps || []).forEach(p => { if (p.user_id) msgProfileCache.set(p.user_id,p); });
+    } catch (e) { console.warn('Notification profile lookup failed:',e); }
+  }
+
+  combined.messages = combined.messages.map(m => ({
+    ...m,
+    sender: profileWithOwnerIdentity(m.sender || msgProfileCache.get(m.sender_id) || null) || (m.sender_id === callerId && isOwnerUser ? ownerProfile() : null)
+  }));
+  if (!combined.sender && combined.sender_id) combined.sender = profileWithOwnerIdentity(msgProfileCache.get(combined.sender_id)||null) || (combined.sender_id===callerId&&isOwnerUser?ownerProfile():null);
+  if (!combined.recipient && combined.recipient_id) combined.recipient = msgProfileCache.get(combined.recipient_id)||null;
+  return combined;
+}
+
 /* ===================== Thread list ===================== */
 function threadDisplaySubject(thread){
   if (thread.origin_broadcast_id) return `Re: ${thread.origin_broadcast_subject || thread.subject || 'Broadcast'}`;
@@ -457,12 +729,13 @@ function renderThreadList(){
   sorted.forEach(thread=>{
     const row=document.createElement('div'); row.className='thread-row';
     const person=participantForThread(thread);
+    const ownerPerson = profileWithOwnerIdentity(person);
     const snippet=thread.latest_message ? plainFromRich(thread.latest_message.body||'') : '';
     const hasImage=(thread.latest_message?.attachments||[]).some(a=>(a.mime_type||a.type||'').startsWith('image/'));
     const hasAttach=!!(thread.latest_message?.attachments?.length);
     const time=thread.latest_message?.created_at||thread.created_at;
     row.innerHTML=`${thread.unread?'<span class="thread-unread-dot"></span>':'<span style="width:8px"></span>'}
-      ${avatarHtml(person, 'U','mini-avatar')}
+      ${avatarHtml(ownerPerson, 'U','mini-avatar')}
       <div class="thread-row-main"><div class="thread-participant"><div><div class="participant-name">${esc(person.name||person.email||'User')}</div><div class="participant-sub">${thread.is_broadcast?'Broadcast':'Conversation'}</div></div></div>
       <div class="thread-row-top"><span class="thread-subject">${esc(threadDisplaySubject(thread))}</span><span class="thread-time">${relativeTime(time)}</span></div>
       <div class="thread-snippet">${hasImage?'🖼️ Image · ':''}${esc(snippet)}${hasAttach&&!hasImage?' · 📎':''}</div>${threadTag(thread)}</div>`;
@@ -471,9 +744,16 @@ function renderThreadList(){
 }
 
 async function loadThreads(){
-  const result = await callNotifFn('list_threads');
-  threads = result.threads || [];
-  renderThreadList();
+  try {
+    const result = await callNotifFn('list_threads');
+    const incoming = extractThreads(result);
+    threads = incoming;
+    renderThreadList();
+    return threads;
+  } catch (err) {
+    console.error('loadThreads failed:', err);
+    throw err;
+  }
 }
 $('refreshThreadsBtn').addEventListener('click', loadThreads);
 
@@ -486,20 +766,28 @@ function getProfile(userId, thread){
 }
 const msgProfileCache = new Map();
 function avatarHtml(profile, fallback='U', cls='msg-avatar'){
-  const url=profile?.profile_photo_url || '';
+  const isOwnerProfile = !!(profile?.is_owner || profile?.email?.toLowerCase?.() === OWNER_EMAIL);
+  const url = isOwnerProfile ? OWNER_AVATAR : (profile?.profile_photo_url || '');
   const name=profile?.name || profile?.email || fallback;
   return `<div class="${cls}">${url?`<img src="${esc(url)}" alt="${esc(name)}" loading="lazy">`:esc((name||fallback).charAt(0).toUpperCase())}</div>`;
 }
+function ownerProfile(){ return { name: OWNER_NAME_FALLBACK, email: OWNER_EMAIL, profile_photo_url: OWNER_AVATAR, is_owner: true }; }
+function profileWithOwnerIdentity(profile){
+  if(profile?.email?.toLowerCase?.() === OWNER_EMAIL || profile?.is_owner) return ownerProfile();
+  return profile || null;
+}
 function participantForThread(thread){
-  if(thread.is_broadcast) return {name:'MHSS Administration', email:'Broadcast', photo:thread.sender?.profile_photo_url||''};
-  if(thread.recipient_id===callerId) return thread.sender || {name:'User'};
-  return thread.recipient || {name:'User'};
+  if(thread.is_broadcast) return {name:OWNER_NAME_FALLBACK, email:'Broadcast', photo:thread.sender?.profile_photo_url||''};
+  if(thread.recipient_id===callerId) return profileWithOwnerIdentity(thread.sender) || {name:'User'};
+  return profileWithOwnerIdentity(thread.recipient) || {name:'User'};
 }
 function senderLabel(msg, thread){
-  if (msg.sender_id === callerId) return profiles.find(p=>p.user_id===callerId)?.name || 'You';
+  if (msg.sender_id === callerId) return isOwnerUser ? OWNER_NAME_FALLBACK : (profiles.find(p=>p.user_id===callerId)?.name || 'You');
+  const senderProfile = profileWithOwnerIdentity(msg.sender || getProfile(msg.sender_id, thread));
+  if (senderProfile?.is_owner) return senderProfile.name || OWNER_NAME_FALLBACK;
   if (thread.sender && (thread.sender.name || thread.sender.email) && msg.sender_id === thread.sender.user_id) return thread.sender.name || thread.sender.email;
   const sender = profiles.find(p=>p.user_id===msg.sender_id);
-  return sender ? (sender.name || sender.email) : (thread.is_broadcast ? 'MHSS Administration' : 'User');
+  return sender ? (sender.name || sender.email) : (thread.is_broadcast ? OWNER_NAME_FALLBACK : 'User');
 }
 function renderThreadModal(thread){
   $('modalSubject').textContent = threadDisplaySubject(thread);
@@ -517,27 +805,52 @@ function renderThreadModal(thread){
     callNotifFn('mark_read', { thread_id: thread.id }).then(()=>{ thread.unread = false; renderThreadList(); }).catch(()=>{});
   }
 }
-function openThreadModal(id){
+async function openThreadModal(id){
   activeThreadId = id;
-  const thread = threads.find(t=>t.id === id);
-  if (!thread) return;
-  renderThreadModal(thread);
   $('threadOverlay').classList.remove('hidden');
-  $('modalReplyText').innerHTML = '';
+  $('modalSubject').innerHTML = '<div class="detail-subject">Loading conversation…</div>';
+  $('modalThreadBody').innerHTML = '<div class="empty">Loading full message history…</div>';
+
   const replyBox = $('modalReplyText').closest('.modal-reply');
   if (replyBox) replyBox.classList.remove('hidden-reply');
-  $('modalReplyText').focus();
+  $('modalReplyText').innerHTML = '';
+
+  try {
+    const fresh = await hydrateThread(id);
+    if (!fresh) throw new Error('Conversation not found');
+
+    const index = threads.findIndex(t=>t.id===id);
+    if (index >= 0) threads[index] = fresh;
+    else threads.push(fresh);
+
+    if (!fresh.messages.length) {
+      $('modalSubject').innerHTML =
+        `<div class="detail-subject">${esc(threadDisplaySubject(fresh))}</div>
+         <div class="detail-meta">No message rows were returned for this thread.</div>`;
+      $('modalThreadBody').innerHTML =
+        '<div class="empty">The conversation exists, but its message history could not be loaded. Check the Edge Function/RLS permissions for mhss_notification_messages.</div>';
+    } else {
+      renderThreadModal(fresh);
+    }
+    renderThreadList();
+    startActiveThreadPolling(id);
+  } catch (err) {
+    console.error('openThreadModal failed:', err);
+    $('modalThreadBody').innerHTML =
+      `<div class="notice">${esc(err?.message || 'Could not load conversation history.')}</div>`;
+  }
 }
 function closeThreadModal(){
   $('threadOverlay').classList.add('hidden');
   activeThreadId = null;
+  stopActiveThreadPolling();
 }
 $('closeThreadModal').addEventListener('click', closeThreadModal);
 $('threadOverlay').addEventListener('click', (e)=>{ if (e.target.id === 'threadOverlay') closeThreadModal(); });
 document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && !$('threadOverlay').classList.contains('hidden')) closeThreadModal(); });
 
 async function sendModalReply(){
-  const text = $('modalReplyText').value.trim();
+  const text = plainFromRich(sanitizeRichHtml($('modalReplyText').innerHTML));
   if (!text || !activeThreadId) return;
   $('modalReplySend').disabled = true;
   try {
@@ -559,6 +872,79 @@ $('modalReplyText').addEventListener('keydown', (e)=>{ if (e.key === 'Enter' && 
 
 /* ===================== Rich Messaging ===================== */
 let composeAttachments = [];
+let composeMode = 'normal';
+
+function setComposeMode(mode){
+  composeMode=mode||'normal';
+  document.querySelectorAll('#composeModes .mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===composeMode));
+  const box=$('specialComposeFields'); if(!box)return;
+  if(composeMode==='poll') box.innerHTML=`<div class="field"><label>Poll question</label><input id="pollQuestion" maxlength="180" placeholder="Ask your Sunday School question..."></div><div class="field"><label>Options</label><input id="pollOptions" placeholder="Option 1, Option 2, Option 3"></div>`;
+  else if(composeMode==='bible') box.innerHTML=`<div class="field"><label>Bible reference</label><input id="bibleReference" maxlength="80" placeholder="John 3:16"></div>`;
+  else box.innerHTML='';
+}
+document.querySelectorAll('#composeModes .mode-btn').forEach(b=>b.addEventListener('click',()=>setComposeMode(b.dataset.mode)));
+
+function messageSpecialHtml(m){
+  const type=m.message_type||m.type;
+  if(type==='announcement') return `<div class="special-card"><div class="special-title">📢 Announcement</div><div class="special-body">${m.content_format==='html'?renderMessageContent(m.body||m.content||''):esc(m.body||m.content||'')}</div></div>`;
+  if(type==='bible_verse'||type==='bible') return `<div class="special-card"><div class="special-title">📖 Bible Verse ${m.bible_reference?`· ${esc(m.bible_reference)}`:''}</div><div class="special-body">${esc(m.body||m.content||'')}</div></div>`;
+  if(type==='poll'){ const opts=Array.isArray(m.poll_options)?m.poll_options:[]; return `<div class="special-card"><div class="special-title">📊 ${esc(m.poll_question||m.body||'Poll')}</div>${opts.map((o,i)=>`<div class="poll-option"><span>${esc(typeof o==='string'?o:o.label||o.text||'Option')}</span><button type="button" data-poll-option="${i}">Vote</button></div>`).join('')}</div>`; }
+  return '';
+}
+
+async function editMessage(m){
+  if(!m?.id || m.sender_id!==callerId)return;
+  const current=plainFromRich(m.body||''); const next=prompt('Edit message',current); if(next===null || !next.trim() || next.trim()===current)return;
+  try{ await callNotifFn('edit_message',{message_id:m.id,body:next.trim(),content:next.trim(),content_format:'text'}); toast('Message edited'); const fresh=await hydrateThread(activeThreadId); const idx=threads.findIndex(t=>t.id===activeThreadId); if(idx>=0)threads[idx]=fresh; renderThreadModal(fresh); renderThreadList(); }catch(e){toast(e.message||'Could not edit message')}
+}
+async function deleteMessage(m){
+  if(!m?.id || m.sender_id!==callerId)return;
+  if(!confirm('Delete this message?'))return;
+  try{ await callNotifFn('delete_message',{message_id:m.id,thread_id:m.thread_id}); toast('Message deleted'); const fresh=await hydrateThread(activeThreadId); const idx=threads.findIndex(t=>t.id===activeThreadId); if(idx>=0)threads[idx]=fresh; renderThreadModal(fresh); renderThreadList(); }catch(e){toast(e.message||'Could not delete message')}
+}
+
+function renderPresence(){
+  if(!isOwnerUser){$('presencePanel')?.classList.add('hidden');return;}
+  const panel=$('presencePanel'), list=$('presenceList'); if(!panel||!list)return; panel.classList.remove('hidden');
+  list.innerHTML=profiles.map(p=>`<span class="presence-pill"><span class="offline-dot" data-presence="${esc(p.user_id)}"></span><strong>${esc(p.name||p.email||'User')}</strong><span class="presence-last" data-lastseen="${esc(p.user_id)}">${p.last_seen_at?`Last seen ${relativeTime(p.last_seen_at)} ago`:'Last seen unavailable'}</span></span>`).join('');
+}
+
+function setupPresence(){
+  if(!callerId)return;
+  if(isOwnerUser) renderPresence();
+  try{
+    if(window.__mhPresenceChannel)supabase.removeChannel(window.__mhPresenceChannel);
+    window.__mhPresenceChannel=supabase.channel('mhss-message-presence',{config:{presence:{key:callerId}}});
+    window.__mhPresenceChannel.on('presence',{event:'sync'},()=>{
+      if(!isOwnerUser)return;
+      const state=window.__mhPresenceChannel.presenceState(); const online=new Set(Object.keys(state||{}));
+      document.querySelectorAll('[data-presence]').forEach(dot=>{const id=dot.dataset.presence; const on=online.has(id); dot.className=on?'online-dot':'offline-dot'; const text=document.querySelector(`[data-lastseen="${CSS.escape(id)}"]`); if(text)text.textContent=on?'Online':'Last seen unavailable';});
+    }).subscribe(async status=>{if(status==='SUBSCRIBED'){await window.__mhPresenceChannel.track({user_id:callerId,online_at:new Date().toISOString()}); updateMyLastSeen();}});
+    setInterval(updateMyLastSeen,30000);
+  }catch(e){console.warn('Presence unavailable',e)}
+}
+async function updateMyLastSeen(){
+  if(!callerId)return;
+  try{await supabase.from('mhss_user_profiles').update({last_seen_at:new Date().toISOString()}).eq('user_id',callerId);}catch{}
+}
+
+function setupTyping(){
+  const editor=$('modalReplyText'); if(!editor||!callerId)return;
+  try{
+    window.__mhTypingChannel=supabase.channel('mhss-message-typing');
+    window.__mhTypingChannel.on('broadcast',{event:'typing'},payload=>{
+      const d=payload?.payload||{}; if(!activeThreadId||d.thread_id!==activeThreadId||d.user_id===callerId)return;
+      const name=profileName(d.user_id); const el=$('typingIndicator'); if(el)el.textContent=d.typing?`${name} is typing…`:'';
+      clearTimeout(window.__mhTypingTimer); window.__mhTypingTimer=setTimeout(()=>{if(el)el.textContent='';},1800);
+    }).subscribe();
+  }catch{}
+  let timer=null;
+  editor.addEventListener('input',()=>{
+    if(!activeThreadId||!window.__mhTypingChannel)return; clearTimeout(timer);
+    try{window.__mhTypingChannel.send({type:'broadcast',event:'typing',payload:{thread_id:activeThreadId,user_id:callerId,typing:true}}); }catch{}
+    timer=setTimeout(()=>{try{window.__mhTypingChannel.send({type:'broadcast',event:'typing',payload:{thread_id:activeThreadId,user_id:callerId,typing:false}})}catch{}},1200);
+  });
+}
 
 function formatBytes(bytes){
   if(!bytes) return '0 B';
@@ -663,35 +1049,46 @@ function renderAttachments(attachments=[]){
     </div>`;
   }).join('');
 }
-function renderRichMessage(mine,m,thread){
-  const senderProfile = m.sender || getProfile(m.sender_id,thread) || {};
-  const recipientProfile = thread.recipient || {};
-  const sender = senderProfile.name || senderProfile.email || senderLabel(m,thread);
-  const attachments = m.attachments || m.message_attachments || [];
+function renderRichMessage(mine,m,thread,grouped){
+  // mine = this message is from the customer (right side). Any other
+  // message in a private thread is, by construction, from the admin/owner
+  // side — resolve that directly instead of relying on a profile lookup,
+  // since the owner's account may not have a row in mhss_user_profiles.
+  const senderProfile = mine
+    ? (profileWithOwnerIdentity(m.sender || getProfile(m.sender_id,thread)) || {})
+    : ownerProfile();
+  const sender = senderProfile.name || senderProfile.email || (mine ? senderLabel(m,thread) : OWNER_NAME_FALLBACK);
+  const attachments = asArray(m.attachments || m.message_attachments || m.files || []).map(normalizeAttachment).filter(Boolean);
   const images = attachments.filter(a=>((a.mime_type||a.file_type||a.type||'').startsWith('image/')) && (a.url||a.public_url||a.file_url||a.path));
   const files = attachments.filter(a=>!images.includes(a));
-  const rawContent = m.body ?? m.content ?? '';
-  const content = m.content_format === 'html'
+  const rawContent = String(m.body ?? m.content ?? m.message ?? '');
+  const contentFormat = m.content_format || (/<[a-z][\s\S]*>/i.test(rawContent) ? 'html' : 'text');
+  const content = contentFormat === 'html'
     ? renderMessageContent(rawContent)
-    : esc(String(rawContent)).replace(/\n/g,'<br>');
-  const topImages=images.filter(a=>(a.position||'top')!=='bottom');
-  const bottomImages=images.filter(a=>a.position==='bottom');
-  const imageStack = (arr, cls='') => arr.length ? `<div class="media-stack ${cls}">${arr.map(a=>{const url=a.url||a.public_url||a.file_url||a.path;const name=a.file_name||a.name||'Image';return `<img class="message-image" src="${esc(url)}" alt="${esc(name)}" data-image-preview="${esc(url)}" loading="lazy">`;}).join('')}</div>` : '';
-  const wrap=document.createElement('div'); wrap.className=`bubble ${mine?'bubble-self':'bubble-other'}`;
-  wrap.innerHTML=`<div class="message-card">
-    <div class="msg-head">${avatarHtml(senderProfile,sender,'msg-avatar')}<div style="min-width:0"><div class="msg-name">${esc(sender)}</div><div class="msg-role">${mine?'Sender':'Receiver'} · <span class="msg-time">${formatDateTime(m.created_at)}</span></div></div></div>
-    ${imageStack(topImages)}
-    ${content?`<div class="media-caption">${content}</div>`:(files.length||images.length?'':'<div class="media-caption"><span style="color:var(--muted)">No message content</span></div>')}
-    ${imageStack(bottomImages,'bottom')}
-    ${files.length?`<div class="document-list">${renderAttachments(files)}</div>`:''}
-  </div>`;
+    : esc(rawContent).replace(/\n/g,'<br>');
+  const imageStack = (arr) => arr.length ? `<div class="chat-media">${arr.map(a=>{const url=a.url||a.public_url||a.file_url||a.path;const name=a.file_name||a.name||'Image';return `<img class="chat-image" src="${esc(url)}" alt="${esc(name)}" data-image-preview="${esc(url)}" loading="lazy">`;}).join('')}</div>` : '';
+  const wrap=document.createElement('div'); wrap.className=`chat-row ${mine?'self':'other'}${grouped?' grouped':''}`;
+  wrap.innerHTML=`
+    ${avatarHtml(senderProfile,sender,'chat-avatar')}
+    <div class="chat-col">
+      ${!grouped?`<div class="chat-sender">${esc(sender)}</div>`:''}
+      <div class="chat-bubble ${mine?'self':'other'}${grouped?' grouped':''}">
+        ${imageStack(images)}
+        ${messageSpecialHtml(m)}${(m.message_type||m.type)?'':(content?`<div class="chat-text">${content}</div>`:(files.length||images.length?'':'<div class="chat-text" style="opacity:.6">Empty message</div>'))}
+        ${files.length?`<div class="document-list">${renderAttachments(files)}</div>`:''}
+      </div>
+      <div class="chat-time">${formatDateTime(m.created_at)}${m.edited_at?' · edited':''}${mine&&messagePrefs.read?'<span class="read-receipt read">✓✓ Read</span>':''}</div>${mine?`<div class="message-tools"><button type="button" class="message-tool" data-edit-message="1">✏️ Edit</button><button type="button" class="message-tool" data-delete-message="1">🗑️ Delete</button></div>`:''}
+      ${renderReactions(m)}
+    </div>`;
   wrap.querySelectorAll('[data-image-preview]').forEach(img=>img.addEventListener('click',()=>{ $('imagePreviewImg').src=img.dataset.imagePreview; $('imagePreviewOverlay').classList.remove('hidden'); }));
   return wrap;
 }
 
 /* Rich message detail popup */
+function displayProfileName(profile, fallback='User'){ const p=profileWithOwnerIdentity(profile); return p?.name || p?.email || fallback; }
 renderThreadModal = function(thread){
-  $('modalSubject').innerHTML = `<div class="detail-subject">${esc(threadDisplaySubject(thread))}</div><div class="detail-meta">${esc(thread.is_broadcast ? 'Broadcast' : ((thread.sender?.name || thread.sender?.email || 'Sender') + ' → ' + (thread.recipient?.name || thread.recipient?.email || 'Receiver')))}</div>`;
+  const customerName = thread.is_broadcast ? 'Everyone' : displayProfileName(thread.recipient, 'User');
+  $('modalSubject').innerHTML = `<div class="detail-subject">${esc(threadDisplaySubject(thread))}</div><div class="detail-meta">${esc(thread.is_broadcast ? `Broadcast · ${OWNER_NAME_FALLBACK}` : `${OWNER_NAME_FALLBACK} ↔ ${customerName}`)}</div>`;
   const body = $('modalThreadBody'); body.innerHTML='';
   if (thread.receipt_summary) {
     const r=thread.receipt_summary;
@@ -700,9 +1097,18 @@ renderThreadModal = function(thread){
     if(Array.isArray(r.users)&&r.users.length){const list=document.createElement('div');list.className='receipt-list';list.innerHTML=r.users.map(u=>`<span class="receipt-pill">${esc(u.name||u.email||'User')} · ${u.read?'✓✓ Read':'○ Unread'}</span>`).join('');bar.appendChild(list);}
     body.appendChild(bar);
   }
-  (thread.messages||[]).forEach(m=>body.appendChild(renderRichMessage(m,m.sender_id===callerId,thread)));
+  (thread.messages||[]).forEach((m,i,arr)=>{
+    const grouped = i>0 && arr[i-1].sender_id === m.sender_id;
+    // Fixed roles, not "who's viewing": the customer's own messages are
+    // always on the right, the admin/owner's are always on the left —
+    // the same for both the owner's screen and the user's screen.
+    const isCustomerMsg = thread.recipient_id ? m.sender_id === thread.recipient_id : false;
+    body.appendChild(renderRichMessage(isCustomerMsg,m,thread,grouped));
+  });
+  buildThreadGallery(thread);
+  body.querySelectorAll('[data-react]').forEach(btn=>btn.addEventListener('click',async()=>{const row=btn.closest('.chat-row');const idx=[...body.querySelectorAll('.chat-row')].indexOf(row);const msg=thread.messages[idx];if(msg){await sendReaction(msg,btn.dataset.react);renderThreadModal(thread)}})); body.querySelectorAll('[data-edit-message]').forEach(btn=>btn.addEventListener('click',()=>{const row=btn.closest('.chat-row');const idx=[...body.querySelectorAll('.chat-row')].indexOf(row);editMessage(thread.messages[idx])})); body.querySelectorAll('[data-poll-option]').forEach(btn=>btn.addEventListener('click',async()=>{const row=btn.closest('.chat-row');const idx=[...body.querySelectorAll('.chat-row')].indexOf(row);const msg=thread.messages[idx];try{await callNotifFn('poll_vote',{message_id:msg.id,option_index:Number(btn.dataset.pollOption)});toast('Vote recorded');const fresh=await hydrateThread(activeThreadId);const i=threads.findIndex(t=>t.id===activeThreadId);if(i>=0)threads[i]=fresh;renderThreadModal(fresh)}catch(e){toast(e.message||'Could not record vote')}})); body.querySelectorAll('[data-delete-message]').forEach(btn=>btn.addEventListener('click',()=>{const row=btn.closest('.chat-row');const idx=[...body.querySelectorAll('.chat-row')].indexOf(row);deleteMessage(thread.messages[idx])}));
   requestAnimationFrame(()=>{body.scrollTop=body.scrollHeight;});
-  if(thread.unread){callNotifFn('mark_read',{thread_id:thread.id}).then(()=>{thread.unread=false;renderThreadList();}).catch(()=>{});}
+  if(thread.unread && messagePrefs.read){callNotifFn('mark_read',{thread_id:thread.id}).then(()=>{thread.unread=false;renderThreadList();}).catch(()=>{});}
 };
 
 /* Send rich HTML while retaining compatibility with the current Edge Function. */
@@ -715,7 +1121,7 @@ $('composeForm').addEventListener('submit', async(e)=>{
   const subject=$('fSubject').value.trim();
   const rich=sanitizeRichHtml($('fBody').innerHTML);
   const body=plainFromRich(rich);
-  if(!body && !composeAttachments.length) return;
+  if(!body && !composeAttachments.length && composeMode==='normal') return;
   $('sendBtn').disabled=true;
   try{
     /* Send rich content. If backend accepts content/html, it is used;
@@ -725,11 +1131,24 @@ $('composeForm').addEventListener('submit', async(e)=>{
       const uploaded = await uploadNotifFile(file);
       if (uploaded) uploadedAttachments.push({...uploaded, position: $('attachmentPosition')?.value === 'bottom' ? 'bottom' : 'top'});
     }
+    const extra={};
+    if(composeMode==='announcement') extra.message_type='announcement';
+    if(composeMode==='poll'){
+      const q=$('pollQuestion')?.value.trim();
+      const opts=($('pollOptions')?.value||'').split(',').map(x=>x.trim()).filter(Boolean);
+      if(!q||opts.length<2) throw new Error('Add a poll question and at least 2 options.');
+      extra.message_type='poll'; extra.poll_question=q; extra.poll_options=opts;
+    }
+    if(composeMode==='bible'){
+      const ref=$('bibleReference')?.value.trim();
+      if(!ref) throw new Error('Add a Bible reference.');
+      extra.message_type='bible_verse'; extra.bible_reference=ref;
+    }
     await callNotifFn('send_notification',{
       recipient_id:recipientId,subject,body:rich,content:rich,content_format:'html',
-      attachments: uploadedAttachments
+      attachments: uploadedAttachments,...extra
     });
-    $('fSubject').value=''; $('fBody').innerHTML=''; composeAttachments=[];
+    $('fSubject').value=''; $('fBody').innerHTML=''; composeAttachments=[]; setComposeMode('normal');
     renderComposeFiles();
     toast(t('sendSuccess'));
     await loadThreads();
@@ -782,25 +1201,77 @@ if(savedDraft){
 }
 
 
+/* ===================== Live updates ===================== */
+let __mhActiveThreadTimer = null;
+
+function startActiveThreadPolling(threadId){
+  stopActiveThreadPolling();
+  __mhActiveThreadTimer = setInterval(async ()=>{
+    if (!threadId || threadId !== activeThreadId) return;
+    try {
+      const fresh = await hydrateThread(threadId);
+      const idx = threads.findIndex(t=>t.id===threadId);
+      const prevCount = idx>=0 ? (threads[idx].messages||[]).length : 0;
+      if (idx>=0) threads[idx]=fresh; else threads.push(fresh);
+      if ((fresh.messages||[]).length !== prevCount) renderThreadModal(fresh);
+      renderThreadList();
+    } catch {}
+  }, 4000);
+}
+function stopActiveThreadPolling(){
+  if (__mhActiveThreadTimer) { clearInterval(__mhActiveThreadTimer); __mhActiveThreadTimer = null; }
+}
+
+function setupRealtimeMessages(){
+  try {
+    if (window.__mhRealtimeChannel) supabase.removeChannel(window.__mhRealtimeChannel);
+    window.__mhRealtimeChannel = supabase
+      .channel('mhss-notification-messages')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mhss_notification_messages' }, (payload)=>{
+        handleIncomingMessage(payload?.new);
+      })
+      .subscribe();
+  } catch (e) { console.warn('Realtime not available, relying on polling instead.', e); }
+}
+
+async function handleIncomingMessage(row){
+  if (!row?.thread_id) return;
+  if (row.sender_id && row.sender_id !== callerId) playMessageSound();
+  if (row.thread_id === activeThreadId) {
+    try {
+      const fresh = await hydrateThread(activeThreadId);
+      const idx = threads.findIndex(t=>t.id===activeThreadId);
+      if (idx>=0) threads[idx]=fresh; else threads.push(fresh);
+      renderThreadModal(fresh);
+    } catch {}
+  }
+  loadThreads().catch(()=>{});
+}
+
 /* ===================== Boot ===================== */
 (async()=>{
   const r = await initializeRBAC({ supabase });
   if (!r?.allowed) { location.href = 'dashboard.html'; return; }
   const { data: userData } = await supabase.auth.getUser();
   callerId = userData?.user?.id || null;
-  const adminMode = isSuperAdmin();
+  loadMessagePrefs();
+  syncMessagePrefs();
+  isOwnerUser = (userData?.user?.email || '').toLowerCase() === OWNER_EMAIL;
+  const adminMode = isSuperAdmin() || isOwnerUser;
   isAdminUser = !!adminMode;
   $('app').classList.remove('hidden');
   applyLanguage(currentLang);
-  if (!adminMode) {
+  setupPresence(); setupTyping();
+   if (!adminMode) {
     document.querySelector('.grid2 > section:first-child')?.classList.add('hidden');
     document.querySelector('.hero p')?.setAttribute('data-i18n','receiverDesc');
   } else {
     await loadProfiles();
   }
   await loadThreads();
+  setupRealtimeMessages();
   if (window.__mhThreadRefreshTimer) clearInterval(window.__mhThreadRefreshTimer);
-  window.__mhThreadRefreshTimer = setInterval(loadThreads, 60 * 1000);
+  window.__mhThreadRefreshTimer = setInterval(loadThreads, 15 * 1000);
 })();
 </script>
 </body>

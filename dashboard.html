@@ -107,6 +107,7 @@
     .user-btn .avatar{width:34px;height:34px}
     .user-btn-name,.user-btn svg.chev{display:none!important}
     .notif-dot{top:5px;right:5px}
+    .notif-badge{top:1px;right:1px}
     .sidebar{width:min(300px,88vw);max-width:calc(100vw - 18px);padding-top:env(safe-area-inset-top)}
     .main-content{padding-top:1rem}
   }
@@ -323,7 +324,65 @@
     position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;
     background:var(--danger);border:2px solid var(--surface);
   }
+  .notif-badge{
+    position:absolute;top:2px;right:2px;min-width:17px;height:17px;padding:0 4px;
+    border-radius:9px;background:var(--danger);color:#fff;font-size:.62rem;font-weight:800;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+    border:2px solid var(--surface);box-sizing:content-box;
+  }
   .icon-btn-wrap{position:relative;}
+  .nav-notif-dot{
+    min-width:8px;height:8px;padding:0;border-radius:50%;background:var(--danger);
+    margin-left:auto;flex-shrink:0;
+  }
+  .nav-notif-dot.has-count{
+    min-width:17px;height:17px;padding:0 4px;color:#fff;font-size:.62rem;font-weight:800;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+  }
+
+  /* Notification dropdown: tabs + mark-all + per-item mark-read */
+  .notif-tabs{display:flex;gap:.3rem;padding:.1rem .2rem .5rem;}
+  .notif-tab{
+    flex:1;text-align:center;padding:.35rem .5rem;border-radius:var(--r-sm);
+    font-size:.72rem;font-weight:700;color:var(--muted);background:transparent;
+    border:1px solid var(--border);cursor:pointer;transition:all .15s ease;
+  }
+  .notif-tab.active{background:rgba(var(--gold-rgb),.14);color:var(--gold-light);border-color:transparent;}
+  .notif-markall{
+    font-size:.68rem;font-weight:700;color:var(--accent,var(--gold-light));background:none;border:none;
+    cursor:pointer;padding:0;text-decoration:none;
+  }
+  .notif-markall:disabled{opacity:.4;cursor:default;}
+  .notif-item{position:relative;}
+  .notif-item-read-btn{
+    flex-shrink:0;width:22px;height:22px;border-radius:50%;border:1px solid var(--border);
+    background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;opacity:0;transition:opacity .15s ease,color .15s ease,border-color .15s ease;
+  }
+  .notif-item:hover .notif-item-read-btn{opacity:1;}
+  .notif-item-read-btn:hover{color:var(--success);border-color:var(--success);}
+  .notif-item-read-btn svg{width:12px;height:12px;}
+
+  /* New-message toast */
+  .mh-toast-wrap{
+    position:fixed;top:calc(var(--header-h) + 12px);right:16px;z-index:500;
+    display:flex;flex-direction:column;gap:.5rem;max-width:min(340px,90vw);
+  }
+  .mh-toast{
+    display:flex;gap:.6rem;align-items:flex-start;background:var(--surface);
+    border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-1);
+    padding:.7rem .8rem;cursor:pointer;animation:mhToastIn .22s ease;text-decoration:none;color:inherit;
+  }
+  .mh-toast:hover{border-color:rgba(var(--gold-rgb),.4);}
+  .mh-toast-icon{
+    width:30px;height:30px;border-radius:9px;flex-shrink:0;background:rgba(var(--gold-rgb),.14);
+    color:var(--gold-light);display:flex;align-items:center;justify-content:center;
+  }
+  .mh-toast-icon svg{width:16px;height:16px;}
+  .mh-toast-body{min-width:0;}
+  .mh-toast-title{font-size:.8rem;font-weight:700;color:var(--text);}
+  .mh-toast-msg{font-size:.74rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px;}
+  @keyframes mhToastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 
   .dropdown-wrap{position:relative;}
   .dropdown-panel{
@@ -772,9 +831,10 @@ html[data-theme="dark"] #mainContent .section-title{
     </a>
     <a href="system-health.html" id="systemHealthNav" class="nav-link super-admin-only" data-super-admin-only="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l2-6 4 12 2-6h6"/><circle cx="12" cy="12" r="9"/></svg><span data-i18n="navSystemHealth">System Health Monitor</span></a>
     <a href="audit-trail.html" id="auditTrailNav" class="nav-link super-admin-only" data-super-admin-only="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span data-i18n="navAuditTrail">Audit Trail</span></a>
-    <a href="notifications.html" id="notificationsNav" class="nav-link super-admin-only" data-super-admin-only="true">
+    <a href="notifications.html" id="notificationsNav" class="nav-link">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
       <span data-i18n="navNotifications">Notifications</span>
+      <span id="sidebarNotifDot" class="nav-notif-dot hidden">0</span>
     </a>
 
     <a href="dashboard.html#settings" class="nav-link">
@@ -829,14 +889,22 @@ html[data-theme="dark"] #mainContent .section-title{
 
       <div class="dropdown-wrap">
         <div class="icon-btn-wrap">
-          <button id="notifBtn" class="icon-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open Notifications">
+          <button id="notifBtn" class="icon-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open Messages">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.2 8.2 0 0 1-3.5-.8L4 20l1.8-4.1A7.3 7.3 0 0 1 4 11.5 7.5 7.5 0 0 1 12 4a7.5 7.5 0 0 1 8 7.5Z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg>
           </button>
-          <span id="notifDot" class="notif-dot hidden"></span>
+          <span id="notifDot" class="notif-badge hidden">0</span>
         </div>
-        <div id="notifDropdown" class="dropdown-panel hidden" role="menu" aria-label="Messages and notifications">
+        <div id="notifDropdown" class="dropdown-panel hidden" role="menu" aria-label="Message Dashboard">
           <div class="dropdown-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-            <span>Notifications</span><a href="notifications.html" style="font-size:.72rem;color:var(--accent);font-weight:700;text-decoration:none">View all</a>
+            <span>Messages</span>
+            <span style="display:flex;align-items:center;gap:10px">
+              <button id="notifMarkAllBtn" class="notif-markall" type="button">Mark all read</button>
+              <a href="notifications.html" style="font-size:.72rem;color:var(--accent);font-weight:700;text-decoration:none">Message Dashboard</a>
+            </span>
+          </div>
+          <div class="notif-tabs" role="tablist">
+            <button type="button" class="notif-tab active" data-notif-tab="all" role="tab">All</button>
+            <button type="button" class="notif-tab" data-notif-tab="unread" role="tab">Unread</button>
           </div>
           <div id="notifList"><div class="notif-empty">Loading…</div></div>
         </div>
@@ -1406,8 +1474,9 @@ function toggleDropdown(panelId, btnId){
 $('notifBtn').addEventListener('click', e => {
   e.preventDefault();
   e.stopPropagation();
-  window.location.href = 'notifications.html';
+  toggleDropdown('notifDropdown','notifBtn');
 });
+$('notifDropdown').addEventListener('click', e => e.stopPropagation());
 function goToProfile(){window.location.hash='#profile'}
 $('userMenuBtn').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();goToProfile()});
 $('sidebarUserProfile').addEventListener('click',goToProfile);
@@ -1736,44 +1805,185 @@ function renderNeedsAttention() {
     </div>`).join('');
 }
 
-async function loadDashboardNotifications(){
+/* =====================================================================
+   Notifications: cache, badge, tabs, mark-read, polling, toast
+===================================================================== */
+let __mhNotifRows=[];          // last fetched threads (full list, for tab filtering)
+let __mhNotifTab='all';        // 'all' | 'unread'
+let __mhNotifSeenIds=null;     // ids seen on the previous poll, to detect new arrivals
+let __mhNotifPollTimer=null;
+
+async function mhNotifCall(body){
+  const {data:sessionData}=await supabase.auth.getSession();
+  const token=sessionData?.session?.access_token;
+  if(!token) throw new Error('Not signed in');
+  const res=await fetch(`${supabase.supabaseUrl}/functions/v1/mhss-notifications`,{
+    method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  const data=await res.json();
+  if(!res.ok) throw new Error(data?.error||'Notification request failed');
+  return data;
+}
+
+function updateNotifBadges(unreadCount){
+  const label=unreadCount>99?'99+':String(unreadCount);
+  const headerDot=$('notifDot');
+  if(headerDot){ headerDot.textContent=label; headerDot.classList.toggle('hidden',unreadCount===0); }
+  const sideDot=$('sidebarNotifDot');
+  if(sideDot){
+    sideDot.textContent=label;
+    sideDot.classList.toggle('hidden',unreadCount===0);
+    sideDot.classList.toggle('has-count',unreadCount>0);
+  }
+  const markAllBtn=$('notifMarkAllBtn');
+  if(markAllBtn) markAllBtn.disabled=unreadCount===0;
+}
+
+function renderNotifList(){
+  const listEl=$('notifList');
+  const rows=__mhNotifTab==='unread'?__mhNotifRows.filter(t=>t.unread):__mhNotifRows;
+  const recent=rows.slice(0,6);
+  if(!recent.length){
+    listEl.innerHTML=`<div class="notif-empty">${__mhNotifTab==='unread'?'No unread messages.':'You’re all caught up.'}</div>`;
+    return;
+  }
+  listEl.innerHTML=recent.map(t=>{
+    const title=t.subject||t.origin_broadcast_subject||'Notification';
+    const msg=t.latest_message?.body||'';
+    const clean=String(msg).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+    const sender=t.sender?.name||t.recipient?.name||(t.is_broadcast?'MHSS Administration':'Message');
+    const clip=clean.length>75?clean.slice(0,75)+'…':clean;
+    return `<a href="notifications.html?thread=${encodeURIComponent(t.id)}" class="notif-item" style="text-decoration:none;display:flex;gap:10px;align-items:flex-start;${t.unread?'font-weight:700':''}">
+      <span class="ni-dot" style="background:${t.unread?'var(--accent)':'var(--muted)'}"></span>
+      <span style="min-width:0;flex:1"><strong>${esc(title)}</strong><br><span style="color:var(--muted);font-size:.72rem">${esc(sender)} · ${esc(relativeTime(t.latest_message?.created_at||t.created_at))}</span><br><span style="color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block">${esc(clip||'Open message')}</span>${(t.latest_message?.attachments||[]).length?'<span style="font-size:.7rem;color:var(--accent)">📎 Attachment</span>':''}</span>
+      ${t.unread?`<button type="button" class="notif-item-read-btn" data-mark-read="${esc(t.id)}" title="Mark as read" aria-label="Mark as read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>`:''}
+    </a>`;
+  }).join('');
+}
+
+function showNotifToast(t){
+  let wrap=$('mhToastWrap');
+  if(!wrap){
+    wrap=document.createElement('div');
+    wrap.id='mhToastWrap';
+    wrap.className='mh-toast-wrap';
+    document.body.appendChild(wrap);
+  }
+  const title=t.subject||t.origin_broadcast_subject||'New message';
+  const sender=t.sender?.name||(t.is_broadcast?'MHSS Administration':'Message');
+  const msg=String(t.latest_message?.body||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+  const toast=document.createElement('a');
+  toast.href=`notifications.html?thread=${encodeURIComponent(t.id)}`;
+  toast.className='mh-toast';
+  toast.innerHTML=`<span class="mh-toast-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.2 8.2 0 0 1-3.5-.8L4 20l1.8-4.1A7.3 7.3 0 0 1 4 11.5 7.5 7.5 0 0 1 12 4a7.5 7.5 0 0 1 8 7.5Z"/></svg></span>
+    <span class="mh-toast-body"><span class="mh-toast-title">${esc(title)}</span><br><span class="mh-toast-msg">${esc(sender)}${msg?' · '+esc(msg.slice(0,60)):''}</span></span>`;
+  wrap.appendChild(toast);
+  setTimeout(()=>{ toast.style.opacity='0'; toast.style.transform='translateY(-8px)'; toast.style.transition='opacity .2s ease,transform .2s ease'; setTimeout(()=>toast.remove(),220); },6000);
+}
+
+function playNotifSound(){
+  try{
+    const Ctx=window.AudioContext||window.webkitAudioContext;
+    if(!Ctx) return;
+    const ctx=new Ctx();
+    const osc=ctx.createOscillator(), gain=ctx.createGain();
+    osc.type='sine'; osc.frequency.value=880;
+    gain.gain.setValueAtTime(0.001,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.12,ctx.currentTime+0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime+0.35);
+    osc.onended=()=>ctx.close();
+  }catch(e){ /* audio not available, ignore */ }
+}
+
+async function loadDashboardNotifications(isPoll){
   const listEl=$('notifList');
   try{
-    const {data:sessionData}=await supabase.auth.getSession();
-    const token=sessionData?.session?.access_token;
-    if(!token) throw new Error('Not signed in');
-    const res=await fetch(`${supabase.supabaseUrl}/functions/v1/mhss-notifications`,{
-      method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
-      body:JSON.stringify({action:'list_threads'})
-    });
-    const data=await res.json();
-    if(!res.ok) throw new Error(data?.error||'Could not load notifications');
+    const data=await mhNotifCall({action:'list_threads'});
     const rows=Array.isArray(data?.threads)?data.threads:[];
-    const recent=rows.slice(0,6);
     const unread=rows.filter(x=>x.unread).length;
-    $('notifDot').classList.toggle('hidden',unread===0);
-    if(!recent.length){listEl.innerHTML='<div class="notif-empty">You’re all caught up.</div>';return;}
-    listEl.innerHTML=recent.map(t=>{
-      const title=t.subject||t.origin_broadcast_subject||'Notification';
-      const msg=t.latest_message?.body||'';
-      const clean=String(msg).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
-      const sender=t.sender?.name||t.recipient?.name||(t.is_broadcast?'MHSS Administration':'Message');
-      const clip=clean.length>75?clean.slice(0,75)+'…':clean;
-      return `<a href="notifications.html?thread=${encodeURIComponent(t.id)}" class="notif-item" style="text-decoration:none;display:flex;gap:10px;align-items:flex-start;${t.unread?'font-weight:700':''}">
-        <span class="ni-dot" style="background:${t.unread?'var(--accent)':'var(--muted)'}"></span>
-        <span style="min-width:0;flex:1"><strong>${esc(title)}</strong><br><span style="color:var(--muted);font-size:.72rem">${esc(sender)} · ${esc(relativeTime(t.latest_message?.created_at||t.created_at))}</span><br><span style="color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block">${esc(clip||'Open message')}</span>${(t.latest_message?.attachments||[]).length?'<span style="font-size:.7rem;color:var(--accent)">📎 Attachment</span>':''}</span>
-      </a>`;
-    }).join('');
+
+    // Detect genuinely new unread threads since the last check, for toast + sound.
+    if(isPoll && __mhNotifSeenIds){
+      const newlyUnread=rows.filter(t=>t.unread && !__mhNotifSeenIds.has(t.id));
+      if(newlyUnread.length){
+        showNotifToast(newlyUnread[0]);
+        playNotifSound();
+      }
+    }
+    __mhNotifSeenIds=new Set(rows.filter(t=>t.unread).map(t=>t.id));
+
+    __mhNotifRows=rows;
+    updateNotifBadges(unread);
+    renderNotifList();
   }catch(err){
     console.error('[Dashboard] notification load failed:',err);
-    listEl.innerHTML='<div class="notif-empty">Could not load notifications.<br><a href="notifications.html" style="color:var(--accent);font-weight:700">Open Notifications</a></div>';
+    if(listEl) listEl.innerHTML='<div class="notif-empty">Could not load notifications.<br><a href="notifications.html" style="color:var(--accent);font-weight:700">Open Notifications</a></div>';
   }
 }
+
+async function markAllNotificationsRead(){
+  const btn=$('notifMarkAllBtn');
+  if(btn) btn.disabled=true;
+  try{
+    await mhNotifCall({action:'mark_all_read'});
+    __mhNotifRows=__mhNotifRows.map(t=>({...t,unread:false}));
+    updateNotifBadges(0);
+    renderNotifList();
+  }catch(err){
+    console.error('[Dashboard] mark all read failed:',err);
+    if(btn) btn.disabled=false;
+  }
+}
+
+async function markThreadRead(threadId){
+  try{
+    await mhNotifCall({action:'mark_thread_read',thread_id:threadId});
+  }catch(err){
+    console.error('[Dashboard] mark thread read failed:',err);
+  }
+  __mhNotifRows=__mhNotifRows.map(t=>t.id===threadId?{...t,unread:false}:t);
+  const unread=__mhNotifRows.filter(x=>x.unread).length;
+  updateNotifBadges(unread);
+  renderNotifList();
+}
+
+$('notifMarkAllBtn')?.addEventListener('click',(e)=>{ e.stopPropagation(); markAllNotificationsRead(); });
+document.querySelectorAll('[data-notif-tab]').forEach(tabBtn=>{
+  tabBtn.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    __mhNotifTab=tabBtn.dataset.notifTab;
+    document.querySelectorAll('[data-notif-tab]').forEach(b=>b.classList.toggle('active',b===tabBtn));
+    renderNotifList();
+  });
+});
+$('notifList')?.addEventListener('click',(e)=>{
+  const btn=e.target.closest('[data-mark-read]');
+  if(!btn) return;
+  e.preventDefault(); e.stopPropagation();
+  markThreadRead(btn.dataset.markRead);
+});
+
+function startNotifPolling(){
+  if(__mhNotifPollTimer) clearInterval(__mhNotifPollTimer);
+  __mhNotifPollTimer=setInterval(()=>{
+    if(document.hidden) return; // pause while tab is in background
+    loadDashboardNotifications(true);
+  },45000);
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden) loadDashboardNotifications(true);
+  });
+}
+
 function renderNotifications(){
   // The old dashboard alert/ring system is intentionally removed.
   // Header notification data comes from the real MHSS Messaging Center.
   const dotEl=$('notifDot');
   if(dotEl) dotEl.classList.add('hidden');
+  const sidebarDotEl=$('sidebarNotifDot');
+  if(sidebarDotEl) sidebarDotEl.classList.add('hidden');
 }
 
 /* =====================================================================
@@ -1838,13 +2048,6 @@ function applyRBACToDashboard(rbac) {
     const show = !!rbac?.isSuperAdmin || String(rbac?.user?.email || '').trim().toLowerCase() === 'mhssepr@gmail.com';
     userRoles.classList.toggle('super-admin-only', !show);
     userRoles.classList.toggle('hidden', !show);
-  }
-
-  const notificationsNav = $('notificationsNav');
-  if (notificationsNav) {
-    const show = !!rbac?.isSuperAdmin || String(rbac?.user?.email || '').trim().toLowerCase() === 'mhssepr@gmail.com';
-    notificationsNav.classList.toggle('super-admin-only', !show);
-    notificationsNav.classList.toggle('hidden', !show);
   }
 
   ["systemHealthNav","auditTrailNav"].forEach((id)=>{const el=$(id);if(el){const show=!!rbac?.isSuperAdmin || String(rbac?.user?.email||"").trim().toLowerCase()==="mhssepr@gmail.com";el.classList.toggle("super-admin-only",!show);el.classList.toggle("hidden",!show);}});
@@ -1931,6 +2134,7 @@ $('refreshBtn').addEventListener('click', async () => {
   setInterval(loadDashboard, 5 * 60 * 1000);
   // The dashboard now uses the single functional Messaging Center notification button above.
   loadDashboardNotifications();
+  startNotifPolling();
 })();
 
 /* =====================================================================

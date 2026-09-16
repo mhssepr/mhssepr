@@ -94,9 +94,20 @@
     .idcard-divider { height: 2px; margin: 0 14px; background: linear-gradient(90deg, transparent, var(--idc-gold), transparent); position: relative; z-index: 1; }
     .idcard-body { display: flex; gap: 10px; padding: 8px 14px 2px; flex: 1; position: relative; z-index: 1; min-height: 0; }
     .idcard-col-left { width: 112px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
-    .idcard-photo-frame { position: relative; width: 108px; height: 108px; border-radius: 12px; border: 2px solid var(--idc-gold); box-shadow: 0 4px 10px -2px rgba(0,0,0,0.25); overflow: hidden; background: var(--idc-graybg); }
-    .idcard-photo { width: 100%; height: 100%; object-fit: cover; }
+    .idcard-photo-frame { position: relative; width: 108px; height: 108px; border-radius: 12px; border: 2px solid var(--idc-gold); box-shadow: 0 4px 10px -2px rgba(0,0,0,0.25); overflow: visible; background: var(--idc-graybg); }
+    .idcard-photo { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
     .idcard-photo-cross { position: absolute; top: -8px; left: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--idc-gold); color: var(--idc-white); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2; }
+        /* Physical card number sits ABOVE the student photo. */
+        .idcard-card-number { position:absolute; top:-13px; left:50%; transform:translateX(-50%); z-index:8; pointer-events:none; white-space:nowrap; font-family:'Cinzel','Montserrat',sans-serif; font-size:6.5px; font-weight:700; letter-spacing:.12em; color:var(--idc-blue); opacity:.55; text-shadow:0 1px 1px rgba(255,255,255,.75); }
+        .idcard-photo-security-line { position:absolute; left:4px; right:4px; bottom:4px; z-index:4; pointer-events:none; white-space:nowrap; overflow:hidden; text-align:center; font-family:'Montserrat',sans-serif; font-size:4px; font-weight:700; letter-spacing:.12em; color:#fff; opacity:.42; text-shadow:0 1px 2px rgba(0,0,0,.9); }
+        .idcard-hologram { position:absolute; right:4px; top:4px; z-index:4; width:18px; height:18px; border-radius:50%; pointer-events:none; background:conic-gradient(from 20deg,rgba(255,255,255,.15),rgba(201,162,39,.42),rgba(56,189,248,.25),rgba(255,255,255,.15)); border:1px solid rgba(255,255,255,.38); box-shadow:0 0 7px rgba(201,162,39,.28); opacity:.58; mix-blend-mode:screen; }
+        .idcard-hologram::after { content:"MHSS"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:700 4px/1 'Montserrat',sans-serif; color:#fff; }
+        .card-security-panel { border:1px solid var(--border); border-radius:14px; padding:12px; background:rgba(200,158,58,.055); }
+        .card-security-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+        .card-history-modal { width:min(900px,100%); }
+        .card-history-row { display:grid; grid-template-columns:120px 1fr 120px; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); font-size:11px; }
+        @media(max-width:600px){ .card-history-row{grid-template-columns:1fr;gap:3px;} .idcard-card-number{font-size:6px;} }
+
     .idcard-mini-box { position: relative; width: 100%; margin-top: 8px; border: 1.5px solid var(--idc-gold); border-radius: 10px; padding: 8px 6px 5px; text-align: center; background: #ffffff; }
     .idcard-mini-box .idcard-box-label { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: var(--idc-blue); color: var(--idc-white); font-size: 7px; font-weight: 700; letter-spacing: .04em; padding: 2px 9px; border-radius: 9px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     .idcard-mini-box strong { display: block; font-size: 11.5px; font-weight: 700; color: var(--idc-navy); letter-spacing: .02em; }
@@ -120,7 +131,7 @@
     .idcard-back-row .idcard-value { display: block; border-bottom: 1px dotted rgba(18,58,122,0.3); padding-bottom: 3px; font-weight: 600; }
     .idcard-stamp { position: absolute; top: 155px; right: 16px; width: 75px; height: 75px; object-fit: contain; background: transparent; transform: rotate(-12deg); opacity: 0.85; mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
     .idcard-barcode-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 1; }
-    .idcard-barcode-wrap svg { width: 86%; height: 52px; }
+    .idcard-barcode-wrap svg { width: 72%; height: 42px; }
     .idcard-barcode-id { font-family: 'Cinzel', monospace; font-size: 12px; font-weight: 700; letter-spacing: .16em; color: var(--idc-navy); margin-top: 2px; }
 
     /* ==========================================
@@ -197,7 +208,31 @@
     .mode-btn:disabled { opacity:.45; cursor:not-allowed; }
     .feature-btn { border:1px solid var(--border); background:var(--surface); color:var(--text-main); transition:.15s; }
     .feature-btn:hover { border-color:var(--gold); transform:translateY(-1px); }
-    .status-select { min-width:100px; }
+    .status-select {
+        min-width:112px;
+        max-width:128px;
+        color:var(--text-main) !important;
+        background:var(--input-bg) !important;
+        border:1px solid var(--input-border) !important;
+        font-weight:700 !important;
+        opacity:1 !important;
+        color-scheme:light;
+    }
+    .status-select option {
+        color:#111827 !important;
+        background:#ffffff !important;
+        font-weight:600;
+    }
+    html[data-theme="dark"] .status-select {
+        color:#F8FAFC !important;
+        background:#182235 !important;
+        border-color:rgba(255,255,255,.16) !important;
+        color-scheme:dark;
+    }
+    html[data-theme="dark"] .status-select option {
+        color:#F8FAFC !important;
+        background:#182235 !important;
+    }
     .id-filter-select option, .settings-control option { background:#0f172a; color:#f8fafc; }
     [data-theme="light"] .id-filter-select option, [data-theme="light"] .settings-control option { background:#ffffff; color:#111827; }
     .settings-control { width:100%; min-height:38px; border-radius:9px; padding:0 9px; background:var(--input-bg); color:var(--text-main); border:1px solid var(--input-border); font-size:11px; font-weight:700; }
@@ -276,6 +311,13 @@
                 </div>
                 <div id="studentListWrap" class="max-h-[420px] overflow-y-auto flex flex-col gap-1 pr-1"></div>
                 <p id="listEmptyMsg" class="hidden text-center text-xs py-8" style="color:var(--text-muted)">No students found.</p>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3 card-security-panel">
+                <div class="flex items-center justify-between gap-2"><div><h3 class="text-sm font-bold">🛡️ ID Card Security Center</h3><p class="text-[10px] mt-1" style="color:var(--text-muted)">Student ID is permanent. MHSS number identifies the physical card.</p></div><span class="text-[9px] font-bold px-2 py-1 rounded-full" style="background:rgba(200,158,58,.12);color:var(--gold)">MHSS V2</span></div>
+                <div class="grid grid-cols-3 gap-2 text-center"><div class="rounded-lg p-2" style="background:rgba(200,158,58,.07)"><div id="cardActiveCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Active</div></div><div class="rounded-lg p-2" style="background:rgba(239,68,68,.07)"><div id="cardLostCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Lost</div></div><div class="rounded-lg p-2" style="background:rgba(59,130,246,.07)"><div id="cardPrintedCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Printed</div></div></div>
+                <div class="card-security-actions"><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="verifyCardByBarcode()">🔎 Verify Barcode</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openCardHistory()">📜 Card History</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="replaceSelectedCard()">♻️ Replace Lost Card</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="exportCardAudit()">🧾 Audit / Print History</button></div>
+                <p class="text-[9px] leading-relaxed" style="color:var(--text-muted)">No QR code. The barcode contains the permanent Student ID so Attendance and other scan workflows continue to identify the student.</p>
             </div>
 
             <div class="glass-panel rounded-2xl p-4 flex flex-col gap-4">
@@ -401,6 +443,9 @@
     <div class="p-4 border-t flex justify-end gap-2" style="border-color:var(--border)"><button type="button" onclick="closeTestPrint()" class="feature-btn px-4 py-2 rounded-xl text-sm font-bold">Cancel</button><button type="button" onclick="printTestPage()" class="gold-btn px-4 py-2 rounded-xl text-sm">🧪 Print Test Page</button></div>
   </div>
 </div>
+
+<!-- ID Card History / Verification -->
+<div id="cardHistoryModal" class="modal-backdrop" onclick="if(event.target===this) closeCardHistory()"><div class="modal-card card-history-modal"><div class="p-4 md:p-5 flex items-center justify-between gap-3 border-b" style="border-color:var(--border)"><div><div id="cardHistoryTitle" class="font-bold">🛡️ ID Card Security Center</div><div id="cardVerifyResult" class="text-xs mt-1" style="color:var(--text-muted)"></div></div><button type="button" onclick="closeCardHistory()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button></div><div class="p-4"><div id="cardVerifyBox" class="hidden mb-4"><div class="text-xs font-bold mb-2">Enter or scan the physical barcode number</div><div class="flex gap-2"><input id="verifyCardInput" class="lux-input flex-1 px-3 py-2 rounded-xl text-sm" placeholder="MHSS-XXXXXX" autocomplete="off"><button type="button" onclick="runCardVerification()" class="gold-btn px-4 py-2 rounded-xl text-sm font-bold">Verify</button></div></div><div id="cardHistoryBody"></div></div></div></div>
 
 <!-- Hidden area used for the real, full-size print output -->
 <div id="realPrintArea"></div>
@@ -786,8 +831,11 @@
                 <div class="idcard-body">
                     <div class="idcard-col-left">
                         <div class="idcard-photo-frame">
+                            <span class="idcard-card-number">${escapeHtml(getStudentCardNumber(s))}</span>
+                            <span class="idcard-hologram" aria-hidden="true"></span>
                             <span class="idcard-photo-cross">✝</span>
                             <img src="${getPhotoUrl(s)}" class="idcard-photo" alt="Student photo" crossorigin="anonymous">
+                            <span class="idcard-photo-security-line">AUTHENTIC • MHSS • AUTHENTIC • MHSS • AUTHENTIC</span>
                         </div>
                         <div class="idcard-mini-box"><span class="idcard-box-label">ID NO.</span><strong>${escapeHtml(s.id)}</strong></div>
                         <div class="idcard-mini-box"><span class="idcard-box-label">ምድብ &nbsp;/&nbsp; Grade</span><strong class="idcard-amh">${escapeHtml(s.className || '-')}</strong></div>
@@ -857,7 +905,7 @@
                     </div>
                     <div class="idcard-barcode-wrap">
                         <svg id="${barcodeId}"></svg>
-                        <div class="idcard-barcode-id">${escapeHtml(s.id)}</div>
+                        <div class="idcard-barcode-id">${escapeHtml(String(s.id || ""))}</div>
                     </div>
                     <div class="idcard-amh" style="color: var(--idc-blue); font-size: 13px; text-align: center; padding: 0 12px; margin-top: 2px; font-weight: bold;">
                         ይህ መታወቂያ ጠፍቶ ወይም ወድቆ ካገኙ ለሰንበት/ቤቱ ጽሕፈት ቤት ያስረክቡ፡፡
@@ -874,22 +922,44 @@
     function renderIdCardBarcode(s, uid) {
         const barcodeId = `idCardBarcodeSvg${uid ? '-' + uid : ''}`;
         try {
-            JsBarcode(`#${barcodeId}`, s.id, { format: 'CODE128', lineColor: '#1B1B2F', width: 2, height: 50, displayValue: false, margin: 0 });
+            JsBarcode(`#${barcodeId}`, String(s.id || ''), { format: 'CODE128', lineColor: '#1B1B2F', width: 2, height: 50, displayValue: false, margin: 0 });
         } catch (e) { }
     }
 
     // ==========================================
     // STUDENT LIST / SELECTION
     // ==========================================
+    // ==========================================
+    // MHSS PHYSICAL CARD REGISTRY
+    // Student ID = permanent identity.
+    // MHSS-XXXXXX = physical card identity.
+    // ==========================================
+    const CARD_REGISTRY_KEY = 'mhss_student_id_cards_v2';
+    const CARD_AUDIT_KEY = 'mhss_student_id_card_audit_v2';
+    function getCardRegistry(){ try{return JSON.parse(localStorage.getItem(CARD_REGISTRY_KEY)||'{}')||{};}catch(e){return{};} }
+    function saveCardRegistry(r){localStorage.setItem(CARD_REGISTRY_KEY,JSON.stringify(r));}
+    function getCardAudit(){try{return JSON.parse(localStorage.getItem(CARD_AUDIT_KEY)||'[]')||[];}catch(e){return[];}}
+    function saveCardAudit(a){localStorage.setItem(CARD_AUDIT_KEY,JSON.stringify(a.slice(-500)));}
+    function nowIso(){return new Date().toISOString();}
+    function generateUniqueCardNumber(registry){let n;do{n='MHSS-'+Math.random().toString(36).slice(2,8).toUpperCase();}while(Object.values(registry).some(r=>r&&r.cardNumber===n));return n;}
+    function addCardAudit(action,student,cardNumber,details=''){const a=getCardAudit();a.push({action,studentId:student?.id||null,studentName:student?.name||null,cardNumber:cardNumber||null,details,at:nowIso()});saveCardAudit(a);}
+    function ensureCardRecord(s){const r=getCardRegistry();let rec=r[s.id];if(!rec||!rec.cardNumber){const at=nowIso(),n=generateUniqueCardNumber(r);rec={cardNumber:n,studentId:s.id,status:'Active',issuedAt:at,version:1,history:[{action:'ISSUED',at,cardNumber:n}]};r[s.id]=rec;saveCardRegistry(r);addCardAudit('CARD_ISSUED',s,n,'Initial physical card created');}return rec;}
+    function getStudentCardNumber(s){return ensureCardRecord(s).cardNumber;}
+    function getStudentCardRecord(s){return ensureCardRecord(s);}
+    function getStudentStatus(s){const rec=ensureCardRecord(s);return rec.status||studentStatusMap[s.id]||'Not Printed';}
+    function setStudentStatus(id,value){const s=studentsData.find(x=>x.id===id);if(!s)return;const r=getCardRegistry(),rec=ensureCardRecord(s),old=rec.status;rec.status=value;rec.history=Array.isArray(rec.history)?rec.history:[];rec.history.push({action:'STATUS_CHANGED',from:old,to:value,at:nowIso(),cardNumber:rec.cardNumber});r[id]=rec;saveCardRegistry(r);studentStatusMap[id]=value;localStorage.setItem('mh_id_card_statuses',JSON.stringify(studentStatusMap));addCardAudit('STATUS_CHANGED',s,rec.cardNumber,old+' → '+value);renderStudentList();updateCardSecurityStats();}
+    function updateCardSecurityStats(){const rs=Object.values(getCardRegistry()),a=document.getElementById('cardActiveCount'),l=document.getElementById('cardLostCount'),p=document.getElementById('cardPrintedCount');if(a)a.textContent=rs.filter(r=>r.status==='Active').length;if(l)l.textContent=rs.filter(r=>r.status==='Lost'||r.status==='Replacement Required').length;if(p)p.textContent=rs.filter(r=>r.status==='Printed').length;}
+    function replaceSelectedCard(){const s=getSelectedStudentsOrdered()[0];if(!s){alert('Select one student first.');return;}const r=getCardRegistry(),old=ensureCardRecord(s),oldNo=old.cardNumber;if(!confirm(`Replace physical card ${oldNo} for ${s.name}? The old card will become REPLACED and a new MHSS number will be issued.`))return;const at=nowIso();old.status='Replaced';old.replacedAt=at;old.history.push({action:'REPLACED',at,cardNumber:oldNo});const newNo=generateUniqueCardNumber(r);const rec={cardNumber:newNo,studentId:s.id,status:'Active',issuedAt:at,version:(Number(old.version)||1)+1,previousCardNumber:oldNo,history:[{action:'REISSUED',at,cardNumber:newNo,previousCardNumber:oldNo}]};r[s.id]=rec;saveCardRegistry(r);addCardAudit('CARD_REPLACED',s,newNo,'Previous card: '+oldNo);cardPrintMode='replacement';localStorage.setItem('mh_id_card_print_mode','replacement');renderStudentList();renderPreview();updateCardSecurityStats();alert(`New card issued: ${newNo}\nOld card: ${oldNo} — REPLACED`);}
+    function verifyCardByBarcode(){const m=document.getElementById('cardHistoryModal');document.getElementById('cardVerifyBox').classList.remove('hidden');document.getElementById('cardHistoryTitle').textContent='🔎 Verify Student ID Card';document.getElementById('cardHistoryBody').innerHTML='';document.getElementById('cardVerifyResult').textContent='A USB barcode scanner can type directly into this field.';m.classList.add('open');const i=document.getElementById('verifyCardInput');i.value='';i.focus();}
+    function runCardVerification(){const value=String(document.getElementById('verifyCardInput').value||'').trim().toUpperCase(),rs=getCardRegistry();const entry=Object.values(rs).find(r=>String(r.cardNumber).toUpperCase()===value),student=studentsData.find(s=>entry&&s.id===entry.studentId);const result=document.getElementById('cardVerifyResult'),body=document.getElementById('cardHistoryBody');if(!entry){result.textContent='❌ INVALID CARD — number not found.';body.innerHTML=`<div class="rounded-xl p-4 border" style="border-color:rgba(239,68,68,.35)"><div class="font-bold text-red-500">Card not recognized</div><div class="text-xs mt-1" style="color:var(--text-muted)">Card number: ${escapeHtml(value||'—')}</div></div>`;return;}const valid=entry.status==='Active'||entry.status==='Printed';result.textContent=valid?'✅ VALID CARD':`⚠️ CARD STATUS: ${entry.status}`;body.innerHTML=`<div class="rounded-xl p-4 border" style="border-color:var(--border)"><div class="grid grid-cols-2 md:grid-cols-4 gap-3"><div><div class="text-[9px]" style="color:var(--text-muted)">CARD NUMBER</div><div class="font-black">${escapeHtml(entry.cardNumber)}</div></div><div><div class="text-[9px]" style="color:var(--text-muted)">STUDENT ID</div><div class="font-bold">${escapeHtml(entry.studentId)}</div></div><div><div class="text-[9px]" style="color:var(--text-muted)">STATUS</div><div class="font-bold">${escapeHtml(entry.status)}</div></div><div><div class="text-[9px]" style="color:var(--text-muted)">VERSION</div><div class="font-bold">V${escapeHtml(entry.version||1)}</div></div></div><div class="mt-4 pt-3 border-t" style="border-color:var(--border)"><div class="text-xs font-bold">${escapeHtml(student?.name||'Student record not loaded')}</div><div class="text-[10px] mt-1" style="color:var(--text-muted)">${escapeHtml(student?.className||'')}</div></div></div>`;}
+    function openCardHistory(){document.getElementById('cardVerifyBox').classList.add('hidden');document.getElementById('cardHistoryTitle').textContent='📜 Card History & Audit Trail';document.getElementById('cardVerifyResult').textContent='Issuance, replacement, status and print actions.';const a=getCardAudit().slice().reverse();document.getElementById('cardHistoryBody').innerHTML=a.length?a.map(x=>`<div class="card-history-row"><div class="font-bold">${escapeHtml(x.action)}</div><div><b>${escapeHtml(x.cardNumber||'—')}</b> · ${escapeHtml(x.studentName||x.studentId||'—')}<div class="text-[9px] mt-1" style="color:var(--text-muted)">${escapeHtml(x.details||'')}</div></div><div style="color:var(--text-muted)">${escapeHtml(new Date(x.at).toLocaleString())}</div></div>`).join(''):'<div class="text-sm py-8 text-center" style="color:var(--text-muted)">No audit history yet.</div>';document.getElementById('cardHistoryModal').classList.add('open');}
+    function closeCardHistory(){document.getElementById('cardHistoryModal').classList.remove('open');}
+    function exportCardAudit(){const blob=new Blob([JSON.stringify(getCardAudit(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`MHSS-ID-Card-Audit-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);}
+    function recordPrintHistory(ids,stage){const r=getCardRegistry(),a=getCardAudit(),at=nowIso();ids.forEach(id=>{const s=studentsData.find(x=>x.id===id);if(!s)return;const rec=ensureCardRecord(s);rec.status='Printed';rec.history=Array.isArray(rec.history)?rec.history:[];rec.history.push({action:'PRINTED',stage,at,cardNumber:rec.cardNumber});r[id]=rec;a.push({action:'PRINTED',stage,studentId:s.id,studentName:s.name,cardNumber:rec.cardNumber,at,details:`${stage.toUpperCase()} print job`});});saveCardRegistry(r);saveCardAudit(a);updateCardSecurityStats();}
+
     function hasStudentPhoto(s) {
         const p = String(s?.photo || '').trim();
         return !!p;
-    }
-    function getStudentStatus(s) { return studentStatusMap[s.id] || 'Not Printed'; }
-    function setStudentStatus(id, value) {
-        studentStatusMap[id] = value;
-        localStorage.setItem('mh_id_card_statuses', JSON.stringify(studentStatusMap));
-        renderStudentList();
     }
     function setMissingPhotoFilter() { missingPhotoOnly = true; renderStudentList(); }
     function clearStudentFilter() { missingPhotoOnly = false; document.getElementById('searchInput').value=''; renderStudentList(); }
@@ -1267,6 +1337,7 @@
             return;
         }
 
+        recordPrintHistory(getSelectedStudentsOrdered().map(s => s.id), stage);
         isPrinting = false;
         duplexPrintStage = null;
         document.getElementById('realPrintArea').innerHTML = '';
@@ -1280,6 +1351,7 @@
     (async function init() {
         try {
             setCardPrintMode(cardPrintMode);
+            updateCardSecurityStats();
             const savedPS = JSON.parse(localStorage.getItem('mh_id_card_print_settings') || 'null');
             if (savedPS) {
                 const flip = document.querySelector(`input[name="flipEdge"][value="${savedPS.flipEdge || 'long'}"]`);

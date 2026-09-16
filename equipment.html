@@ -305,7 +305,8 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
     table { font-size:10px !important; }
     th, td { padding:.5rem .3rem !important; }
     #inventoryTab table th:nth-child(4), #inventoryTab table td:nth-child(4),
-    #inventoryTab table th:nth-child(5), #inventoryTab table td:nth-child(5) { display:none; }
+    #inventoryTab table th:nth-child(5), #inventoryTab table td:nth-child(5),
+    #inventoryTab table th:nth-child(6), #inventoryTab table td:nth-child(6) { display:none; }
     #lendingTab table th:nth-child(3), #lendingTab table td:nth-child(3),
     #lendingTab table th:nth-child(5), #lendingTab table td:nth-child(5),
     #lendingTab table th:nth-child(6), #lendingTab table td:nth-child(6) { display:none; }
@@ -332,33 +333,77 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
     .tab-btn { font-size:.62rem !important; }
 }
 
-    </style>
+    
+
+/* ===== STUDENT-STYLE APP HEADER ===== */
+header.app-header { position:sticky; top:0; z-index:30; background:var(--surface) !important; }
+.header-controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.lang-switch { display:flex; align-items:center; background:var(--surface-soft); border:1px solid var(--border); border-radius:999px; padding:3px; gap:2px; }
+.lang-switch button { border:none; background:transparent; font-size:12px; font-weight:700; letter-spacing:.03em; padding:6px 12px; border-radius:999px; color:var(--text-muted); cursor:pointer; transition:all .25s ease; }
+.lang-switch button.active { background:var(--primary); color:#1a1a1a; box-shadow:0 4px 12px -3px rgba(184,146,46,.4); }
+.theme-toggle { position:relative; width:52px; height:30px; border-radius:999px; border:1px solid var(--border); background:var(--surface-soft); cursor:pointer; padding:0; flex-shrink:0; }
+.theme-toggle .knob { position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; transition:transform .35s cubic-bezier(.4,0,.2,1); box-shadow:0 2px 6px rgba(0,0,0,.2); }
+html[data-theme="light"] .theme-toggle .knob { transform:translateX(22px); }
+.theme-toggle .knob svg { width:14px; height:14px; }
+.back-dash-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 16px; border-radius:12px; font-size:13px; font-weight:700; background:var(--surface-soft); border:1px solid var(--border); color:var(--text); transition:all .2s ease; }
+.back-dash-btn:hover { background:var(--surface); border-color:var(--primary); color:var(--primary); transform:translateY(-2px); }
+@media(max-width:640px){.back-dash-btn span.label{display:none}.back-dash-btn{padding:10px}header.app-header{padding:1rem !important;flex-wrap:wrap;gap:12px}header.app-header h1{font-size:1.35rem !important}header.app-header img{width:44px !important;height:44px !important}}
+/* ===== Equipment upgrades: categories, analytics, advanced search ===== */
+.category-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .6rem;border-radius:999px;background:color-mix(in srgb,var(--primary) 12%,var(--surface-soft));border:1px solid color-mix(in srgb,var(--primary) 30%,var(--border));color:var(--text);font-size:.72rem;font-weight:700}
+.analytics-card{position:relative;overflow:hidden;border:1px solid var(--border);background:linear-gradient(145deg,var(--surface),var(--surface-soft));border-radius:1.35rem;padding:1.1rem;box-shadow:var(--shadow)}
+.analytics-card .metric{font-size:1.7rem;font-weight:800;letter-spacing:-.04em}
+.analytics-card .muted{color:var(--text-muted);font-size:.78rem;font-weight:600}
+.category-mini{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.7rem;border:1px solid var(--border);background:var(--surface-soft);border-radius:1rem;cursor:pointer;transition:.2s}
+.category-mini:hover{border-color:var(--primary);transform:translateY(-1px)}
+.category-mini .count{font-weight:800;color:var(--primary)}
+#advancedSearchPanel{max-height:0;overflow:hidden;opacity:0;transition:max-height .3s ease,opacity .2s ease}
+#advancedSearchPanel.open{max-height:900px;opacity:1;margin-bottom:1rem}
+.inventory-filter-select{min-width:170px;min-height:44px;white-space:nowrap;}
+.search-filter-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem}
+.search-filter-grid label{display:block;font-size:.7rem;color:var(--text-muted);font-weight:700;margin-bottom:.3rem}
+@media(max-width:900px){.search-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.search-filter-grid{grid-template-columns:1fr}.analytics-card{padding:.9rem}.category-mini{padding:.6rem}}
+
+</style>
 </head>
 <body class="min-h-screen flex flex-col relative overflow-x-hidden">
 
     <div class="ambient-glow no-print"></div>
     <div class="ambient-glow-2 no-print"></div>
 
-    <header class="glass-panel w-full p-8 flex justify-between items-end border-b border-white/5 z-10 no-print">
-        <div class="flex items-center gap-6">
-            <img src="logo.png" alt="Logo" class="w-20 h-20 rounded-2xl bg-white/5 p-2 border border-white/10 shadow-xl shadow-yellow-500/10">
-            <div>
-                <h1 class="text-4xl font-bold tracking-tight" data-i18n="appTitle">Meserete Hiwot EPR System</h1>
-                <p class="text-yellow-500 font-medium mt-1" data-i18n="appSubtitle">Equipment Management System <span class="amharic text-sm ml-2">(የመሳሪያዎች እና ንብረት አስተዳደር)</span></p>
+    <header class="app-header glass-panel w-full p-6 md:p-8 flex flex-wrap justify-between items-center md:items-end gap-4 border-b border-white/5 z-10 no-print">
+        <div class="flex items-center gap-4 md:gap-6 min-w-0">
+            <img src="logo.png" alt="Logo" class="w-12 h-12 md:w-20 md:h-20 rounded-2xl bg-white/5 p-2 border border-white/10 shadow-xl shadow-yellow-500/10 flex-shrink-0">
+            <div class="min-w-0">
+                <h1 class="text-xl md:text-4xl font-bold tracking-tight truncate" data-i18n="appTitle">Meserete Hiwot ERP System</h1>
+                <p class="text-yellow-500 font-medium mt-1 text-xs md:text-base" data-i18n="appSubtitle">Equipment Management System <span class="amharic text-sm ml-2">(የመሳሪያዎች እና ንብረት አስተዳደር)</span></p>
             </div>
         </div>
 
-        <div class="flex items-center gap-4 mb-2">
-            <div class="flex items-center rounded-xl overflow-hidden border border-white/10 text-xs font-bold">
-                <button id="langBtnEn" onclick="setLanguage('en')" class="lang-btn px-3 py-2 bg-white/5">EN</button>
-                <button id="langBtnAm" onclick="setLanguage('am')" class="lang-btn px-3 py-2 bg-white/5 amharic">አማ</button>
-            </div>
-            <div class="text-right mr-4 hidden md:block">
+        <div class="header-controls">
+            <div class="text-right mr-2 hidden lg:block">
                 <p class="text-sm text-gray-400" id="dateDisplay">Loading date...</p>
                 <p class="text-lg font-semibold" data-i18n="adminDashboard">Admin Dashboard</p>
             </div>
-            <button id="themeToggle" type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light and dark mode" title="Toggle light and dark mode">☾</button>
-            <a href="dashboard.html" class="back-dashboard px-5 py-2 rounded-xl text-sm font-bold border transition"><span data-i18n="backDashboard">← Back to Dashboard</span></a>
+
+            <!-- Language Switcher -->
+            <div class="lang-switch" role="group" aria-label="Language switcher">
+                <button type="button" id="langBtnEn" onclick="setLanguage('en')" aria-pressed="true">ENG</button>
+                <button type="button" id="langBtnAm" onclick="setLanguage('am')" aria-pressed="false">አማ</button>
+            </div>
+
+            <!-- Theme Toggle -->
+            <button type="button" class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Toggle light/dark theme" aria-pressed="false">
+                <span class="knob" id="themeKnob">
+                    <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round"/></svg>
+                </span>
+            </button>
+
+            <!-- Back to Dashboard -->
+            <a href="dashboard.html" class="back-dash-btn" aria-label="Back to Dashboard">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <span class="label" data-i18n="backDashboard">Back to Dashboard</span>
+            </a>
         </div>
     </header>
 
@@ -384,7 +429,7 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
             </div>
         </div>
 
-        <div class="flex flex-wrap gap-3 mb-8 no-print">
+<div class="flex flex-wrap gap-3 mb-8 no-print">
             <button onclick="openAssetModal()" class="quick-action-btn px-5 py-3 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 shadow-lg shadow-yellow-500/20" data-i18n="btnRegister">➕ Register New Asset</button>
             <button onclick="openLendModal()" class="quick-action-btn px-5 py-3 glass-panel rounded-xl hover:bg-white/10 font-semibold" data-i18n="btnLend">🔄 Lend Asset</button>
             <button onclick="openReturnModal()" class="quick-action-btn px-5 py-3 glass-panel rounded-xl hover:bg-white/10 font-semibold" data-i18n="btnReturn">↩️ Return Asset</button>
@@ -403,9 +448,34 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
         <div id="inventoryTab">
             <div class="flex flex-col md:flex-row justify-between items-center mb-5 gap-3 no-print">
                 <div class="flex items-center gap-3 flex-wrap w-full md:w-auto">
-                    <input type="text" id="invSearch" data-i18n-placeholder="searchAssetPlaceholder" placeholder="🔍 Search Asset ID, Name..." onkeyup="renderInventory()" class="glass-panel bg-transparent px-4 py-2 rounded-xl focus:outline-none focus:border-yellow-500 w-56">
-                    <select id="invStatusFilter" onchange="renderInventory()" class="lux-input bg-[#1e293b] border border-white/10 rounded-xl px-3 py-2 text-sm"></select>
-                    <select id="invLocationFilter" onchange="renderInventory()" class="lux-input bg-[#1e293b] border border-white/10 rounded-xl px-3 py-2 text-sm"></select>
+                    <input type="text" id="invSearch" data-i18n-placeholder="searchAssetPlaceholder" placeholder="🔍 Search Asset ID, Name..." oninput="renderInventory()" class="glass-panel bg-transparent px-4 py-2 rounded-xl focus:outline-none focus:border-yellow-500 w-56">
+                    <select id="invStatusFilter" onchange="renderInventory()" class="lux-input inventory-filter-select bg-[#1e293b] border border-white/10 rounded-xl px-3 py-2 text-sm"><option value="">All Status</option></select>
+                    <button onclick="toggleAdvancedSearch()" class="glass-panel px-4 py-2 rounded-xl font-semibold hover:border-yellow-500 transition" data-i18n="advancedSearch">⚙️ Advanced Search</button>
+                    <button onclick="openCategoryManager()" class="glass-panel px-4 py-2 rounded-xl font-semibold hover:border-yellow-500 transition" data-i18n="manageCategories">🏷️ Categories</button>
+                </div>
+            </div>
+
+            <div id="advancedSearchPanel" class="glass-panel rounded-2xl p-4 no-print">
+                <div class="flex items-center justify-between mb-3">
+                    <div><h3 class="font-bold" data-i18n="advancedSearch">⚙️ Advanced Search</h3><p class="text-xs text-gray-500" data-i18n="advancedSearchHint">Combine multiple filters to find equipment quickly.</p></div>
+                    <span id="searchResultCount" class="category-chip">0</span>
+                </div>
+                <div class="search-filter-grid">
+                    <div><label data-i18n="assetIdLabel">Asset ID</label><input id="advAssetId" class="lux-input w-full rounded-xl p-2 text-sm" oninput="renderInventory()"></div>
+                    <div><label data-i18n="nameLabel">Name</label><input id="advName" class="lux-input w-full rounded-xl p-2 text-sm" oninput="renderInventory()"></div>
+                    <div><label data-i18n="categoryLabel">Category</label><select id="advCategory" class="lux-input w-full rounded-xl p-2 text-sm" onchange="renderInventory()"></select></div>
+                    <div><label data-i18n="statusLabel">Status</label><select id="advStatus" class="lux-input w-full rounded-xl p-2 text-sm" onchange="renderInventory()"></select></div>
+                    <div><label data-i18n="locationLabel">Storage Location</label><input id="advLocation" class="lux-input w-full rounded-xl p-2 text-sm" oninput="renderInventory()"></div>
+                    <div><label data-i18n="borrowingStatus">Borrowing Status</label><select id="advLoanStatus" class="lux-input w-full rounded-xl p-2 text-sm" onchange="renderInventory()"><option value="" data-i18n="allLoan">All</option><option value="available" data-i18n="available">Available</option><option value="active" data-i18n="active">Active</option><option value="overdue" data-i18n="overdue">Overdue</option></select></div>
+                    <div><label data-i18n="borrowerSearch">Borrower</label><input id="advBorrower" class="lux-input w-full rounded-xl p-2 text-sm" oninput="renderInventory()"></div>
+                    <div><label data-i18n="priceMin">Min Price (ETB)</label><input id="advPriceMin" type="number" min="0" class="lux-input w-full rounded-xl p-2 text-sm" oninput="renderInventory()"></div>
+                    <div><label data-i18n="priceMax">Max Price (ETB)</label><input id="advPriceMax" type="number" min="0" class="lux-input w-full rounded-xl p-2 text-sm" oninput="renderInventory()"></div>
+                    <div><label data-i18n="purchaseFrom">Purchase From (EC)</label><input id="advDateFrom" type="date" class="lux-input w-full rounded-xl p-2 text-sm" onchange="renderInventory()"></div>
+                    <div><label data-i18n="purchaseTo">Purchase To (EC)</label><input id="advDateTo" type="date" class="lux-input w-full rounded-xl p-2 text-sm" onchange="renderInventory()"></div>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                    <button onclick="clearAdvancedSearch()" class="px-4 py-2 glass-panel rounded-xl font-semibold" data-i18n="clearAll">Clear All</button>
+                    <button onclick="toggleAdvancedSearch()" class="px-4 py-2 bg-yellow-500 text-black rounded-xl font-bold" data-i18n="close">Close</button>
                 </div>
             </div>
 
@@ -519,6 +589,22 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
         </div>
     </main>
 
+    <!-- CATEGORY MANAGER MODAL -->
+    <div id="categoryModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto no-print">
+      <div class="modal-panel luxury-modal w-11/12 max-w-2xl rounded-2xl relative overflow-hidden my-8 max-h-[90vh] flex flex-col">
+        <div class="p-5 border-b border-yellow-500/15 flex justify-between items-center"><h2 class="text-lg font-bold" data-i18n="manageCategories">🏷️ Manage Categories</h2><button onclick="closeModal('categoryModal')" class="text-gray-400 text-2xl">&times;</button></div>
+        <div class="p-5 overflow-y-auto">
+          <form onsubmit="return saveCategory(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
+            <input type="hidden" id="catEditId"><input id="catNameEn" class="lux-input rounded-xl p-2" data-i18n-placeholder="categoryEnglish" placeholder="English name" required>
+            <input id="catNameAm" class="lux-input rounded-xl p-2" data-i18n-placeholder="categoryAmharic" placeholder="Amharic name" required>
+            <input id="catIcon" class="lux-input rounded-xl p-2" placeholder="📦" value="📦" maxlength="4">
+            <button class="bg-yellow-500 text-black rounded-xl font-bold" data-i18n="saveCategory">Save Category</button>
+          </form>
+          <div id="categoryManagerList" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- REGISTER ASSET MODAL -->
     <div id="assetModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto no-print">
         <div class="modal-panel luxury-modal w-11/12 max-w-xl rounded-2xl relative overflow-hidden my-8 max-h-[90vh] flex flex-col">
@@ -538,8 +624,8 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
                         <input type="text" id="aName" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none" required>
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1 amharic" data-i18n="typeLabel">አይነት (Type)</label>
-                        <input type="text" id="aType" placeholder="ለምሳሌ፦ ማይክሮፎን" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                        <label class="block text-xs text-gray-400 mb-1" data-i18n="categoryLabel">Category</label>
+                        <select id="aCategory" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none" required></select>
                     </div>
                     <div>
                         <label class="block text-xs text-gray-400 mb-1 amharic" data-i18n="priceLabel">የመግዣ ዋጋ (Purchase Price - ETB)</label>
@@ -1014,6 +1100,26 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
         const MAINT_DUE_SOON_DAYS = 7;
 
         let assets = [], loans = [], maintenanceLogs = [], assetCounter = 0;
+        let categories = [];
+        let categoryAnalyticsChartInstance = null, borrowingAnalyticsChartInstance = null;
+        const DEFAULT_CATEGORIES = [
+          ['teaching','Teaching & Learning Materials','የማስተማሪያና ትምህርት እቃዎች','📚'],['books','Books & Bibles','መጽሐፍትና መጽሐፍ ቅዱስ','📖'],['furniture','Classroom Furniture','የክፍል ዕቃዎች','🪑'],['chairs','Chairs & Tables','ወንበርና ጠረጴዛ','🪑'],['audio','Audio & Sound Equipment','የድምፅ መሳሪያዎች','🎤'],['projector','Projectors & Displays','ፕሮጀክተርና ማሳያዎች','📽️'],['it','Computers & IT Equipment','ኮምፒውተርና የIT መሳሪያዎች','💻'],['camera','Cameras & Photography','ካሜራና ፎቶግራፍ መሳሪያዎች','📷'],['music','Musical Instruments','የሙዚቃ መሳሪያዎች','🎵'],['sports','Sports & Recreation','ስፖርትና መዝናኛ','⚽'],['arts','Arts & Crafts','የስነ-ጥበብና የእጅ ስራ ዕቃዎች','🎨'],['office','Office & Administration','የቢሮና አስተዳደር ዕቃዎች','🗂️'],['cleaning','Cleaning & Safety','የጽዳትና ደህንነት ዕቃዎች','🧹'],['events','Events & Programs','የፕሮግራምና ዝግጅት ዕቃዎች','🎪'],['other','Other','ሌሎች','📦']
+        ].map(([id,nameEn,nameAm,icon])=>({id,nameEn,nameAm,icon,active:true}));
+        function initCategories(){ try{ const saved=JSON.parse(localStorage.getItem('mh_equipment_categories')||'null'); categories=Array.isArray(saved)&&saved.length?saved:DEFAULT_CATEGORIES.map(x=>({...x})); localStorage.setItem('mh_equipment_categories',JSON.stringify(categories)); }catch(e){categories=DEFAULT_CATEGORIES.map(x=>({...x}));} }
+        function saveCategoriesLocal(){ localStorage.setItem('mh_equipment_categories',JSON.stringify(categories)); }
+        function categoryName(id){ const c=categories.find(x=>x.id===id); return c ? `${c.icon} ${currentLang==='am'?c.nameAm:c.nameEn}` : (currentLang==='am'?'ሌሎች':'Other'); }
+        function populateCategorySelects(){
+          const activeCategories=categories.filter(c=>c.active);
+          const opts=activeCategories.map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(currentLang==='am'?c.nameAm:c.nameEn)}</option>`).join('');
+          ['aCategory','advCategory'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const cur=el.value;const first=id==='aCategory'?'':`<option value="">${escapeHtml(t('allCategories'))}</option>`;el.innerHTML=first+opts; if(cur && [...el.options].some(o=>o.value===cur)) el.value=cur;});
+          const st=document.getElementById('advStatus'); if(st){const cur=st.value;st.innerHTML=`<option value="">${t('allStatus')}</option><option value="functional">${t('statusFunctionalOpt')}</option><option value="maintenance">${t('statusMaintenanceOpt')}</option><option value="retired">${t('statusRetiredOpt')}</option>`;st.value=cur;}
+        }
+        function openCategoryManager(){renderCategoryManager();openModalEl('categoryModal');}
+        function renderCategoryManager(){const box=document.getElementById('categoryManagerList');if(!box)return;box.innerHTML=categories.map(c=>`<div class="flex items-center justify-between gap-3 p-3 rounded-xl border border-white/10 bg-white/5"><div class="flex items-center gap-3"><span class="text-xl">${escapeHtml(c.icon)}</span><div><b>${escapeHtml(c.nameEn)}</b><div class="text-xs text-gray-500 amharic">${escapeHtml(c.nameAm)}</div></div></div><div class="flex gap-2"><button onclick="editCategory('${c.id}')" class="icon-btn bg-blue-500/10 text-blue-400">✏️</button><button onclick="toggleCategory('${c.id}')" class="px-3 py-1 rounded-lg text-xs ${c.active?'bg-green-500/10 text-green-400':'bg-gray-500/10 text-gray-400'}">${c.active?t('active'):t('inactive')}</button></div></div>`).join('');}
+        function editCategory(id){const c=categories.find(x=>x.id===id);if(!c)return;document.getElementById('catEditId').value=c.id;document.getElementById('catNameEn').value=c.nameEn;document.getElementById('catNameAm').value=c.nameAm;document.getElementById('catIcon').value=c.icon;}
+        function toggleCategory(id){const c=categories.find(x=>x.id===id);if(c){c.active=!c.active;saveCategoriesLocal();populateCategorySelects();renderCategoryManager();renderInventory();renderDashboard();}}
+        function saveCategory(e){e.preventDefault();const en=document.getElementById('catNameEn').value.trim(),am=document.getElementById('catNameAm').value.trim(),icon=document.getElementById('catIcon').value.trim()||'📦',edit=document.getElementById('catEditId').value;if(!en||!am)return false;if(edit){const c=categories.find(x=>x.id===edit);Object.assign(c,{nameEn:en,nameAm:am,icon});}else{const id='custom_'+Date.now().toString(36);categories.push({id,nameEn:en,nameAm:am,icon,active:true});}saveCategoriesLocal();document.getElementById('catEditId').value='';document.getElementById('catNameEn').value='';document.getElementById('catNameAm').value='';document.getElementById('catIcon').value='📦';populateCategorySelects();renderCategoryManager();renderDashboard();return false;}
+
 
         function cryptoId() { return 'X' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
         function nextAssetId() { assetCounter++; return `መሕ/ንብ/${String(assetCounter).padStart(3, '0')}`; }
@@ -1021,8 +1127,11 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
         // Fetch Data from Supabase
         async function loadData() {
             try {
+                initCategories();
                 const { data: aData } = await window.supabase.from('assets').select('*');
                 if (aData) assets = aData;
+                const categoryMap=JSON.parse(localStorage.getItem('mh_equipment_asset_categories')||'{}');
+                assets=assets.map(a=>({...a,category:a.category||categoryMap[a.id]||'other'}));
                 
                 const { data: lData } = await window.supabase.from('loans').select('*');
                 if (lData) loans = lData;
@@ -1179,25 +1288,26 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
         }
 
         function populateLocationFilter() {
-            const sel = document.getElementById('invLocationFilter');
-            const cur = sel.value;
-            const locations = [...new Set(assets.map(a => a.location).filter(Boolean))];
-            sel.innerHTML = `<option value="">${t('allLocations')}</option>` + locations.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
-            sel.value = cur;
+            // Standalone inventory Location filter removed; Advanced Search handles location.
+            return;
         }
 
         function renderInventory() {
             renderDashboard();
             populateLocationFilter();
-            const search = document.getElementById('invSearch').value || '';
+            populateCategorySelects();
+            const search = (document.getElementById('invSearch').value || '').trim().toLowerCase();
             const statusFilter = document.getElementById('invStatusFilter').value;
-            const locationFilter = document.getElementById('invLocationFilter').value;
-
-            const rows = assets.filter(a =>
-                (assetIdMatches(a.assetId, search) || a.name.toLowerCase().includes(search.toLowerCase())) &&
-                (!statusFilter || a.status === statusFilter) &&
-                (!locationFilter || a.location === locationFilter)
-            );
+            const categoryFilter = '';
+            const locationFilter = '';
+            const val=id=>document.getElementById(id)?.value||'';
+            const advId=val('advAssetId').trim().toLowerCase(), advName=val('advName').trim().toLowerCase(), advType=val('advType').trim().toLowerCase(), advCat=val('advCategory'), advStatus=val('advStatus'), advLoc=val('advLocation').trim().toLowerCase(), advLoan=val('advLoanStatus'), advBorrower=val('advBorrower').trim().toLowerCase(), pmin=Number(val('advPriceMin')), pmax=Number(val('advPriceMax')), dfrom=val('advDateFrom'), dto=val('advDateTo');
+            const rows = assets.filter(a=>{
+              const loan=activeLoanForAsset(a.assetId), loanStatus=loan?getLoanStatus(loan):'available';
+              const hay=`${a.assetId||''} ${a.name||''} ${a.type||''} ${categoryName(a.category)} ${a.location||''}`.toLowerCase();
+              return (!search||hay.includes(search)||assetIdMatches(a.assetId,search)) && (!statusFilter||a.status===statusFilter) && (!categoryFilter||a.category===categoryFilter) && (!locationFilter||a.location===locationFilter) && (!advId||String(a.assetId||'').toLowerCase().includes(advId)) && (!advName||String(a.name||'').toLowerCase().includes(advName)) && (!advType||String(a.type||'').toLowerCase().includes(advType)) && (!advCat||a.category===advCat) && (!advStatus||a.status===advStatus) && (!advLoc||String(a.location||'').toLowerCase().includes(advLoc)) && (!advLoan||loanStatus===advLoan) && (!advBorrower||String(loan?.borrower||'').toLowerCase().includes(advBorrower)) && (!pmin||Number(a.price||0)>=pmin) && (!pmax||Number(a.price||0)<=pmax) && (!dfrom||!a.purchaseDate||a.purchaseDate>=dfrom) && (!dto||!a.purchaseDate||a.purchaseDate<=dto);
+            });
+            const count=document.getElementById('searchResultCount');if(count)count.textContent=`${rows.length} ${t('assetsFound')}`;
 
             const tbody = document.getElementById('inventoryTableBody');
             document.getElementById('inventoryEmptyMsg').classList.toggle('hidden', rows.length > 0);
@@ -1212,6 +1322,7 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
                     <td class="p-4"><svg id="bc-inv-${a.id}" class="bg-white p-1 rounded max-w-[120px] h-[32px]"></svg></td>
                     <td class="p-4"><span class="id-chip text-yellow-400 font-mono text-xs px-2 py-0.5 rounded-full">${escapeHtml(a.assetId)}</span></td>
                     <td class="p-4"><p class="font-semibold amharic">${escapeHtml(a.name)}</p><p class="text-xs text-gray-500">${escapeHtml(a.type || '-')}</p></td>
+                    <td class="p-4"><span class="category-chip">${escapeHtml(categoryName(a.category))}</span></td>
                     <td class="p-4 amharic text-gray-300">${loan ? escapeHtml(loan.borrower) : `<span class="text-gray-500">${t('inStorage')}</span>`}</td>
                     <td class="p-4 text-gray-400 amharic">${escapeHtml(a.location || '-')}</td>
                     <td class="p-4 text-center">${statusPill(a.status)}</td>
@@ -1242,6 +1353,7 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
                 </div>
                 <div class="flex justify-center py-2 bg-white rounded-xl p-2 my-2 overflow-x-auto"><svg id="bc-view-${a.id}"></svg></div>
                 <p class="text-xs text-gray-400 text-center font-mono mb-2">${escapeHtml(getBarcodeDataString(a))}</p>
+                <p><b class="text-gray-400 amharic">${t('categoryLabel')}</b> ${escapeHtml(categoryName(a.category))}</p>
                 <p><b class="text-gray-400 amharic">${t('assetNameLabelView')}</b> ${escapeHtml(a.name)} <span class="text-gray-500">(${escapeHtml(a.type || '-')})</span></p>
                 <p><b class="text-gray-400 amharic">${t('purchasePriceView')}</b> ${a.price ? Number(a.price).toLocaleString() + ' ETB' : '-'}</p>
                 <p><b class="text-gray-400 amharic">${t('purchaseDateView')}</b> ${ecDisplay(a.purchaseDate)} EC</p>
@@ -1285,7 +1397,8 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
                 const a = assets.find(x => x.id === editId);
                 document.getElementById('aAssetId').value = a.assetId;
                 document.getElementById('aName').value = a.name;
-                document.getElementById('aType').value = a.type || '';
+                                populateCategorySelects();
+                document.getElementById('aCategory').value = a.category || 'other';
                 document.getElementById('aPrice').value = a.price || '';
                 initEcField('aPurchaseDateSelects', 'aPurchaseDate', a.purchaseDate);
                 document.getElementById('aStatus').value = a.status;
@@ -1293,7 +1406,8 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
             } else {
                 document.getElementById('aAssetId').value = '(auto-generated on save)';
                 document.getElementById('aName').value = '';
-                document.getElementById('aType').value = '';
+                                populateCategorySelects();
+                document.getElementById('aCategory').value = 'other';
                 document.getElementById('aPrice').value = '';
                 initEcField('aPurchaseDateSelects', 'aPurchaseDate', todayIso());
                 document.getElementById('aStatus').value = 'functional';
@@ -1308,28 +1422,58 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
             if (!name) { showToast(t('errNameRequired'), 'error'); return; }
             const payload = {
                 name,
-                type: document.getElementById('aType').value.trim(),
+                type: editId ? ((assets.find(x => x.id === editId)?.type) || '') : '',
                 price: Number(document.getElementById('aPrice').value) || 0,
                 purchaseDate: document.getElementById('aPurchaseDate').value,
                 status: document.getElementById('aStatus').value,
-                location: document.getElementById('aLocation').value.trim()
+                location: document.getElementById('aLocation').value.trim(),
+                category: document.getElementById('aCategory').value || 'other'
             };
             
             if (editId) {
                 const idx = assets.findIndex(x => x.id === editId);
                 assets[idx] = { ...assets[idx], ...payload };
-                await window.supabase.from('assets').update(payload).eq('id', editId);
+                const dbPayload={...payload}; delete dbPayload.category;
+                await window.supabase.from('assets').update(dbPayload).eq('id', editId);
+                try{ const r=await window.supabase.from('assets').update({category:payload.category}).eq('id',editId); if(r.error) console.warn('Category column not available:',r.error.message); }catch(e){}
+                const map=JSON.parse(localStorage.getItem('mh_equipment_asset_categories')||'{}');map[editId]=payload.category;localStorage.setItem('mh_equipment_asset_categories',JSON.stringify(map));
                 showToast(t('toastAssetUpdated'), 'success');
             } else {
-                const newAsset = { id: cryptoId(), assetId: nextAssetId(), ...payload };
+                const newAsset = { id: cryptoId(), assetId: nextAssetId(), name:payload.name, type:payload.type, price:payload.price, purchaseDate:payload.purchaseDate, status:payload.status, location:payload.location, category:payload.category };
+                // Add locally first so the newly registered asset is immediately visible.
                 assets.push(newAsset);
-                await window.supabase.from('assets').insert([newAsset]);
+
+                // Keep the database insert compatible with older assets tables that may not
+                // have a category column yet. Category is stored separately when possible.
+                const dbAsset = { ...newAsset };
+                delete dbAsset.category;
+                const { error: insertError } = await window.supabase.from('assets').insert([dbAsset]);
+                if (insertError) {
+                    console.error('Asset registration failed:', insertError);
+                    assets = assets.filter(x => x.id !== newAsset.id);
+                    showToast(insertError.message || t('errSaveFailed'), 'error');
+                    return;
+                }
+                try {
+                    const { error: categoryError } = await window.supabase.from('assets').update({category:payload.category}).eq('id',newAsset.id);
+                    if (categoryError) console.warn('Category column not available:', categoryError.message);
+                } catch(e) {}
+                const map=JSON.parse(localStorage.getItem('mh_equipment_asset_categories')||'{}');
+                map[newAsset.id]=payload.category;
+                localStorage.setItem('mh_equipment_asset_categories',JSON.stringify(map));
                 showToast(t('toastAssetRegistered'), 'success');
             }
             
             closeModal('assetModal');
             renderInventory();
         }
+
+        function toggleAdvancedSearch(){document.getElementById('advancedSearchPanel')?.classList.toggle('open');}
+        function clearAdvancedSearch(){['invSearch','advAssetId','advName','advType','advLocation','advBorrower','advPriceMin','advPriceMax','advDateFrom','advDateTo'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['invStatusFilter','advCategory','advStatus','advLoanStatus'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderInventory();}
+        function renderEquipmentAnalytics() { return; }
+
+        function filterByCategory(id){const e=document.getElementById('advCategory');if(e)e.value=id;switchTab('inventory');renderInventory();}
+        function filterByAsset(id){document.getElementById('invSearch').value=id;switchTab('inventory');renderInventory();}
 
         function renderLending() {
             renderDashboard();
@@ -1682,18 +1826,17 @@ tbody tr:hover { background:color-mix(in srgb, var(--surface-soft) 78%, transpar
         }
 
 
+        // New bilingual labels for equipment upgrades
+        Object.assign(T.en,{advancedSearch:'⚙️ Advanced Search',advancedSearchHint:'Combine multiple filters to find equipment quickly.',manageCategories:'🏷️ Manage Categories',categoryLabel:'Category',allCategories:'All Categories',dashboardAnalytics:'📊 Equipment Analytics',dashboardAnalyticsHint:'A live overview of categories, borrowing and maintenance.',activeLoansMetric:'Active Loans',overdueLoansMetric:'Overdue Loans',maintenanceCostMetric:'Maintenance Cost',categoryDistribution:'🏷️ Category Distribution',borrowingTrend:'📈 Borrowing Trend',categorySummary:'Category Summary',mostBorrowed:'🏆 Most Borrowed Equipment',borrowed:'Borrowed',assetsFound:'assets found',borrowingStatus:'Borrowing Status',available:'Available',borrowerSearch:'Borrower',priceMin:'Min Price (ETB)',priceMax:'Max Price (ETB)',purchaseFrom:'Purchase From (EC)',purchaseTo:'Purchase To (EC)',clearAll:'Clear All',close:'Close',categoryEnglish:'English name',categoryAmharic:'Amharic name',saveCategory:'Save Category',inactive:'Inactive'});
+        Object.assign(T.am,{advancedSearch:'⚙️ የላቀ ፍለጋ',advancedSearchHint:'ብዙ ማጣሪያዎችን በማጣመር ንብረትን በፍጥነት ይፈልጉ።',manageCategories:'🏷️ የንብረት ምድቦች',categoryLabel:'ምድብ',allCategories:'ሁሉም ምድቦች',dashboardAnalytics:'📊 የንብረት ትንተና',dashboardAnalyticsHint:'የምድብ፣ የብድርና የጥገና እንቅስቃሴ የቀጥታ ማጠቃለያ።',activeLoansMetric:'ንቁ ብድሮች',overdueLoansMetric:'ጊዜው ያለፈ ብድር',maintenanceCostMetric:'የጥገና ወጪ',categoryDistribution:'🏷️ የምድብ ስርጭት',borrowingTrend:'📈 የብድር እንቅስቃሴ',categorySummary:'የምድብ ማጠቃለያ',mostBorrowed:'🏆 በብዛት የተዋሱ ንብረቶች',borrowed:'ተበድሯል',assetsFound:'ንብረት ተገኝቷል',borrowingStatus:'የብድር ሁኔታ',available:'ይገኛል',borrowerSearch:'ተበዳሪ',priceMin:'ዝቅተኛ ዋጋ (ብር)',priceMax:'ከፍተኛ ዋጋ (ብር)',purchaseFrom:'የመግዣ ቀን ከ (EC)',purchaseTo:'የመግዣ ቀን እስከ (EC)',clearAll:'ሁሉንም አጽዳ',close:'ዝጋ',categoryEnglish:'የእንግሊዝኛ ስም',categoryAmharic:'የአማርኛ ስም',saveCategory:'ምድብ አስቀምጥ',inactive:'እንቅስቃሴ የሌለው'});
+
         // ===================== THEME SYSTEM =====================
         function applyTheme(theme) {
             const root = document.documentElement;
             root.setAttribute('data-theme', theme);
             localStorage.setItem('mh_equipment_theme', theme);
-            const btn = document.getElementById('themeToggle');
-            if (btn) {
-                const dark = theme === 'dark';
-                btn.textContent = dark ? '☀' : '☾';
-                btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-                btn.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
-            }
+            const btn = document.getElementById('themeToggleBtn');
+            if (btn) btn.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
             if (typeof currentTab !== 'undefined' && currentTab === 'reports' && typeof renderReports === 'function') {
                 setTimeout(() => renderReports(), 0);
             }
