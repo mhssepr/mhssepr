@@ -196,19 +196,62 @@
     /* Live on-screen preview: exact same markup, just scaled down */
     #previewViewport { overflow: hidden; border-radius: 12px; box-shadow: 0 20px 50px -15px rgba(0,0,0,.5); background:#ffffff; }
     #previewScaler { transform-origin: top left; }
-
-    /* Hidden real print area (only visible to the print engine) */
+    /* Hidden real print area. The print engine receives the SAME card markup as the live preview. */
     #realPrintArea { display: none; }
+
+    /* PRINT PARITY: only establish the physical A4 canvas in print mode.
+       The card itself is never rebuilt or restyled for printing. */
     @media print {
-        @page { size: A4 landscape; margin: 0; }
-        html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
-        /* display:none fully removes the rest of the app from the page layout, so its
-           height can't add a stray blank page during pagination — visibility:hidden
-           alone would keep it in the flow (just invisible) and was doing exactly that. */
+        @page { size: A4 landscape; margin: 0 !important; }
+        html, body {
+            width: 297mm !important; min-width: 297mm !important; height: auto !important;
+            margin: 0 !important; padding: 0 !important; background: #fff !important;
+            overflow: visible !important;
+            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+        }
         body.printing-bulk-id-cards #root { display: none !important; }
-        body.printing-bulk-id-cards #realPrintArea { display: block !important; margin: 0; padding: 0; }
-        body.printing-bulk-id-cards .print-page { page-break-after: always; break-after: page; }
-        body.printing-bulk-id-cards .print-page:last-child { page-break-after: auto; break-after: auto; }
+        body.printing-bulk-id-cards #realPrintArea {
+            display: block !important; width: 297mm !important; margin: 0 !important; padding: 0 !important;
+            background: #fff !important;
+        }
+        body.printing-bulk-id-cards .print-page {
+            width: 297mm !important; height: 210mm !important;
+            min-width: 297mm !important; min-height: 210mm !important;
+            max-width: 297mm !important; max-height: 210mm !important;
+            margin: 0 !important; padding: 0 !important;
+            display: flex !important; align-items: center !important; justify-content: center !important;
+            box-sizing: border-box !important; position: relative !important; overflow: hidden !important;
+            background: #fff !important; page-break-after: always !important; break-after: page !important;
+            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+        }
+        body.printing-bulk-id-cards .print-page:last-child { page-break-after: auto !important; break-after: auto !important; }
+        body.printing-bulk-id-cards .print-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 72mm) !important;
+            grid-template-rows: repeat(2, 91.2mm) !important;
+            column-gap: 10mm !important; row-gap: 10mm !important;
+            width: 236mm !important; height: 192.4mm !important;
+            flex: 0 0 auto !important; box-sizing: border-box !important;
+            transform: translate(var(--print-offset-x, 0mm), var(--print-offset-y, 0mm)) !important;
+        }
+        body.printing-bulk-id-cards .card-slot {
+            width: 72mm !important; height: 91.2mm !important;
+            min-width: 72mm !important; min-height: 91.2mm !important;
+            max-width: 72mm !important; max-height: 91.2mm !important;
+            position: relative !important; overflow: hidden !important; box-sizing: border-box !important;
+        }
+        body.printing-bulk-id-cards .card-slot .idcard {
+            width: 300px !important; height: 380px !important;
+            min-width: 300px !important; min-height: 380px !important;
+            max-width: 300px !important; max-height: 380px !important;
+            margin: 0 !important; box-shadow: none !important;
+            transform: scale(calc(0.9070866141732283 * var(--print-card-scale, 1))) !important;
+            transform-origin: top left !important;
+            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+        }
+        body.printing-bulk-id-cards img, body.printing-bulk-id-cards svg {
+            break-inside: avoid !important; page-break-inside: avoid !important;
+        }
     }
 
     .id-filter-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px; }
@@ -890,6 +933,22 @@
     // This is the single source of truth for front, back, photo,
     // barcode, stamp, logo, Amharic/English text, borders, etc.
     // ==========================================
+    // Automatically reduce the student-name font when the name is long.
+    // This keeps the name inside its row without changing the card layout.
+    function getStudentNameStyle(name) {
+        const text = String(name || '').trim();
+        const len = [...text].length;
+        let size = 13.5;
+        if (len > 42) size = 8.2;
+        else if (len > 36) size = 8.8;
+        else if (len > 30) size = 9.5;
+        else if (len > 26) size = 10.2;
+        else if (len > 22) size = 10.9;
+        else if (len > 19) size = 11.6;
+        else if (len > 16) size = 12.4;
+        return `font-size:${size}px;color:var(--idc-blue);white-space:nowrap;overflow:visible;line-height:1.15;letter-spacing:-0.01em;`;
+    }
+
     function buildIdCardFrontHTML(s, uid) {
         return `
             <div class="idcard idcard-front">${cardPrintMode === 'replacement' ? '<div class="replacement-ribbon">REPLACEMENT</div>' : ''}
@@ -921,7 +980,7 @@
                     <div class="idcard-col-right idcard-amh">
                         <div class="idcard-row">
                             <span class="idcard-icon">👤</span>
-                            <div class="idcard-row-text"><span class="idcard-row-label">የተማሪው ስም / Name</span><span class="idcard-value" style="font-size: 13.5px; color: var(--idc-blue);">${escapeHtml(s.name)}</span></div>
+                            <div class="idcard-row-text"><span class="idcard-row-label">የተማሪው ስም / Name</span><span class="idcard-value" style="${getStudentNameStyle(s.name)}">${escapeHtml(s.name)}</span></div>
                         </div>
                         <div class="idcard-row">
                             <span class="idcard-icon">⚧</span>
@@ -1884,7 +1943,7 @@
         document.documentElement.style.setProperty('--print-offset-y', `${y}mm`);
         // The fixed 72mm/300px ratio is multiplied by the user scale.
         document.querySelectorAll('.card-slot .idcard').forEach(el => {
-            el.style.transform = `scale(${0.9070866142 * scale})`;
+            el.style.transform = `scale(${0.9070866141732283 * scale})`;
         });
     }
     function onPrintLayoutSettingChanged() {
