@@ -103,15 +103,22 @@
         .idcard-photo-security-line { position:absolute; left:4px; right:4px; bottom:4px; z-index:4; pointer-events:none; white-space:nowrap; overflow:hidden; text-align:center; font-family:'Montserrat',sans-serif; font-size:4px; font-weight:700; letter-spacing:.12em; color:#fff; opacity:.42; text-shadow:0 1px 2px rgba(0,0,0,.9); }
         .idcard-hologram { position:absolute; right:4px; top:4px; z-index:4; width:18px; height:18px; border-radius:50%; pointer-events:none; background:conic-gradient(from 20deg,rgba(255,255,255,.15),rgba(201,162,39,.42),rgba(56,189,248,.25),rgba(255,255,255,.15)); border:1px solid rgba(255,255,255,.38); box-shadow:0 0 7px rgba(201,162,39,.28); opacity:.58; mix-blend-mode:screen; }
         .idcard-hologram::after { content:"MHSS"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:700 4px/1 'Montserrat',sans-serif; color:#fff; }
-        /* QR = card verification. Sits beside the emergency name/phone on the back. */
+        /* Emergency information block on the card back. */
         .idcard-back-emerg-wrap { display:flex; align-items:center; gap:8px; margin:0 16px; position:relative; z-index:1; }
         .idcard-back-emerg-wrap .idcard-back-rows { margin:0; flex:1; min-width:0; }
-        .idcard-qr { width:58px; height:58px; flex-shrink:0; background:#fff; padding:2px; border:1.5px solid var(--idc-gold); border-radius:6px; box-sizing:content-box; }
-        .idcard-qr svg { display:block; width:100%; height:100%; }
         .card-security-panel { border:1px solid var(--border); border-radius:14px; padding:12px; background:rgba(200,158,58,.055); }
         .card-security-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
         .card-history-modal { width:min(900px,100%); }
         .card-history-row { display:grid; grid-template-columns:120px 1fr 120px; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); font-size:11px; }
+        .replacement-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+        .replacement-kpi { border:1px solid var(--border); border-radius:12px; padding:10px; background:rgba(255,255,255,.035); }
+        .replacement-request-row { display:grid; grid-template-columns:1fr 100px 110px 190px; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:11px; }
+        .replacement-status { display:inline-flex; align-items:center; justify-content:center; padding:4px 8px; border-radius:999px; font-size:9px; font-weight:800; border:1px solid var(--border); }
+        .replacement-timeline { position:relative; margin:8px 0 0 8px; padding-left:20px; border-left:1px solid var(--border); }
+        .replacement-timeline-item { position:relative; padding:0 0 14px 8px; }
+        .replacement-timeline-item:before { content:""; position:absolute; width:8px; height:8px; border-radius:50%; left:-25px; top:4px; background:var(--idc-gold,#c9a227); box-shadow:0 0 0 3px rgba(201,162,39,.12); }
+        @media(max-width:760px){ .replacement-grid{grid-template-columns:repeat(2,minmax(0,1fr));} .replacement-request-row{grid-template-columns:1fr;gap:5px;} }
+
         @media(max-width:600px){ .card-history-row{grid-template-columns:1fr;gap:3px;} .idcard-card-number{font-size:6px;} }
 
     .idcard-mini-box { position: relative; width: 100%; margin-top: 8px; border: 1.5px solid var(--idc-gold); border-radius: 10px; padding: 8px 6px 5px; text-align: center; background: #ffffff; }
@@ -131,7 +138,10 @@
     .idcard-back-content { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 6px 0; min-height: 0; position: relative; }
     .idcard-back-emergency-banner { margin: 0 14px; background: var(--idc-blue); border-top: 2px solid var(--idc-gold); border-radius: 10px; padding: 7px; text-align: center; position: relative; z-index: 1; }
     .idcard-back-emergency-banner h5 { margin: 0; font-family: 'Montserrat', serif; font-size: 9px; letter-spacing: .05em; color: var(--idc-white); }
-    .idcard-back-rows { margin: 0 16px; position: relative; z-index: 1; }
+    .idcard-back-emergency-area { margin: 0 16px; display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; }
+    .idcard-back-rows { flex: 1; min-width: 0; position: relative; z-index: 1; }
+    .idcard-qr-wrap { width: 58px; height: 58px; flex: 0 0 58px; display: flex; align-items: center; justify-content: center; padding: 2px; background: #fff; border: 1px solid rgba(18,58,122,0.18); border-radius: 7px; }
+    .idcard-qr-wrap svg { width: 52px; height: 52px; display: block; }
     .idcard-back-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
     .idcard-back-row .idcard-icon { background: var(--idc-white); border: 1.5px solid var(--idc-gold); color: var(--idc-blue); }
     .idcard-back-row .idcard-value { display: block; border-bottom: 1px dotted rgba(18,58,122,0.3); padding-bottom: 3px; font-weight: 600; }
@@ -199,9 +209,6 @@
         body.printing-bulk-id-cards #realPrintArea { display: block !important; margin: 0; padding: 0; }
         body.printing-bulk-id-cards .print-page { page-break-after: always; break-after: page; }
         body.printing-bulk-id-cards .print-page:last-child { page-break-after: auto; break-after: auto; }
-        body.printing-test-page #root, body.printing-test-page #individualPreviewModal, body.printing-test-page #testPrintModal { display:none !important; }
-        body.printing-test-page #realPrintArea { display:block !important; }
-        body.printing-test-page .test-page-preview { page-break-after:auto; break-after:auto; }
     }
 
     .id-filter-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px; }
@@ -253,11 +260,6 @@
     .individual-preview-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; padding:18px; }
     .individual-card-wrap { min-width:0; }
     @media(max-width:800px){ .individual-preview-grid{grid-template-columns:1fr;} }
-    .test-page-preview { width:297mm; height:210mm; background:#fff; color:#111; padding:12mm; box-sizing:border-box; font-family:Arial,sans-serif; }
-    .test-grid { display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(2,1fr); gap:8mm; height:150mm; margin-top:10mm; }
-    .test-cell { border:1px solid #111; display:flex; align-items:center; justify-content:center; flex-direction:column; position:relative; }
-    .test-cell .cross{font-size:24px; font-weight:700;}
-    .test-cell .mm{font-size:11px; margin-top:6px;}
 </style>
 </head>
 <body class="min-h-screen">
@@ -265,6 +267,9 @@
 <div id="root" class="no-print">
     <!-- HEADER -->
     <header class="glass-panel w-full px-6 py-5 md:px-10 md:py-6 flex flex-wrap items-center justify-between gap-4 border-b sticky top-0 z-30">
+        <div class="absolute right-4 top-3 md:right-8 md:top-4 z-40">
+            <button id="languageToggleBtn" type="button" onclick="togglePageLanguage()" class="feature-btn px-3 py-2 rounded-xl text-xs font-bold" title="Language">🌐 <span id="languageToggleLabel">አማ</span></button>
+        </div>
         <div class="min-w-0">
             <div class="flex items-center gap-3">
                 <a href="dashboard.html" class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition flex items-center gap-1 text-sm font-semibold" style="color:var(--text-main)">
@@ -289,17 +294,17 @@
         <section class="flex flex-col gap-5 min-w-0">
             <div class="glass-panel rounded-2xl p-4">
                 <div class="id-filter-card mb-3">
-                    <label class="id-filter-label" for="groupSelect">Group / Division</label>
+                    <label class="id-filter-label" for="groupSelect" data-i18n="groupDivision">Group / Division</label>
                     <select id="groupSelect" class="id-filter-select" onchange="handleGroupChange()">
-                        <option value="">All Groups / ሁሉም ምድቦች</option>
+                        <option value="" data-i18n="allGroups">All Groups / ሁሉም ምድቦች</option>
                     </select>
                     <div class="mt-3">
-                        <label class="id-filter-label" for="classSelect">Class / Grade</label>
+                        <label class="id-filter-label" for="classSelect" data-i18n="classGrade">Class / Grade</label>
                         <select id="classSelect" class="id-filter-select" onchange="handleClassChange()">
-                            <option value="">Select a Class / Grade</option>
+                            <option value="" data-i18n="selectClass">Select a Class / Grade</option>
                         </select>
                     </div>
-                    <p class="id-filter-help">Classes and groups are loaded from the same <b>student_groups</b> and <b>student_classes</b> database used by Students Management.</p>
+                    <p class="id-filter-help" data-i18n="classHelp">Classes and groups are loaded from the same <b>student_groups</b> and <b>student_classes</b> database used by Students Management.</p>
                 </div>
                 <input type="text" id="searchInput" placeholder="Search name or ID..." data-i18n-ph="searchPlaceholder"
                        class="lux-input w-full px-4 py-2 rounded-xl text-sm mb-3">
@@ -309,21 +314,21 @@
                 </div>
                 <div class="text-xs font-semibold mb-2 flex items-center justify-between gap-2" style="color:var(--text-muted)">
                     <span><span id="selectedCount">0</span> <span data-i18n="selected">selected</span></span>
-                    <span id="missingPhotoSummary" class="photo-missing-badge hidden">0 missing photos</span>
+                    <span id="missingPhotoSummary" class="photo-missing-badge hidden">0 <span data-i18n="missingPhotos">missing photos</span></span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mb-3">
-                    <button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="setMissingPhotoFilter()">📸 Missing Photos</button>
-                    <button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="clearStudentFilter()">↻ Show All</button>
+                    <button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="setMissingPhotoFilter()" data-i18n="missingPhotosBtn">📸 Missing Photos</button>
+                    <button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="clearStudentFilter()" data-i18n="showAll">↻ Show All</button>
                 </div>
                 <div id="studentListWrap" class="max-h-[420px] overflow-y-auto flex flex-col gap-1 pr-1"></div>
-                <p id="listEmptyMsg" class="hidden text-center text-xs py-8" style="color:var(--text-muted)">No students found.</p>
+                <p id="listEmptyMsg" class="hidden text-center text-xs py-8" style="color:var(--text-muted)" data-i18n="noStudents">No students found.</p>
             </div>
 
             <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3 card-security-panel">
                 <div class="flex items-center justify-between gap-2"><div><h3 class="text-sm font-bold">🛡️ ID Card Security Center</h3><p class="text-[10px] mt-1" style="color:var(--text-muted)">Student ID is permanent. MHSS number identifies the physical card.</p></div><span class="text-[9px] font-bold px-2 py-1 rounded-full" style="background:rgba(200,158,58,.12);color:var(--gold)">MHSS V2</span></div>
                 <div class="grid grid-cols-3 gap-2 text-center"><div class="rounded-lg p-2" style="background:rgba(200,158,58,.07)"><div id="cardActiveCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Active</div></div><div class="rounded-lg p-2" style="background:rgba(239,68,68,.07)"><div id="cardLostCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Lost</div></div><div class="rounded-lg p-2" style="background:rgba(59,130,246,.07)"><div id="cardPrintedCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Printed</div></div></div>
-                <div class="card-security-actions"><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="verifyCardByBarcode()">🔎 Verify Barcode</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openCardHistory()">📜 Card History</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="replaceSelectedCard()">♻️ Replace Lost Card</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="exportCardAudit()">🧾 Audit / Print History</button></div>
-                <p class="text-[9px] leading-relaxed" style="color:var(--text-muted)">Barcode = permanent Student ID (Attendance and other scan workflows). QR = verifies the physical card through its MHSS card number.</p>
+                <div class="card-security-actions"><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="verifyCardByBarcode()">🔎 Verify Barcode</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openCardHistory()">📜 Card History</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openSelectedCardProfile()">👤 Card Profile</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openReplacementCenter().then(renderReplacementRequestForm)">♻️ New Replacement Request</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openReplacementCenter()">🪪 Replacement Center</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="exportCardAudit()">🧾 Audit / Print History</button></div>
+                <p class="text-[9px] leading-relaxed" style="color:var(--text-muted)">Barcode = permanent Student ID (Attendance and other scan workflows). Physical card verification uses the MHSS card number.</p>
             </div>
 
             <div class="glass-panel rounded-2xl p-4 flex flex-col gap-4">
@@ -392,13 +397,13 @@
                     </div>
                     <div class="mt-2 text-[9px]" style="color:var(--text-muted)">Use scale and offsets only for printer alignment. The front and back use exactly the same settings.</div>
                     <label class="flex items-center justify-between mt-3 pt-3 border-t text-[11px]" style="border-color:var(--border)">
-                        <span>Remember print settings</span><input id="rememberPrintSettings" type="checkbox" checked class="w-4 h-4 accent-yellow-500" onchange="savePrintSettings()">
+                        <span data-i18n="rememberPrintSettings">Remember print settings</span><input id="rememberPrintSettings" type="checkbox" checked class="w-4 h-4 accent-yellow-500" onchange="savePrintSettings()">
                     </label>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
-                    <button type="button" class="feature-btn px-3 py-2.5 rounded-xl text-xs font-bold" onclick="openTestPrint()">🧪 Print Test Page</button>
-                    <button type="button" class="feature-btn px-3 py-2.5 rounded-xl text-xs font-bold" onclick="openSelectedPreview()">👁️ Individual Preview</button>
+                    <button type="button" class="feature-btn px-3 py-2.5 rounded-xl text-xs font-bold" onclick="openPostPrintingVerification()" data-i18n="postPrintVerification">✓ Post-Printing Verification</button>
+                    <button type="button" class="feature-btn px-3 py-2.5 rounded-xl text-xs font-bold" onclick="openSelectedPreview()" data-i18n="individualPreview">👁️ Individual Preview</button>
                 </div>
 
                 <label class="flex items-center justify-between text-sm cursor-pointer border-t pt-3" style="border-color:var(--border)">
@@ -438,20 +443,32 @@
   </div>
 </div>
 
-<!-- Print test page modal -->
-<div id="testPrintModal" class="modal-backdrop" onclick="if(event.target===this) closeTestPrint()">
-  <div class="modal-card">
-    <div class="p-4 flex items-center justify-between border-b" style="border-color:var(--border)">
-      <div><div class="font-bold">🧪 Epson L3252 Print Test</div><div class="text-xs mt-1" style="color:var(--text-muted)">Use one A4 sheet to verify scale and alignment before printing ID cards.</div></div>
-      <button type="button" onclick="closeTestPrint()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button>
+<!-- Post-Printing Verification -->
+<div id="postPrintingVerificationModal" class="modal-backdrop" onclick="if(event.target===this) closePostPrintingVerification()">
+  <div class="modal-card" style="width:min(760px,100%)">
+    <div class="p-4 md:p-5 flex items-center justify-between gap-3 border-b" style="border-color:var(--border)">
+      <div><div class="font-bold" data-i18n="postPrintVerification">✓ Post-Printing Verification</div><div class="text-xs mt-1" style="color:var(--text-muted)" data-i18n="postPrintDesc">Scan the printed card barcode or QR code to confirm the physical card matches the current student record.</div></div>
+      <button type="button" onclick="closePostPrintingVerification()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button>
     </div>
-    <div class="p-4 overflow-auto"><div id="testPrintSheet" class="test-page-preview"><div style="font-size:18px;font-weight:800;text-align:center">MESERETE HIWOT — ID CARD ALIGNMENT TEST</div><div style="font-size:11px;text-align:center;margin-top:4px">A4 LANDSCAPE · 3 × 2 CARD POSITIONS · EPSON L3252</div><div class="test-grid">${Array.from({length:6},(_,i)=>`<div class="test-cell"><div class="cross">+</div><div style="font-weight:700">POSITION ${i+1}</div><div class="mm">72mm × 91.2mm slot</div><div style="position:absolute;inset:3mm;border:0.3mm dashed #777"></div></div>`).join('')}</div><div style="display:flex;justify-content:space-between;font-size:10px;margin-top:7mm"><span>LEFT / RIGHT CHECK</span><span>TOP / BOTTOM CHECK</span><span>100% SCALE — DO NOT FIT TO PAGE</span></div></div></div>
-    <div class="p-4 border-t flex justify-end gap-2" style="border-color:var(--border)"><button type="button" onclick="closeTestPrint()" class="feature-btn px-4 py-2 rounded-xl text-sm font-bold">Cancel</button><button type="button" onclick="printTestPage()" class="gold-btn px-4 py-2 rounded-xl text-sm">🧪 Print Test Page</button></div>
+    <div class="p-4 space-y-4">
+      <div class="rounded-xl p-4 border" style="border-color:var(--border);background:rgba(200,158,58,.055)">
+        <div class="text-xs font-bold mb-2" data-i18n="scanStudentBarcode">Scan Student ID Barcode</div>
+        <div class="flex gap-2">
+          <input id="postPrintVerifyInput" class="lux-input flex-1 px-3 py-2.5 rounded-xl text-sm" placeholder="Scan barcode or enter Student ID" autocomplete="off">
+          <button type="button" onclick="runPostPrintingVerification()" class="gold-btn px-4 py-2.5 rounded-xl text-sm font-bold">Verify</button>
+        </div>
+        <div class="text-[10px] mt-2" style="color:var(--text-muted)">USB barcode scanners work as keyboard input. No camera is required.</div>
+      </div>
+      <div id="postPrintVerifyResult" class="text-xs" style="color:var(--text-muted)">Waiting for a printed card scan…</div>
+      <div id="postPrintVerifyBody"></div>
+    </div>
   </div>
 </div>
 
 <!-- ID Card History / Verification -->
-<div id="cardHistoryModal" class="modal-backdrop" onclick="if(event.target===this) closeCardHistory()"><div class="modal-card card-history-modal"><div class="p-4 md:p-5 flex items-center justify-between gap-3 border-b" style="border-color:var(--border)"><div><div id="cardHistoryTitle" class="font-bold">🛡️ ID Card Security Center</div><div id="cardVerifyResult" class="text-xs mt-1" style="color:var(--text-muted)"></div></div><button type="button" onclick="closeCardHistory()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button></div><div class="p-4"><div id="cardVerifyBox" class="hidden mb-4"><div class="text-xs font-bold mb-2">Scan the card QR or the student barcode, or type the card number / Student ID</div><div class="flex gap-2"><input id="verifyCardInput" class="lux-input flex-1 px-3 py-2 rounded-xl text-sm" placeholder="MHSS-XXXXXX or MHSS/EST/001" autocomplete="off"><button type="button" onclick="runCardVerification()" class="gold-btn px-4 py-2 rounded-xl text-sm font-bold">Verify</button></div><div class="mt-2"><button id="cardScanBtn" type="button" onclick="toggleCardScanner()" class="feature-btn px-3 py-2 rounded-xl text-xs font-bold">📷 Scan with camera</button></div><div id="cardScanWrap" class="hidden mt-3"><div style="position:relative;border-radius:12px;overflow:hidden;background:#000"><video id="cardScanVideo" playsinline muted style="width:100%;max-height:260px;object-fit:cover;display:block"></video><div style="position:absolute;inset:16%;border:2px solid rgba(255,215,0,.85);border-radius:12px;pointer-events:none"></div></div><div id="cardScanMsg" class="text-[10px] mt-1" style="color:var(--text-muted)"></div></div></div><div id="cardHistoryBody"></div></div></div></div>
+<div id="replacementCenterModal" class="modal-backdrop" onclick="if(event.target===this) closeReplacementCenter()"><div class="modal-card card-history-modal"><div class="p-4 md:p-5 flex items-center justify-between gap-3 border-b" style="border-color:var(--border)"><div><div class="font-bold" data-i18n="replacementCenterTitle">🪪 Card Replacement Center</div><div id="replacementCenterSubtitle" class="text-xs mt-1" style="color:var(--text-muted)">Admin replacement request management</div></div><button type="button" onclick="closeReplacementCenter()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button></div><div class="p-4"><div id="replacementCenterBody"></div></div></div></div>
+
+<div id="cardHistoryModal" class="modal-backdrop" onclick="if(event.target===this) closeCardHistory()"><div class="modal-card card-history-modal"><div class="p-4 md:p-5 flex items-center justify-between gap-3 border-b" style="border-color:var(--border)"><div><div id="cardHistoryTitle" class="font-bold">🛡️ ID Card Security Center</div><div id="cardVerifyResult" class="text-xs mt-1" style="color:var(--text-muted)"></div></div><button type="button" onclick="closeCardHistory()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button></div><div class="p-4"><div id="cardVerifyBox" class="hidden mb-4"><div class="text-xs font-bold mb-2">Scan the student barcode, or type the physical card number / Student ID</div><div class="flex gap-2"><input id="verifyCardInput" class="lux-input flex-1 px-3 py-2 rounded-xl text-sm" placeholder="MHSS-XXXXXX or MHSS/EST/001" autocomplete="off"><button type="button" onclick="runCardVerification()" class="gold-btn px-4 py-2 rounded-xl text-sm font-bold">Verify</button></div><div class="mt-2"><button id="cardScanBtn" type="button" onclick="toggleCardScanner()" class="feature-btn px-3 py-2 rounded-xl text-xs font-bold">📷 Scan with camera</button></div><div id="cardScanWrap" class="hidden mt-3"><div style="position:relative;border-radius:12px;overflow:hidden;background:#000"><video id="cardScanVideo" playsinline muted style="width:100%;max-height:260px;object-fit:cover;display:block"></video><div style="position:absolute;inset:16%;border:2px solid rgba(255,215,0,.85);border-radius:12px;pointer-events:none"></div></div><div id="cardScanMsg" class="text-[10px] mt-1" style="color:var(--text-muted)"></div></div></div><div id="cardHistoryBody"></div></div></div></div>
 
 <!-- Hidden area used for the real, full-size print output -->
 <div id="realPrintArea"></div>
@@ -507,7 +524,7 @@
         const saved = localStorage.getItem('mh_theme') || 'light';
         document.documentElement.setAttribute('data-theme', saved);
     })();
-    const currentLang = localStorage.getItem('mh_lang') || 'en';
+    let currentLang = localStorage.getItem('mh_lang') || 'en';
     const I18N = {
         en: {
             back: 'Back', pageTitle: '🪪 Student ID Card Printing', students: 'Students',
@@ -522,6 +539,12 @@
             flipTip: "Tip: print one test sheet first — print the fronts, flip the same sheet using the option above, print the backs, then hold it up to the light to confirm each card's front and back line up.",
             printIdCardsBtn: '🖨️ PRINT ID CARDS', prevPage: '◀ Previous', nextPage: 'Next ▶',
             noSelection: 'Select at least one student to see the print preview.',
+            groupDivision: 'Group / Division', allGroups: 'All Groups / ሁሉም ምድቦች', classGrade: 'Class / Grade', selectClass: 'Select a Class / Grade',
+            classHelp: 'Classes and groups are loaded from the same student_groups and student_classes database used by Students Management.',
+            missingPhotos: 'missing photos', missingPhotosBtn: '📸 Missing Photos', showAll: '↻ Show All', noStudents: 'No students found.',
+            postPrintVerification: '✓ Post-Printing Verification', individualPreview: '👁️ Individual Preview', rememberPrintSettings: 'Remember print settings',
+            postPrintDesc: 'Scan the printed card barcode or QR code to confirm the physical card matches the current student record.', scanStudentBarcode: 'Scan Student ID Barcode', verify: 'Verify',
+            usbScannerNote: 'USB barcode scanners work as keyboard input. No camera is required.', waitingScan: 'Waiting for a printed card scan…', replacementCenterTitle: '🪪 Card Replacement Center', replacementCenterDesc: 'Admin replacement request management',
             pageOfTpl: (p, t) => `Page ${p} of ${t}`
         },
         am: {
@@ -537,11 +560,18 @@
             flipTip: 'ምክር፡ መጀመሪያ አንድ የሙከራ ወረቀት ያትሙ — የፊት ገጽን አትመው፣ ከላይ በተመረጠው መንገድ ገልብጠው፣ የኋላ ገጽን አትመው፣ ከዚያም ወደ ብርሃን ይዘው በማየት እያንዳንዱ ካርድ ፊትና ኋላ በትክክል መጣጣማቸውን ያረጋግጡ፡፡',
             printIdCardsBtn: '🖨️ መታወቂያዎችን አትም', prevPage: '◀ ቀዳሚ', nextPage: 'ቀጣይ ▶',
             noSelection: 'ቅድመ እይታውን ለማየት ቢያንስ አንድ ተማሪ ይምረጡ።',
+            groupDivision: 'ምድብ / ክፍል', allGroups: 'ሁሉም ምድቦች', classGrade: 'ክፍል / ደረጃ', selectClass: 'ክፍል / ደረጃ ይምረጡ',
+            classHelp: 'ክፍሎችና ምድቦች ከStudents Management ጋር ከሚጋራው student_groups እና student_classes ዳታቤዝ ይጫናሉ።',
+            missingPhotos: 'ፎቶ የሌላቸው', missingPhotosBtn: '📸 ፎቶ የሌላቸው', showAll: '↻ ሁሉንም አሳይ', noStudents: 'ተማሪዎች አልተገኙም።',
+            postPrintVerification: '✓ ከህትመት በኋላ ማረጋገጫ', individualPreview: '👁️ የግል ቅድመ እይታ', rememberPrintSettings: 'የህትመት ቅንብሮችን አስታውስ',
+            postPrintDesc: 'የታተመውን ካርድ ባርኮድ በመስካን አካላዊ ካርዱ ከአሁኑ የተማሪ መረጃ ጋር መመሳሰሉን ያረጋግጡ።', scanStudentBarcode: 'የተማሪ መታወቂያ ባርኮድ ስካን ያድርጉ', verify: 'አረጋግጥ',
+            usbScannerNote: 'USB ባርኮድ ስካነሮች እንደ ኪቦርድ ግቤት ይሰራሉ። ካሜራ አያስፈልግም።', waitingScan: 'የታተመ ካርድ ስካን እየጠበቀ ነው…', replacementCenterTitle: '🪪 የካርድ መተኪያ ማዕከል', replacementCenterDesc: 'የአስተዳዳሪ መተኪያ ጥያቄ አስተዳደር',
             pageOfTpl: (p, t) => `ገጽ ${p} ከ ${t}`
         }
     };
-    (function applyI18n() {
+    function applyI18n() {
         const dict = I18N[currentLang] || I18N.en;
+        document.documentElement.lang = currentLang === 'am' ? 'am' : 'en';
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (dict[key]) el.textContent = dict[key];
@@ -550,7 +580,46 @@
             const key = el.getAttribute('data-i18n-ph');
             if (dict[key]) el.setAttribute('placeholder', dict[key]);
         });
-    })();
+        const btn = document.getElementById('languageToggleLabel');
+        if (btn) btn.textContent = currentLang === 'am' ? 'EN' : 'አማ';
+        translateKnownUiText();
+    }
+
+    const KNOWN_UI_AM = {
+        'Group / Division':'ምድብ / ክፍል','All Groups / ሁሉም ምድቦች':'ሁሉም ምድቦች','Class / Grade':'ክፍል / ደረጃ','Select a Class / Grade':'ክፍል / ደረጃ ይምረጡ',
+        'Search name or ID...':'ስም ወይም መታወቂያ ፈልግ...','Missing Photos':'ፎቶ የሌላቸው','Show All':'ሁሉንም አሳይ','No students found.':'ተማሪዎች አልተገኙም።',
+        'ID Card Security Center':'የመታወቂያ ካርድ ደህንነት ማዕከል','Verify Barcode':'ባርኮድ አረጋግጥ','Card History':'የካርድ ታሪክ','Card Profile':'የካርድ መገለጫ','New Replacement Request':'አዲስ የመተኪያ ጥያቄ','Card Replacement Center':'የካርድ መተኪያ ማዕከል','Audit / Print History':'የኦዲት / ህትመት ታሪክ',
+        'Print Settings':'የህትመት ቅንብሮች','Manual Two-Sided Printing':'በእጅ ባለሁለት ገጽ ማተሚያ','Re-feed / flip method':'የመመለሻ / መገልበጫ ዘዴ','Print mode':'የህትመት ሁኔታ','Front + Back':'ፊት + ጀርባ','Front Only':'ፊት ብቻ','Back Only':'ጀርባ ብቻ',
+        'Print FRONT pages.':'የፊት ገጾችን ያትሙ።','Show Cutting Guides':'የመቁረጫ መስመር አሳይ','Remember print settings':'የህትመት ቅንብሮችን አስታውስ','Individual Preview':'የግል ቅድመ እይታ','Previous':'ቀዳሚ','Next':'ቀጣይ',
+        'Verify':'አረጋግጥ','Waiting for a printed card scan…':'የታተመ ካርድ ስካን እየጠበቀ ነው…','Scan Student ID Barcode':'የተማሪ መታወቂያ ባርኮድ ስካን ያድርጉ','Admin replacement request management':'የአስተዳዳሪ መተኪያ ጥያቄ አስተዳደር',
+        'Replacement Requests':'የመተኪያ ጥያቄዎች','New Request':'አዲስ ጥያቄ','Pending':'በመጠባበቅ ላይ','Approved':'ጸድቋል','Rejected':'ውድቅ ተደርጓል','Completed':'ተጠናቋል','Approve':'አጽድቅ','Reject':'ውድቅ አድርግ','View':'ይመልከቱ','Mark Paid':'ተከፍሏል ብለህ ምልክት አድርግ','Save payment':'ክፍያ አስቀምጥ','Cancel':'ሰርዝ','Submit Request':'ጥያቄ አስገባ',
+        'Create Replacement Request':'የመተኪያ ጥያቄ ፍጠር','Permanent Student ID *':'ቋሚ የተማሪ መታወቂያ *','Find':'ፈልግ','Student Name':'የተማሪ ስም','Current Physical Card':'የአሁኑ አካላዊ ካርድ','Reason *':'ምክንያት *','Description / Details':'መግለጫ / ዝርዝር','Requester Name *':'የጠያቂ ስም *','Phone / Contact':'ስልክ / እውቂያ','Replacement fee':'የመተኪያ ክፍያ','Payment status':'የክፍያ ሁኔታ','Receipt / payment reference':'ደረሰኝ / የክፍያ ማጣቀሻ',
+        'Lost':'ጠፍቷል','Damaged':'ተጎድቷል','Card not working':'ካርዱ አይሰራም','Expired':'ጊዜው አልፏል','Information update':'የመረጃ ማዘመኛ','Photo update':'የፎቶ ማዘመኛ','Other':'ሌላ','Unpaid':'ያልተከፈለ','Paid':'ተከፍሏል','Free':'ነፃ','Waived':'ክፍያ ተሰርዟል'
+    };
+    function translateKnownUiText() {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        const nodes=[]; let n; while(n=walker.nextNode()) nodes.push(n);
+        const reverse = currentLang === 'en' ? Object.fromEntries(Object.entries(KNOWN_UI_AM).map(([en,am]) => [am,en])) : null;
+        nodes.forEach(node => {
+            const parent=node.parentElement; if(!parent || ['SCRIPT','STYLE'].includes(parent.tagName) || parent.closest('.idcard')) return;
+            const raw=node.nodeValue; const trimmed=raw.trim();
+            const replacement = currentLang === 'am' ? KNOWN_UI_AM[trimmed] : (reverse && reverse[trimmed]);
+            if(replacement) node.nodeValue=raw.replace(trimmed,replacement);
+        });
+    }
+    function togglePageLanguage(){
+        currentLang = currentLang === 'am' ? 'en' : 'am';
+        localStorage.setItem('mh_lang', currentLang);
+        applyI18n();
+        try { window.dispatchEvent(new CustomEvent('mh-language-changed',{detail:{lang:currentLang}})); } catch(e) {}
+    }
+    window.addEventListener('storage', e => { if(e.key==='mh_lang' && (e.newValue==='am'||e.newValue==='en')) { currentLang=e.newValue; applyI18n(); } });
+    applyI18n();
+
+    const languageObserver = new MutationObserver(() => {
+        if (currentLang === 'am') translateKnownUiText();
+    });
+    languageObserver.observe(document.body, { childList:true, subtree:true });
 
     // ==========================================
     // CLASS / GRADE SELECTION
@@ -601,7 +670,7 @@
         const classSelect = document.getElementById('classSelect');
         if (!groupSelect || !classSelect) return;
 
-        groupSelect.innerHTML = '<option value="">All Groups / ሁሉም ምድቦች</option>' +
+        groupSelect.innerHTML = '<option value="" data-i18n="allGroups">All Groups / ሁሉም ምድቦች</option>' +
             dbGroupCache.map(g =>
                 `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`
             ).join('');
@@ -617,7 +686,7 @@
             !groupId || String(c.group_id) === String(groupId)
         );
 
-        select.innerHTML = '<option value="">Select a Class / Grade</option>' +
+        select.innerHTML = '<option value="" data-i18n="selectClass">Select a Class / Grade</option>' +
             classes.map(c =>
                 `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}${c.code ? ' — ' + escapeHtml(c.code) : ''}</option>`
             ).join('');
@@ -880,20 +949,10 @@
             </div>
         `;
     }
-    // QR = physical card verification. It holds a verification URL + the card number (token), never the student's data.
-    function cardVerifyUrl(no) { try { return new URL('print-id-cards.html?c=' + encodeURIComponent(no), location.href).href; } catch (e) { return no; } }
-    function buildCardQrHTML(s) {
-        try {
-            const no = (ensureCardRecord(s).cardNumber || '');
-            if (!no || typeof qrcode !== 'function') return '';
-            const q = qrcode(0, 'M'); q.addData(cardVerifyUrl(no)); q.make();
-            const n = q.getModuleCount(); let d = '';
-            for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c},${r}h1v1h-1z`;
-            return `<div class="idcard-qr" title="${escapeHtml(no)}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges"><path d="${d}" fill="#000"/></svg></div>`;
-        } catch (e) { return ''; }
-    }
+    // Physical card verification is handled inside print-id-cards.html. The QR contains the UNIQUE PHYSICAL CARD NUMBER; the existing Student ID barcode remains unchanged.
     function buildIdCardBackHTML(s, uid) {
         const barcodeId = `idCardBarcodeSvg${uid ? '-' + uid : ''}`;
+        const qrId = `idCardQrSvg${uid ? '-' + uid : ''}`;
         return `
             <div class="idcard idcard-back">${cardPrintMode === 'replacement' ? '<div class="replacement-ribbon">REPLACEMENT</div>' : ''}
                 <div class="idcard-guilloche"></div>
@@ -914,7 +973,7 @@
                     <div class="idcard-back-emergency-banner idcard-amh">
                         <h5>የአደጋ ጊዜ ተጠራ መረጃ</h5>
                     </div>
-                    <div class="idcard-back-emerg-wrap">
+                    <div class="idcard-back-emergency-area">
                     <div class="idcard-back-rows idcard-amh">
                         <div class="idcard-back-row">
                             <span class="idcard-icon">👤</span>
@@ -925,7 +984,7 @@
                             <div class="idcard-row-text"><span class="idcard-value">${escapeHtml(s.emergencyPhone || '-')}</span></div>
                         </div>
                     </div>
-                    ${buildCardQrHTML(s)}
+                    <div class="idcard-qr-wrap" aria-label="Student verification QR code"><svg id="${qrId}"></svg></div>
                     </div>
                     <div class="idcard-barcode-wrap">
                         <svg id="${barcodeId}"></svg>
@@ -948,6 +1007,23 @@
         try {
             JsBarcode(`#${barcodeId}`, String(s.id || ''), { format: 'CODE128', lineColor: '#1B1B2F', width: 2, height: 50, displayValue: false, margin: 0 });
         } catch (e) { }
+    }
+
+    function renderIdCardQR(s, uid) {
+        const qrId = `idCardQrSvg${uid ? '-' + uid : ''}`;
+        const el = document.getElementById(qrId);
+        if (!el || !window.qrcode || !s) return;
+        const cardRec = ensureCardRecord(s);
+        const cardNumber = String((cardRec && cardRec.cardNumber) || s.idCardNumber || '').trim().toUpperCase();
+        if (!cardNumber) return;
+        try {
+            const qr = qrcode(0, 'M');
+            qr.addData(`MHSS:CARD:${cardNumber}`);
+            qr.make();
+            el.outerHTML = qr.createSvgTag({ scalable: true, margin: 0 });
+            const created = document.getElementById(qrId);
+            if (created) { created.setAttribute('aria-label', 'Student verification QR code'); created.style.width = '52px'; created.style.height = '52px'; }
+        } catch (e) { console.warn('Could not render student QR code:', e); }
     }
 
     // ==========================================
@@ -983,7 +1059,7 @@
         const body=document.getElementById('cardHistoryBody');
         const input=document.getElementById('verifyCardInput');
         if(title) title.textContent='🔎 ID Card Verification';
-        if(result) result.textContent='Scan a QR/card number or Student ID barcode, or enter it manually.';
+        if(result) result.textContent='Scan the student barcode or enter the physical card number / Student ID manually.';
         if(body) body.innerHTML='';
         if(box) box.classList.remove('hidden');
         if(modal) modal.classList.add('open');
@@ -1000,7 +1076,7 @@
     // Accepts "MHSS-EX7K4N", "mhss ex7k4n", "MHSS -EX7K4N", "MHSSEX7K4N" or just the 6 characters.
     function normalizeCardNumber(v){const x=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(x.length===10&&x.startsWith('MHSS'))return 'MHSS-'+x.slice(4);if(x.length===6&&!x.startsWith('MHSS'))return 'MHSS-'+x;return String(v||'').trim().toUpperCase();}
     async function currentUserId(client){try{const u=await client.auth.getUser();return (u&&u.data&&u.data.user&&u.data.user.id)||null;}catch(e){return null;}}
-    async function logCardAuditDB(client,action,student,cardNumber,stage,details){try{const uid=await currentUserId(client);const {error}=await client.from('mhss_student_id_card_audit').insert([{action,student_id:(student&&(student.id||student.student_id))||null,student_name:(student&&student.name)||null,card_number:cardNumber||null,stage:stage||null,details:details||null,created_by:uid}]);if(error)console.warn('Card audit save failed:',error);}catch(e){console.warn('Card audit save failed:',e);}}
+    async function logCardAuditDB(client,action,student,cardNumber,stage,details){try{const uid=await currentUserId(client);const {error}=await client.from('mhss_student_id_card_audit').insert([{action,student_id:(student&&(student.id||student.student_id))||null,student_name:(student&&student.name)||null,card_number:cardNumber||null,stage:stage||null,details:details||null,created_by:uid}]);if(error)console.warn('Card audit save failed:',error);return error||null;}catch(e){console.warn('Card audit save failed:',e);return e;}}
     async function lookupCardInSupabase(client,no){
         const cols='id,name,class_name,grade,photo,status,id_card_number';
         const c=await client.from('mhss_student_id_cards').select('*').eq('card_number',no).maybeSingle();
@@ -1061,6 +1137,17 @@
     // Reads what a scanner/camera/keyboard produced: a QR URL, a card number, or a Student ID (barcode).
     function parseScannedValue(raw){
         const v=String(raw||'').trim();
+        const qrCard=v.match(/^MHSS:CARD:(.+)$/i);
+        if(qrCard)return {kind:'card',value:qrCard[1].trim().toUpperCase()};
+        const qrStudent=v.match(/^MHSS:STUDENT:(.+)$/i);
+        if(qrStudent)return {kind:'student',value:qrStudent[1].trim()};
+        try{
+            if(/^https?:/i.test(v)){
+                const u=new URL(v);
+                const sid=u.searchParams.get('student')||u.searchParams.get('student_id')||u.searchParams.get('id');
+                if(sid)return {kind:'student',value:sid.trim()};
+            }
+        }catch(e){}
         const m=v.match(/MHSS-[A-Z0-9]{6}/i);
         if(m)return {kind:'card',value:m[0].toUpperCase()};
         if(v.includes('/')&&!/^https?:/i.test(v))return {kind:'student',value:v};
@@ -1123,9 +1210,9 @@
             input.select();
         }finally{cardVerifyBusy=false;}
     }
-    // ---- Camera scanner: QR (card) and barcode (student). Uses the browser's BarcodeDetector when present, jsQR otherwise (QR only). ----
+    // ---- Camera scanner: Student barcode / physical card number where browser BarcodeDetector supports it. ----
     let cardScanStream=null,cardScanTimer=null,cardScanDetector=null,cardScanCanvas=null;
-    function loadJsQR(){return new Promise((ok,fail)=>{if(window.jsQR)return ok();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';s.onload=()=>ok();s.onerror=()=>fail(new Error('Could not load the QR reader'));document.head.appendChild(s);});}
+    function loadJsQR(){return new Promise((ok,fail)=>{if(window.jsQR)return ok();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';s.onload=()=>ok();s.onerror=()=>fail(new Error('Could not load the camera barcode reader'));document.head.appendChild(s);});}
     function stopCardScanner(){
         if(cardScanTimer){clearInterval(cardScanTimer);cardScanTimer=null;}
         if(cardScanStream){cardScanStream.getTracks().forEach(t=>t.stop());cardScanStream=null;}
@@ -1213,6 +1300,388 @@
             const i=studentsData.findIndex(x=>x.id===s.id);if(i>=0)studentsData[i].idCardNumber=newRec.cardNumber;
         }catch(e){console.error('Replacement was not saved to the database:',e);alert('⚠️ The new card was issued on this browser, but it could not be saved to the database:\n'+((e&&e.message)||e)+'\n\nVerification on other devices will not see it until this is fixed.');}
     }
+    // ==========================================
+    // CARD REPLACEMENT CENTER — admin/owner workflow
+    // ==========================================
+    const REPL_TABLE = 'mhss_student_card_replacement_requests';
+    // Lost, Damaged, Photo update and Information update = 300 ETB. Everything else is free.
+    const REPLACEMENT_FEE_ETB = { Lost:300, Damaged:300, 'Card not working':0, Expired:0, 'Information update':300, 'Photo update':300, Other:0 };
+    const REPLACEMENT_STATUSES = ['Submitted','Under Review','Approved','Rejected','Replacement Required','New Card Generated','Printed','Completed'];
+    const REPLACEMENT_REASONS = ['Lost','Damaged','Card not working','Expired','Information update','Photo update','Other'];
+    const REPLACEMENT_PAYMENT_STATUSES = ['Unpaid','Pending','Paid'];
+    const REPLACEMENT_OPEN_STATUSES = ['Submitted','Under Review','Approved','Replacement Required','New Card Generated','Printed'];
+    const REPLACEMENT_REASON_HINTS = {
+        'Photo update': "Save the student's new photo in the Students page first. Approving this request issues a new card number so the card can be reprinted with the new photo.",
+        'Information update': "Save the corrected student information in the Students page first. Approving this request issues a new card number so the card can be reprinted with the updated details."
+    };
+    let replacementBusy = false;
+    let replacementLookupTimer = null;
+    let replacementLookupSeq = 0;
+    let replacementStudent = null;   // student found by the Student ID lookup in the request form
+
+    function replacementCanManage(){ return !!(window.__mhCanPrintIdCards || false); }
+    function replacementFee(reason){ return Number(REPLACEMENT_FEE_ETB[String(reason||'').trim()] ?? 0); }
+    function replacementErrorText(e){
+        const msg = String((e && e.message) || e || 'Unknown error');
+        const code = String((e && e.code) || '');
+        if (code === '42501' || /permission denied|row-level security/i.test(msg))
+            return msg + '\n\nThe table is not open to public access yet. Run mhss_student_card_replacement_requests.sql in the Supabase SQL Editor (it grants access to public, anon and authenticated), then try again.';
+        if (code === 'PGRST205' || code === 'PGRST204' || code === '42P01' || code === '42703' || /schema cache|does not exist|check constraint/i.test(msg))
+            return msg + '\n\nThe database is not up to date. Run the latest mhss_student_card_replacement_requests.sql in the Supabase SQL Editor, then reload this page.';
+        return msg;
+    }
+    function replacementStatusPill(status){
+        const s=String(status||'Submitted');
+        const cls=(s==='Approved'||s==='Completed'||s==='Printed')?'color:#22c55e;border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.08)':(s==='Rejected')?'color:#ef4444;border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.08)':'color:#f59e0b;border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.08)';
+        return `<span class="replacement-status" style="${cls}">${escapeHtml(s)}</span>`;
+    }
+    function replacementFeePill(fee, status){
+        const st = String(status || (Number(fee) > 0 ? 'Unpaid' : 'Free'));
+        const styles = {
+            Paid:'color:#22c55e;border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)',
+            Pending:'color:#f59e0b;border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)',
+            Unpaid:'color:#ef4444;border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08)'
+        };
+        return `<span class="replacement-status" style="${styles[st]||'color:var(--text-muted)'}">${escapeHtml(st)}</span>`;
+    }
+    async function getReplacementClient(){ return await waitForSupabase(); }
+    async function loadReplacementRequests(limit=80){
+        const client=await getReplacementClient();
+        const q=await client.from(REPL_TABLE).select('*').order('created_at',{ascending:false}).limit(limit);
+        if(q.error) throw q.error;
+        return q.data||[];
+    }
+
+    // Writes the card number into the student file (students table) — the number students.html shows.
+    async function syncStudentCardNumber(client, studentId, cardNo){
+        const u = await client.from('students').update({ id_card_number: cardNo }).eq('id', studentId).select('id,id_card_number');
+        if (u.error) throw u.error;
+        if (!u.data || !u.data.length) throw new Error('The student record was not updated (student not found, or no permission to update the students table).');
+        const i = studentsData.findIndex(x => x.id === studentId);
+        if (i >= 0) studentsData[i].idCardNumber = cardNo;
+        return true;
+    }
+
+    // ---------- Student lookup used by the request form ----------
+    async function findReplacementStudent(rawId){
+        const client = await getReplacementClient();
+        const id = String(rawId||'').trim();
+        const sr = await client.from('students').select('id,name,class_name,grade,phone,photo,status,id_card_number').in('id', [...new Set([id, id.toUpperCase()])]).limit(1);
+        if (sr.error) throw sr.error;
+        const st = (sr.data||[])[0];
+        if (!st) return null;
+        const [cr, orq] = await Promise.all([
+            client.from('mhss_student_id_cards').select('card_number,status,version').eq('student_id', st.id).eq('is_current', true).maybeSingle(),
+            client.from(REPL_TABLE).select('id,reason,request_status').eq('student_id', st.id).in('request_status', REPLACEMENT_OPEN_STATUSES)
+        ]);
+        return { student: st, card: (cr && !cr.error && cr.data) || null, openRequests: (orq && !orq.error && orq.data) || [] };
+    }
+    function replacementInfoMessage(html, color){ return `<div class="text-[11px]" style="color:${color||'var(--text-muted)'}">${html}</div>`; }
+    function replacementStudentCard(st, res, cardNo){
+        const cell = (l,v) => `<div><div class="text-[9px]" style="color:var(--text-muted)">${l}</div><div class="font-bold text-xs">${escapeHtml(v||'—')}</div></div>`;
+        const c = res.card, open = res.openRequests || [];
+        const warn = t => `<div class="text-[11px] mt-3" style="color:#f59e0b">${t}</div>`;
+        return `<div class="flex items-center gap-3">
+            <img src="${escapeHtml(getPhotoUrl({name:st.name,photo:st.photo}))}" alt="" style="width:56px;height:56px;border-radius:14px;object-fit:cover;flex:none">
+            <div style="min-width:0"><div class="font-black">${escapeHtml(st.name||'—')}</div>
+              <div class="text-[10px]" style="color:var(--text-muted)">${escapeHtml(st.id)} · ${escapeHtml(st.class_name||'—')} · ${escapeHtml(st.grade||'—')}</div>
+              <div class="text-[10px]" style="color:var(--text-muted)">📞 ${escapeHtml(st.phone||'—')}</div></div></div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 pt-3 border-t" style="border-color:var(--border)">
+            ${cell('Current card', cardNo||'Not issued')}${cell('Card status', c&&c.status)}${cell('Version', c&&c.version?'V'+c.version:'')}${cell('Student status', st.status||'Active')}</div>
+          ${cardNo?'':warn('⚠️ This student has no ID card number yet. Register/issue the card from the Students page first.')}
+          ${open.length?warn('⚠️ This student already has an open request: '+open.map(o=>escapeHtml(o.reason)+' — '+escapeHtml(o.request_status)).join(', ')+'.'):''}`;
+    }
+    function replacementSetFilled(name, card){
+        const n=document.getElementById('replacementStudentName'), c=document.getElementById('replacementCurrentCard');
+        if(n)n.value=name||''; if(c)c.value=card||'';
+    }
+    function scheduleReplacementLookup(){ clearTimeout(replacementLookupTimer); replacementLookupTimer=setTimeout(()=>runReplacementLookup(false),450); }
+    async function runReplacementLookup(explicit){
+        clearTimeout(replacementLookupTimer);
+        const input=document.getElementById('replacementStudentId'), box=document.getElementById('replacementStudentInfo');
+        if(!input||!box)return;
+        const id=input.value.trim();
+        if(replacementStudent && id && replacementStudent.id.toLowerCase()===id.toLowerCase())return;   // already loaded
+        const seq=++replacementLookupSeq;
+        replacementStudent=null; replacementSetFilled('','');
+        if(id.length<3){ box.innerHTML=replacementInfoMessage('Type the Student ID — the name, class and current card fill in automatically.'); return; }
+        box.innerHTML=replacementInfoMessage('Looking up student…');
+        try{
+            const res=await findReplacementStudent(id);
+            if(seq!==replacementLookupSeq)return;
+            if(!res){ box.innerHTML=replacementInfoMessage(explicit?'No student found with ID “'+escapeHtml(id)+'”. Check the ID and try again.':'Searching… no student matches “'+escapeHtml(id)+'” yet.', explicit?'#ef4444':null); return; }
+            const st=res.student, cardNo=String(st.id_card_number||(res.card&&res.card.card_number)||'').trim().toUpperCase();
+            replacementStudent={id:st.id,name:st.name,cardNumber:cardNo,openRequests:res.openRequests};
+            input.value=st.id;
+            replacementSetFilled(st.name,cardNo);
+            box.innerHTML=replacementStudentCard(st,res,cardNo);
+        }catch(e){
+            if(seq!==replacementLookupSeq)return;
+            console.error(e);
+            box.innerHTML=replacementInfoMessage(escapeHtml(replacementErrorText(e)).replace(/\n/g,'<br>'),'#ef4444');
+        }
+    }
+
+    // ---------- Request form ----------
+    function replacementRequestForm(prefill={}){
+        const reason=String(prefill.reason||'Lost');
+        const fee=replacementFee(reason);
+        return `<div class="space-y-4">
+            <div class="rounded-xl p-3 border" style="border-color:var(--border);background:rgba(200,158,58,.06)">
+              <div class="font-bold text-sm">Create Replacement Request</div>
+              <div class="text-[10px] mt-1" style="color:var(--text-muted)">Enter the Student ID and the student's details fill in automatically. The current card stays active until the request is approved.</div>
+            </div>
+            <div>
+              <label class="text-[10px] font-bold">Permanent Student ID *</label>
+              <div class="flex gap-2 mt-1">
+                <input id="replacementStudentId" class="lux-input w-full px-3 py-2 rounded-xl text-sm" value="${escapeHtml(String(prefill.student_id||''))}" placeholder="MHSS/EST/001" autocomplete="off" oninput="scheduleReplacementLookup()" onblur="runReplacementLookup(true)" onkeydown="if(event.key==='Enter'){event.preventDefault();runReplacementLookup(true);}">
+                <button type="button" class="feature-btn px-4 py-2 rounded-xl text-xs font-bold" onclick="runReplacementLookup(true)">Find</button>
+              </div>
+            </div>
+            <div id="replacementStudentInfo" class="rounded-xl p-3 border" style="border-color:var(--border);background:rgba(255,255,255,.03)">${replacementInfoMessage('Type the Student ID — the name, class and current card fill in automatically.')}</div>
+            <div class="grid md:grid-cols-2 gap-3">
+              <div><label class="text-[10px] font-bold">Student Name</label><input id="replacementStudentName" readonly class="lux-input w-full px-3 py-2 rounded-xl text-sm mt-1" placeholder="Filled automatically"></div>
+              <div><label class="text-[10px] font-bold">Current Physical Card</label><input id="replacementCurrentCard" readonly class="lux-input w-full px-3 py-2 rounded-xl text-sm mt-1" placeholder="Filled automatically"></div>
+            </div>
+            <div>
+              <label class="text-[10px] font-bold">Reason *</label>
+              <select id="replacementReason" class="lux-input w-full px-3 py-2 rounded-xl text-sm mt-1" onchange="updateReplacementFeePreview()">${REPLACEMENT_REASONS.map(r=>`<option ${r===reason?'selected':''}>${escapeHtml(r)}</option>`).join('')}</select>
+              <div id="replacementReasonHint" class="text-[10px] mt-1" style="color:var(--text-muted)">${escapeHtml(REPLACEMENT_REASON_HINTS[reason]||'')}</div>
+            </div>
+            <div><label class="text-[10px] font-bold">Description / Details</label><textarea id="replacementDescription" class="lux-input w-full px-3 py-2 rounded-xl text-sm mt-1" rows="3" placeholder="Explain why the card needs replacement..."></textarea></div>
+            <div class="grid md:grid-cols-2 gap-3">
+              <div><label class="text-[10px] font-bold">Requester Name *</label><input id="replacementRequester" class="lux-input w-full px-3 py-2 rounded-xl text-sm mt-1" placeholder="Admin / owner name"></div>
+              <div><label class="text-[10px] font-bold">Phone / Contact</label><input id="replacementPhone" class="lux-input w-full px-3 py-2 rounded-xl text-sm mt-1" placeholder="Optional"></div>
+            </div>
+            <div class="rounded-xl p-3 border" style="border-color:var(--border);background:rgba(255,255,255,.03)">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div><div class="text-[10px]" style="color:var(--text-muted)">Replacement fee</div><div id="replacementFeePreview" class="font-black text-lg mt-1">${fee>0?fee.toLocaleString()+' ETB':'Free'}</div></div>
+                <div id="replacementFeeControls" class="grid md:grid-cols-2 gap-3 flex-1" style="min-width:240px;max-width:440px;${fee>0?'':'display:none'}">
+                  <div><label class="text-[10px] font-bold">Payment status</label><select id="replacementFeeStatus" class="lux-input w-full px-3 py-2 rounded-xl text-sm mt-1"><option value="Unpaid">Unpaid</option><option value="Pending">Pending (awaiting confirmation)</option><option value="Paid">Paid</option></select></div>
+                  <div><label class="text-[10px] font-bold">Receipt / payment reference</label><input id="replacementPaymentRef" class="lux-input w-full px-3 py-2 rounded-xl text-sm mt-1" placeholder="Optional"></div>
+                </div>
+              </div>
+              <div class="text-[9px] mt-2" style="color:var(--text-muted)">Lost, Damaged, Photo update and Information update = 300 ETB. Card not working, Expired and Other = Free.</div>
+            </div>
+            <div class="flex justify-end gap-2"><button type="button" class="feature-btn px-4 py-2 rounded-xl text-xs font-bold" onclick="renderReplacementCenter()">Cancel</button><button type="button" class="gold-btn px-4 py-2 rounded-xl text-xs font-bold" onclick="submitReplacementRequest()">Submit Request</button></div>
+          </div>`;
+    }
+    function updateReplacementFeePreview(){
+        const r=document.getElementById('replacementReason')?.value||'Other', fee=replacementFee(r);
+        const el=document.getElementById('replacementFeePreview'); if(el)el.textContent=fee>0?fee.toLocaleString()+' ETB':'Free';
+        const ctl=document.getElementById('replacementFeeControls'); if(ctl)ctl.style.display=fee>0?'':'none';
+        const hint=document.getElementById('replacementReasonHint'); if(hint)hint.textContent=REPLACEMENT_REASON_HINTS[r]||'';
+    }
+    async function submitReplacementRequest(){
+        if(replacementBusy)return;
+        if(!replacementCanManage()){alert('Only the owner or authorized admin can manage replacement requests.');return;}
+        const val=id=>document.getElementById(id)?.value.trim();
+        const typedId=val('replacementStudentId'), st=replacementStudent;
+        if(!typedId||!st||st.id.toLowerCase()!==typedId.toLowerCase()){alert('Enter a valid Student ID and wait for the student details to appear before submitting.');return;}
+        if(!st.cardNumber){alert('This student has no ID card number yet. Issue the card from the Students page first.');return;}
+        const reason=document.getElementById('replacementReason')?.value, requester_name=val('replacementRequester');
+        if(!reason||!requester_name){alert('Please complete all required fields.');return;}
+        const fee=replacementFee(reason);
+        const fee_status=fee>0?(document.getElementById('replacementFeeStatus')?.value||'Unpaid'):'Free';
+        if(fee>0&&!REPLACEMENT_PAYMENT_STATUSES.includes(fee_status)){alert('Choose the payment status: Unpaid, Pending or Paid.');return;}
+        if(st.openRequests&&st.openRequests.length&&!confirm('This student already has an open replacement request. Create another one anyway?'))return;
+        replacementBusy=true;
+        try{
+            const client=await getReplacementClient(), uid=await currentUserId(client);
+            const row={student_id:st.id,student_name:st.name,current_card_number:st.cardNumber,reason,description:val('replacementDescription')||null,requester_name,requester_phone:val('replacementPhone')||null,request_status:'Submitted',fee_etb:fee,fee_status,payment_reference:fee>0?(val('replacementPaymentRef')||null):null,requested_by:uid};
+            if(fee_status==='Paid')row.fee_paid_at=nowIso();
+            const ins=await client.from(REPL_TABLE).insert([row]).select().single();
+            if(ins.error)throw ins.error;
+            logCardAuditDB(client,'REPLACEMENT_REQUESTED',{id:st.id,name:st.name},st.cardNumber,'replacement',`${reason}; fee ${fee} ETB (${fee_status})`);
+            alert('Replacement request submitted successfully.');
+            await renderReplacementCenter();
+        }catch(e){console.error(e);alert('Could not submit replacement request:\n'+replacementErrorText(e));}
+        finally{replacementBusy=false;}
+    }
+
+    // ---------- Fee payment status (Unpaid / Pending / Paid) ----------
+    async function updateReplacementPayment(id,status,ref){
+        if(replacementBusy)return false;
+        if(!replacementCanManage()){alert('Only the owner or authorized admin can update payments.');return false;}
+        if(!REPLACEMENT_PAYMENT_STATUSES.includes(status)){alert('Choose Paid, Unpaid or Pending.');return false;}
+        replacementBusy=true;
+        try{
+            const client=await getReplacementClient();
+            const patch={fee_status:status,payment_reference:ref||null,fee_paid_at:status==='Paid'?nowIso():null};
+            const u=await client.from(REPL_TABLE).update(patch).eq('id',id).select().single();
+            if(u.error)throw u.error;
+            const r=u.data;
+            logCardAuditDB(client,'REPLACEMENT_FEE_UPDATED',{id:r.student_id,name:r.student_name},r.current_card_number,'replacement',`Fee ${Number(r.fee_etb||0)} ETB marked ${status}`+(ref?'; ref '+ref:''));
+            return true;
+        }catch(e){console.error(e);alert('Could not update the payment status:\n'+replacementErrorText(e));return false;}
+        finally{replacementBusy=false;}
+    }
+    async function saveReplacementPayment(id){
+        const status=document.getElementById('replacementPayStatus')?.value, ref=document.getElementById('replacementPayRef')?.value.trim();
+        if(await updateReplacementPayment(id,status,ref))await viewReplacementRequest(id);
+    }
+    async function markReplacementPaid(id){
+        const ref=prompt('Receipt / payment reference (optional). Press OK to mark this fee as PAID.','');
+        if(ref===null)return;
+        if(await updateReplacementPayment(id,'Paid',ref.trim()))await renderReplacementCenter();
+    }
+
+    // ---------- Approve / reject / activate ----------
+    async function approveReplacementRequest(id){
+        if(replacementBusy)return;
+        if(!replacementCanManage()){alert('Only the owner or authorized admin can approve replacements.');return;}
+        replacementBusy=true;
+        try{
+            const client=await getReplacementClient(), uid=await currentUserId(client);
+            const q=await client.from(REPL_TABLE).select('*').eq('id',id).single(); if(q.error)throw q.error;
+            const req=q.data;
+            if(!req||(req.request_status!=='Submitted'&&req.request_status!=='Under Review'))throw new Error('This request is no longer pending.');
+            const feeDue=Number(req.fee_etb||0)>0, feeOk=!feeDue||req.fee_status==='Paid'||req.fee_status==='Waived';
+            let msg='Approve this replacement request?\n\nThe old card will be blocked, a new card number will be issued, and the new number will be saved to the student file automatically.';
+            if(!feeOk)msg='⚠️ The '+Number(req.fee_etb).toLocaleString()+' ETB fee is marked '+String(req.fee_status||'Unpaid').toUpperCase()+' — it is not confirmed as paid.\n\n'+msg+'\n\nApprove anyway?';
+            if(!confirm(msg))return;
+
+            const oldQ=await client.from('mhss_student_id_cards').select('*').eq('student_id',req.student_id).eq('is_current',true).maybeSingle(); if(oldQ.error)throw oldQ.error;
+            const old=oldQ.data, at=nowIso();
+            const oldNo=old?.card_number||req.current_card_number;
+            const oldStatus=(req.reason==='Lost'||req.reason==='Damaged')?req.reason:'Replacement Required';
+            const newVersion=(Number(old?.version)||0)+1;
+            const newNo=await uniqueCardNumberDB(getCardRegistry());
+            let retired=false,studentChanged=false,cardRowWritten=false,studentSyncError=null;
+            try{
+                // 1) Block the old card.
+                if(old){
+                    const h=Array.isArray(old.history)?old.history.slice():[]; h.push({action:'REPLACEMENT_APPROVED',reason:req.reason,at,cardNumber:old.card_number});
+                    const u=await client.from('mhss_student_id_cards').update({status:oldStatus,is_current:false,replaced_at:at,history:h,updated_by:uid}).eq('id',old.id); if(u.error)throw u.error; retired=true;
+                }
+                // 2) Put the new card number in the student file (what students.html shows).
+                try{await syncStudentCardNumber(client,req.student_id,newNo);studentChanged=true;}catch(e){studentSyncError=e;console.warn('Student file was not updated by the page:',e);}
+                // 3) Save the new card (update the row if a database trigger already created it, otherwise insert it).
+                const cardFields={status:'Replacement Required',version:newVersion,issued_at:at,previous_card_number:oldNo,is_current:true,history:[{action:'REPLACEMENT_CARD_GENERATED',at,cardNumber:newNo,previousCardNumber:oldNo}],updated_by:uid};
+                const ex=await client.from('mhss_student_id_cards').select('id').eq('card_number',newNo).maybeSingle(); if(ex.error)throw ex.error;
+                const w=ex.data?await client.from('mhss_student_id_cards').update(cardFields).eq('id',ex.data.id):await client.from('mhss_student_id_cards').insert([{student_id:req.student_id,card_number:newNo,created_by:uid,...cardFields}]);
+                if(w.error)throw w.error; cardRowWritten=true;
+                // 4) Mark the request approved.
+                const upd=await client.from(REPL_TABLE).update({request_status:'Approved',reviewed_by:uid,reviewed_at:at,approved_at:at,old_card_status:oldStatus,new_card_number:newNo,new_card_version:newVersion}).eq('id',id); if(upd.error)throw upd.error;
+            }catch(err){
+                // Undo what was done so the student is never left without a valid current card.
+                try{if(cardRowWritten)await client.from('mhss_student_id_cards').delete().eq('card_number',newNo);}catch(x){}
+                try{if(studentChanged)await client.from('students').update({id_card_number:oldNo}).eq('id',req.student_id);}catch(x){}
+                try{if(retired)await client.from('mhss_student_id_cards').update({status:old.status,is_current:true,replaced_at:old.replaced_at||null,history:old.history||[],updated_by:uid}).eq('id',old.id);}catch(x){}
+                throw err;
+            }
+            // This browser's local card registry + audit trail.
+            const localReg=getCardRegistry();
+            localReg[req.student_id]={cardNumber:newNo,studentId:req.student_id,status:'Replacement Required',issuedAt:at,version:newVersion,previousCardNumber:oldNo,history:[{action:'REPLACEMENT_CARD_GENERATED',at,cardNumber:newNo,previousCardNumber:oldNo}]};
+            saveCardRegistry(localReg);
+            addCardAudit('CARD_REPLACED',{id:req.student_id,name:req.student_name},newNo,`Replacement approved (${req.reason}); previous card: ${oldNo}`);
+            logCardAuditDB(client,'REPLACEMENT_APPROVED',{id:req.student_id,name:req.student_name},newNo,'replacement',`${req.reason}; old card ${oldNo} → ${newNo}`);
+            // Confirm the student file really shows the new number (the database trigger also does this).
+            let studentOk=false;
+            try{const chk=await client.from('students').select('id_card_number').eq('id',req.student_id).maybeSingle();studentOk=!!(chk.data&&chk.data.id_card_number===newNo);}catch(e){}
+            if(studentOk){const i=studentsData.findIndex(x=>x.id===req.student_id);if(i>=0)studentsData[i].idCardNumber=newNo;}
+            alert(studentOk
+                ?`Replacement approved.\nNew card: ${newNo}\nVersion: ${newVersion}\n\nThe student file now shows the new card number.`
+                :`Replacement approved.\nNew card: ${newNo}\nVersion: ${newVersion}\n\n⚠️ The student file (students table) was NOT updated automatically`+(studentSyncError?`:\n${(studentSyncError.message||studentSyncError)}`:'.')+`\n\nRun mhss_student_card_replacement_requests.sql in Supabase, then press "Activate after Print" — it retries the student file update.`);
+            await renderReplacementCenter(); renderStudentList(); updateCardSecurityStats();
+        }catch(e){console.error(e);alert('Could not approve replacement:\n'+replacementErrorText(e));}
+        finally{replacementBusy=false;}
+    }
+    async function rejectReplacementRequest(id){
+        if(replacementBusy)return; if(!replacementCanManage())return;
+        const reason=prompt('Enter rejection reason:'); if(!reason||!reason.trim())return;
+        replacementBusy=true;
+        try{
+            const client=await getReplacementClient(),uid=await currentUserId(client),at=nowIso();
+            const u=await client.from(REPL_TABLE).update({request_status:'Rejected',reviewed_by:uid,reviewed_at:at,rejection_reason:reason.trim()}).eq('id',id); if(u.error)throw u.error;
+            alert('Replacement request rejected.'); await renderReplacementCenter();
+        }catch(e){alert('Could not reject request:\n'+replacementErrorText(e));}
+        finally{replacementBusy=false;}
+    }
+    async function completeReplacementPrint(id){
+        if(replacementBusy)return; if(!replacementCanManage())return;
+        replacementBusy=true;
+        try{
+            const client=await getReplacementClient(),uid=await currentUserId(client),at=nowIso();
+            const q=await client.from(REPL_TABLE).select('*').eq('id',id).single(); if(q.error)throw q.error;
+            const req=q.data; if(!req.new_card_number)throw new Error('No replacement card has been generated.');
+            // Keep the card's existing history and add the activation entry.
+            const cq=await client.from('mhss_student_id_cards').select('id,history').eq('student_id',req.student_id).eq('card_number',req.new_card_number).eq('is_current',true).maybeSingle(); if(cq.error)throw cq.error;
+            if(!cq.data)throw new Error('The replacement card record '+req.new_card_number+' was not found.');
+            const hist=[...(Array.isArray(cq.data.history)?cq.data.history:[]),{action:'CARD_ACTIVATED',at,cardNumber:req.new_card_number}];
+            const u=await client.from('mhss_student_id_cards').update({status:'Active',history:hist,updated_by:uid}).eq('id',cq.data.id); if(u.error)throw u.error;
+            const ru=await client.from(REPL_TABLE).update({request_status:'Completed',completed_at:at}).eq('id',id); if(ru.error)throw ru.error;
+            // Make sure the student file shows the active card number (safe to repeat).
+            let synced=true; try{await syncStudentCardNumber(client,req.student_id,req.new_card_number);}catch(e){synced=false;console.warn(e);}
+            logCardAuditDB(client,'REPLACEMENT_COMPLETED',{id:req.student_id,name:req.student_name},req.new_card_number,'replacement','New card activated after printing.');
+            alert('Replacement completed. The new card is now ACTIVE.'+(synced?'':'\n\n⚠️ The student file could not be updated with the new card number. Check the permissions on the students table.'));
+            await renderReplacementCenter(); renderStudentList(); updateCardSecurityStats();
+        }catch(e){alert('Could not complete replacement:\n'+replacementErrorText(e));}
+        finally{replacementBusy=false;}
+    }
+
+    // ---------- Replacement Center screens ----------
+    async function openReplacementCenter(){
+        if(!replacementCanManage()){alert('Only the owner or authorized admin can manage the Card Replacement Center.');return;}
+        const m=document.getElementById('replacementCenterModal'); if(m)m.classList.add('open'); await renderReplacementCenter();
+    }
+    function closeReplacementCenter(){document.getElementById('replacementCenterModal')?.classList.remove('open');}
+    async function renderReplacementCenter(){
+        const body=document.getElementById('replacementCenterBody'); if(!body)return;
+        body.innerHTML='<div class="text-sm py-8 text-center" style="color:var(--text-muted)">Loading replacement center…</div>';
+        try{
+            const rows=await loadReplacementRequests();
+            const counts={Submitted:0,'Under Review':0,Approved:0,Rejected:0,Completed:0}; rows.forEach(r=>{if(counts[r.request_status]!==undefined)counts[r.request_status]++;});
+            const feeCount={Paid:0,Pending:0,Unpaid:0}; rows.forEach(r=>{if(Number(r.fee_etb||0)>0&&r.request_status!=='Rejected'&&feeCount[r.fee_status]!==undefined)feeCount[r.fee_status]++;});
+            const rowHtml=r=>{
+                const pending=(r.request_status==='Submitted'||r.request_status==='Under Review');
+                const feeDue=Number(r.fee_etb||0)>0;
+                return `<div class="replacement-request-row"><div><div class="font-bold">${escapeHtml(r.student_name||r.student_id)}</div><div class="text-[9px] mt-1" style="color:var(--text-muted)">${escapeHtml(r.student_id||'—')} · ${escapeHtml(r.current_card_number||'—')}${r.new_card_number?' → '+escapeHtml(r.new_card_number):''} · ${escapeHtml(r.reason||'—')}</div></div>
+                  <div>${replacementStatusPill(r.request_status)}</div>
+                  <div><div class="font-bold">${feeDue?Number(r.fee_etb).toLocaleString()+' ETB':'Free'}</div>${feeDue?`<div class="mt-1">${replacementFeePill(r.fee_etb,r.fee_status)}</div>`:''}</div>
+                  <div class="flex flex-wrap gap-1">${pending?`<button class="feature-btn px-2 py-1 rounded-lg text-[9px] font-bold" onclick="approveReplacementRequest('${r.id}')">Approve</button><button class="feature-btn px-2 py-1 rounded-lg text-[9px] font-bold" onclick="rejectReplacementRequest('${r.id}')">Reject</button>`:''}${r.request_status==='Approved'&&r.new_card_number?`<button class="gold-btn px-2 py-1 rounded-lg text-[9px] font-bold" onclick="completeReplacementPrint('${r.id}')">Activate after Print</button>`:''}${feeDue&&r.fee_status!=='Paid'&&r.request_status!=='Rejected'?`<button class="feature-btn px-2 py-1 rounded-lg text-[9px] font-bold" onclick="markReplacementPaid('${r.id}')">Mark Paid</button>`:''}<button class="feature-btn px-2 py-1 rounded-lg text-[9px] font-bold" onclick="viewReplacementRequest('${r.id}')">View</button></div></div>`;
+            };
+            body.innerHTML=`<div class="flex flex-wrap justify-between items-center gap-2 mb-4"><div><div class="font-bold">Replacement Requests</div><div class="text-[10px]" style="color:var(--text-muted)">300 ETB for Lost, Damaged, Photo update &amp; Information update · other reasons are free</div></div><button type="button" class="gold-btn px-4 py-2 rounded-xl text-xs font-bold" onclick="renderReplacementRequestForm()">＋ New Request</button></div>
+              <div class="replacement-grid mb-2"><div class="replacement-kpi"><div class="text-[9px]" style="color:var(--text-muted)">Pending</div><div class="font-black text-lg">${counts.Submitted+counts['Under Review']}</div></div><div class="replacement-kpi"><div class="text-[9px]" style="color:var(--text-muted)">Approved</div><div class="font-black text-lg">${counts.Approved}</div></div><div class="replacement-kpi"><div class="text-[9px]" style="color:var(--text-muted)">Rejected</div><div class="font-black text-lg">${counts.Rejected}</div></div><div class="replacement-kpi"><div class="text-[9px]" style="color:var(--text-muted)">Completed</div><div class="font-black text-lg">${counts.Completed}</div></div></div>
+              <div class="text-[10px] mb-3" style="color:var(--text-muted)">💰 Fees: <b style="color:#22c55e">${feeCount.Paid} Paid</b> · <b style="color:#f59e0b">${feeCount.Pending} Pending</b> · <b style="color:#ef4444">${feeCount.Unpaid} Unpaid</b></div>
+              <div>${rows.length?rows.map(rowHtml).join(''):'<div class="text-sm py-10 text-center" style="color:var(--text-muted)">No replacement requests yet.</div>'}</div>`;
+        }catch(e){body.innerHTML=`<div class="rounded-xl p-4 border" style="border-color:rgba(239,68,68,.35)"><div class="font-bold" style="color:#ef4444">Could not load Replacement Center</div><div class="text-xs mt-1" style="color:var(--text-muted)">${escapeHtml(replacementErrorText(e)).replace(/\n/g,'<br>')}</div></div>`;}
+    }
+    function renderReplacementRequestForm(prefill){
+        prefill=(prefill&&typeof prefill==='object'&&!prefill.target)?prefill:{};
+        // Opened from a selected student? Start with that student's ID.
+        if(!prefill.student_id){try{const sel=getSelectedStudentsOrdered()[0];if(sel)prefill={...prefill,student_id:sel.id};}catch(e){}}
+        replacementStudent=null; replacementLookupSeq++;
+        document.getElementById('replacementCenterBody').innerHTML=replacementRequestForm(prefill);
+        if(prefill.student_id)runReplacementLookup(true);
+    }
+    async function viewReplacementRequest(id){
+        try{
+            const client=await getReplacementClient();
+            const q=await client.from(REPL_TABLE).select('*').eq('id',id).single(); if(q.error)throw q.error;
+            const r=q.data, feeDue=Number(r.fee_etb||0)>0;
+            const payPanel=(feeDue&&replacementCanManage())?`<div class="mt-4 rounded-xl p-3 border" style="border-color:var(--border)"><div class="text-[9px]" style="color:var(--text-muted)">Fee payment</div>
+                <div class="grid md:grid-cols-[1fr_1fr_auto] gap-3 mt-2 items-end">
+                  <div><label class="text-[10px] font-bold">Payment status</label><select id="replacementPayStatus" class="lux-input w-full px-3 py-2 rounded-xl text-sm mt-1">${REPLACEMENT_PAYMENT_STATUSES.map(s=>`<option value="${s}" ${(r.fee_status===s)?'selected':''}>${s==='Pending'?'Pending (awaiting confirmation)':s}</option>`).join('')}</select></div>
+                  <div><label class="text-[10px] font-bold">Receipt / payment reference</label><input id="replacementPayRef" class="lux-input w-full px-3 py-2 rounded-xl text-sm mt-1" value="${escapeHtml(r.payment_reference||'')}" placeholder="Optional"></div>
+                  <button type="button" class="gold-btn px-4 py-2 rounded-xl text-xs font-bold" onclick="saveReplacementPayment('${r.id}')">Save payment</button>
+                </div></div>`:'';
+            document.getElementById('replacementCenterBody').innerHTML=`<div class="flex justify-between items-center mb-3"><div class="font-bold">Replacement Request</div><button class="feature-btn px-3 py-2 rounded-xl text-xs font-bold" onclick="renderReplacementCenter()">← Back</button></div>
+              <div class="grid md:grid-cols-2 gap-3">
+                <div class="replacement-kpi"><div class="text-[9px]" style="color:var(--text-muted)">Student</div><div class="font-bold">${escapeHtml(r.student_name||'—')}</div><div class="text-[10px]">${escapeHtml(r.student_id||'—')}</div></div>
+                <div class="replacement-kpi"><div class="text-[9px]" style="color:var(--text-muted)">Card</div><div class="font-bold">${escapeHtml(r.current_card_number||'—')}</div><div class="text-[10px]">${escapeHtml(r.new_card_number||'No new card yet')}</div></div>
+                <div class="replacement-kpi"><div class="text-[9px]" style="color:var(--text-muted)">Reason</div><div class="font-bold">${escapeHtml(r.reason||'—')}</div><div class="text-[10px] mt-1">Fee: ${feeDue?Number(r.fee_etb).toLocaleString()+' ETB':'Free'} ${feeDue?replacementFeePill(r.fee_etb,r.fee_status):''}</div>${r.payment_reference?`<div class="text-[10px] mt-1">Ref: ${escapeHtml(r.payment_reference)}</div>`:''}${r.fee_paid_at?`<div class="text-[10px] mt-1">Paid on ${escapeHtml(new Date(r.fee_paid_at).toLocaleString())}</div>`:''}</div>
+                <div class="replacement-kpi"><div class="text-[9px]" style="color:var(--text-muted)">Status</div><div class="mt-1">${replacementStatusPill(r.request_status)}</div></div>
+              </div>${payPanel}
+              <div class="mt-4 rounded-xl p-3 border" style="border-color:var(--border)"><div class="text-[9px]" style="color:var(--text-muted)">Description</div><div class="text-sm mt-1">${escapeHtml(r.description||'No description')}</div><div class="text-[9px] mt-3" style="color:var(--text-muted)">Requester</div><div class="text-sm">${escapeHtml(r.requester_name||'—')} · ${escapeHtml(r.requester_phone||'—')}</div>${r.rejection_reason?`<div class="text-[9px] mt-3" style="color:#ef4444">Rejection reason</div><div class="text-sm">${escapeHtml(r.rejection_reason)}</div>`:''}</div>`;
+        }catch(e){alert(replacementErrorText(e));}
+    }
+    async function openSelectedCardProfile(){
+        const s=getSelectedStudentsOrdered()[0]; if(!s){alert('Select one student first.');return;} const r=ensureCardRecord(s); const client=await waitForSupabase().catch(()=>null); let dbCard=null,history=[];
+        if(client){try{const q=await client.from('mhss_student_id_cards').select('*').eq('student_id',s.id).order('version',{ascending:true});if(!q.error){history=q.data||[];dbCard=history.find(x=>x.is_current)||history[history.length-1]||null;}}catch(e){}}
+        const current=dbCard||r; const timeline=(history.length?history:([r].filter(Boolean))).map(c=>`<div class="replacement-timeline-item"><div class="font-bold">${escapeHtml(c.card_number||r.cardNumber||'—')} · V${escapeHtml(c.version||r.version||1)}</div><div class="text-[9px] mt-1">${escapeHtml(c.status||r.status||'—')} · ${c.issued_at?escapeHtml(new Date(c.issued_at).toLocaleString()):'—'}</div></div>`).join('');
+        const body=document.getElementById('cardHistoryBody'),box=document.getElementById('cardVerifyBox'),modal=document.getElementById('cardHistoryModal'); box.classList.add('hidden');document.getElementById('cardHistoryTitle').textContent='👤 Student Card Profile';document.getElementById('cardVerifyResult').textContent='Permanent student identity + physical card lifecycle.';body.innerHTML=`<div class="grid md:grid-cols-[110px_1fr] gap-4"><img src="${getPhotoUrl(s)}" style="width:110px;height:110px;border-radius:18px;object-fit:cover"><div><div class="font-black text-lg">${escapeHtml(s.name)}</div><div class="text-xs mt-1" style="color:var(--text-muted)">${escapeHtml(s.id)} · ${escapeHtml(s.className||'—')}</div><div class="grid grid-cols-2 gap-3 mt-4"><div><div class="text-[9px]" style="color:var(--text-muted)">Current Card</div><div class="font-bold">${escapeHtml(current.card_number||current.cardNumber||'Not Issued')}</div></div><div><div class="text-[9px]" style="color:var(--text-muted)">Status</div><div class="font-bold">${escapeHtml(current.status||'Not Issued')}</div></div></div></div></div><div class="mt-5"><div class="font-bold text-sm">Card Lifecycle</div><div class="replacement-timeline mt-3"><div class="replacement-timeline-item"><div class="font-bold">NOT ISSUED</div><div class="text-[9px]" style="color:var(--text-muted)">No physical card record</div></div><div class="replacement-timeline-item"><div class="font-bold">GENERATED</div><div class="text-[9px]" style="color:var(--text-muted)">Unique MHSS physical card number created</div></div><div class="replacement-timeline-item"><div class="font-bold">PRINTED</div><div class="text-[9px]" style="color:var(--text-muted)">Physical card print stage</div></div><div class="replacement-timeline-item"><div class="font-bold">ACTIVE</div><div class="text-[9px]" style="color:var(--text-muted)">Current card accepted for verification</div></div>${timeline}</div></div><div class="flex flex-wrap gap-2 mt-5"><button class="feature-btn px-3 py-2 rounded-xl text-xs font-bold" onclick="verifyCardByBarcode();document.getElementById('verifyCardInput').value='${escapeHtml(current.card_number||current.cardNumber||s.id)}';runCardVerification()">🔎 Verify</button><button class="gold-btn px-3 py-2 rounded-xl text-xs font-bold" onclick="closeCardHistory();openReplacementCenter().then(renderReplacementRequestForm)">♻️ Replacement Request</button></div>`;modal.classList.add('open');
+    }
     function openCardHistory(){document.getElementById('cardVerifyBox').classList.add('hidden');document.getElementById('cardHistoryTitle').textContent='📜 Card History & Audit Trail';document.getElementById('cardVerifyResult').textContent='Issuance, replacement, status and print actions.';const a=getCardAudit().slice().reverse();document.getElementById('cardHistoryBody').innerHTML=a.length?a.map(x=>`<div class="card-history-row"><div class="font-bold">${escapeHtml(x.action)}</div><div><b>${escapeHtml(x.cardNumber||'—')}</b> · ${escapeHtml(x.studentName||x.studentId||'—')}<div class="text-[9px] mt-1" style="color:var(--text-muted)">${escapeHtml(x.details||'')}</div></div><div style="color:var(--text-muted)">${escapeHtml(new Date(x.at).toLocaleString())}</div></div>`).join(''):'<div class="text-sm py-8 text-center" style="color:var(--text-muted)">No audit history yet.</div>';document.getElementById('cardHistoryModal').classList.add('open');}
     function closeCardHistory(){stopCardScanner();document.getElementById('cardHistoryModal').classList.remove('open');}
     function exportCardAudit(){const blob=new Blob([JSON.stringify(getCardAudit(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`MHSS-ID-Card-Audit-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);}
@@ -1255,6 +1724,7 @@
                   <div class="text-sm font-semibold amharic truncate">${escapeHtml(s.name)}</div>
                   <div class="text-[10px] font-mono truncate" style="color:var(--text-muted)">${escapeHtml(s.id)} · ${escapeHtml(s.className)}</div>
                 </div>
+                <button type="button" class="feature-btn px-2 py-1 rounded-lg text-[9px] font-bold flex-shrink-0" onclick="event.stopPropagation(); selectedIds.clear(); selectedIds.add('${escapeHtml(s.id)}'); openSelectedCardProfile()">👤 Card</button>
                 ${!hasStudentPhoto(s) ? '<span class="photo-missing-badge">NO PHOTO</span>' : ''}
                 <select class="status-select lux-input text-[10px] rounded-lg px-1 py-1" onchange="setStudentStatus('${escapeHtml(s.id)}', this.value)" onclick="event.stopPropagation()">
                   ${['Not Printed','Printed','Replacement Required','Lost','Damaged'].map(v => `<option value="${v}" ${getStudentStatus(s)===v?'selected':''}>${v}</option>`).join('')}
@@ -1302,16 +1772,94 @@
         const grid = document.getElementById('individualPreviewGrid');
         grid.innerHTML = `<div class="individual-card-wrap"><div class="text-xs font-bold mb-2">FRONT</div>${buildIdCardFrontHTML(s,'individualFront')}</div><div class="individual-card-wrap"><div class="text-xs font-bold mb-2">BACK</div>${buildIdCardBackHTML(s,'individualBack')}</div>`;
         renderIdCardBarcode(s,'individualBack');
+        renderIdCardQR(s,'individualBack');
         document.getElementById('individualPreviewModal').classList.add('open');
     }
     function closeIndividualPreview() { document.getElementById('individualPreviewModal').classList.remove('open'); }
-    function openTestPrint() { document.getElementById('testPrintModal').classList.add('open'); }
-    function closeTestPrint() { document.getElementById('testPrintModal').classList.remove('open'); }
-    function printTestPage() {
-        const area = document.getElementById('realPrintArea');
-        area.innerHTML = document.getElementById('testPrintSheet').outerHTML;
-        document.body.classList.add('printing-test-page');
-        window.print();
+    function openPostPrintingVerification(){
+        const modal=document.getElementById('postPrintingVerificationModal');
+        const input=document.getElementById('postPrintVerifyInput');
+        const result=document.getElementById('postPrintVerifyResult');
+        const body=document.getElementById('postPrintVerifyBody');
+        if(result)result.textContent='Waiting for a printed card scan…';
+        if(body)body.innerHTML='';
+        if(modal)modal.classList.add('open');
+        setTimeout(()=>{if(input){input.value='';input.focus();}},100);
+    }
+    function closePostPrintingVerification(){
+        document.getElementById('postPrintingVerificationModal')?.classList.remove('open');
+    }
+    async function runPostPrintingVerification(){
+        const input=document.getElementById('postPrintVerifyInput');
+        const result=document.getElementById('postPrintVerifyResult');
+        const body=document.getElementById('postPrintVerifyBody');
+        const raw=String(input?.value||'').trim();
+        if(!raw){if(result)result.textContent='Enter or scan the Student ID barcode.';input?.focus();return;}
+        if(result)result.textContent='Checking printed card…';
+        if(body)body.innerHTML='';
+        let client;
+        try{client=await waitForSupabase();}catch(e){
+            if(result)result.textContent='⚠️ Database unavailable';
+            if(body)body.innerHTML='<div class="rounded-xl p-4 border text-xs" style="border-color:rgba(245,158,11,.45)">Post-print verification requires the live database connection.</div>';
+            return;
+        }
+        const parsed=parseScannedValue(raw);
+        let studentId=parsed.kind==='student'?parsed.value:null;
+        let scannedCardNumber=parsed.kind==='card'?parsed.value:null;
+        if(!studentId && parsed.kind==='card'){
+            const cr=await lookupCardInSupabase(client,parsed.value);
+            studentId=cr.card?.student_id||cr.student?.id||null;
+            if(!studentId){
+                if(result)result.textContent='❌ CARD NOT FOUND';
+                if(body)body.innerHTML=renderVerification(parsed.value,cr,{level:'invalid',title:'❌ CARD NOT FOUND',msg:'This physical card is not registered in the live database.'},'database');
+                await logCardAuditDB(client,'POST_PRINT_VERIFY_FAILED',null,parsed.value,'post-print-verification','Card not found');
+                return;
+            }
+        }
+        const sr=await client.from('students').select('id,name,class_name,grade,photo,status,id_card_number').in('id',[studentId,studentId.toUpperCase()]).limit(1);
+        const st=sr.data?.[0];
+        if(sr.error||!st){
+            if(result)result.textContent='❌ STUDENT NOT FOUND';
+            if(body)body.innerHTML='<div class="rounded-xl p-4 border text-xs" style="border-color:rgba(239,68,68,.45)">The scanned Student ID is not registered.</div>';
+            await logCardAuditDB(client,'POST_PRINT_VERIFY_FAILED',null,null,'post-print-verification','Student not found: '+studentId);
+            return;
+        }
+        const cr=await client.from('mhss_student_id_cards').select('*').eq('student_id',st.id).eq('is_current',true).maybeSingle();
+        if(cr.error){
+            if(result)result.textContent='⚠️ VERIFICATION ERROR';
+            if(body)body.innerHTML='<div class="rounded-xl p-4 border text-xs" style="border-color:rgba(245,158,11,.45)">Could not load the current physical card.</div>';
+            return;
+        }
+        const card=cr.data;
+        const status=card?.status||'Not Issued';
+        const qrCardMismatch=!!scannedCardNumber && String(card?.card_number||'').trim().toUpperCase()!==String(scannedCardNumber).trim().toUpperCase();
+        const valid=!!card && card.is_current!==false && !['Lost','Damaged','Expired','Replaced','Replacement Required'].includes(status) && !qrCardMismatch;
+        const printed=status==='Printed';
+        const title=valid?'✓ CARD VERIFIED':'✕ CARD NOT VALID';
+        const msg=!card?'No current physical card is registered for this student.':qrCardMismatch?`The scanned QR card number (${scannedCardNumber}) does not match the current card (${card.card_number||'—'}).`:!valid?`Current card status is ${status}. Do not accept this card.`:`The scanned physical card number matches the current student record.`;
+        if(result)result.textContent=title;
+        if(body){
+            const border=valid?'rgba(34,197,94,.45)':'rgba(239,68,68,.45)';
+            const photo=getPhotoUrl({photo:st.photo,name:st.name});
+            body.innerHTML=`<div class="rounded-xl p-4 border" style="border-color:${border}">
+                <div class="flex gap-3 items-center"><img src="${photo}" alt="" style="width:68px;height:68px;border-radius:12px;object-fit:cover"><div><div class="text-sm font-bold">${escapeHtml(st.name)}</div><div class="text-[10px] mt-1" style="color:var(--text-muted)">${escapeHtml([st.class_name,st.grade].filter(Boolean).join(' · '))}</div></div></div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-3 border-t" style="border-color:var(--border)"><div><div class="text-[9px]" style="color:var(--text-muted)">STUDENT ID</div><div class="font-bold text-xs break-all">${escapeHtml(st.id)}</div></div><div><div class="text-[9px]" style="color:var(--text-muted)">PHYSICAL CARD</div><div class="font-bold text-xs break-all">${escapeHtml(card?.card_number||'—')}</div></div><div><div class="text-[9px]" style="color:var(--text-muted)">VERSION</div><div class="font-bold text-xs">V${escapeHtml(card?.version||1)}</div></div><div><div class="text-[9px]" style="color:var(--text-muted)">STATUS</div><div class="font-bold text-xs">${escapeHtml(status)}</div></div></div>
+                <div class="mt-4 pt-3 border-t text-xs" style="border-color:var(--border)">${valid?(scannedCardNumber?'✓ QR card number matches the current physical card.':'✓ Current physical card matches the student record.'):'⚠ The card cannot be confirmed as a valid current card.'}</div>
+                ${valid?`<button type="button" class="gold-btn w-full mt-4 py-2.5 rounded-xl text-sm font-bold" onclick="confirmPostPrintingVerification('${escapeHtml(st.id)}','${escapeHtml(card.card_number||'')}','${escapeHtml(card.version||1)}')">✓ Confirm Printed Card</button>`:''}
+            </div>`;
+        }
+        await logCardAuditDB(client,valid?'POST_PRINT_VERIFIED':'POST_PRINT_VERIFY_FAILED',{id:st.id,name:st.name},card?.card_number||null,'post-print-verification',valid?`Printed card verified successfully${printed?' (status PRINTED)':''}`:msg);
+        addCardAudit(valid?'POST_PRINT_VERIFIED':'POST_PRINT_VERIFY_FAILED',{id:st.id,name:st.name},card?.card_number||null,msg);
+        input?.select();
+    }
+    async function confirmPostPrintingVerification(studentId,cardNumber,version){
+        let client;
+        try{client=await waitForSupabase();}catch(e){return;}
+        const {error}=await logCardAuditDB(client,'POST_PRINT_CONFIRMED',{id:studentId,name:''},cardNumber,'post-print-verification',`Physical card confirmed after printing · Version ${version}`);
+        addCardAudit('POST_PRINT_CONFIRMED',{id:studentId,name:''},cardNumber,`Physical card confirmed after printing · Version ${version}`);
+        const result=document.getElementById('postPrintVerifyResult');
+        if(result)result.textContent=error?'⚠️ VERIFIED, BUT AUDIT SAVE WARNING':'✓ PRINTED CARD CONFIRMED';
+        const note=document.createElement('div');note.className='rounded-xl p-3 mt-3 text-xs font-bold';note.style.cssText='border:1px solid rgba(34,197,94,.45);background:rgba(34,197,94,.08);color:#22c55e';note.textContent='✓ Post-print verification has been recorded in the card audit history.';document.getElementById('postPrintVerifyBody')?.appendChild(note);
     }
     function savePrintSettings() {
         const remember = document.getElementById('rememberPrintSettings')?.checked ?? true;
@@ -1432,7 +1980,7 @@
     }
     function renderBarcodesForPage(page, uidPrefix) {
         if (page.side !== 'back') return;
-        page.slots.forEach((s, i) => { if (s) renderIdCardBarcode(s, `${uidPrefix}${i}`); });
+        page.slots.forEach((s, i) => { if (s) { renderIdCardBarcode(s, `${uidPrefix}${i}`); renderIdCardQR(s, `${uidPrefix}${i}`); } });
     }
 
     // ==========================================
@@ -1562,12 +2110,6 @@
     }
 
     window.addEventListener('afterprint', async () => {
-        if (document.body.classList.contains('printing-test-page')) {
-            document.body.classList.remove('printing-test-page');
-            document.getElementById('realPrintArea').innerHTML = '';
-            closeTestPrint();
-            return;
-        }
         document.body.classList.remove('printing-bulk-id-cards');
         const stage = duplexPrintStage;
         const btn = document.getElementById('printBtn');

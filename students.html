@@ -3024,6 +3024,45 @@ html[data-theme="dark"] .view-lux-modal{
             }
         }
 
+        // Keeps the ID card number in sync when a card is replaced in print-id-cards.html.
+        // When this tab is shown again, quietly re-read only id_card_number for the open class
+        // and refresh the table / open student popup if any number changed.
+        let idCardSyncBusy = false;
+        async function syncIdCardNumbersFromDB() {
+            if (idCardSyncBusy) return;
+            idCardSyncBusy = true;
+            try {
+                const tableView = document.getElementById('studentTableView');
+                if (!currentClassStr || !studentsData.length || !tableView || tableView.classList.contains('hidden')) return;
+                const client = await waitForSupabase();
+                const { data, error } = await client.from('students').select('id,id_card_number').eq('class_name', currentClassStr);
+                if (error || !data) return;
+                let changed = false;
+                data.forEach(row => {
+                    const s = studentsData.find(x => x.id === row.id);
+                    if (s && (s.idCardNumber || null) !== (row.id_card_number || null)) { s.idCardNumber = row.id_card_number; changed = true; }
+                });
+                if (!changed) return;
+                renderTable();
+                const viewModal = document.getElementById('viewStudentModal');
+                if (currentViewId && viewModal && !viewModal.classList.contains('hidden')) {
+                    const cur = studentsData.find(x => x.id === currentViewId);
+                    if (cur) document.getElementById('vIdCardNumber').textContent = cur.idCardNumber || '-';
+                }
+                if (editModeId) {
+                    const cur = studentsData.find(x => x.id === editModeId);
+                    const field = document.getElementById('sIdCardNumber');
+                    if (cur && field) field.value = cur.idCardNumber || '';
+                }
+            } catch (e) {
+                /* background refresh only - ignore errors */
+            } finally {
+                idCardSyncBusy = false;
+            }
+        }
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncIdCardNumbersFromDB(); });
+        window.addEventListener('focus', syncIdCardNumbersFromDB);
+
         // 3. UI Navigation
         async function openClass(className, idPrefix) {
             currentClassStr = className;
