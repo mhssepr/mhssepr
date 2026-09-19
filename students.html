@@ -1847,6 +1847,45 @@ html[data-theme="dark"] .view-lux-modal{
     <!-- ==========================================
          3. STUDENT REGISTRATION POPUP (Medium, Luxury)
     =========================================== -->
+    <!-- ==========================================
+         STUDENT TYPE SELECTION — shown before registration
+    =========================================== -->
+    <div id="studentTypeModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] modal-overlay modal-hidden-state hidden flex justify-center items-center p-4 no-print">
+        <div class="modal-panel luxury-modal w-full max-w-lg rounded-3xl relative overflow-hidden">
+            <div class="p-6 border-b border-yellow-500/15 bg-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-yellow-500 text-black flex items-center justify-center text-xl">👤</div>
+                    <div>
+                        <h2 class="text-xl font-black">Student Type / የተማሪ አይነት</h2>
+                        <p class="text-xs text-gray-400 mt-1">Choose the student type before continuing.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button type="button" onclick="selectStudentType('New')"
+                    class="group rounded-2xl border border-yellow-500/30 bg-yellow-500/10 hover:bg-yellow-500/20 p-6 text-left transition">
+                    <div class="text-3xl mb-3">🆕</div>
+                    <div class="font-black text-lg">New</div>
+                    <div class="text-sm text-gray-400 mt-1">አዲስ</div>
+                    <div class="text-[11px] text-gray-500 mt-3">Newly registering student</div>
+                </button>
+                <button type="button" onclick="selectStudentType('Old')"
+                    class="group rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 p-6 text-left transition">
+                    <div class="text-3xl mb-3">🔄</div>
+                    <div class="font-black text-lg">Old</div>
+                    <div class="text-sm text-gray-400 mt-1">ነባር</div>
+                    <div class="text-[11px] text-gray-500 mt-3">Existing/returning MHSS student</div>
+                </button>
+            </div>
+            <div class="px-6 pb-6">
+                <button type="button" onclick="closeModal('studentTypeModal')"
+                    class="w-full rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 py-3 text-sm font-bold transition">
+                    Cancel / ይቅር
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="addStudentModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 modal-overlay modal-hidden-state hidden flex justify-center items-center overflow-y-auto no-print">
         <div class="modal-panel luxury-modal w-11/12 max-w-4xl rounded-2xl relative overflow-hidden my-6 max-h-[94vh] flex flex-col">
 
@@ -1859,6 +1898,10 @@ html[data-theme="dark"] .view-lux-modal{
             </div>
 
             <form id="studentForm" class="p-6 overflow-y-auto flex flex-col gap-5">
+                <div id="profileCompletionBox" class="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-4 sticky top-0 z-10 backdrop-blur-md">
+                    <div class="flex items-center justify-between gap-3 mb-2"><div><div class="text-xs uppercase tracking-widest text-yellow-400 font-black" data-i18n="profileCompletion">Profile Completion</div><div id="profileCompletionText" class="text-[11px] text-gray-400 mt-1">0%</div></div><div id="profileMissingText" class="text-[10px] text-gray-400 text-right"></div></div>
+                    <div class="h-2 rounded-full bg-white/10 overflow-hidden"><div id="profileCompletionBar" class="h-full rounded-full bg-gradient-to-r from-yellow-600 to-yellow-300 transition-all duration-300" style="width:0%"></div></div>
+                </div>
                 <div class="flex flex-col sm:flex-row gap-6">
                     <!-- Photo Upload Area -->
                     <div class="flex flex-col items-center gap-2 flex-shrink-0 mx-auto sm:mx-0">
@@ -1884,12 +1927,14 @@ html[data-theme="dark"] .view-lux-modal{
                             </div>
                             <div>
                                 <label class="block text-[10px] text-gray-400 mb-1 amharic text-center" data-i18n="fileNumber">📁 File Number / የፋይል ቁጥር</label>
-                                <input type="text" id="sFileNumber" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none text-center" placeholder="Optional">
+                                <input type="text" id="sFileNumber" readonly class="lux-input w-full bg-white/5 border border-yellow-500/20 rounded-lg p-2 text-xs outline-none text-center text-yellow-400 font-bold" placeholder="Auto"><span class="text-[8px] text-gray-500 block text-center mt-1" data-i18n="fileAuto">Automatically assigned and permanent</span>
                             </div>
                             <div>
-                                <label class="block text-[10px] text-gray-400 mb-1 amharic text-center" data-i18n="idNumber">🪪 ID Number / መታወቂያ ቁጥር</label>
-                                <input type="text" id="sIdNumber" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs outline-none text-center" placeholder="Optional">
+                                <label class="block text-[10px] text-gray-400 mb-1 amharic text-center">🎫 ID Card Number / የመታወቂያ ካርድ ቁጥር</label>
+                                <input type="text" id="sIdCardNumber" readonly class="lux-input w-full bg-white/5 border border-yellow-500/20 rounded-lg p-2 text-sm outline-none text-center text-yellow-400 font-mono font-bold" placeholder="Generating...">
+                                <span class="text-[8px] text-gray-500 block text-center mt-1">Automatically generated for the paper ID card</span>
                             </div>
+                            <input type="hidden" id="sIdNumber">
                         </div>
                     </div>
 
@@ -1912,7 +1957,7 @@ html[data-theme="dark"] .view-lux-modal{
                                 </div>
                                 <div class="form-field">
                                     <label data-i18n="fieldChristianNameNew">Christian Name / የክርስትና ስም</label>
-                                    <input type="text" id="sChristianName" class="lux-input">
+                                    <input type="text" id="sChristianName" class="lux-input" required>
                                 </div>
                                 <div class="form-field">
                                     <label data-i18n="fieldGenderNew">Gender / ጾታ</label>
@@ -1922,21 +1967,29 @@ html[data-theme="dark"] .view-lux-modal{
                                     </select>
                                 </div>
                                 <div class="form-field">
-                                    <label data-i18n="fieldPhoneNew">Phone Number / ስልክ ቁጥር</label>
-                                    <input type="tel" id="sPhone" class="lux-input">
+                                    <label data-i18n="fieldPhoneNew">Phone Number / ስልክ ቁጥር <span class="required-mark">*</span></label>
+                                    <input type="tel" id="sPhone" class="lux-input" required>
+                                </div>
+                                <div class="form-field">
+                                    <label data-i18n="email">Email / ኢሜይል <span class="required-mark">*</span></label>
+                                    <input type="email" id="sEmail" class="lux-input" required placeholder="name@example.com">
                                 </div>
                                 <div class="form-field form-field-wide">
-                                    <label data-i18n="fieldDobNew">Date of Birth / የትውልድ ቀን (የኢትዮጵያ ካላንደር)</label>
+                                    <label data-i18n="studentType">Student Type / የተማሪ አይነት <span class="required-mark">*</span></label>
+                                    <input type="text" id="sStudentType" class="lux-input" readonly required>
+                                </div>
+                                <div class="form-field form-field-wide">
+                                    <label data-i18n="fieldDobNew">Date of Birth / የትውልድ ቀን (የኢትዮጵያ ካላንደር) <span class="required-mark">*</span></label>
                                     <div class="form-dob-row">
-                                        <select id="dobDay" class="lux-input">
+                                        <select id="dobDay" class="lux-input" required>
                                             <option>ቀን</option>
                                             <script>for(let i=1;i<=30;i++) document.write(`<option>${i}</option>`);</script>
                                         </select>
-                                        <select id="dobMonth" class="lux-input amharic bg-[#1e293b]">
+                                        <select id="dobMonth" class="lux-input amharic bg-[#1e293b]" required>
                                             <option>ወር</option>
                                             <option>መስከረም</option><option>ጥቅምት</option><option>ህዳር</option><option>ታህሳስ</option><option>ጥር</option><option>የካቲት</option><option>መጋቢት</option><option>ሚያዝያ</option><option>ግንቦት</option><option>ሰኔ</option><option>ሐምሌ</option><option>ነሐሴ</option><option>ጳጉሜ</option>
                                         </select>
-                                        <input type="number" id="dobYear" placeholder="ዓ.ም" min="1" max="9999" class="lux-input">
+                                        <input type="number" id="dobYear" placeholder="ዓ.ም" min="1" max="9999" class="lux-input" required>
                                     </div>
                                     <div class="form-age-row">
                                         <span class="form-age-label">ዕድሜ / Age</span>
@@ -1958,19 +2011,44 @@ html[data-theme="dark"] .view-lux-modal{
                             </div>
                             <div class="form-group-grid">
                                 <div class="form-field">
-                                    <label data-i18n="fieldGradeNew">Education Level / የአለማዊ ትምህርት ደረጃ</label>
-                                    <select id="sGrade" class="lux-input bg-[#1e293b]">
-                                        <option>1ኛ ክፍል</option><option>2ተኛ ክፍል</option><option>3ኛ ክፍል</option><option>4ኛ ክፍል</option>
-                                        <option>5ኛ ክፍል</option><option>6ኛ ክፍል</option><option>7ኛ ክፍል</option><option>8ኛ ክፍል</option>
-                                        <option>9ኛ ክፍል</option><option>10ኛ ክፍል</option><option>11ኛ ክፍል</option><option>12ኛ ክፍል</option>
-                                        <option>ዲግሪ (Degree)</option><option>ዲፕሎማ (Diploma)</option><option>ማስተርስ (Masters)</option>
+                                    <label>Education Type / የትምህርት አይነት</label>
+                                    <input type="text" id="sEduType" class="lux-input" value="አለማዊ ትምህርት" readonly tabindex="-1">
+                                </div>
+                                <div class="form-field">
+                                    <label>Education Level / የትምህርት ደረጃ <span class="required-mark">*</span></label>
+                                    <select id="sEduLevel" class="lux-input bg-[#1e293b]" required>
+                                        <option value="">Select / ይምረጡ</option>
+                                        <option value="Primary">Primary / አንደኛ ደረጃ (1–8)</option>
+                                        <option value="Secondary">Secondary / ሁለተኛ ደረጃ (9–12)</option>
+                                        <option value="Certificate">Certificate / ሰርተፍኬት</option>
+                                        <option value="Diploma">Diploma / ዲፕሎማ</option>
+                                        <option value="Degree">Degree / ዲግሪ</option>
+                                        <option value="Masters">Master's / ማስተርስ</option>
+                                        <option value="PhD">PhD / ዶክትሬት</option>
+                                        <option value="Other">Other / ሌላ</option>
                                     </select>
+                                    <!-- Legacy 'grade' column value, derived from the level (and grade number for Primary/Secondary). -->
+                                    <input type="hidden" id="sGrade">
+                                </div>
+                                <div id="gradeNumberWrap" class="form-field field-study-hidden">
+                                    <label>Grade / ክፍል <span class="required-mark">*</span></label>
+                                    <select id="sGradeNumber" class="lux-input bg-[#1e293b]"></select>
+                                </div>
+                                <div id="eduOtherWrap" class="form-field field-study-hidden">
+                                    <label>Please specify / እባክዎ ይግለጹ <span class="required-mark">*</span></label>
+                                    <input type="text" id="sEduOther" class="lux-input" maxlength="120">
                                 </div>
                                 <div id="fieldOfStudyWrap" class="form-field field-study-hidden">
-                                    <label data-i18n="fieldStudyNew">Field of Study / የትምህርት መስክ <span class="optional-mark">Optional</span></label>
-                                    <input type="text" id="sFieldOfStudy" class="lux-input">
+                                    <label data-i18n="fieldStudyNew">Field of Study / የትምህርት መስክ <span class="required-mark">*</span></label>
+                                    <input type="text" id="sFieldOfStudy" class="lux-input" list="dlFieldOfStudy" autocomplete="off" placeholder="Search or type / ይፈልጉ ወይም ይጻፉ">
+                                </div>
+                                <div id="institutionWrap" class="form-field field-study-hidden">
+                                    <label>University / Institution / ዩኒቨርሲቲ / ተቋም <span class="required-mark">*</span></label>
+                                    <input type="text" id="sInstitution" class="lux-input" list="dlInstitutions" autocomplete="off" placeholder="Search or type / ይፈልጉ ወይም ይጻፉ">
                                 </div>
                             </div>
+                            <datalist id="dlFieldOfStudy"></datalist>
+                            <datalist id="dlInstitutions"></datalist>
                         </section>
 
                         <!-- CHURCH INFORMATION -->
@@ -2036,16 +2114,38 @@ html[data-theme="dark"] .view-lux-modal{
                             <div class="form-group-grid form-group-grid-3">
                                 <div class="form-field">
                                     <label data-i18n="fieldRegionNew">Region / ክልል</label>
-                                    <input type="text" id="sRegion" value="አዲስ አበባ" placeholder="ክልል" class="lux-input">
+                                    <input type="text" id="sRegion" required value="አዲስ አበባ" placeholder="ክልል" class="lux-input">
                                 </div>
                                 <div class="form-field">
                                     <label data-i18n="fieldSubCityNew">Sub City / ክ/ከተማ</label>
-                                    <input type="text" id="sSubCity" value="ለሚ ኩራ" placeholder="ክ/ከተማ" class="lux-input">
+                                    <input type="text" id="sSubCity" required value="ለሚ ኩራ" placeholder="ክ/ከተማ" class="lux-input">
                                 </div>
                                 <div class="form-field">
                                     <label data-i18n="fieldWoredaNew">Woreda / ወረዳ</label>
-                                    <input type="text" id="sWoreda" value="8" placeholder="ወረዳ" class="lux-input">
+                                    <input type="text" id="sWoreda" required value="8" placeholder="ወረዳ" class="lux-input">
                                 </div>
+                            </div>
+                        </section>
+
+                        <!-- PREVIOUS SUNDAY SCHOOL -->
+                        <section class="form-group-card previous-school-card hidden" id="previousSundaySchoolSection">
+                            <div class="form-group-heading">
+                                <div class="form-group-icon">📜</div>
+                                <div><h3 data-i18n="previousSundaySchool">Previous Sunday School</h3><p data-i18n="previousSundaySchoolHelp">Complete this only if the student attended another Sunday School before.</p></div>
+                            </div>
+                            <div class="form-field mb-4">
+                                <label data-i18n="previousAttended">Did you attend a previous Sunday School? <span class="required-mark">*</span></label>
+                                <div class="flex gap-3 mt-2">
+                                    <label class="service-choice flex-1"><input type="radio" name="previousAttended" value="Yes" onchange="togglePreviousSchool(true)"><span data-i18n="previousYes">Yes</span></label>
+                                    <label class="service-choice flex-1"><input type="radio" name="previousAttended" value="No" onchange="togglePreviousSchool(false)"><span data-i18n="previousNo">No</span></label>
+                                </div>
+                            </div>
+                            <div id="previousSchoolFields" class="form-group-grid opacity-50 pointer-events-none" aria-disabled="true">
+                                <div class="form-field"><label data-i18n="previousSchoolName">Previous Sunday School Name</label><input id="sPreviousSchoolName" type="text" class="lux-input" disabled></div>
+                                <div class="form-field"><label data-i18n="previousLeavingReason">Reason for Leaving</label><input id="sPreviousLeavingReason" type="text" class="lux-input" disabled></div>
+                                <div class="form-field"><label data-i18n="previousReleaseNumber">Release / Transfer Certificate No.</label><input id="sPreviousReleaseNumber" type="text" class="lux-input" disabled></div>
+                                <div class="form-field"><label data-i18n="previousAttachmentNumber">Physical File Attachment No.</label><input id="sPreviousAttachmentNumber" type="text" class="lux-input" disabled></div>
+                                <div class="form-field form-field-wide"><label data-i18n="previousOtherInfo">Other Essential Information</label><textarea id="sPreviousOtherInfo" rows="3" class="lux-input" disabled></textarea></div>
                             </div>
                         </section>
 
@@ -2060,20 +2160,20 @@ html[data-theme="dark"] .view-lux-modal{
                             </div>
                             <div class="form-group-grid">
                                 <div class="form-field">
-                                    <label data-i18n="fieldMotherNameNew">Mother Name / የእናት ስም</label>
-                                    <input type="text" id="mName" class="lux-input">
+                                    <label data-i18n="fieldMotherNameNew">Mother Name / የእናት ስም <span class="required-mark">*</span></label>
+                                    <input type="text" id="mName" class="lux-input" required>
                                 </div>
                                 <div class="form-field">
-                                    <label data-i18n="fieldMotherPhoneNew">Mother Phone / የእናት ስልክ</label>
-                                    <input type="tel" id="mPhone" class="lux-input">
+                                    <label data-i18n="fieldMotherPhoneNew">Mother Phone / የእናት ስልክ <span class="required-mark">*</span></label>
+                                    <input type="tel" id="mPhone" class="lux-input" required>
                                 </div>
                                 <div class="form-field">
-                                    <label data-i18n="fieldFatherNameNew">Father Name / የአባት ስም</label>
-                                    <input type="text" id="fName" class="lux-input">
+                                    <label data-i18n="fieldFatherNameNew">Father Name / የአባት ስም <span class="required-mark">*</span></label>
+                                    <input type="text" id="fName" class="lux-input" required>
                                 </div>
                                 <div class="form-field">
-                                    <label data-i18n="fieldFatherPhoneNew">Father Phone / የአባት ስልክ</label>
-                                    <input type="tel" id="fPhone" class="lux-input">
+                                    <label data-i18n="fieldFatherPhoneNew">Father Phone / የአባት ስልክ <span class="required-mark">*</span></label>
+                                    <input type="tel" id="fPhone" class="lux-input" required>
                                 </div>
                             </div>
                         </section>
@@ -2089,11 +2189,11 @@ html[data-theme="dark"] .view-lux-modal{
                             </div>
                             <div class="form-group-grid">
                                 <div class="form-field">
-                                    <label data-i18n="fieldEmergencyNameNew">Emergency Contact Name / የአደጋ ጊዜ ተጠሪ ስም</label>
+                                    <label data-i18n="fieldEmergencyNameNew">Emergency Contact Name / የአደጋ ጊዜ ተጠሪ ስም <span class="required-mark">*</span></label>
                                     <input type="text" id="eName" class="lux-input emergency-input">
                                 </div>
                                 <div class="form-field">
-                                    <label data-i18n="fieldEmergencyPhoneNew">Emergency Contact Phone / የአደጋ ጊዜ ተጠሪ ስልክ</label>
+                                    <label data-i18n="fieldEmergencyPhoneNew">Emergency Contact Phone / የአደጋ ጊዜ ተጠሪ ስልክ <span class="required-mark">*</span></label>
                                     <input type="tel" id="ePhone" class="lux-input emergency-input">
                                 </div>
                             </div>
@@ -2104,7 +2204,7 @@ html[data-theme="dark"] .view-lux-modal{
                             <div class="form-group-heading">
                                 <div class="form-group-icon service-group-icon">🤝</div>
                                 <div>
-                                    <h3 data-i18n="serviceDepartmentsTitle">ማገልገል የሚፈልጉበት ክፍል</h3>
+                                    <h3 data-i18n="serviceDepartmentsTitle">ማገልገል የሚፈልጉበት ክፍል <span class="required-mark">*</span></h3>
                                     <p data-i18n="serviceDepartmentsHelp">Choose up to 3 departments / እስከ 3 ክፍሎች ይምረጡ</p>
                                 </div>
                                 <div id="serviceCount" class="selection-count">0 / 3</div>
@@ -2124,33 +2224,49 @@ html[data-theme="dark"] .view-lux-modal{
                         <!-- SKILLS & TALENTS -->
                         <section class="form-group-card skills-group-card">
                             <div class="form-group-heading">
-                                <div class="form-group-icon skills-group-icon">✦</div>
+                                <div class="form-group-icon skills-group-icon">🎨</div>
                                 <div>
-                                    <h3 data-i18n="skillsTalents">Skills &amp; Talents</h3>
+                                    <h3 data-i18n="skillsTalents">Skills &amp; Talents <span class="required-mark">*</span></h3>
                                     <p data-i18n="skillsHelp">Select all that apply / የሚመለከቱትን ሁሉ ይምረጡ</p>
                                 </div>
                             </div>
-                            <div class="modern-skill-grid clean-skill-grid" id="skillsTalentsGrid">
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Singing"><span>Singing</span><small>ዝማሬ</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Instrument"><span>Instrument</span><small>የዜማ መሳሪያ</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Preaching"><span>Preaching</span><small>ስብከት</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Bible Knowledge"><span>Bible Knowledge</span><small>የመጽሐፍ ቅዱስ እውቀት</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Prayer/Intercession"><span>Prayer / Intercession</span><small>ጸሎት / ምልጃ</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Teaching"><span>Teaching</span><small>ትምህርት ማስተማር</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Evangelism"><span>Evangelism</span><small>ወንጌል ማስተላለፍ</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="IT"><span>IT</span><small>ኢንፎርሜሽን ቴክኖሎጂ</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Art"><span>Art</span><small>ሥነ ጥበብ</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Sports"><span>Sports</span><small>ስፖርት</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Leadership"><span>Leadership</span><small>አመራር</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Drama/Acting"><span>Drama / Acting</span><small>ድራማ / ትወና</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Writing"><span>Writing</span><small>ጽሑፍ</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Public Speaking"><span>Public Speaking</span><small>የሕዝብ ንግግር</small></label>
-                                <label class="modern-choice"><input type="checkbox" name="skillsTalents" value="Photography/Video"><span>Photography / Video</span><small>ፎቶግራፍ / ቪዲዮ</small></label>
-                                <label class="modern-choice"><input type="checkbox" id="skillOtherTalent" name="skillsTalents" value="Other Talent"><span>Other Talent</span><small>ሌላ ተሰጥኦ</small></label>
+                            <h4 class="text-[11px] font-black uppercase tracking-wider text-yellow-500/80 mb-2">Skills / ክህሎቶች</h4>
+                            <div class="modern-skill-grid clean-skill-grid" id="skillsGrid">
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="skill" value="Photoshop"><span>Photoshop</span><small>ፎቶሾፕ</small></label>
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="skill" value="Canva"><span>Canva</span><small>ካንቫ</small></label>
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="skill" value="Video Editing"><span>Video Editing</span><small>ቪዲዮ ኤዲቲንግ</small></label>
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="skill" value="Web Development"><span>Web Development</span><small>ድረ ገጽ ልማት</small></label>
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="skill" value="Public Speaking"><span>Public Speaking</span><small>የሕዝብ ንግግር</small></label>
                             </div>
-                            <div id="otherTalentWrap" class="hidden other-talent-box">
-                                <label data-i18n="otherTalentName">Other Talent Name / ሌላ ተሰጥኦ ይግለጹ</label>
-                                <input type="text" id="sOtherTalent" class="lux-input" placeholder="Optional">
+                            <h4 class="text-[11px] font-black uppercase tracking-wider text-yellow-500/80 mt-4 mb-2">Talents / ተሰጥኦዎች</h4>
+                            <div class="modern-skill-grid clean-skill-grid" id="talentsGrid">
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="talent" value="Singing"><span>Singing</span><small>ዝማሬ</small></label>
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="talent" value="Instrument"><span>Instrument</span><small>የዜማ መሳሪያ</small></label>
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="talent" value="Writing"><span>Writing</span><small>ጽሑፍ</small></label>
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="talent" value="Drawing"><span>Drawing</span><small>ስዕል</small></label>
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="talent" value="Teaching"><span>Teaching</span><small>ማስተማር</small></label>
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="talent" value="Leadership"><span>Leadership</span><small>አመራር</small></label>
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="talent" value="Acting"><span>Acting</span><small>ትወና</small></label>
+                                    <label class="modern-choice"><input type="checkbox" name="skillsTalents" data-kind="talent" value="Poetry"><span>Poetry</span><small>ግጥም</small></label>
+                            </div>
+                            <div id="otherTalentWrap" class="other-talent-box">
+                                <label>Other skill / talent: / ሌላ ክህሎት ወይም ተሰጥኦ</label>
+                                <input type="text" id="sOtherTalent" class="lux-input" maxlength="150" placeholder="Optional">
+                            </div>
+                        </section>
+
+                        <!-- REGISTRATION + COMMITMENT -->
+                        <section class="form-group-card registration-info-card">
+                            <div class="form-group-heading"><div class="form-group-icon">📝</div><div><h3 data-i18n="registrationInfo">Registration Information</h3><p>EC date, registered by, accuracy and signature</p></div></div>
+                            <div class="form-group-grid form-group-grid-3">
+                                <div class="form-field"><label data-i18n="registrationDateEC">Registration Date (E.C.) <span class="required-mark">*</span></label><div class="form-dob-row"><select id="regDateDay" class="lux-input" required></select><select id="regDateMonth" class="lux-input amharic bg-[#1e293b]" required></select><input id="regDateYear" type="number" class="lux-input" min="1" required></div></div>
+                                <div class="form-field"><label data-i18n="registeredBy">Registered By</label><input id="sRegisteredBy" type="text" class="lux-input" readonly></div>
+                                <div class="form-field"><label>File Number</label><input id="sFileNumberConfirm" type="text" class="lux-input" readonly></div>
+                            </div>
+                            <div class="mt-5 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-4">
+                                <h4 class="font-black text-white mb-2" data-i18n="commitmentTitle">Student Data Accuracy & Commitment</h4>
+                                <label class="flex items-start gap-3 text-sm text-gray-300 cursor-pointer"><input id="sCommitment" type="checkbox" class="mt-1 accent-yellow-500" required><span data-i18n="commitmentText">I confirm that the information provided is accurate and complete.</span></label>
+                                <div class="mt-4"><div class="flex justify-between items-center mb-2"><label class="text-xs font-bold text-gray-300" data-i18n="signatureTitle">Student / Parent Signature</label><button type="button" onclick="clearSignature()" class="text-xs text-yellow-400 hover:text-yellow-300" data-i18n="clearSignature">Clear</button></div><p class="text-[10px] text-gray-500 mb-2" data-i18n="signatureHelp">Sign in the box below</p><canvas id="signatureCanvas" width="800" height="220" class="signature-canvas"></canvas><input type="hidden" id="sSignature"></div>
                             </div>
                         </section>
 
@@ -2243,6 +2359,8 @@ html[data-theme="dark"] .view-lux-modal{
                     <div class="student-detail-meta">
                         <span class="student-detail-meta-pill">🎓 <span id="vGradeClass" class="amharic"></span></span>
                         <span class="student-detail-meta-pill">ID <span id="vCodesId"></span></span>
+                        <span class="student-detail-meta-pill">📁 <span id="vFileNumber"></span></span>
+                        <span class="student-detail-meta-pill">🎫 <span id="vIdCardNumber"></span></span>
                     </div>
                 </div>
 
@@ -2271,7 +2389,10 @@ html[data-theme="dark"] .view-lux-modal{
                     <div class="student-detail-field"><span data-i18n="fieldDob">Date of Birth</span><strong id="vDob"></strong></div>
                     <div class="student-detail-field"><span data-i18n="fieldAge">Age</span><strong id="vAge"></strong></div>
                     <div class="student-detail-field"><span data-i18n="fieldFieldOfStudy">Field of Study</span><strong id="vFieldOfStudy" class="amharic"></strong></div>
+                    <div class="student-detail-field"><span>University / Institution</span><strong id="vInstitution" class="amharic"></strong></div>
                     <div class="student-detail-field wide"><span data-i18n="fieldAddress">Address</span><strong id="vAddress" class="amharic"></strong></div>
+                    <div class="student-detail-field"><span data-i18n="email">Email</span><strong id="vEmail"></strong></div>
+                    <div class="student-detail-field"><span data-i18n="studentType">Student Type</span><strong id="vStudentType"></strong></div>
                 </div>
 
                 <div class="student-detail-section-title second">
@@ -2398,6 +2519,9 @@ html[data-theme="dark"] .view-lux-modal{
         .student-detail-grid{grid-template-columns:1fr}
     }
     </style>
+<style>
+.student-type-choice{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:180px;border:1px solid rgba(255,255,255,.12);border-radius:22px;background:rgba(255,255,255,.04);color:#fff;transition:.25s ease;cursor:pointer;padding:24px}.student-type-choice:hover{border-color:rgba(212,175,55,.65);transform:translateY(-3px);background:rgba(212,175,55,.08)}.student-type-choice strong{font-size:18px}.student-type-choice small{font-size:11px;color:#94a3b8}.previous-school-card.is-locked{opacity:.72}.signature-canvas{width:100%;height:150px;background:#fff;border:1px solid rgba(212,175,55,.45);border-radius:14px;display:block;touch-action:none;cursor:crosshair}.required-mark{color:#fbbf24;font-weight:900;margin-left:3px}.profile-missing{color:#fbbf24}.profile-ok{color:#86efac}
+</style>
 
 <!-- ==========================================
          5. ULTRA LUXURY STUDENT ID CARD (Front + Back)
@@ -2527,7 +2651,8 @@ html[data-theme="dark"] .view-lux-modal{
                 studentProfile: 'Student Profile',
                 studentIdCardTitle: 'Student ID Card',
                 secPersonal: 'Personal Information',
-                formPersonalInfo: 'Personal Information', formPersonalHelp: 'Basic identity and contact information', formEducation: 'Education', formEducationHelp: 'Current academic level and field of study', formChurchInfo: 'Church Information', formChurchHelp: 'Sunday School class and spiritual information', formAddress: 'Address', formAddressHelp: 'Current residential location', formFamily: 'Family Information', formFamilyHelp: 'Parent and family contact details', formEmergencyHelp: 'Person to contact in an emergency', fieldFullName: 'Full Name / ሙሉ ስም', fieldChristianNameNew: 'Christian Name / የክርስትና ስም', fieldGenderNew: 'Gender / ጾታ', fieldPhoneNew: 'Phone Number / ስልክ ቁጥር', fieldDobNew: 'Date of Birth / የትውልድ ቀን (የኢትዮጵያ ካላንደር)', fieldGradeNew: 'Education Level / የአለማዊ ትምህርት ደረጃ', fieldStudyNew: 'Field of Study / የትምህርት መስክ', fieldSundaySchoolGrade: 'Sunday School Education Level / የሰንበት ት/ቤት የትምህርት ደረጃ', fieldConfessionFatherNameNew: 'Confession Father Name / የንስሐ አባት ስም', fieldConfessionFatherPhoneNew: 'Confession Father Phone / የንስሐ አባት ስልክ', fieldRegionNew: 'Region / ክልል', fieldSubCityNew: 'Sub City / ክ/ከተማ', fieldWoredaNew: 'Woreda / ወረዳ', fieldMotherNameNew: 'Mother Name / የእናት ስም', fieldMotherPhoneNew: 'Mother Phone / የእናት ስልክ', fieldFatherNameNew: 'Father Name / የአባት ስም', fieldFatherPhoneNew: 'Father Phone / የአባት ስልክ', fieldEmergencyNameNew: 'Emergency Contact Name / የአደጋ ጊዜ ተጠሪ ስም', fieldEmergencyPhoneNew: 'Emergency Contact Phone / የአደጋ ጊዜ ተጠሪ ስልክ',
+                formPersonalInfo: 'Personal Information', formPersonalHelp: 'Basic identity and contact information',
+                 email: 'Email', emailHelp: 'A valid email address is required', studentType: 'Student Type', studentTypeNew: '🆕 New / አዲስ', studentTypeOld: '🔄 Old / ነባር', previousSundaySchool: 'Previous Sunday School', previousSundaySchoolHelp: 'Complete this only if the student attended another Sunday School before.', previousAttended: 'Did you attend a previous Sunday School?', previousYes: 'Yes', previousNo: 'No', previousSchoolName: 'Previous Sunday School Name', previousLeavingReason: 'Reason for Leaving', previousReleaseNumber: 'Release / Transfer Certificate No.', previousAttachmentNumber: 'Physical File Attachment No.', previousOtherInfo: 'Other Essential Information', commitmentTitle: 'Student Data Accuracy & Commitment', commitmentText: 'I confirm that the information provided is accurate and complete. I understand that the Sunday School may use this information for student administration and ministry purposes.', signatureTitle: 'Student / Parent Signature', signatureHelp: 'Sign in the box below', clearSignature: 'Clear', registrationInfo: 'Registration Information', registrationDateEC: 'Registration Date (E.C.)', registeredBy: 'Registered By', registeredByValue: 'Meserete Hiwot Sunday School / የመሠረተ ሕይወት ሰንበት ት/ቤት', profileCompletion: 'Profile Completion', requiredMissing: 'Required fields missing', previousLocked: 'Locked until Yes is selected', fileAuto: 'Automatically assigned and permanent', formEducation: 'Education', formEducationHelp: 'Current academic level and field of study', formChurchInfo: 'Church Information', formChurchHelp: 'Sunday School class and spiritual information', formAddress: 'Address', formAddressHelp: 'Current residential location', formFamily: 'Family Information', formFamilyHelp: 'Parent and family contact details', formEmergencyHelp: 'Person to contact in an emergency', fieldFullName: 'Full Name / ሙሉ ስም', fieldChristianNameNew: 'Christian Name / የክርስትና ስም', fieldGenderNew: 'Gender / ጾታ', fieldPhoneNew: 'Phone Number / ስልክ ቁጥር', fieldDobNew: 'Date of Birth / የትውልድ ቀን (የኢትዮጵያ ካላንደር)', fieldGradeNew: 'Education Level / የአለማዊ ትምህርት ደረጃ', fieldStudyNew: 'Field of Study / የትምህርት መስክ', fieldSundaySchoolGrade: 'Sunday School Education Level / የሰንበት ት/ቤት የትምህርት ደረጃ', fieldConfessionFatherNameNew: 'Confession Father Name / የንስሐ አባት ስም', fieldConfessionFatherPhoneNew: 'Confession Father Phone / የንስሐ አባት ስልክ', fieldRegionNew: 'Region / ክልል', fieldSubCityNew: 'Sub City / ክ/ከተማ', fieldWoredaNew: 'Woreda / ወረዳ', fieldMotherNameNew: 'Mother Name / የእናት ስም', fieldMotherPhoneNew: 'Mother Phone / የእናት ስልክ', fieldFatherNameNew: 'Father Name / የአባት ስም', fieldFatherPhoneNew: 'Father Phone / የአባት ስልክ', fieldEmergencyNameNew: 'Emergency Contact Name / የአደጋ ጊዜ ተጠሪ ስም', fieldEmergencyPhoneNew: 'Emergency Contact Phone / የአደጋ ጊዜ ተጠሪ ስልክ',
                 secChurch: 'Church Information',
                 secParent: 'Parent Information',
                 secEmergency: 'Emergency Information',
@@ -2582,7 +2707,8 @@ html[data-theme="dark"] .view-lux-modal{
                 studentProfile: 'የተማሪ መረጃ',
                 studentIdCardTitle: 'የተማሪ መታወቂያ ካርድ',
                 secPersonal: 'የግል መረጃ',
-                formPersonalInfo: 'የግል መረጃ', formPersonalHelp: 'የተማሪው መሰረታዊ ማንነት እና የመገኛ መረጃ', formEducation: 'ትምህርት', formEducationHelp: 'የትምህርት ደረጃ እና የትምህርት መስክ', formChurchInfo: 'የቤተ ክርስቲያን መረጃ', formChurchHelp: 'የሰንበት ት/ቤት ክፍል እና መንፈሳዊ መረጃ', formAddress: 'አድራሻ', formAddressHelp: 'የአሁኑ የመኖሪያ አድራሻ', formFamily: 'የቤተሰብ መረጃ', formFamilyHelp: 'የወላጆች እና የቤተሰብ መገኛ መረጃ', formEmergencyHelp: 'በአደጋ ጊዜ የሚጠራ ሰው', fieldFullName: 'ሙሉ ስም', fieldChristianNameNew: 'የክርስትና ስም', fieldGenderNew: 'ጾታ', fieldPhoneNew: 'ስልክ ቁጥር', fieldDobNew: 'የትውልድ ቀን (የኢትዮጵያ ካላንደር)', fieldGradeNew: 'የአለማዊ ትምህርት ደረጃ', fieldStudyNew: 'የትምህርት መስክ', fieldSundaySchoolGrade: 'የሰንበት ት/ቤት የትምህርት ደረጃ', fieldConfessionFatherNameNew: 'የንስሐ አባት ስም', fieldConfessionFatherPhoneNew: 'የንስሐ አባት ስልክ', fieldRegionNew: 'ክልል', fieldSubCityNew: 'ክ/ከተማ', fieldWoredaNew: 'ወረዳ', fieldMotherNameNew: 'የእናት ስም', fieldMotherPhoneNew: 'የእናት ስልክ', fieldFatherNameNew: 'የአባት ስም', fieldFatherPhoneNew: 'የአባት ስልክ', fieldEmergencyNameNew: 'የአደጋ ጊዜ ተጠሪ ስም', fieldEmergencyPhoneNew: 'የአደጋ ጊዜ ተጠሪ ስልክ',
+                formPersonalInfo: 'የግል መረጃ', formPersonalHelp: 'የተማሪው መሰረታዊ ማንነት እና የመገኛ መረጃ',
+                 email: 'ኢሜይል', emailHelp: 'ትክክለኛ የኢሜይል አድራሻ ያስፈልጋል', studentType: 'የተማሪ አይነት', studentTypeNew: '🆕 አዲስ', studentTypeOld: '🔄 ነባር', previousSundaySchool: 'የቀድሞ ሰንበት ት/ቤት', previousSundaySchoolHelp: 'ከዚህ በፊት ሌላ ሰንበት ት/ቤት የተማረ ከሆነ ብቻ ይሙሉ።', previousAttended: 'ከዚህ በፊት ሌላ ሰንበት ት/ቤት ተምረዋል?', previousYes: 'አዎ', previousNo: 'አይ', previousSchoolName: 'የቀድሞ ሰንበት ት/ቤት ስም', previousLeavingReason: 'የመልቀቂያ ምክንያት', previousReleaseNumber: 'የመልቀቂያ / መሸኛ ቁጥር', previousAttachmentNumber: 'የፊዚካል ፋይል ማያያዣ ቁጥር', previousOtherInfo: 'ሌሎች አስፈላጊ መረጃዎች', commitmentTitle: 'የተማሪ መረጃ ትክክለኛነት እና ቃል ኪዳን', commitmentText: 'የሰጠሁት መረጃ ትክክለኛና ሙሉ መሆኑን አረጋግጣለሁ። ሰንበት ት/ቤቱ ይህን መረጃ ለተማሪ አስተዳደርና ለአገልግሎት ዓላማ ሊጠቀምበት እንደሚችል እስማማለሁ።', signatureTitle: 'የተማሪ / የወላጅ ፊርማ', signatureHelp: 'ከታች ባለው ሳጥን ውስጥ ይፈርሙ', clearSignature: 'ፊርማ አጥፋ', registrationInfo: 'የምዝገባ መረጃ', registrationDateEC: 'የምዝገባ ቀን (ዓ.ም)', registeredBy: 'ያስመዘገበው', registeredByValue: 'መሠረተ ሕይወት ሰንበት ት/ቤት / Meserete Hiwot Sunday School', profileCompletion: 'የመገለጫ ሙሉነት', requiredMissing: 'የሚቀሩ አስፈላጊ መስኮች', previousLocked: 'አዎ እስኪመረጥ ድረስ ተቆልፏል', fileAuto: 'በስርዓቱ በራስ-ሰር የሚሰጥና ቋሚ ነው', formEducation: 'ትምህርት', formEducationHelp: 'የትምህርት ደረጃ እና የትምህርት መስክ', formChurchInfo: 'የቤተ ክርስቲያን መረጃ', formChurchHelp: 'የሰንበት ት/ቤት ክፍል እና መንፈሳዊ መረጃ', formAddress: 'አድራሻ', formAddressHelp: 'የአሁኑ የመኖሪያ አድራሻ', formFamily: 'የቤተሰብ መረጃ', formFamilyHelp: 'የወላጆች እና የቤተሰብ መገኛ መረጃ', formEmergencyHelp: 'በአደጋ ጊዜ የሚጠራ ሰው', fieldFullName: 'ሙሉ ስም', fieldChristianNameNew: 'የክርስትና ስም', fieldGenderNew: 'ጾታ', fieldPhoneNew: 'ስልክ ቁጥር', fieldDobNew: 'የትውልድ ቀን (የኢትዮጵያ ካላንደር)', fieldGradeNew: 'የአለማዊ ትምህርት ደረጃ', fieldStudyNew: 'የትምህርት መስክ', fieldSundaySchoolGrade: 'የሰንበት ት/ቤት የትምህርት ደረጃ', fieldConfessionFatherNameNew: 'የንስሐ አባት ስም', fieldConfessionFatherPhoneNew: 'የንስሐ አባት ስልክ', fieldRegionNew: 'ክልል', fieldSubCityNew: 'ክ/ከተማ', fieldWoredaNew: 'ወረዳ', fieldMotherNameNew: 'የእናት ስም', fieldMotherPhoneNew: 'የእናት ስልክ', fieldFatherNameNew: 'የአባት ስም', fieldFatherPhoneNew: 'የአባት ስልክ', fieldEmergencyNameNew: 'የአደጋ ጊዜ ተጠሪ ስም', fieldEmergencyPhoneNew: 'የአደጋ ጊዜ ተጠሪ ስልክ',
                 secChurch: 'የቤተ ክርስቲያን መረጃ',
                 secParent: 'የወላጅ መረጃ',
                 secEmergency: 'የአደጋ ጊዜ መረጃ',
@@ -2706,12 +2832,16 @@ html[data-theme="dark"] .view-lux-modal{
         let currentViewId = null;    
         let currentIdCardId = null;  
         let studentsData = [];       // Loaded live from Supabase
+        let currentStudentType = null;
+        const MHSS_REGISTERED_BY = 'Meserete Hiwot Sunday School / የመሠረተ ሕይወት ሰንበት ት/ቤት';
 
         // Map DB record (snake_case) to Frontend Object (camelCase)
         function mapFromDB(row) {
             return {
                 id: row.id,
                 name: row.name,
+                email: row.email,
+                studentType: row.student_type,
                 christianName: row.christian_name,
                 gender: row.gender,
                 phone: row.phone,
@@ -2719,6 +2849,9 @@ html[data-theme="dark"] .view-lux-modal{
                 grade: row.grade,
                 sundaySchoolGrade: row.sunday_school_grade,
                 fieldOfStudy: row.field_of_study,
+                educationLevel: row.education_level,
+                institution: row.institution,
+                educationOther: row.education_other,
                 dobDay: row.dob_day,
                 dobMonth: row.dob_month,
                 dobYear: row.dob_year,
@@ -2737,11 +2870,30 @@ html[data-theme="dark"] .view-lux-modal{
                 photo: row.photo,
                 fileNumber: row.file_number,
                 idNumber: row.id_number,
+                idCardNumber: row.id_card_number,
                 status: row.status || 'Active',
                 skillsTalents: row.skills_talents || [],
                 otherTalent: row.other_talent,
                 medicalNotes: row.medical_notes,
-                serviceDepartments: row.service_departments || []
+                serviceDepartments: row.service_departments || [],
+                previousAttended: row.previous_sunday_school_attended,
+                previousSchoolName: row.previous_sunday_school_name,
+                previousLeavingReason: row.previous_sunday_school_reason,
+                previousReleaseNumber: row.release_certificate_number,
+                previousAttachmentNumber: row.physical_file_attachment_number,
+                previousOtherInfo: row.previous_sunday_school_other_info,
+                // registration_ec_day/month/year don't exist as DB columns — derive the
+                // Ethiopian registration date from reg_date instead (same approach as
+                // formatRegDateEC further down), so editing a student still shows the
+                // date they were actually registered on, not "today".
+                ...(function () {
+                    const ec = typeof gregorianDateStrToEthiopian === 'function' ? gregorianDateStrToEthiopian(row.reg_date) : null;
+                    return ec ? { registrationEcDay: ec.day, registrationEcMonth: ec.month, registrationEcYear: ec.year }
+                               : { registrationEcDay: null, registrationEcMonth: null, registrationEcYear: null };
+                })(),
+                registeredBy: row.registered_by,
+                commitmentAccepted: row.commitment_confirmed,
+                signature: row.signature_data
             };
         }
 
@@ -2750,6 +2902,8 @@ html[data-theme="dark"] .view-lux-modal{
             return {
                 id: s.id,
                 name: s.name,
+                email: s.email || null,
+                student_type: s.studentType || null,
                 christian_name: s.christianName,
                 gender: s.gender,
                 phone: s.phone,
@@ -2757,6 +2911,9 @@ html[data-theme="dark"] .view-lux-modal{
                 grade: s.grade,
                 sunday_school_grade: s.sundaySchoolGrade || null,
                 field_of_study: s.fieldOfStudy,
+                education_level: s.educationLevel || null,
+                institution: s.institution || null,
+                education_other: s.educationOther || null,
                 dob_day: s.dobDay,
                 dob_month: s.dobMonth,
                 dob_year: s.dobYear,
@@ -2775,11 +2932,27 @@ html[data-theme="dark"] .view-lux-modal{
                 photo: s.photo,
                 file_number: s.fileNumber || null,
                 id_number: s.idNumber || null,
+                id_card_number: s.idCardNumber || null,
                 status: s.status || 'Active',
                 skills_talents: Array.isArray(s.skillsTalents) ? s.skillsTalents : [],
                 other_talent: s.otherTalent || null,
                 medical_notes: s.medicalNotes || null,
-                service_departments: Array.isArray(s.serviceDepartments) ? s.serviceDepartments : []
+                service_departments: Array.isArray(s.serviceDepartments) ? s.serviceDepartments : [],
+                previous_sunday_school_attended: s.previousAttended || null,
+                previous_sunday_school_name: s.previousSchoolName || null,
+                previous_sunday_school_reason: s.previousLeavingReason || null,
+                release_certificate_number: s.previousReleaseNumber || null,
+                physical_file_attachment_number: s.previousAttachmentNumber || null,
+                previous_sunday_school_other_info: s.previousOtherInfo || null,
+                // registration_ec_day/month/year have no matching DB columns — the EC date
+                // is only used in-form to compute reg_date (see ethiopianToGregorianDate);
+                // it isn't persisted separately, so it's intentionally left out here.
+                registered_by: s.registeredBy || 'Meserete Hiwot Sunday School / የመሠረተ ሕይወት ሰንበት ት/ቤት',
+                commitment_confirmed: !!s.commitmentAccepted,
+                // The form has one combined "I confirm the info is accurate and complete"
+                // checkbox, which maps to both confirmation columns in the schema.
+                data_accuracy_confirmed: !!s.commitmentAccepted,
+                signature_data: s.signature || null
             };
         }
 
@@ -3042,7 +3215,7 @@ html[data-theme="dark"] .view-lux-modal{
                 '1ኛ ክፍል','2ተኛ ክፍል','3ኛ ክፍል','4ኛ ክፍል',
                 '5ኛ ክፍል','6ኛ ክፍል','7ኛ ክፍል','8ኛ ክፍል',
                 '9ኛ ክፍል','10ኛ ክፍል','11ኛ ክፍል','12ኛ ክፍል',
-                'ዲግሪ (Degree)','ዲፕሎማ (Diploma)','ማስተርስ (Masters)'
+                'ሰርተፍኬት (Certificate)','ዲፕሎማ (Diploma)','ዲግሪ (Degree)','ማስተርስ (Masters)','ዶክትሬት (PhD)','ሌላ (Other)'
             ];
 
             const counts = new Map(gradeOrder.map(g => [g, 0]));
@@ -3108,15 +3281,6 @@ html[data-theme="dark"] .view-lux-modal{
                 }
             });
         }
-
-        // Skills & talents: clean selection cards + Other Talent field.
-        document.querySelectorAll('input[name="skillsTalents"]').forEach(cb => {
-            cb.addEventListener('change', () => {
-                const other = document.getElementById('skillOtherTalent');
-                document.getElementById('otherTalentWrap').classList.toggle('hidden', !other.checked);
-                if (!other.checked) document.getElementById('sOtherTalent').value = '';
-            });
-        });
 
         // Preferred service departments: each student may choose a maximum of 3.
         const serviceCheckboxes = Array.from(document.querySelectorAll('input[name="serviceDepartments"]'));
@@ -3438,19 +3602,152 @@ html[data-theme="dark"] .view-lux-modal{
         });
         setInterval(updateDobAgePreview, 60000);
 
-        // Show field of study only for Diploma / Degree / Masters.
-        function toggleFieldOfStudy() {
-            const grade = document.getElementById('sGrade');
-            const wrap = document.getElementById('fieldOfStudyWrap');
-            const field = document.getElementById('sFieldOfStudy');
-            if (!grade || !wrap) return;
-            const v = grade.value || '';
-            const higher = /ዲግሪ|Degree|ዲፕሎማ|Diploma|ማስተርስ|Masters/i.test(v);
-            wrap.classList.toggle('field-study-hidden', !higher);
-            if (!higher && field) field.value = '';
+        // ===== Education system (አለማዊ ትምህርት / secular education) =====
+        // Level -> field of study -> university / institution. Lists are suggestions only; anything can be typed.
+        const EDU_GRADE_LABELS = ['1ኛ ክፍል','2ተኛ ክፍል','3ኛ ክፍል','4ኛ ክፍል','5ኛ ክፍል','6ኛ ክፍል','7ኛ ክፍል','8ኛ ክፍል','9ኛ ክፍል','10ኛ ክፍል','11ኛ ክፍል','12ኛ ክፍል'];
+        // Value stored in the legacy `grade` column (kept compatible with existing rows, charts and views).
+        const EDU_LEVEL_GRADE = { Certificate: 'ሰርተፍኬት (Certificate)', Diploma: 'ዲፕሎማ (Diploma)', Degree: 'ዲግሪ (Degree)', Masters: 'ማስተርስ (Masters)', PhD: 'ዶክትሬት (PhD)', Other: 'ሌላ (Other)' };
+        const EDU_HIGHER = ['Diploma', 'Degree', 'Masters', 'PhD'];
+        const eduFlat = groups => Array.from(new Set(Object.values(groups).flat()));
+
+        const EDU_FIELDS = {
+            Diploma: eduFlat({ all: [
+                'Accounting','Accounting and Finance','Marketing','Sales and Marketing','Business Management','Secretarial Science','Office Administration','Human Resource Management',
+                'Information Technology','Computer Science','Software Development','Computer Maintenance','Networking','Database Administration','Graphic Design','Multimedia','Journalism',
+                'Tourism Management','Hotel Management','Hospitality Management','Food Preparation','Agriculture','Animal Health','Animal Science','Crop Production','Natural Resource Management',
+                'Construction Technology','Surveying','Civil Engineering Technology','Electrical Engineering Technology','Mechanical Engineering Technology','Automotive Technology','Industrial Technology',
+                'Pharmacy Technician','Nursing','Midwifery','Medical Laboratory','Health / Medical Programs','Teacher Education','Early Childhood Education','Language Programs','TVET / Technical Programs'
+            ]}),
+            Degree: eduFlat({
+                business: ['Accounting','Accounting and Finance','Economics','Management','Business Management','Business Administration','Marketing Management','Sales Management','Marketing and Sales Management','Entrepreneurship','Logistics and Supply Chain Management','Procurement and Supply Management','Human Resource Management','Public Administration','Public Management','Development Management','International Business','Banking and Finance','Finance','Insurance','Cooperative Management','Tourism Management','Hotel Management','Hospitality Management','Transport Management','Project Management'],
+                computing: ['Computer Science','Information Technology','Information Systems','Software Engineering','Computer Engineering','Information Science','Information Management','Cybersecurity','Data Science','Artificial Intelligence','Data Analytics','Statistics','Computer Networking','Network Engineering','Database Systems','Web Development','Multimedia','Digital Media','Information and Communication Technology','Electrical and Computer Engineering'],
+                engineering: ['Civil Engineering','Mechanical Engineering','Electrical Engineering','Electronics Engineering','Computer Engineering','Chemical Engineering','Industrial Engineering','Environmental Engineering','Water Resources Engineering','Hydraulic Engineering','Construction Engineering','Architectural Engineering','Architecture','Structural Engineering','Geotechnical Engineering','Transportation Engineering','Manufacturing Engineering','Mechatronics Engineering','Biomedical Engineering','Mining Engineering','Petroleum Engineering','Geological Engineering','Textile Engineering','Food Engineering','Agricultural Engineering','Energy Engineering','Renewable Energy Engineering'],
+                health: ['Medicine','Nursing','Midwifery','Pharmacy','Medical Laboratory Science','Public Health','Health Officer','Anesthesia','Radiology','Medical Imaging','Physiotherapy','Medical Rehabilitation','Dentistry','Veterinary Medicine','Environmental Health','Nutrition','Health Informatics','Biomedical Sciences','Clinical Sciences'],
+                agriculture: ['Agricultural Science','Agronomy','Plant Science','Horticulture','Animal Science','Veterinary Medicine','Agricultural Economics','Agricultural Extension','Agricultural Engineering','Rural Development','Natural Resource Management','Forestry','Wildlife Management','Fisheries','Soil Science','Water Resources','Crop Protection','Food Science','Food Technology'],
+                naturalSciences: ['Biology','Chemistry','Physics','Mathematics','Statistics','Geology','Geography','Environmental Science','Earth Science','Atmospheric Science','Meteorology','Biotechnology','Biochemistry','Botany','Zoology'],
+                socialSciences: ['Sociology','Psychology','Political Science','International Relations','Social Work','Geography','Development Studies','Gender Studies','Anthropology','Economics','Population Studies','Peace and Security Studies','Human Rights','Rural Development'],
+                law: ['Law (LL.B)','Sharia Law','Constitutional Law','Commercial Law','International Law','Human Rights Law'],
+                education: ['Educational Planning and Management','Teacher Education','Primary Education','Secondary Education','Early Childhood Education','Special Needs Education','Inclusive Education','Educational Psychology','Curriculum and Instruction','Educational Leadership','Mathematics Education','Physics Education','Chemistry Education','Biology Education','English Education','Amharic Education','Afaan Oromoo Education','Geography Education','History Education','Civics Education','Physical Education'],
+                humanities: ['English','Amharic','Afaan Oromoo','Tigrinya','French','Arabic','Linguistics','Literature','Journalism','Communication','History','Philosophy','Archaeology','Religious Studies','Ethiopian Studies','Translation and Interpretation'],
+                media: ['Journalism','Mass Communication','Communication','Public Relations','Film','Film Production','Video Production','Photography','Graphic Design','Fine Arts','Multimedia','Animation','Fashion Design','Performing Arts','Music','Theatre Arts']
+            }),
+            Masters: eduFlat({
+                business: ['MBA','MBA in Marketing','MBA in Finance','MBA in Human Resource Management','MBA in International Business','MBA in Project Management','MBA in Entrepreneurship','Marketing Management','Accounting and Finance','Finance','Economics','Development Economics','Business Management','Management','Logistics and Supply Chain Management','Procurement and Supply Management','Human Resource Management','Public Administration','Public Management','Development Management','Tourism Management','Transport Management'],
+                computing: ['Computer Science','Information Technology','Information Systems','Software Engineering','Computer Engineering','Cybersecurity','Data Science','Data Analytics','Artificial Intelligence','Information Management','Computer Networking','Telecommunications','ICT','Digital Transformation'],
+                engineering: ['Civil Engineering','Structural Engineering','Geotechnical Engineering','Transportation Engineering','Water Resources Engineering','Hydraulic Engineering','Electrical Engineering','Electronics Engineering','Mechanical Engineering','Industrial Engineering','Chemical Engineering','Environmental Engineering','Construction Engineering','Architecture','Urban Planning','Manufacturing Engineering','Mechatronics','Energy Engineering','Renewable Energy','Agricultural Engineering','Biomedical Engineering'],
+                health: ['Public Health','Epidemiology','Nursing','Clinical Nursing','Maternal Health','Reproductive Health','Pharmacy','Medical Laboratory Sciences','Health Informatics','Health Systems Management','Nutrition','Health Economics','Health Policy','Health Services Management'],
+                agriculture: ['Agricultural Economics','Agronomy','Plant Science','Animal Science','Agricultural Extension','Rural Development','Natural Resource Management','Soil Science','Horticulture','Food Science','Food Technology','Agricultural Engineering','Forestry','Wildlife Management'],
+                education: ['Educational Leadership','Educational Planning and Management','Curriculum and Instruction','Educational Psychology','Special Needs Education','Inclusive Education','Teacher Education','Mathematics Education','English Language Teaching','Biology Education','Chemistry Education','Physics Education','Educational Measurement and Evaluation'],
+                social: ['Sociology','Psychology','Social Work','Political Science','International Relations','Development Studies','Peace and Security Studies','Gender Studies','Anthropology','Human Rights','Governance'],
+                law: ['Commercial Law','Constitutional Law','Human Rights Law','International Law','Business Law','Criminal Justice','Tax Law','Public Law']
+            }),
+            PhD: eduFlat({ all: [
+                'Economics','Management','Business','Accounting','Marketing','Development Studies','Education','Educational Leadership','Psychology','Sociology','Political Science','International Relations','Law',
+                'Computer Science','Information Technology','Engineering','Civil Engineering','Electrical Engineering','Mechanical Engineering','Agriculture','Agricultural Economics','Plant Science','Animal Science',
+                'Natural Resources','Biology','Chemistry','Physics','Mathematics','Public Health','Nursing','Medicine'
+            ]})
+        };
+
+        const EDU_INSTITUTIONS = Array.from(new Set([
+            // Public universities
+            'Adama Science and Technology University','Addis Ababa Science and Technology University','Addis Ababa University','Adigrat University','Aksum University','Ambo University','Arba Minch University','Arsi University','Assosa University',
+            'Bahir Dar University','Bonga University','Borana University','Bule Hora University',
+            'Dambi Dollo University','Debark University','Debre Berhan University','Debre Markos University','Debre Tabor University','Dilla University','Dire Dawa University',
+            'Gambella University','University of Gondar','Haramaya University','Hawassa University','Injibara University',
+            'Jigjiga University','Jimma University','Jinka University','Kebri Dehar University','Kotebe University of Education',
+            'Madda Walabu University','Mekdela Amba University','Mekelle University','Mettu University','Mizan-Tepi University','Oda Bultum University','Oromia State University',
+            'Raya University','Salale University','Samara University','Wachemo University','Werabe University','Wolaita Sodo University','Woldia University','Wolkite University','Wollega University','Wollo University',
+            // Specialized government institutions
+            'Ethiopian Defence University','Ethiopian Police University','Ethiopian Public Service University','Ethiopian Aviation University',
+            // Private universities
+            'Admas University','New Generation University College','Rift Valley University',"St. Mary's University",'Unity University'
+        ])).sort((a, b) => a.localeCompare(b));
+
+        const eduAttr = v => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        const eduOptions = list => list.map(v => `<option value="${eduAttr(v)}"></option>`).join('');
+        document.getElementById('dlInstitutions').innerHTML = eduOptions(EDU_INSTITUTIONS);
+
+        // Skills/talents saved earlier that are not in today's checkbox list (kept so editing never loses them).
+        let legacySkillTalents = [];
+
+        function syncEducationGrade() {
+            const level = document.getElementById('sEduLevel')?.value || '';
+            const g = document.getElementById('sGrade');
+            if (!g) return;
+            g.value = (level === 'Primary' || level === 'Secondary')
+                ? (document.getElementById('sGradeNumber').value || '')
+                : (EDU_LEVEL_GRADE[level] || '');
         }
-        document.getElementById('sGrade')?.addEventListener('change', toggleFieldOfStudy);
-        toggleFieldOfStudy();
+
+        function updateEducationUI() {
+            const levelEl = document.getElementById('sEduLevel');
+            if (!levelEl) return;
+            const level = levelEl.value;
+            const isSchool = level === 'Primary' || level === 'Secondary';
+            const isHigher = EDU_HIGHER.includes(level);
+            const isOther = level === 'Other';
+            const show = (id, on) => document.getElementById(id)?.classList.toggle('field-study-hidden', !on);
+            show('gradeNumberWrap', isSchool); show('fieldOfStudyWrap', isHigher); show('institutionWrap', isHigher); show('eduOtherWrap', isOther);
+
+            const gradeSel = document.getElementById('sGradeNumber');
+            const keep = gradeSel.value;
+            if (isSchool) {
+                const list = level === 'Primary' ? EDU_GRADE_LABELS.slice(0, 8) : EDU_GRADE_LABELS.slice(8);
+                gradeSel.innerHTML = '<option value="">Select grade / ክፍል ይምረጡ</option>' + list.map(g => `<option value="${g}">${g}</option>`).join('');
+                gradeSel.value = list.includes(keep) ? keep : '';
+            } else {
+                gradeSel.innerHTML = '';
+            }
+            const field = document.getElementById('sFieldOfStudy'), inst = document.getElementById('sInstitution'), other = document.getElementById('sEduOther');
+            gradeSel.required = isSchool;
+            field.required = isHigher;
+            inst.required = isHigher && !editModeId;   // not enforced when editing older records
+            other.required = isOther;
+            if (!isHigher) { field.value = ''; inst.value = ''; }
+            if (!isOther) other.value = '';
+            document.getElementById('dlFieldOfStudy').innerHTML = isHigher ? eduOptions(EDU_FIELDS[level] || []) : '';
+            syncEducationGrade();
+        }
+
+        // Older rows only have `grade`; work out the level from it.
+        function inferEducationLevel(grade) {
+            const g = String(grade || '');
+            const m = g.match(/^(\d+)/);
+            if (m) return Number(m[1]) <= 8 ? 'Primary' : 'Secondary';
+            if (/Degree|ዲግሪ/i.test(g)) return 'Degree';
+            if (/Diploma|ዲፕሎማ/i.test(g)) return 'Diploma';
+            if (/Masters|ማስተርስ/i.test(g)) return 'Masters';
+            if (/Certificate|ሰርተፍኬት/i.test(g)) return 'Certificate';
+            if (/PhD|ዶክትሬት/i.test(g)) return 'PhD';
+            return '';
+        }
+
+        function setEducationFields(student) {
+            const level = student.educationLevel || inferEducationLevel(student.grade);
+            document.getElementById('sEduLevel').value = level || '';
+            updateEducationUI();
+            if (level === 'Primary' || level === 'Secondary') document.getElementById('sGradeNumber').value = student.grade || '';
+            document.getElementById('sFieldOfStudy').value = EDU_HIGHER.includes(level) ? (student.fieldOfStudy || '') : '';
+            document.getElementById('sInstitution').value = EDU_HIGHER.includes(level) ? (student.institution || '') : '';
+            document.getElementById('sEduOther').value = level === 'Other' ? (student.educationOther || '') : '';
+            syncEducationGrade();
+        }
+
+        function getEducationExtraFields() {
+            const level = document.getElementById('sEduLevel')?.value || '';
+            const extra = [];
+            if (level === 'Primary' || level === 'Secondary') extra.push(['Grade', 'sGradeNumber']);
+            if (EDU_HIGHER.includes(level)) {
+                extra.push(['Field of Study', 'sFieldOfStudy']);
+                if (!editModeId) extra.push(['University / Institution', 'sInstitution']);
+            }
+            if (level === 'Other') extra.push(['Education (Other)', 'sEduOther']);
+            return extra;
+        }
+
+        document.getElementById('sEduLevel')?.addEventListener('change', updateEducationUI);
+        document.getElementById('sGradeNumber')?.addEventListener('change', syncEducationGrade);
+        updateEducationUI();
 
         // 8. CRUD Operations (Connected to Supabase)
         // ==========================================
@@ -3461,43 +3758,237 @@ html[data-theme="dark"] .view-lux-modal{
         function computeNextStudentId(idPrefix, excludeNum) {
             const classStudents = studentsData.filter(s => s.className === currentClassStr);
             const existingNumbers = classStudents.map(s => {
-                const parts = s.id.split('-');
-                return parseInt(parts[parts.length - 1], 10);
+                const raw = String(s.id || '');
+                const match = raw.match(/(\d+)\s*$/);
+                return match ? parseInt(match[1], 10) : NaN;
             }).filter(n => !isNaN(n) && n !== excludeNum).sort((a, b) => a - b);
 
             let nextNumInt = 1;
-            for (let i = 0; i < existingNumbers.length; i++) {
-                if (existingNumbers[i] === nextNumInt) {
-                    nextNumInt++;
-                } else if (existingNumbers[i] > nextNumInt) {
-                    // We found a gap! (e.g. 1, 2, 4 -> gap is 3)
-                    break;
-                }
+            for (const n of existingNumbers) {
+                if (n === nextNumInt) nextNumInt++;
+                else if (n > nextNumInt) break;
             }
-            const nextNumStr = nextNumInt.toString().padStart(2, '0');
-            return { id: `${idPrefix}-${nextNumStr}`, num: nextNumInt };
+            return { id: `${idPrefix}-${String(nextNumInt).padStart(3, '0')}`, num: nextNumInt };
         }
 
         function openAddStudentModal() {
-            editModeId = null;
-            document.getElementById('studentForm').reset();
-            document.getElementById('sStatus').value = 'Active';
-            document.getElementById('sSundaySchoolGrade').value = 'ቅድመ መደበኛ';
-            document.getElementById('otherTalentWrap').classList.add('hidden');
+            if (editModeId) { openStudentFormModal(); return; }
+            openModal('studentTypeModal');
+        }
+
+        function selectStudentType(type) {
+            currentStudentType = type;
+            document.getElementById('previousSundaySchoolSection')?.classList.toggle('hidden', type !== 'New');
+            closeModal('studentTypeModal');
+            setTimeout(() => openStudentFormModal(), 120);
+        }
+
+        // ---- ID CARD NUMBER (MHSS-XXXXXX) - generated ONLY here, at registration ----
+        const ID_CARD_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        function randomIdCardNumber() {
+            const a = new Uint32Array(6);
+            crypto.getRandomValues(a);
+            return 'MHSS-' + Array.from(a, v => ID_CARD_CHARS[v % ID_CARD_CHARS.length]).join('');
+        }
+        // Returns a card number that is not used by any student or any issued card.
+        async function requestNextIdCardNumber(client) {
+            for (let i = 0; i < 10; i++) {
+                const n = randomIdCardNumber();
+                const a = await client.from('students').select('id').eq('id_card_number', n).limit(1);
+                if (a.error) throw a.error;
+                const b = await client.from('mhss_student_id_cards').select('id').eq('card_number', n).limit(1);
+                if (b.error) console.warn('Could not check mhss_student_id_cards for duplicates:', b.error);
+                if (!(a.data && a.data.length) && !(b.data && b.data.length)) return n;
+            }
+            throw new Error('Could not generate a unique ID card number');
+        }
+        // Registers the issued card in mhss_student_id_cards + mhss_student_id_card_audit.
+        // Safe if the database trigger already created the card row.
+        async function recordIssuedIdCard(client, studentId, studentName, cardNumber) {
+            const at = new Date().toISOString();
+            let userId = null;
+            try { const u = await client.auth.getUser(); userId = (u && u.data && u.data.user && u.data.user.id) || null; } catch (e) {}
+            const ex = await client.from('mhss_student_id_cards').select('id').eq('student_id', studentId).eq('is_current', true).limit(1);
+            if (ex.error) throw ex.error;
+            if (!(ex.data && ex.data.length)) {
+                const ins = await client.from('mhss_student_id_cards').insert([{
+                    student_id: studentId, card_number: cardNumber, status: 'Active', version: 1,
+                    issued_at: at, is_current: true, created_by: userId, updated_by: userId,
+                    history: [{ action: 'ISSUED', at, cardNumber }]
+                }]);
+                if (ins.error && ins.error.code !== '23505') throw ins.error;
+            }
+            const au = await client.from('mhss_student_id_card_audit').select('id').eq('card_number', cardNumber).eq('action', 'CARD_ISSUED').limit(1);
+            if (au.error) throw au.error;
+            if (!(au.data && au.data.length)) {
+                const ai = await client.from('mhss_student_id_card_audit').insert([{
+                    action: 'CARD_ISSUED', student_id: studentId, student_name: studentName, card_number: cardNumber,
+                    stage: 'registration', details: 'Card number generated at student registration', created_by: userId
+                }]);
+                if (ai.error) throw ai.error;
+            }
+        }
+        // Shows the ID card number in the form as soon as it opens (re-checked at save time).
+        async function previewNextIdCardNumber(forEdit) {
+            const el = document.getElementById('sIdCardNumber');
+            el.value = '';
+            try {
+                const client = await waitForSupabase();
+                const n = await requestNextIdCardNumber(client);
+                if (editModeId && !forEdit) return;
+                el.value = n;
+            } catch (err) {
+                console.error('ID card number preview failed:', err);
+                // Still show a number; it is re-checked for uniqueness when the student is saved.
+                if (!editModeId || forEdit) el.value = randomIdCardNumber();
+            }
+        }
+
+        // Next global file number. Uses the database function; if it has not been created yet,
+        // falls back to reading the highest MHSS/#### from the students table.
+        async function requestNextFileNumber(client) {
+            const { data, error } = await client.rpc('next_mhss_file_number');
+            if (!error && data) return data;
+            console.warn('next_mhss_file_number() unavailable - computing from the students table. Run mhss_global_file_number.sql.', error);
+            const { data: rows, error: e2 } = await client.from('students').select('file_number')
+                .like('file_number', 'MHSS/%').order('file_number', { ascending: false }).limit(1);
+            if (e2) throw e2;
+            const m = /^MHSS\/(\d+)$/.exec((rows && rows[0] && rows[0].file_number) || '');
+            const next = (m ? parseInt(m[1], 10) : 0) + 1;
+            if (next > 9999) throw new Error('MHSS file numbers exhausted (maximum is MHSS/9999)');
+            return 'MHSS/' + String(next).padStart(4, '0');
+        }
+
+        // If the education columns have not been added to the database yet, save everything else instead of failing.
+        const EDU_DB_KEYS = ['education_level', 'institution', 'education_other'];
+        function isMissingEduColumnError(err) {
+            if (!err) return false;
+            const m = ((err.message || '') + ' ' + (err.details || '')).toLowerCase();
+            return EDU_DB_KEYS.some(k => m.includes(k)) && (err.code === 'PGRST204' || err.code === '42703' || m.includes('column'));
+        }
+        function stripEduColumns(rec) { EDU_DB_KEYS.forEach(k => delete rec[k]); }
+
+        // Shows the next global file number (MHSS/0351 ...) as soon as the form opens.
+        // It is re-issued at save time, so if another registrar takes it first the form shows the new number.
+        async function previewNextFileNumber() {
+            const a = document.getElementById('sFileNumber'), b = document.getElementById('sFileNumberConfirm');
+            a.value = '';
+            b.value = '...';
+            try {
+                const client = await waitForSupabase();
+                const data = await requestNextFileNumber(client);
+                if (editModeId) return;                 // form was switched to edit mode meanwhile
+                a.value = data;
+                b.value = data;
+            } catch (err) {
+                console.error('File number preview failed (has mhss_global_file_number.sql been run?):', err);
+                if (!editModeId) b.value = 'Will be assigned on save';
+            }
+        }
+
+        function openStudentFormModal() {
+            if (!editModeId) {
+                document.getElementById('studentForm').reset();
+                document.getElementById('sStatus').value = 'Active';
+                document.getElementById('sSundaySchoolGrade').value = 'ቅድመ መደበኛ';
+                document.getElementById('sRegisteredBy').value = MHSS_REGISTERED_BY;
+                document.getElementById('sStudentType').value = currentStudentType || '';
+                document.getElementById('sCommitment').checked = false;
+                document.getElementById('regModalTitle').textContent = t('studentRegistration');
+                removePhoto();
+                updateDobAgePreview();
+                populateRegistrationDateFields();
+                clearSignature();
+                togglePreviousSchool(false);
+                document.getElementById('formIdDisplay').value = computeNextStudentId(currentIdPrefix).id;
+                previewNextFileNumber();
+                previewNextIdCardNumber();
+                legacySkillTalents = [];
+                updateEducationUI();
+            }
+            initSignaturePad();
             serviceCheckboxes.forEach(cb => cb.checked = false);
             updateServiceSelectionUI();
-            document.getElementById('regModalTitle').textContent = t('studentRegistration');
-            removePhoto();
-            updateDobAgePreview();
-
-            document.getElementById('formIdDisplay').value = computeNextStudentId(currentIdPrefix).id;
-
+            updateProfileCompletion();
             openModal('addStudentModal');
         }
 
         function closeAddStudentModal() {
             closeModal('addStudentModal');
         }
+
+        function populateRegistrationDateFields(student) {
+            const d = student && student.registrationEcDay ? {day: student.registrationEcDay, month: student.registrationEcMonth, year: student.registrationEcYear} : getCurrentEthiopianDate();
+            const day = document.getElementById('regDateDay'), month = document.getElementById('regDateMonth'), year = document.getElementById('regDateYear');
+            if (!day || !month || !year) return;
+            day.innerHTML = '';
+            for (let i=1;i<=30;i++) day.insertAdjacentHTML('beforeend', `<option value="${i}">${i}</option>`);
+            month.innerHTML = ETHIOPIAN_MONTHS.map((m,i)=>`<option value="${i+1}">${currentLang==='am'?m:ETHIOPIAN_MONTHS_EN[i]}</option>`).join('');
+            day.value = String(d.day); month.value = String(d.month); year.value = String(d.year);
+        }
+
+        function ethiopianToGregorianDate(ecYear, ecMonth, ecDay) {
+            const jdn = ethiopianToJdn(Number(ecYear), Number(ecMonth), Number(ecDay));
+            let gy = Math.floor((jdn - 1867216.25) / 365.2425);
+            let gm = 1, gd = 1;
+            // Reliable bounded search around the approximate year.
+            for (let y=Math.max(1,gy-2); y<=gy+2; y++) {
+                for (let m=1;m<=12;m++) {
+                    const start = gregorianToJdn(y,m,1), next = m===12 ? gregorianToJdn(y+1,1,1) : gregorianToJdn(y,m+1,1);
+                    if (jdn >= start && jdn < next) { return `${y}-${String(m).padStart(2,'0')}-${String(jdn-start+1).padStart(2,'0')}`; }
+                }
+            }
+            return null;
+        }
+
+        function togglePreviousSchool(enabled) {
+            const wrap = document.getElementById('previousSchoolFields');
+            if (!wrap) return;
+            wrap.classList.toggle('opacity-50', !enabled); wrap.classList.toggle('pointer-events-none', !enabled); wrap.setAttribute('aria-disabled', String(!enabled));
+            wrap.querySelectorAll('input,textarea').forEach(el => { el.disabled = !enabled; el.required = enabled && el.id === 'sPreviousSchoolName'; if (!enabled) el.value=''; });
+        }
+
+        function getRequiredFieldStatus() {
+            const vals = [
+                ['Full Name','sName'],['Christian Name','sChristianName'],['Phone','sPhone'],['Email','sEmail'],['Education','sGrade'],
+                ['Birth Day','dobDay'],['Birth Month','dobMonth'],['Birth Year','dobYear'],['Region','sRegion'],['Sub City','sSubCity'],['Woreda','sWoreda'],
+                ['Mother Name','mName'],['Mother Phone','mPhone'],['Father Name','fName'],['Father Phone','fPhone'],['Emergency Name','eName'],['Emergency Phone','ePhone'],
+                ['Student Type','sStudentType'],['Registration Date','regDateYear'],['Commitment','sCommitment']
+            ];
+            const missing = vals.filter(([_,id]) => { const el=document.getElementById(id); return !el || (el.type==='checkbox' ? !el.checked : !String(el.value||'').trim() || ['ቀን','ወር'].includes(el.value)); }).map(x=>x[0]);
+            getEducationExtraFields().forEach(([label, id]) => { if (!String(document.getElementById(id)?.value || '').trim()) missing.push(label); });
+            const previousAnswered = !!document.querySelector('input[name="previousAttended"]:checked');
+            if (currentStudentType === 'New' && !previousAnswered) missing.push('Previous Sunday School Yes/No');
+            const serviceOk = serviceCheckboxes.some(cb=>cb.checked);
+            const skillsOk = document.querySelectorAll('input[name="skillsTalents"]:checked').length > 0 || String(document.getElementById('sOtherTalent')?.value||'').trim();
+            if (!serviceOk) missing.push('Preferred Service');
+            if (!skillsOk) missing.push('Skill & Talent');
+            if (!document.getElementById('sSignature')?.value) missing.push('Signature');
+            if (document.querySelector('input[name="previousAttended"]:checked')?.value === 'Yes' && !String(document.getElementById('sPreviousSchoolName')?.value||'').trim()) missing.push('Previous Sunday School Name');
+            const eduTotal = vals.length + 3 + getEducationExtraFields().length;
+            return {missing,total: eduTotal, complete: Math.max(0, eduTotal-missing.length)};
+        }
+
+        function updateProfileCompletion() {
+            const box=document.getElementById('profileCompletionBox'); if(!box) return;
+            const s=getRequiredFieldStatus(); const pct=Math.round((s.complete/s.total)*100);
+            document.getElementById('profileCompletionBar').style.width=pct+'%';
+            document.getElementById('profileCompletionText').textContent=pct+'%';
+            const miss=document.getElementById('profileMissingText');
+            miss.textContent=s.missing.length ? `${s.missing.length} ${t('requiredMissing')}` : (currentLang==='am'?'ሁሉም አስፈላጊ መረጃዎች ተሟልተዋል':'All required information is complete');
+            miss.classList.toggle('profile-missing',!!s.missing.length); miss.classList.toggle('profile-ok',!s.missing.length);
+        }
+
+        function initSignaturePad() {
+            const canvas=document.getElementById('signatureCanvas'); if(!canvas || canvas.dataset.ready) return;
+            const ctx=canvas.getContext('2d'); let drawing=false;
+            const point=e=>{const r=canvas.getBoundingClientRect(); const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left, y=(e.touches?e.touches[0].clientY:e.clientY)-r.top; return {x:x*canvas.width/r.width,y:y*canvas.height/r.height};};
+            const start=e=>{e.preventDefault();drawing=true;ctx.beginPath();const p=point(e);ctx.moveTo(p.x,p.y);};
+            const move=e=>{if(!drawing)return;e.preventDefault();const p=point(e);ctx.lineTo(p.x,p.y);ctx.strokeStyle='#172033';ctx.lineWidth=3;ctx.lineCap='round';ctx.stroke();document.getElementById('sSignature').value=canvas.toDataURL('image/png');updateProfileCompletion();};
+            const end=()=>{drawing=false;};
+            canvas.addEventListener('mousedown',start);canvas.addEventListener('mousemove',move);window.addEventListener('mouseup',end);canvas.addEventListener('touchstart',start,{passive:false});canvas.addEventListener('touchmove',move,{passive:false});canvas.addEventListener('touchend',end);canvas.dataset.ready='1';
+        }
+        function clearSignature(){const c=document.getElementById('signatureCanvas');if(!c)return; c.getContext('2d').clearRect(0,0,c.width,c.height);document.getElementById('sSignature').value='';updateProfileCompletion();}
 
         // ==========================================
         // PHOTO STORAGE (Supabase Storage bucket: student-photos)
@@ -3561,12 +4052,17 @@ html[data-theme="dark"] .view-lux-modal{
 
             let id = document.getElementById('formIdDisplay').value;
             const name = document.getElementById('sName').value.trim();
-            const christianName = document.getElementById('sChristianName').value;
+            const christianName = document.getElementById('sChristianName').value.trim();
+            const email = document.getElementById('sEmail').value.trim();
+            const studentType = document.getElementById('sStudentType').value;
             const gender = document.getElementById('sGender').value;
             const phone = document.getElementById('sPhone').value;
             const grade = document.getElementById('sGrade').value;
             const sundaySchoolGrade = document.getElementById('sSundaySchoolGrade').value;
-            const fieldOfStudy = document.getElementById('sFieldOfStudy').value;
+            const fieldOfStudy = document.getElementById('sFieldOfStudy').value.trim();
+            const educationLevel = document.getElementById('sEduLevel').value;
+            const institution = document.getElementById('sInstitution').value.trim();
+            const educationOther = document.getElementById('sEduOther').value.trim();
             const dobDay = document.getElementById('dobDay').value;
             const dobMonth = document.getElementById('dobMonth').value;
             const dobYear = document.getElementById('dobYear').value;
@@ -3581,13 +4077,32 @@ html[data-theme="dark"] .view-lux-modal{
             const fatherPhone = document.getElementById('fPhone').value;
             const emergencyName = document.getElementById('eName').value;
             const emergencyPhone = document.getElementById('ePhone').value;
-            const fileNumber = document.getElementById('sFileNumber').value.trim();
+            let fileNumber = document.getElementById('sFileNumber').value.trim();
             const idNumber = document.getElementById('sIdNumber').value.trim();
+            let idCardNumber = document.getElementById('sIdCardNumber').value.trim();
             const status = document.getElementById('sStatus').value;
-            const skillsTalents = Array.from(document.querySelectorAll('input[name="skillsTalents"]:checked')).map(el => el.value);
+            const checkedSkillsTalents = Array.from(document.querySelectorAll('input[name="skillsTalents"]:checked')).map(el => el.value);
+            const skillsTalents = checkedSkillsTalents.concat(legacySkillTalents.filter(v => !checkedSkillsTalents.includes(v)));
             const otherTalent = document.getElementById('sOtherTalent').value.trim();
             const medicalNotes = document.getElementById('sMedicalNotes').value.trim();
             const serviceDepartments = serviceCheckboxes.filter(cb => cb.checked).map(cb => cb.value).slice(0, 3);
+            const previousAttended = document.querySelector('input[name="previousAttended"]:checked')?.value || 'No';
+            const previousSchoolName = document.getElementById('sPreviousSchoolName').value.trim();
+            const previousLeavingReason = document.getElementById('sPreviousLeavingReason').value.trim();
+            const previousReleaseNumber = document.getElementById('sPreviousReleaseNumber').value.trim();
+            const previousAttachmentNumber = document.getElementById('sPreviousAttachmentNumber').value.trim();
+            const previousOtherInfo = document.getElementById('sPreviousOtherInfo').value.trim();
+            const registrationEcDay = document.getElementById('regDateDay').value;
+            const registrationEcMonth = document.getElementById('regDateMonth').value;
+            const registrationEcYear = document.getElementById('regDateYear').value;
+            const registeredBy = MHSS_REGISTERED_BY;
+            const commitmentAccepted = document.getElementById('sCommitment').checked;
+            const signature = document.getElementById('sSignature').value;
+
+            updateProfileCompletion();
+            const completion = getRequiredFieldStatus();
+            if (completion.missing.length) { alert((currentLang === 'am' ? 'እባክዎ አስፈላጊ መስኮችን ይሙሉ፦ ' : 'Please complete required fields: ') + completion.missing.join(', ')); return; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert(currentLang === 'am' ? 'ትክክለኛ ኢሜይል ያስገቡ።' : 'Please enter a valid email address.'); document.getElementById('sEmail').focus(); return; }
 
             // Required-field validation (id, name, class_name are never null in the DB)
             if (!name) { alert('Name is required.'); document.getElementById('sName').focus(); return; }
@@ -3617,29 +4132,64 @@ html[data-theme="dark"] .view-lux-modal{
                     photoUrl = null;
                 }
 
+                if (!editModeId) {
+                    // File numbers are GLOBAL (MHSS/0001, MHSS/0002, ...) - never per class.
+                    let generatedFileNumber = null, fileErr = null;
+                    try { generatedFileNumber = await requestNextFileNumber(client); } catch (e) { fileErr = e; }
+                    if (fileErr || !generatedFileNumber) { console.error('File number generation error:', fileErr); alert('Could not generate the permanent file number. Please try again.'); return; }
+                    fileNumber = generatedFileNumber;
+                    document.getElementById('sFileNumber').value = fileNumber;
+                    document.getElementById('sFileNumberConfirm').value = fileNumber;
+                    // ID Card Number (MHSS-XXXXXX) is generated here in students.html, never in print-id-cards.html.
+                    try {
+                        if (!/^MHSS-[A-Z0-9]{6}$/.test(idCardNumber)) idCardNumber = await requestNextIdCardNumber(client);
+                    } catch (e) { console.error('ID card number generation error:', e); alert('Could not generate the ID card number. Please try again.'); return; }
+                    document.getElementById('sIdCardNumber').value = idCardNumber;
+                }
+                const regDate = ethiopianToGregorianDate(registrationEcYear, registrationEcMonth, registrationEcDay) || new Date().toISOString().slice(0, 10);
                 const payload = {
                     id,
                     className: currentClassStr,
-                    regDate: previousStudent ? previousStudent.regDate : new Date().toISOString().slice(0, 10),
-                    name, christianName, gender, phone, grade, sundaySchoolGrade, fieldOfStudy,
+                    regDate,
+                    name, christianName, gender, phone, grade, sundaySchoolGrade, fieldOfStudy, educationLevel, institution, educationOther,
                     dobDay, dobMonth, dobYear, confessionFatherName, confessionFatherPhone,
                     region, subCity, woreda, motherName, motherPhone, fatherName, fatherPhone,
-                    emergencyName, emergencyPhone, photo: photoUrl, fileNumber, idNumber, status, skillsTalents, otherTalent, medicalNotes, serviceDepartments
+                    emergencyName, emergencyPhone, photo: photoUrl, fileNumber, idNumber, idCardNumber, status, skillsTalents, otherTalent, medicalNotes, serviceDepartments, email, studentType, previousAttended, previousSchoolName, previousLeavingReason, previousReleaseNumber, previousAttachmentNumber, previousOtherInfo, registrationEcDay, registrationEcMonth, registrationEcYear, registeredBy, commitmentAccepted, signature
                 };
 
                 const dbRecord = mapToDB(payload);
+                // Editing never overwrites an issued card number; a student with no card number yet gets one now.
+                const legacyNoCard = !!(editModeId && previousStudent && !previousStudent.idCardNumber);
+                if (editModeId && !legacyNoCard) delete dbRecord.id_card_number;
+                if (legacyNoCard) {
+                    try {
+                        if (!/^MHSS-[A-Z0-9]{6}$/.test(idCardNumber)) idCardNumber = await requestNextIdCardNumber(client);
+                    } catch (e) { console.error('ID card number generation error:', e); alert('Could not generate the ID card number. Please try again.'); return; }
+                    dbRecord.id_card_number = idCardNumber;
+                    document.getElementById('sIdCardNumber').value = idCardNumber;
+                }
+                let missingEduColumns = false;
+                let cardRecordFailed = false;
 
                 if (editModeId) {
                     // Update the existing row — never creates a second student.
-                    const { error } = await client
+                    let { error } = await client
                         .from('students')
                         .update(dbRecord)
                         .eq('id', editModeId);
+                    if (error && isMissingEduColumnError(error)) {
+                        stripEduColumns(dbRecord); missingEduColumns = true;
+                        ({ error } = await client.from('students').update(dbRecord).eq('id', editModeId));
+                    }
 
                     if (error) {
                         console.error('Update error:', error);
-                        alert('Error updating student. Please check your connection and try again.');
+                        alert('Error updating student: ' + (error.message || error.details || 'Please check your connection and try again.'));
                         return;
+                    }
+                    if (legacyNoCard) {
+                        try { await recordIssuedIdCard(client, editModeId, name, idCardNumber); }
+                        catch (e) { console.error('Card registry save failed:', e); cardRecordFailed = true; }
                     }
                 } else {
                     // Insert, with one automatic retry against a duplicate-ID race condition.
@@ -3647,18 +4197,41 @@ html[data-theme="dark"] .view-lux-modal{
                     // user a chance to succeed without manually reopening the form.
                     let attempt = 0;
                     let insertError = null;
-                    while (attempt < 2) {
+                    while (attempt < 4) {
                         const { error } = await client.from('students').insert([dbRecord]);
                         insertError = error;
                         if (!error) break;
-                        if (error.code === '23505' && attempt === 0) {
-                            // Duplicate primary key — recompute the next free ID and retry once.
-                            await fetchStudentsForClass(currentClassStr);
-                            const parts = id.split('-');
-                            const usedNum = parseInt(parts[parts.length - 1], 10);
-                            const next = computeNextStudentId(currentIdPrefix, usedNum);
-                            id = next.id;
-                            dbRecord.id = id;
+                        if (isMissingEduColumnError(error)) {
+                            stripEduColumns(dbRecord); missingEduColumns = true;
+                            attempt++;
+                            continue;
+                        }
+                        if (error.code === '23505' && attempt < 3) {
+                            const msg = ((error.message || '') + ' ' + (error.details || '')).toLowerCase();
+                            if (msg.includes('file_number')) {
+                                // Another registrar took this file number first - ask for the next free global one.
+                                let freshFileNumber = null, freshErr = null;
+                                try { freshFileNumber = await requestNextFileNumber(client); } catch (e) { freshErr = e; }
+                                if (freshErr || !freshFileNumber) { insertError = freshErr || error; break; }
+                                fileNumber = freshFileNumber;
+                                dbRecord.file_number = freshFileNumber;
+                                document.getElementById('sFileNumber').value = freshFileNumber;
+                                document.getElementById('sFileNumberConfirm').value = freshFileNumber;
+                            } else if (msg.includes('id_card_number')) {
+                                // Card number collision - generate another one.
+                                let freshCard = null, freshCardErr = null;
+                                try { freshCard = await requestNextIdCardNumber(client); } catch (e) { freshCardErr = e; }
+                                if (freshCardErr || !freshCard) { insertError = freshCardErr || error; break; }
+                                idCardNumber = freshCard;
+                                dbRecord.id_card_number = freshCard;
+                                document.getElementById('sIdCardNumber').value = freshCard;
+                            } else {
+                                // Duplicate primary key — recompute the next free ID and retry.
+                                await fetchStudentsForClass(currentClassStr);
+                                const next = computeNextStudentId(currentIdPrefix);
+                                id = next.id;
+                                dbRecord.id = id;
+                            }
                             attempt++;
                             continue;
                         }
@@ -3669,19 +4242,29 @@ html[data-theme="dark"] .view-lux-modal{
                         if (insertError.code === '23505') {
                             alert('That Student ID is already taken. Please close and reopen the form to get a new ID.');
                         } else {
-                            alert('Error creating student. Please check your connection and try again.');
+                            alert('Error creating student: ' + (insertError.message || insertError.details || 'Please check your connection and try again.'));
                         }
                         return;
                     }
+                    // Save the issued card in mhss_student_id_cards + audit log.
+                    try { await recordIssuedIdCard(client, dbRecord.id, name, dbRecord.id_card_number); }
+                    catch (e) { console.error('Card registry save failed:', e); cardRecordFailed = true; }
                 }
 
                 const ok = await fetchStudentsForClass(currentClassStr);
                 closeAddStudentModal();
                 if (ok) renderTable();
+                if (cardRecordFailed) alert('Student saved with ID card number ' + idCardNumber + ', but the card could not be recorded in mhss_student_id_cards. Please make sure the ID card tables were created in Supabase.');
+                if (missingEduColumns) alert('Student saved, but Education Level / Institution could not be stored because the database columns are missing. Please run mhss_education_columns.sql in Supabase, then edit this student and save again.');
             } finally {
                 setSaveButtonState(false);
             }
         });
+
+        // Live profile completion + signature initialization
+        document.addEventListener('input', () => updateProfileCompletion());
+        document.addEventListener('change', () => updateProfileCompletion());
+        setTimeout(initSignaturePad, 300);
 
         function editStudent(id) {
             const student = studentsData.find(s => s.id === id);
@@ -3690,12 +4273,15 @@ html[data-theme="dark"] .view-lux-modal{
                 document.getElementById('regModalTitle').textContent = t('editStudent');
                 document.getElementById('formIdDisplay').value = student.id;
                 document.getElementById('sName').value = student.name;
+                document.getElementById('sStudentType').value = student.studentType || 'Old';
+                currentStudentType = student.studentType || 'Old';
+                document.getElementById('previousSundaySchoolSection')?.classList.toggle('hidden', currentStudentType !== 'New');
+                document.getElementById('sEmail').value = student.email || '';
                 document.getElementById('sChristianName').value = student.christianName || '';
                 document.getElementById('sGender').value = student.gender;
                 document.getElementById('sPhone').value = student.phone || '';
-                document.getElementById('sGrade').value = student.grade || document.getElementById('sGrade').options[0].value;
+                setEducationFields(student);
                 document.getElementById('sSundaySchoolGrade').value = student.sundaySchoolGrade || 'ቅድመ መደበኛ';
-                document.getElementById('sFieldOfStudy').value = student.fieldOfStudy || '';
                 document.getElementById('dobDay').value = student.dobDay || 'ቀን';
                 document.getElementById('dobMonth').value = student.dobMonth || 'ወር';
                 document.getElementById('dobYear').value = student.dobYear || '';
@@ -3711,17 +4297,36 @@ html[data-theme="dark"] .view-lux-modal{
                 document.getElementById('eName').value = student.emergencyName || '';
                 document.getElementById('ePhone').value = student.emergencyPhone || '';
                 document.getElementById('sFileNumber').value = student.fileNumber || '';
+                document.getElementById('sFileNumberConfirm').value = student.fileNumber || '';
                 document.getElementById('sIdNumber').value = student.idNumber || '';
+                document.getElementById('sIdCardNumber').value = student.idCardNumber || '';
+                if (!student.idCardNumber) previewNextIdCardNumber(true);   // students registered before card numbers existed get one now
                 document.getElementById('sStatus').value = student.status || 'Active';
                 document.getElementById('sOtherTalent').value = student.otherTalent || '';
                 document.getElementById('sMedicalNotes').value = student.medicalNotes || '';
-                document.querySelectorAll('input[name="skillsTalents"]').forEach(cb => { cb.checked = Array.isArray(student.skillsTalents) && student.skillsTalents.includes(cb.value); });
-                document.getElementById('otherTalentWrap').classList.toggle('hidden', !document.getElementById('skillOtherTalent').checked);
+                document.getElementById('sRegisteredBy').value = student.registeredBy || MHSS_REGISTERED_BY;
+                populateRegistrationDateFields(student);
+                document.querySelectorAll('input[name="previousAttended"]').forEach(r => r.checked = r.value === (student.previousAttended || 'No'));
+                togglePreviousSchool(student.previousAttended === 'Yes');
+                document.getElementById('sPreviousSchoolName').value = student.previousSchoolName || '';
+                document.getElementById('sPreviousLeavingReason').value = student.previousLeavingReason || '';
+                document.getElementById('sPreviousReleaseNumber').value = student.previousReleaseNumber || '';
+                document.getElementById('sPreviousAttachmentNumber').value = student.previousAttachmentNumber || '';
+                document.getElementById('sPreviousOtherInfo').value = student.previousOtherInfo || '';
+                document.getElementById('sCommitment').checked = !!student.commitmentAccepted;
+                clearSignature();
+                if (student.signature) { const img=new Image(); img.onload=()=>{ const c=document.getElementById('signatureCanvas'); c.getContext('2d').drawImage(img,0,0,c.width,c.height); document.getElementById('sSignature').value=student.signature; updateProfileCompletion(); }; img.src=student.signature; }
+                const savedSkills = (Array.isArray(student.skillsTalents) ? student.skillsTalents : []).map(v => v === 'Drama/Acting' ? 'Acting' : v);
+                const knownSkills = new Set(Array.from(document.querySelectorAll('input[name="skillsTalents"]')).map(cb => cb.value));
+                legacySkillTalents = savedSkills.filter(v => !knownSkills.has(v) && v !== 'Other Talent');
+                document.querySelectorAll('input[name="skillsTalents"]').forEach(cb => { cb.checked = savedSkills.includes(cb.value); });
                 serviceCheckboxes.forEach(cb => { cb.checked = Array.isArray(student.serviceDepartments) && student.serviceDepartments.includes(cb.value); });
                 updateServiceSelectionUI();
 
                 if (student.photo) setPhotoPreview(student.photo); else removePhoto();
                 updateDobAgePreview();
+                initSignaturePad();
+                updateProfileCompletion();
 
                 openModal('addStudentModal');
             }
@@ -3791,11 +4396,14 @@ html[data-theme="dark"] .view-lux-modal{
             document.getElementById('vName').textContent = s.name;
             document.getElementById('vNameInfo').textContent = s.name || '-';
             document.getElementById('vGradeClass').textContent = `${s.grade || '-'} · ${s.className}`;
+            document.getElementById('vFileNumber').textContent = s.fileNumber || '-';
+            document.getElementById('vIdCardNumber').textContent = s.idCardNumber || '-';
             document.getElementById('vChristianName').textContent = s.christianName || '-';
             document.getElementById('vGender').textContent = s.gender;
             document.getElementById('vDob').textContent = formatDob(s);
             document.getElementById('vAge').textContent = getStudentAge(s) === null ? '-' : `${getStudentAge(s)} ${currentLang === 'am' ? 'ዓመት' : 'yrs'}`;
             document.getElementById('vFieldOfStudy').textContent = s.fieldOfStudy || '-';
+            document.getElementById('vInstitution').textContent = s.institution || '-';
             document.getElementById('vConfessionFatherName').textContent = s.confessionFatherName || '-';
             document.getElementById('vConfessionFatherPhone').textContent = s.confessionFatherPhone || '-';
             document.getElementById('vPhone').textContent = s.phone || '-';
@@ -5023,7 +5631,7 @@ html[data-theme="light"] .student-form-actions{background:rgba(255,255,255,.97);
     const age=typeof getStudentAge==='function'?getStudentAge(s):null;
     document.getElementById('s360StatAge').textContent=age==null?'—':age+' '+((typeof currentLang!=='undefined'&&currentLang==='am')?'ዓመት':'yrs');
     document.getElementById('s360StatReg').textContent=s360EcDate(s.regDate||s.registeredOn);
-    set('s360Personal',row('Full Name',s.name)+row('Christian Name',s.christianName)+row('Gender',s.gender)+row('Date of Birth',typeof formatDob==='function'?formatDob(s):s.dob||'—')+row('Field of Study',s.fieldOfStudy));
+    set('s360Personal',row('File Number',s.fileNumber)+row('Full Name',s.name)+row('Christian Name',s.christianName)+row('Gender',s.gender)+row('Date of Birth',typeof formatDob==='function'?formatDob(s):s.dob||'—')+row('Field of Study',s.fieldOfStudy)+row('Institution',s.institution));
     set('s360Church',row('Confession Father',s.confessionFatherName)+row('Father Phone',s.confessionFatherPhone));
     set('s360Contact',row('Phone',s.phone)+row('Address',typeof formatAddress==='function'?formatAddress(s):s.address));
     set('s360Father',row('Name',s.fatherName)+row('Phone',s.fatherPhone));

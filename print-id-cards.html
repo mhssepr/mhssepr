@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Ethiopic+Lisan:wght@400;700&family=Noto+Sans+Ethiopic:wght@400;500;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@400;500;600;700&family=Ethiopic+Lisan:wght@400;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
     /* ==========================================
          GLOBAL THEME — same variables/keys as students.html
@@ -98,10 +99,15 @@
     .idcard-photo { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
     .idcard-photo-cross { position: absolute; top: -8px; left: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--idc-gold); color: var(--idc-white); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2; }
         /* Physical card number sits ABOVE the student photo. */
-        .idcard-card-number { position:absolute; top:-13px; left:50%; transform:translateX(-50%); z-index:8; pointer-events:none; white-space:nowrap; font-family:'Cinzel','Montserrat',sans-serif; font-size:6.5px; font-weight:700; letter-spacing:.12em; color:var(--idc-blue); opacity:.55; text-shadow:0 1px 1px rgba(255,255,255,.75); }
+        .idcard-card-number { position:absolute; top:-15px; left:50%; transform:translateX(-50%); z-index:8; pointer-events:none; white-space:nowrap; font-family:'Cinzel','Montserrat',sans-serif; font-size:8px; font-weight:800; letter-spacing:.1em; color:var(--idc-blue); opacity:1; text-shadow:0 1px 1px rgba(255,255,255,.75); }
         .idcard-photo-security-line { position:absolute; left:4px; right:4px; bottom:4px; z-index:4; pointer-events:none; white-space:nowrap; overflow:hidden; text-align:center; font-family:'Montserrat',sans-serif; font-size:4px; font-weight:700; letter-spacing:.12em; color:#fff; opacity:.42; text-shadow:0 1px 2px rgba(0,0,0,.9); }
         .idcard-hologram { position:absolute; right:4px; top:4px; z-index:4; width:18px; height:18px; border-radius:50%; pointer-events:none; background:conic-gradient(from 20deg,rgba(255,255,255,.15),rgba(201,162,39,.42),rgba(56,189,248,.25),rgba(255,255,255,.15)); border:1px solid rgba(255,255,255,.38); box-shadow:0 0 7px rgba(201,162,39,.28); opacity:.58; mix-blend-mode:screen; }
         .idcard-hologram::after { content:"MHSS"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:700 4px/1 'Montserrat',sans-serif; color:#fff; }
+        /* QR = card verification. Sits beside the emergency name/phone on the back. */
+        .idcard-back-emerg-wrap { display:flex; align-items:center; gap:8px; margin:0 16px; position:relative; z-index:1; }
+        .idcard-back-emerg-wrap .idcard-back-rows { margin:0; flex:1; min-width:0; }
+        .idcard-qr { width:58px; height:58px; flex-shrink:0; background:#fff; padding:2px; border:1.5px solid var(--idc-gold); border-radius:6px; box-sizing:content-box; }
+        .idcard-qr svg { display:block; width:100%; height:100%; }
         .card-security-panel { border:1px solid var(--border); border-radius:14px; padding:12px; background:rgba(200,158,58,.055); }
         .card-security-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
         .card-history-modal { width:min(900px,100%); }
@@ -317,7 +323,7 @@
                 <div class="flex items-center justify-between gap-2"><div><h3 class="text-sm font-bold">🛡️ ID Card Security Center</h3><p class="text-[10px] mt-1" style="color:var(--text-muted)">Student ID is permanent. MHSS number identifies the physical card.</p></div><span class="text-[9px] font-bold px-2 py-1 rounded-full" style="background:rgba(200,158,58,.12);color:var(--gold)">MHSS V2</span></div>
                 <div class="grid grid-cols-3 gap-2 text-center"><div class="rounded-lg p-2" style="background:rgba(200,158,58,.07)"><div id="cardActiveCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Active</div></div><div class="rounded-lg p-2" style="background:rgba(239,68,68,.07)"><div id="cardLostCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Lost</div></div><div class="rounded-lg p-2" style="background:rgba(59,130,246,.07)"><div id="cardPrintedCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Printed</div></div></div>
                 <div class="card-security-actions"><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="verifyCardByBarcode()">🔎 Verify Barcode</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openCardHistory()">📜 Card History</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="replaceSelectedCard()">♻️ Replace Lost Card</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="exportCardAudit()">🧾 Audit / Print History</button></div>
-                <p class="text-[9px] leading-relaxed" style="color:var(--text-muted)">No QR code. The barcode contains the permanent Student ID so Attendance and other scan workflows continue to identify the student.</p>
+                <p class="text-[9px] leading-relaxed" style="color:var(--text-muted)">Barcode = permanent Student ID (Attendance and other scan workflows). QR = verifies the physical card through its MHSS card number.</p>
             </div>
 
             <div class="glass-panel rounded-2xl p-4 flex flex-col gap-4">
@@ -445,7 +451,7 @@
 </div>
 
 <!-- ID Card History / Verification -->
-<div id="cardHistoryModal" class="modal-backdrop" onclick="if(event.target===this) closeCardHistory()"><div class="modal-card card-history-modal"><div class="p-4 md:p-5 flex items-center justify-between gap-3 border-b" style="border-color:var(--border)"><div><div id="cardHistoryTitle" class="font-bold">🛡️ ID Card Security Center</div><div id="cardVerifyResult" class="text-xs mt-1" style="color:var(--text-muted)"></div></div><button type="button" onclick="closeCardHistory()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button></div><div class="p-4"><div id="cardVerifyBox" class="hidden mb-4"><div class="text-xs font-bold mb-2">Enter or scan the physical barcode number</div><div class="flex gap-2"><input id="verifyCardInput" class="lux-input flex-1 px-3 py-2 rounded-xl text-sm" placeholder="MHSS-XXXXXX" autocomplete="off"><button type="button" onclick="runCardVerification()" class="gold-btn px-4 py-2 rounded-xl text-sm font-bold">Verify</button></div></div><div id="cardHistoryBody"></div></div></div></div>
+<div id="cardHistoryModal" class="modal-backdrop" onclick="if(event.target===this) closeCardHistory()"><div class="modal-card card-history-modal"><div class="p-4 md:p-5 flex items-center justify-between gap-3 border-b" style="border-color:var(--border)"><div><div id="cardHistoryTitle" class="font-bold">🛡️ ID Card Security Center</div><div id="cardVerifyResult" class="text-xs mt-1" style="color:var(--text-muted)"></div></div><button type="button" onclick="closeCardHistory()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button></div><div class="p-4"><div id="cardVerifyBox" class="hidden mb-4"><div class="text-xs font-bold mb-2">Scan the card QR or the student barcode, or type the card number / Student ID</div><div class="flex gap-2"><input id="verifyCardInput" class="lux-input flex-1 px-3 py-2 rounded-xl text-sm" placeholder="MHSS-XXXXXX or MHSS/EST/001" autocomplete="off"><button type="button" onclick="runCardVerification()" class="gold-btn px-4 py-2 rounded-xl text-sm font-bold">Verify</button></div><div class="mt-2"><button id="cardScanBtn" type="button" onclick="toggleCardScanner()" class="feature-btn px-3 py-2 rounded-xl text-xs font-bold">📷 Scan with camera</button></div><div id="cardScanWrap" class="hidden mt-3"><div style="position:relative;border-radius:12px;overflow:hidden;background:#000"><video id="cardScanVideo" playsinline muted style="width:100%;max-height:260px;object-fit:cover;display:block"></video><div style="position:absolute;inset:16%;border:2px solid rgba(255,215,0,.85);border-radius:12px;pointer-events:none"></div></div><div id="cardScanMsg" class="text-[10px] mt-1" style="color:var(--text-muted)"></div></div></div><div id="cardHistoryBody"></div></div></div></div>
 
 <!-- Hidden area used for the real, full-size print output -->
 <div id="realPrintArea"></div>
@@ -467,6 +473,7 @@
 
       // Prevent the actual print action unless Print/Export is granted.
       window.__mhCanPrintIdCards = isSuperAdmin() || hasModuleAccess('id_print', 'print_export');
+      window.__mhCanSeeEmergency = window.__mhCanPrintIdCards;   // emergency info shown on barcode scan only with this permission
       const printBtn = document.getElementById('printBtn');
       if (printBtn && !window.__mhCanPrintIdCards) {
         printBtn.disabled = true;
@@ -686,7 +693,8 @@
             subCity: row.sub_city, woreda: row.woreda, confessionFatherName: row.confession_father_name,
             confessionFatherPhone: row.confession_father_phone, motherName: row.mother_name, motherPhone: row.mother_phone,
             fatherName: row.father_name, fatherPhone: row.father_phone, emergencyName: row.emergency_name,
-            emergencyPhone: row.emergency_phone, regDate: row.reg_date, photo: row.photo
+            emergencyPhone: row.emergency_phone, regDate: row.reg_date, photo: row.photo,
+            idCardNumber: row.id_card_number
         };
     }
     function getPhotoUrl(s) {
@@ -871,6 +879,18 @@
             </div>
         `;
     }
+    // QR = physical card verification. It holds a verification URL + the card number (token), never the student's data.
+    function cardVerifyUrl(no) { try { return new URL('verify-card.html?c=' + encodeURIComponent(no), location.href).href; } catch (e) { return no; } }
+    function buildCardQrHTML(s) {
+        try {
+            const no = (ensureCardRecord(s).cardNumber || '');
+            if (!no || typeof qrcode !== 'function') return '';
+            const q = qrcode(0, 'M'); q.addData(cardVerifyUrl(no)); q.make();
+            const n = q.getModuleCount(); let d = '';
+            for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c},${r}h1v1h-1z`;
+            return `<div class="idcard-qr" title="${escapeHtml(no)}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges"><path d="${d}" fill="#000"/></svg></div>`;
+        } catch (e) { return ''; }
+    }
     function buildIdCardBackHTML(s, uid) {
         const barcodeId = `idCardBarcodeSvg${uid ? '-' + uid : ''}`;
         return `
@@ -893,6 +913,7 @@
                     <div class="idcard-back-emergency-banner idcard-amh">
                         <h5>የአደጋ ጊዜ ተጠራ መረጃ</h5>
                     </div>
+                    <div class="idcard-back-emerg-wrap">
                     <div class="idcard-back-rows idcard-amh">
                         <div class="idcard-back-row">
                             <span class="idcard-icon">👤</span>
@@ -902,6 +923,8 @@
                             <span class="idcard-icon">📞</span>
                             <div class="idcard-row-text"><span class="idcard-value">${escapeHtml(s.emergencyPhone || '-')}</span></div>
                         </div>
+                    </div>
+                    ${buildCardQrHTML(s)}
                     </div>
                     <div class="idcard-barcode-wrap">
                         <svg id="${barcodeId}"></svg>
@@ -932,7 +955,7 @@
     // ==========================================
     // MHSS PHYSICAL CARD REGISTRY
     // Student ID = permanent identity.
-    // MHSS-XXXXXX = physical card identity.
+    // MHSS-XXXXXX = physical card identity, generated in students.html at registration.
     // ==========================================
     const CARD_REGISTRY_KEY = 'mhss_student_id_cards_v2';
     const CARD_AUDIT_KEY = 'mhss_student_id_card_audit_v2';
@@ -943,19 +966,242 @@
     function nowIso(){return new Date().toISOString();}
     function generateUniqueCardNumber(registry){let n;do{n='MHSS-'+Math.random().toString(36).slice(2,8).toUpperCase();}while(Object.values(registry).some(r=>r&&r.cardNumber===n));return n;}
     function addCardAudit(action,student,cardNumber,details=''){const a=getCardAudit();a.push({action,studentId:student?.id||null,studentName:student?.name||null,cardNumber:cardNumber||null,details,at:nowIso()});saveCardAudit(a);}
-    function ensureCardRecord(s){const r=getCardRegistry();let rec=r[s.id];if(!rec||!rec.cardNumber){const at=nowIso(),n=generateUniqueCardNumber(r);rec={cardNumber:n,studentId:s.id,status:'Active',issuedAt:at,version:1,history:[{action:'ISSUED',at,cardNumber:n}]};r[s.id]=rec;saveCardRegistry(r);addCardAudit('CARD_ISSUED',s,n,'Initial physical card created');}return rec;}
-    function getStudentCardNumber(s){return ensureCardRecord(s).cardNumber;}
+    function ensureCardRecord(s){const r=getCardRegistry();let rec=r[s.id];const dbNo=String(s.idCardNumber||'').trim().toUpperCase();if(dbNo&&(!rec||!rec.cardNumber||(rec.cardNumber!==dbNo&&(Number(rec.version)||1)===1))){const at=nowIso();rec={cardNumber:dbNo,studentId:s.id,status:(rec&&rec.status)||'Active',issuedAt:at,version:1,history:[{action:'ISSUED',at,cardNumber:dbNo,source:'students.html'}]};r[s.id]=rec;saveCardRegistry(r);addCardAudit('CARD_ISSUED',s,dbNo,'Card number issued at student registration (students.html)');}return rec&&rec.cardNumber?rec:{cardNumber:'',studentId:s.id,status:'Not Issued',version:0,history:[]};}
+    function getStudentCardNumber(s){return ensureCardRecord(s).cardNumber||'—';}
     function getStudentCardRecord(s){return ensureCardRecord(s);}
     function getStudentStatus(s){const rec=ensureCardRecord(s);return rec.status||studentStatusMap[s.id]||'Not Printed';}
-    function setStudentStatus(id,value){const s=studentsData.find(x=>x.id===id);if(!s)return;const r=getCardRegistry(),rec=ensureCardRecord(s),old=rec.status;rec.status=value;rec.history=Array.isArray(rec.history)?rec.history:[];rec.history.push({action:'STATUS_CHANGED',from:old,to:value,at:nowIso(),cardNumber:rec.cardNumber});r[id]=rec;saveCardRegistry(r);studentStatusMap[id]=value;localStorage.setItem('mh_id_card_statuses',JSON.stringify(studentStatusMap));addCardAudit('STATUS_CHANGED',s,rec.cardNumber,old+' → '+value);renderStudentList();updateCardSecurityStats();}
+    function setStudentStatus(id,value){const s=studentsData.find(x=>x.id===id);if(!s)return;const r=getCardRegistry(),rec=ensureCardRecord(s),old=rec.status;rec.status=value;rec.history=Array.isArray(rec.history)?rec.history:[];rec.history.push({action:'STATUS_CHANGED',from:old,to:value,at:nowIso(),cardNumber:rec.cardNumber});r[id]=rec;saveCardRegistry(r);studentStatusMap[id]=value;localStorage.setItem('mh_id_card_statuses',JSON.stringify(studentStatusMap));addCardAudit('STATUS_CHANGED',s,rec.cardNumber,old+' → '+value);syncStatusToSupabase(s,rec,old,value);renderStudentList();updateCardSecurityStats();}
     function updateCardSecurityStats(){const rs=Object.values(getCardRegistry()),a=document.getElementById('cardActiveCount'),l=document.getElementById('cardLostCount'),p=document.getElementById('cardPrintedCount');if(a)a.textContent=rs.filter(r=>r.status==='Active').length;if(l)l.textContent=rs.filter(r=>r.status==='Lost'||r.status==='Replacement Required').length;if(p)p.textContent=rs.filter(r=>r.status==='Printed').length;}
-    function replaceSelectedCard(){const s=getSelectedStudentsOrdered()[0];if(!s){alert('Select one student first.');return;}const r=getCardRegistry(),old=ensureCardRecord(s),oldNo=old.cardNumber;if(!confirm(`Replace physical card ${oldNo} for ${s.name}? The old card will become REPLACED and a new MHSS number will be issued.`))return;const at=nowIso();old.status='Replaced';old.replacedAt=at;old.history.push({action:'REPLACED',at,cardNumber:oldNo});const newNo=generateUniqueCardNumber(r);const rec={cardNumber:newNo,studentId:s.id,status:'Active',issuedAt:at,version:(Number(old.version)||1)+1,previousCardNumber:oldNo,history:[{action:'REISSUED',at,cardNumber:newNo,previousCardNumber:oldNo}]};r[s.id]=rec;saveCardRegistry(r);addCardAudit('CARD_REPLACED',s,newNo,'Previous card: '+oldNo);cardPrintMode='replacement';localStorage.setItem('mh_id_card_print_mode','replacement');renderStudentList();renderPreview();updateCardSecurityStats();alert(`New card issued: ${newNo}\nOld card: ${oldNo} — REPLACED`);}
-    function verifyCardByBarcode(){const m=document.getElementById('cardHistoryModal');document.getElementById('cardVerifyBox').classList.remove('hidden');document.getElementById('cardHistoryTitle').textContent='🔎 Verify Student ID Card';document.getElementById('cardHistoryBody').innerHTML='';document.getElementById('cardVerifyResult').textContent='A USB barcode scanner can type directly into this field.';m.classList.add('open');const i=document.getElementById('verifyCardInput');i.value='';i.focus();}
-    function runCardVerification(){const value=String(document.getElementById('verifyCardInput').value||'').trim().toUpperCase(),rs=getCardRegistry();const entry=Object.values(rs).find(r=>String(r.cardNumber).toUpperCase()===value),student=studentsData.find(s=>entry&&s.id===entry.studentId);const result=document.getElementById('cardVerifyResult'),body=document.getElementById('cardHistoryBody');if(!entry){result.textContent='❌ INVALID CARD — number not found.';body.innerHTML=`<div class="rounded-xl p-4 border" style="border-color:rgba(239,68,68,.35)"><div class="font-bold text-red-500">Card not recognized</div><div class="text-xs mt-1" style="color:var(--text-muted)">Card number: ${escapeHtml(value||'—')}</div></div>`;return;}const valid=entry.status==='Active'||entry.status==='Printed';result.textContent=valid?'✅ VALID CARD':`⚠️ CARD STATUS: ${entry.status}`;body.innerHTML=`<div class="rounded-xl p-4 border" style="border-color:var(--border)"><div class="grid grid-cols-2 md:grid-cols-4 gap-3"><div><div class="text-[9px]" style="color:var(--text-muted)">CARD NUMBER</div><div class="font-black">${escapeHtml(entry.cardNumber)}</div></div><div><div class="text-[9px]" style="color:var(--text-muted)">STUDENT ID</div><div class="font-bold">${escapeHtml(entry.studentId)}</div></div><div><div class="text-[9px]" style="color:var(--text-muted)">STATUS</div><div class="font-bold">${escapeHtml(entry.status)}</div></div><div><div class="text-[9px]" style="color:var(--text-muted)">VERSION</div><div class="font-bold">V${escapeHtml(entry.version||1)}</div></div></div><div class="mt-4 pt-3 border-t" style="border-color:var(--border)"><div class="text-xs font-bold">${escapeHtml(student?.name||'Student record not loaded')}</div><div class="text-[10px] mt-1" style="color:var(--text-muted)">${escapeHtml(student?.className||'')}</div></div></div>`;}
+    async function replaceSelectedCard(){const s=getSelectedStudentsOrdered()[0];if(!s){alert('Select one student first.');return;}const r=getCardRegistry(),old=ensureCardRecord(s),oldNo=old.cardNumber;if(!confirm(`Replace physical card ${oldNo} for ${s.name}? The old card will become REPLACED and a new MHSS number will be issued.`))return;const at=nowIso();old.status='Replaced';old.replacedAt=at;old.history.push({action:'REPLACED',at,cardNumber:oldNo});const newNo=await uniqueCardNumberDB(r);const rec={cardNumber:newNo,studentId:s.id,status:'Active',issuedAt:at,version:(Number(old.version)||1)+1,previousCardNumber:oldNo,history:[{action:'REISSUED',at,cardNumber:newNo,previousCardNumber:oldNo}]};r[s.id]=rec;saveCardRegistry(r);addCardAudit('CARD_REPLACED',s,newNo,'Previous card: '+oldNo);syncReplacementToSupabase(s,old,rec);cardPrintMode='replacement';localStorage.setItem('mh_id_card_print_mode','replacement');renderStudentList();renderPreview();updateCardSecurityStats();alert(`New card issued: ${newNo}\nOld card: ${oldNo} — REPLACED`);}
+    function verifyCardByBarcode(){window.open('verify-card.html','_blank');}
+    // ==========================================
+    // CARD VERIFICATION — Supabase (mhss_student_id_cards) is the source of truth,
+    // so a card verifies the same on every device. Falls back to this browser's
+    // local registry only when the database cannot be reached.
+    // ==========================================
+    const CARD_NO_RE=/^MHSS-[A-Z0-9]{6}$/;
+    const CARD_DB_STATUSES=['Active','Printed','Replacement Required','Lost','Damaged','Replaced','Expired'];
+    let cardVerifyBusy=false;
+    // Accepts "MHSS-EX7K4N", "mhss ex7k4n", "MHSS -EX7K4N", "MHSSEX7K4N" or just the 6 characters.
+    function normalizeCardNumber(v){const x=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(x.length===10&&x.startsWith('MHSS'))return 'MHSS-'+x.slice(4);if(x.length===6&&!x.startsWith('MHSS'))return 'MHSS-'+x;return String(v||'').trim().toUpperCase();}
+    async function currentUserId(client){try{const u=await client.auth.getUser();return (u&&u.data&&u.data.user&&u.data.user.id)||null;}catch(e){return null;}}
+    async function logCardAuditDB(client,action,student,cardNumber,stage,details){try{const uid=await currentUserId(client);const {error}=await client.from('mhss_student_id_card_audit').insert([{action,student_id:(student&&(student.id||student.student_id))||null,student_name:(student&&student.name)||null,card_number:cardNumber||null,stage:stage||null,details:details||null,created_by:uid}]);if(error)console.warn('Card audit save failed:',error);}catch(e){console.warn('Card audit save failed:',e);}}
+    async function lookupCardInSupabase(client,no){
+        const cols='id,name,class_name,grade,photo,status,id_card_number';
+        const c=await client.from('mhss_student_id_cards').select('*').eq('card_number',no).maybeSingle();
+        if(c.error)throw c.error;
+        let card=c.data||null,student=null,current=null;
+        if(card){
+            const s=await client.from('students').select(cols).eq('id',card.student_id).maybeSingle();
+            student=s.data||null;
+            if(card.is_current===false||card.status==='Replaced'){
+                const cur=await client.from('mhss_student_id_cards').select('card_number,status,version,issued_at').eq('student_id',card.student_id).eq('is_current',true).maybeSingle();
+                current=cur.data||null;
+            }
+        }else{
+            // Number exists on the student record but the card row is missing.
+            const s=await client.from('students').select(cols).eq('id_card_number',no).maybeSingle();
+            if(s.error)throw s.error;
+            student=s.data||null;
+        }
+        return {card,student,current};
+    }
+    function lookupCardLocal(no){
+        const rs=getCardRegistry(),recs=Object.values(rs);
+        let e=recs.find(r=>String(r.cardNumber).toUpperCase()===no);
+        if(e){const st=studentsData.find(s=>s.id===e.studentId);return {card:{card_number:e.cardNumber,student_id:e.studentId,status:e.status,version:e.version||1,is_current:e.status!=='Replaced',issued_at:e.issuedAt,replaced_at:e.replacedAt||null,previous_card_number:e.previousCardNumber||null,history:e.history||[]},student:st?{id:st.id,name:st.name,class_name:st.className,photo:st.photo}:null,current:null};}
+        e=recs.find(r=>String(r.previousCardNumber||'').toUpperCase()===no);
+        if(e){const st=studentsData.find(s=>s.id===e.studentId);return {card:{card_number:no,student_id:e.studentId,status:'Replaced',is_current:false,version:Math.max(1,(Number(e.version)||2)-1),history:[]},student:st?{id:st.id,name:st.name,class_name:st.className,photo:st.photo}:null,current:{card_number:e.cardNumber,status:e.status,version:e.version}};}
+        return {card:null,student:null,current:null};
+    }
+    function judgeCard(res){
+        const {card,student,current}=res;
+        if(!card&&!student)return {level:'invalid',title:'❌ INVALID CARD',msg:'This card number is not in the MHSS registry. Do not accept this card.'};
+        const status=card?card.status:'Active';
+        if(card&&(card.is_current===false||status==='Replaced'))return {level:'bad',title:'❌ REPLACED CARD — DO NOT ACCEPT',msg:current?`This card was replaced. The current card is ${current.card_number}.`:'This card was replaced by a newer card.'};
+        if(status==='Lost'||status==='Damaged'||status==='Expired')return {level:'bad',title:`⛔ CARD ${status.toUpperCase()} — DO NOT ACCEPT`,msg:`This card is marked ${status}. Ask the student for the current card.`};
+        if(status==='Replacement Required')return {level:'warn',title:'⚠️ REPLACEMENT REQUIRED',msg:'This card must be replaced before it is used again.'};
+        if(!student)return {level:'warn',title:'⚠️ CARD FOUND — STUDENT RECORD MISSING',msg:'The card is registered but its student record could not be found.'};
+        if(student.status&&student.status!=='Active')return {level:'warn',title:`⚠️ CARD VALID — STUDENT ${String(student.status).toUpperCase()}`,msg:`The card is genuine, but this student is marked ${student.status}.`};
+        return {level:'ok',title:'✅ VALID CARD',msg:`Genuine, current MHSS student ID card — ${cardTypeLabel(card).toLowerCase()}.`};
+    }
+    function fmtCardDate(v){if(!v)return '—';const d=new Date(v);return isNaN(d)?'—':d.toLocaleString();}
+    function renderVerification(no,res,j,source){
+        const colors={ok:'rgba(34,197,94,.45)',warn:'rgba(245,158,11,.5)',bad:'rgba(239,68,68,.5)',invalid:'rgba(239,68,68,.5)'};
+        const tc={ok:'#22c55e',warn:'#f59e0b',bad:'#ef4444',invalid:'#ef4444'};
+        const {card,student}=res;
+        const cell=(l,v)=>`<div><div class="text-[9px]" style="color:var(--text-muted)">${l}</div><div class="font-bold text-xs break-all">${escapeHtml(v)}</div></div>`;
+        let html=`<div class="rounded-xl p-4 border" style="border-color:${colors[j.level]}"><div class="font-black text-sm" style="color:${tc[j.level]}">${escapeHtml(j.title)}</div><div class="text-xs mt-1" style="color:var(--text-muted)">${escapeHtml(j.msg)}</div>`;
+        if(card||student){
+            html+=`<div class="flex gap-3 mt-4 items-center"><img src="${getPhotoUrl({photo:student&&student.photo,name:(student&&student.name)||'Student'})}" alt="" style="width:64px;height:64px;border-radius:12px;object-fit:cover;flex-shrink:0"><div><div class="text-sm font-bold">${escapeHtml((student&&student.name)||'Student record not found')}</div><div class="text-[10px] mt-1" style="color:var(--text-muted)">${escapeHtml([student&&student.class_name,student&&student.grade].filter(Boolean).join(' · '))}</div></div></div>`;
+            html+=`<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-3 border-t" style="border-color:var(--border)">${cell('CARD NUMBER',(card&&card.card_number)||no)}${cell('STUDENT ID',(card&&card.student_id)||(student&&student.id)||'—')}${cell('CARD STATUS',card?card.status:'Active')}${cell('CARD TYPE',cardTypeLabel(card))}${cell('VERSION','V'+((card&&card.version)||1))}${cell('ISSUED',fmtCardDate(card&&card.issued_at))}${card&&card.replaced_at?cell('REPLACED ON',fmtCardDate(card.replaced_at)):''}${card&&card.previous_card_number?cell('PREVIOUS CARD',card.previous_card_number):''}${student&&student.status?cell('STUDENT STATUS',student.status):''}</div>`;
+            const h=card&&Array.isArray(card.history)?card.history.slice(-5).reverse():[];
+            if(h.length)html+=`<div class="mt-4 pt-3 border-t" style="border-color:var(--border)"><div class="text-[9px] mb-1" style="color:var(--text-muted)">RECENT CARD HISTORY</div>${h.map(x=>`<div class="text-[10px]">${escapeHtml(x.action||'')} · ${escapeHtml(fmtCardDate(x.at))}${x.cardNumber?' · '+escapeHtml(x.cardNumber):''}</div>`).join('')}</div>`;
+        }else{
+            html+=`<div class="text-xs mt-3" style="color:var(--text-muted)">Card number checked: <b>${escapeHtml(no||'—')}</b></div>`;
+        }
+        html+=`<div class="text-[9px] mt-3" style="color:var(--text-muted)">${source==='database'?'Checked against the live database · ':'⚠️ Database unavailable — checked this browser\'s local records only · '}${escapeHtml(new Date().toLocaleString())}</div></div>`;
+        return html;
+    }
+    // Reads what a scanner/camera/keyboard produced: a QR URL, a card number, or a Student ID (barcode).
+    function parseScannedValue(raw){
+        const v=String(raw||'').trim();
+        const m=v.match(/MHSS-[A-Z0-9]{6}/i);
+        if(m)return {kind:'card',value:m[0].toUpperCase()};
+        if(v.includes('/')&&!/^https?:/i.test(v))return {kind:'student',value:v};
+        return {kind:'card',value:normalizeCardNumber(v)};
+    }
+    function cardTypeLabel(card){return card&&(Number(card.version)>1||card.previous_card_number)?`Replacement card (V${card.version||2})`:'Original card';}
+    // Barcode = Student ID -> student identification (emergency info only with permission).
+    async function runStudentScan(id){
+        const result=document.getElementById('cardVerifyResult'),body=document.getElementById('cardHistoryBody');
+        result.textContent='Checking…';
+        let client;
+        try{client=await waitForSupabase();}catch(e){result.textContent='⚠️ Database unavailable';body.innerHTML='<div class="text-xs" style="color:var(--text-muted)">Student lookup by barcode needs the database connection.</div>';return;}
+        const sr=await client.from('students').select('*').in('id',[id,id.toUpperCase()]).limit(1);
+        const st=sr.data&&sr.data[0];
+        if(sr.error||!st){
+            result.textContent='❌ STUDENT NOT FOUND';
+            body.innerHTML=renderVerification(id,{card:null,student:null},{level:'invalid',title:'❌ STUDENT NOT FOUND',msg:'No student has this Student ID.'},'database').replace('Checked against the live database · ','');
+            logCardAuditDB(client,'STUDENT_SCAN_FAILED',null,null,'barcode','Unknown Student ID: '+id);
+            return;
+        }
+        const cr=await client.from('mhss_student_id_cards').select('card_number,status,version,previous_card_number,issued_at').eq('student_id',st.id).eq('is_current',true).maybeSingle();
+        const card=cr.data||null,active=!st.status||st.status==='Active';
+        const cell=(l,v)=>`<div><div class="text-[9px]" style="color:var(--text-muted)">${l}</div><div class="font-bold text-xs break-all">${escapeHtml(v||'—')}</div></div>`;
+        const canSee=!!window.__mhCanSeeEmergency;
+        result.textContent=active?'🪪 STUDENT IDENTIFIED':`⚠️ STUDENT ${String(st.status).toUpperCase()}`;
+        body.innerHTML=`<div class="rounded-xl p-4 border" style="border-color:${active?'rgba(34,197,94,.45)':'rgba(245,158,11,.5)'}">
+            <div class="flex gap-3 items-center"><img src="${getPhotoUrl({photo:st.photo,name:st.name})}" alt="" style="width:72px;height:72px;border-radius:12px;object-fit:cover;flex-shrink:0"><div><div class="text-sm font-bold">${escapeHtml(st.name)}</div><div class="text-[10px] mt-1" style="color:var(--text-muted)">${escapeHtml([st.class_name,st.grade].filter(Boolean).join(' · '))}</div></div></div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-3 border-t" style="border-color:var(--border)">${cell('STUDENT ID',st.id)}${cell('FILE NUMBER',st.file_number)}${cell('STATUS',st.status||'Active')}${cell('CLASS',st.class_name)}${cell('GRADE',st.grade)}${cell('CARD NO.',card&&card.card_number)}${cell('CARD STATUS',card&&card.status)}${cell('CARD TYPE',card?cardTypeLabel(card):'—')}</div>
+            <div class="mt-4 pt-3 border-t" style="border-color:var(--border)"><div class="text-[9px] mb-1" style="color:var(--text-muted)">EMERGENCY INFORMATION</div>${canSee?`<div class="text-xs font-bold">${escapeHtml(st.emergency_name||'—')}</div><div class="text-xs">${escapeHtml(st.emergency_phone||'—')}</div>`:'<div class="text-xs" style="color:var(--text-muted)">🔒 Restricted — your role does not have permission to view emergency information.</div>'}</div>
+            <div class="text-[9px] mt-3" style="color:var(--text-muted)">Barcode scan · ${escapeHtml(new Date().toLocaleString())}</div></div>`;
+        addCardAudit('STUDENT_SCANNED',{id:st.id,name:st.name},card&&card.card_number,'Barcode scan');
+        logCardAuditDB(client,'STUDENT_SCANNED',{id:st.id,name:st.name},card&&card.card_number,'barcode','Barcode scan');
+    }
+    async function runCardVerification(){
+        if(cardVerifyBusy)return;
+        const input=document.getElementById('verifyCardInput'),result=document.getElementById('cardVerifyResult'),body=document.getElementById('cardHistoryBody');
+        const raw=String(input.value||'').trim();
+        if(!raw){result.textContent='Enter or scan a card number.';body.innerHTML='';input.focus();return;}
+        const parsed=parseScannedValue(raw);
+        cardVerifyBusy=true;
+        try{
+            if(parsed.kind==='student'){await runStudentScan(parsed.value);input.select();return;}
+            const no=parsed.value;
+            if(!CARD_NO_RE.test(no)){
+                result.textContent='❌ INVALID FORMAT';
+                body.innerHTML=renderVerification(no,{card:null,student:null},{level:'invalid',title:'❌ INVALID FORMAT',msg:'A card number looks like MHSS-XXXXXX. A Student ID looks like MHSS/EST/001.'},'database').replace('Checked against the live database · ','');
+                input.select();return;
+            }
+            result.textContent='Checking…';
+            let res,source='database',client=null;
+            try{client=await waitForSupabase();res=await lookupCardInSupabase(client,no);}
+            catch(e){console.warn('Database verification failed, using local records:',e);source='local';res=lookupCardLocal(no);}
+            const j=judgeCard(res);
+            result.textContent=j.title;
+            body.innerHTML=renderVerification(no,res,j,source);
+            const stu=res.student||{id:res.card&&res.card.student_id,name:null};
+            const action=(res.card||res.student)?'CARD_VERIFIED':'CARD_VERIFY_FAILED',details=`${j.title}${source==='local'?' (local records)':''}`;
+            addCardAudit(action,stu&&stu.id?{id:stu.id,name:stu.name}:null,no,details);
+            if(client&&source==='database')logCardAuditDB(client,action,stu,no,'verification',details);
+            input.select();
+        }finally{cardVerifyBusy=false;}
+    }
+    // ---- Camera scanner: QR (card) and barcode (student). Uses the browser's BarcodeDetector when present, jsQR otherwise (QR only). ----
+    let cardScanStream=null,cardScanTimer=null,cardScanDetector=null,cardScanCanvas=null;
+    function loadJsQR(){return new Promise((ok,fail)=>{if(window.jsQR)return ok();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';s.onload=()=>ok();s.onerror=()=>fail(new Error('Could not load the QR reader'));document.head.appendChild(s);});}
+    function stopCardScanner(){
+        if(cardScanTimer){clearInterval(cardScanTimer);cardScanTimer=null;}
+        if(cardScanStream){cardScanStream.getTracks().forEach(t=>t.stop());cardScanStream=null;}
+        const v=document.getElementById('cardScanVideo'),w=document.getElementById('cardScanWrap'),b=document.getElementById('cardScanBtn');
+        if(v)v.srcObject=null;if(w)w.classList.add('hidden');if(b)b.textContent='📷 Scan with camera';
+    }
+    function handleScannedValue(value){stopCardScanner();const i=document.getElementById('verifyCardInput');i.value=value;runCardVerification();}
+    async function toggleCardScanner(){
+        if(cardScanStream){stopCardScanner();return;}
+        const wrap=document.getElementById('cardScanWrap'),video=document.getElementById('cardScanVideo'),msg=document.getElementById('cardScanMsg'),btn=document.getElementById('cardScanBtn');
+        msg.textContent='Starting camera…';wrap.classList.remove('hidden');
+        if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg.textContent='Camera is not available here (it needs https). Type the number instead.';return;}
+        try{
+            cardScanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+            video.srcObject=cardScanStream;await video.play();
+            cardScanDetector=null;
+            if('BarcodeDetector' in window){try{cardScanDetector=new BarcodeDetector({formats:['qr_code','code_128']});}catch(e){cardScanDetector=null;}}
+            if(!cardScanDetector)await loadJsQR();
+            btn.textContent='⏹ Stop camera';
+            msg.textContent=cardScanDetector?'Point the camera at the QR code or the barcode.':'Point the camera at the QR code. (Barcode scanning needs Chrome — otherwise type the Student ID.)';
+            let busy=false;
+            cardScanTimer=setInterval(async()=>{
+                if(busy||!cardScanStream||video.readyState<2)return;busy=true;
+                try{
+                    let value=null;
+                    if(cardScanDetector){const codes=await cardScanDetector.detect(video);if(codes&&codes.length)value=codes[0].rawValue;}
+                    else{
+                        const w=Math.min(640,video.videoWidth),h=Math.round(w*video.videoHeight/video.videoWidth);
+                        cardScanCanvas=cardScanCanvas||document.createElement('canvas');cardScanCanvas.width=w;cardScanCanvas.height=h;
+                        const ctx=cardScanCanvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(video,0,0,w,h);
+                        const c=window.jsQR(ctx.getImageData(0,0,w,h).data,w,h);if(c&&c.data)value=c.data;
+                    }
+                    if(value)handleScannedValue(value);
+                }catch(e){}finally{busy=false;}
+            },250);
+        }catch(e){
+            console.warn('Camera error:',e);stopCardScanner();
+            wrap.classList.remove('hidden');msg.textContent=(e&&e.name==='NotAllowedError')?'Camera permission was denied. Allow it in the browser, or type the number.':'Could not start the camera. Type the number instead.';
+        }
+    }
+    // ---- Keep the database in step with what happens on this page ----
+    async function uniqueCardNumberDB(reg){
+        try{const client=await waitForSupabase();
+            for(let i=0;i<10;i++){const n=generateUniqueCardNumber(reg);
+                const a=await client.from('students').select('id').eq('id_card_number',n).limit(1);
+                const b=await client.from('mhss_student_id_cards').select('id').eq('card_number',n).limit(1);
+                if(!a.error&&!b.error&&!(a.data||[]).length&&!(b.data||[]).length)return n;}
+        }catch(e){console.warn('Could not check card number uniqueness in the database:',e);}
+        return generateUniqueCardNumber(reg);
+    }
+    async function syncStatusToSupabase(s,rec,from,to){
+        try{const client=await waitForSupabase(),uid=await currentUserId(client);
+            const st=CARD_DB_STATUSES.includes(to)?to:'Active';
+            const cur=await client.from('mhss_student_id_cards').select('id,history').eq('student_id',s.id).eq('is_current',true).maybeSingle();
+            if(cur.error)throw cur.error;
+            if(cur.data){const h=Array.isArray(cur.data.history)?cur.data.history:[];h.push({action:'STATUS_CHANGED',from,to,at:nowIso(),cardNumber:rec.cardNumber});
+                const u=await client.from('mhss_student_id_cards').update({status:st,history:h,updated_by:uid}).eq('id',cur.data.id);if(u.error)throw u.error;}
+            else if(rec.cardNumber){const i=await client.from('mhss_student_id_cards').insert([{student_id:s.id,card_number:rec.cardNumber,status:st,version:rec.version||1,is_current:true,history:[{action:'STATUS_CHANGED',from,to,at:nowIso(),cardNumber:rec.cardNumber}],created_by:uid,updated_by:uid}]);if(i.error&&i.error.code!=='23505')throw i.error;}
+            logCardAuditDB(client,'STATUS_CHANGED',s,rec.cardNumber,'status',from+' → '+to);
+        }catch(e){console.warn('Card status was not saved to the database:',e);}
+    }
+    async function syncPrintToSupabase(ids,stage){
+        try{const client=await waitForSupabase(),uid=await currentUserId(client);
+            const u=await client.from('mhss_student_id_cards').update({status:'Printed',updated_by:uid}).in('student_id',ids).eq('is_current',true).in('status',['Active','Printed']);
+            if(u.error)throw u.error;
+            const rows=ids.map(id=>{const s=studentsData.find(x=>x.id===id);const rec=s?ensureCardRecord(s):null;return s&&rec&&rec.cardNumber?{action:'PRINTED',student_id:s.id,student_name:s.name,card_number:rec.cardNumber,stage,details:`${String(stage).toUpperCase()} print job`,created_by:uid}:null;}).filter(Boolean);
+            if(rows.length){const a=await client.from('mhss_student_id_card_audit').insert(rows);if(a.error)throw a.error;}
+        }catch(e){console.warn('Print history was not saved to the database:',e);}
+    }
+    async function syncReplacementToSupabase(s,oldRec,newRec){
+        try{const client=await waitForSupabase(),uid=await currentUserId(client);
+            // 1) Retire the old card first (only one current card per student is allowed).
+            const r1=await client.from('mhss_student_id_cards').update({status:'Replaced',is_current:false,replaced_at:oldRec.replacedAt||nowIso(),updated_by:uid}).eq('student_id',s.id).eq('is_current',true);
+            if(r1.error)throw r1.error;
+            // 2) Point the student at the new card number (a database trigger may also sync the card table).
+            const r2=await client.from('students').update({id_card_number:newRec.cardNumber}).eq('id',s.id);
+            if(r2.error)throw r2.error;
+            // 3) Make sure the new card row is current and complete.
+            const fields={status:'Active',version:newRec.version,issued_at:newRec.issuedAt,is_current:true,previous_card_number:newRec.previousCardNumber,history:newRec.history,updated_by:uid};
+            const ex=await client.from('mhss_student_id_cards').select('id').eq('card_number',newRec.cardNumber).maybeSingle();
+            if(ex.error)throw ex.error;
+            const w=ex.data?await client.from('mhss_student_id_cards').update(fields).eq('id',ex.data.id):await client.from('mhss_student_id_cards').insert([{student_id:s.id,card_number:newRec.cardNumber,created_by:uid,...fields}]);
+            if(w.error)throw w.error;
+            await logCardAuditDB(client,'CARD_REPLACED',s,newRec.cardNumber,'replacement','Previous card: '+oldRec.cardNumber);
+            const i=studentsData.findIndex(x=>x.id===s.id);if(i>=0)studentsData[i].idCardNumber=newRec.cardNumber;
+        }catch(e){console.error('Replacement was not saved to the database:',e);alert('⚠️ The new card was issued on this browser, but it could not be saved to the database:\n'+((e&&e.message)||e)+'\n\nVerification on other devices will not see it until this is fixed.');}
+    }
     function openCardHistory(){document.getElementById('cardVerifyBox').classList.add('hidden');document.getElementById('cardHistoryTitle').textContent='📜 Card History & Audit Trail';document.getElementById('cardVerifyResult').textContent='Issuance, replacement, status and print actions.';const a=getCardAudit().slice().reverse();document.getElementById('cardHistoryBody').innerHTML=a.length?a.map(x=>`<div class="card-history-row"><div class="font-bold">${escapeHtml(x.action)}</div><div><b>${escapeHtml(x.cardNumber||'—')}</b> · ${escapeHtml(x.studentName||x.studentId||'—')}<div class="text-[9px] mt-1" style="color:var(--text-muted)">${escapeHtml(x.details||'')}</div></div><div style="color:var(--text-muted)">${escapeHtml(new Date(x.at).toLocaleString())}</div></div>`).join(''):'<div class="text-sm py-8 text-center" style="color:var(--text-muted)">No audit history yet.</div>';document.getElementById('cardHistoryModal').classList.add('open');}
-    function closeCardHistory(){document.getElementById('cardHistoryModal').classList.remove('open');}
+    function closeCardHistory(){stopCardScanner();document.getElementById('cardHistoryModal').classList.remove('open');}
     function exportCardAudit(){const blob=new Blob([JSON.stringify(getCardAudit(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`MHSS-ID-Card-Audit-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);}
-    function recordPrintHistory(ids,stage){const r=getCardRegistry(),a=getCardAudit(),at=nowIso();ids.forEach(id=>{const s=studentsData.find(x=>x.id===id);if(!s)return;const rec=ensureCardRecord(s);rec.status='Printed';rec.history=Array.isArray(rec.history)?rec.history:[];rec.history.push({action:'PRINTED',stage,at,cardNumber:rec.cardNumber});r[id]=rec;a.push({action:'PRINTED',stage,studentId:s.id,studentName:s.name,cardNumber:rec.cardNumber,at,details:`${stage.toUpperCase()} print job`});});saveCardRegistry(r);saveCardAudit(a);updateCardSecurityStats();}
+    function recordPrintHistory(ids,stage){const r=getCardRegistry(),a=getCardAudit(),at=nowIso();ids.forEach(id=>{const s=studentsData.find(x=>x.id===id);if(!s)return;const rec=ensureCardRecord(s);rec.status='Printed';rec.history=Array.isArray(rec.history)?rec.history:[];rec.history.push({action:'PRINTED',stage,at,cardNumber:rec.cardNumber});r[id]=rec;a.push({action:'PRINTED',stage,studentId:s.id,studentName:s.name,cardNumber:rec.cardNumber,at,details:`${stage.toUpperCase()} print job`});});saveCardRegistry(r);saveCardAudit(a);syncPrintToSupabase(ids,stage);updateCardSecurityStats();}
 
     function hasStudentPhoto(s) {
         const p = String(s?.photo || '').trim();

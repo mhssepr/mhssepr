@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MHSS ID Card Verification</title>
+<style>
+  :root { --bg:#0b1220; --panel:#131c2e; --text:#f1f5f9; --muted:#94a3b8; --gold:#c9a227; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:'Inter','Segoe UI',system-ui,sans-serif; padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+  main { max-width:480px; margin:0 auto; padding:20px 16px 40px; }
+  .brand { text-align:center; font-size:12px; letter-spacing:.16em; font-weight:800; color:var(--gold); margin:8px 0 2px; }
+  .sub { text-align:center; font-size:11px; color:var(--muted); margin-bottom:18px; }
+  .card { background:var(--panel); border:2px solid #24304a; border-radius:18px; padding:20px; }
+  .card.ok { border-color:var(--ok); } .card.warn { border-color:var(--warn); } .card.bad { border-color:var(--bad); }
+  .status { font-size:22px; font-weight:900; text-align:center; }
+  .ok .status { color:var(--ok); } .warn .status { color:var(--warn); } .bad .status { color:var(--bad); }
+  .msg { text-align:center; font-size:12px; color:var(--muted); margin-top:6px; }
+  .who { display:flex; gap:14px; align-items:center; margin-top:18px; }
+  .who img { width:76px; height:76px; border-radius:14px; object-fit:cover; background:#1e293b; flex-shrink:0; }
+  .who .name { font-size:17px; font-weight:800; } .who .cls { font-size:12px; color:var(--muted); margin-top:3px; }
+  dl { display:grid; grid-template-columns:1fr 1fr; gap:12px 10px; margin:18px 0 0; padding-top:14px; border-top:1px solid #24304a; }
+  dt { font-size:9px; letter-spacing:.08em; color:var(--muted); } dd { margin:2px 0 0; font-size:13px; font-weight:700; word-break:break-all; }
+  .foot { font-size:10px; color:var(--muted); text-align:center; margin-top:14px; }
+  form { display:flex; gap:8px; margin-top:18px; }
+  input { flex:1; padding:12px; border-radius:12px; border:1px solid #24304a; background:var(--panel); color:var(--text); font-size:14px; }
+  .hidden { display:none; }
+  button.secondary { width:100%; margin-top:10px; background:transparent; color:var(--gold); border:1.5px solid var(--gold); }
+  .scanbox { position:relative; margin-top:12px; border-radius:14px; overflow:hidden; background:#000; }
+  .scanbox video { width:100%; max-height:300px; object-fit:cover; display:block; }
+  .scanframe { position:absolute; inset:16%; border:2px solid rgba(255,215,0,.85); border-radius:12px; pointer-events:none; }
+  a { color:var(--gold); }
+  button { padding:12px 16px; border-radius:12px; border:0; background:var(--gold); color:#111; font-weight:800; cursor:pointer; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">MHSS ID CARD VERIFICATION</div>
+  <div class="sub">Meserete Hiwot Sunday School</div>
+  <div id="result" class="card"><div class="status" style="color:var(--muted)">Ready to verify</div><div class="msg">Scan a card QR or a student barcode, or type a card number / Student ID below.</div></div>
+  <form id="manual"><input id="manualInput" placeholder="MHSS-XXXXXX or MHSS/EST/001" autocomplete="off" autocapitalize="characters"><button type="submit">Verify</button></form>
+  <button id="scanBtn" type="button" class="secondary">📷 Scan with camera</button>
+  <div id="scanWrap" class="hidden"><div class="scanbox"><video id="scanVideo" playsinline muted></video><div class="scanframe"></div></div><div id="scanMsg" class="foot"></div></div>
+  <div class="foot"><a href="print-id-cards.html">← Back to ID Card Printing</a></div>
+</main>
+<script type="module">
+  import { supabase } from './supabaseClient.js';
+  import { initializeRBAC, hasModuleAccess, isSuperAdmin } from './mhss-rbac.js';
+
+  // Emergency information is only shown with Print/Export permission for Student ID Cards.
+  let canSeeEmergency = false;
+  const rbacReady = (async () => {
+    try { const r = await initializeRBAC({ supabase }); canSeeEmergency = !!r && (isSuperAdmin() || hasModuleAccess('id_print', 'print_export')); }
+    catch (e) { canSeeEmergency = false; }
+  })();
+
+  const $ = id => document.getElementById(id);
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt = v => { if (!v) return '—'; const d = new Date(v); return isNaN(d) ? '—' : d.toLocaleString(); };
+  const CARD_RE = /^MHSS-[A-Z0-9]{6}$/;
+
+  function normalize(v) {
+    const m = String(v || '').match(/MHSS-[A-Z0-9]{6}/i);
+    if (m) return m[0].toUpperCase();
+    const x = String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (x.length === 10 && x.startsWith('MHSS')) return 'MHSS-' + x.slice(4);
+    if (x.length === 6 && !x.startsWith('MHSS')) return 'MHSS-' + x;
+    return String(v || '').trim().toUpperCase();
+  }
+  const typeOf = c => (c && (Number(c.version) > 1 || c.previous_card_number)) ? `Replacement card (V${c.version || 2})` : 'Original card';
+
+  function show(level, title, msg, body = '') {
+    const r = $('result');
+    r.className = 'card ' + level;
+    r.innerHTML = `<div class="status">${esc(title)}</div><div class="msg">${esc(msg)}</div>${body}`;
+  }
+
+  async function log(action, student, no, details) {
+    try {
+      const u = await supabase.auth.getUser();
+      await supabase.from('mhss_student_id_card_audit').insert([{
+        action, student_id: student?.id || null, student_name: student?.name || null,
+        card_number: no || null, stage: 'qr', details, created_by: u?.data?.user?.id || null
+      }]);
+    } catch (e) { console.warn('Audit log failed', e); }
+  }
+
+  async function verify(raw) {
+    const no = normalize(raw);
+    if (!CARD_RE.test(no)) { show('bad', '❌ INVALID CARD', 'A card number looks like MHSS-XXXXXX.'); return; }
+    show('', 'Checking…', no);
+
+    const { data: sess } = await supabase.auth.getSession();
+    if (!sess?.session) {
+      show('warn', '🔒 SIGN IN REQUIRED', 'Sign in to the MHSS system on this device, then scan the card again.');
+      return;
+    }
+
+    try {
+      const cols = 'id,name,class_name,grade,photo,status,file_number';
+      const c = await supabase.from('mhss_student_id_cards').select('*').eq('card_number', no).maybeSingle();
+      if (c.error) throw c.error;
+      let card = c.data, student = null, current = null;
+      if (card) {
+        const s = await supabase.from('students').select(cols).eq('id', card.student_id).maybeSingle();
+        student = s.data || null;
+        if (card.is_current === false || card.status === 'Replaced') {
+          const cur = await supabase.from('mhss_student_id_cards').select('card_number').eq('student_id', card.student_id).eq('is_current', true).maybeSingle();
+          current = cur.data || null;
+        }
+      } else {
+        const s = await supabase.from('students').select(cols).eq('id_card_number', no).maybeSingle();
+        if (s.error) throw s.error;
+        student = s.data || null;
+      }
+
+      if (!card && !student) {
+        show('bad', '❌ INVALID CARD', 'This card number is not in the MHSS registry. Do not accept this card.',
+          `<div class="foot">Card number checked: ${esc(no)}</div>`);
+        log('CARD_VERIFY_FAILED', null, no, 'QR scan: not found');
+        return;
+      }
+
+      const status = card ? card.status : 'Active';
+      let level = 'ok', title = '✅ VALID CARD', msg = `Genuine, current MHSS student ID card — ${typeOf(card).toLowerCase()}.`;
+      if (card && (card.is_current === false || status === 'Replaced')) {
+        level = 'bad'; title = '❌ REPLACED CARD — DO NOT ACCEPT';
+        msg = current ? `This card was replaced. The current card is ${current.card_number}.` : 'This card was replaced by a newer card.';
+      } else if (['Lost', 'Damaged', 'Expired'].includes(status)) {
+        level = 'bad'; title = `⛔ CARD ${status.toUpperCase()} — DO NOT ACCEPT`; msg = `This card is marked ${status}.`;
+      } else if (status === 'Replacement Required') {
+        level = 'warn'; title = '⚠️ REPLACEMENT REQUIRED'; msg = 'This card must be replaced before it is used again.';
+      } else if (!student) {
+        level = 'warn'; title = '⚠️ STUDENT RECORD MISSING'; msg = 'The card is registered but its student record was not found.';
+      } else if (student.status && student.status !== 'Active') {
+        level = 'warn'; title = `⚠️ CARD VALID — STUDENT ${String(student.status).toUpperCase()}`; msg = `The card is genuine, but this student is marked ${student.status}.`;
+      }
+
+      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(student?.name || 'Student')}&background=1e293b&color=FFD700&bold=true`;
+      const cell = (l, v) => `<div><dt>${l}</dt><dd>${esc(v || '—')}</dd></div>`;
+      show(level, title, msg, `
+        <div class="who"><img src="${esc(student?.photo || avatar)}" alt="" onerror="this.src='${avatar}'">
+          <div><div class="name">${esc(student?.name || 'Student record not found')}</div>
+          <div class="cls">${esc([student?.class_name, student?.grade].filter(Boolean).join(' · '))}</div></div></div>
+        <dl>
+          ${cell('STUDENT ID', card?.student_id || student?.id)}
+          ${cell('CARD NO.', card?.card_number || no)}
+          ${cell('CARD STATUS', status)}
+          ${cell('CARD TYPE', typeOf(card))}
+          ${cell('ISSUED', fmt(card?.issued_at))}
+          ${card?.previous_card_number ? cell('PREVIOUS CARD', card.previous_card_number) : ''}
+          ${card?.replaced_at ? cell('REPLACED ON', fmt(card.replaced_at)) : ''}
+          ${student?.status ? cell('STUDENT STATUS', student.status) : ''}
+        </dl>
+        <div class="foot">Checked against the live database · ${esc(new Date().toLocaleString())}</div>`);
+      log('CARD_VERIFIED', student || { id: card?.student_id }, no, `QR scan: ${title}`);
+    } catch (e) {
+      console.error(e);
+      show('warn', '⚠️ COULD NOT VERIFY', 'The database could not be reached or you do not have access. Please try again.');
+    }
+  }
+
+
+  // A scan can be a QR (URL / card number) or a barcode (Student ID).
+  function parseScanned(raw) {
+    const v = String(raw || '').trim();
+    if (/MHSS-[A-Z0-9]{6}/i.test(v)) return { kind: 'card', value: v };
+    if (v.includes('/') && !/^https?:/i.test(v)) return { kind: 'student', value: v };
+    return { kind: 'card', value: v };
+  }
+
+  async function verifyStudent(id) {
+    show('', 'Checking…', id);
+    const { data: sess } = await supabase.auth.getSession();
+    if (!sess?.session) { show('warn', '🔒 SIGN IN REQUIRED', 'Sign in to the MHSS system on this device, then scan again.'); return; }
+    await rbacReady;
+    try {
+      const sr = await supabase.from('students').select('*').in('id', [id, id.toUpperCase()]).limit(1);
+      if (sr.error) throw sr.error;
+      const st = sr.data && sr.data[0];
+      if (!st) {
+        show('bad', '❌ STUDENT NOT FOUND', 'No student has this Student ID.', `<div class="foot">Checked: ${esc(id)}</div>`);
+        log('STUDENT_SCAN_FAILED', null, null, 'Unknown Student ID: ' + id);
+        return;
+      }
+      const cr = await supabase.from('mhss_student_id_cards').select('card_number,status,version,previous_card_number').eq('student_id', st.id).eq('is_current', true).maybeSingle();
+      const card = cr.data || null;
+      const active = !st.status || st.status === 'Active';
+      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(st.name || 'Student')}&background=1e293b&color=FFD700&bold=true`;
+      const cell = (l, v) => `<div><dt>${l}</dt><dd>${esc(v || '—')}</dd></div>`;
+      show(active ? 'ok' : 'warn', active ? '🪪 STUDENT IDENTIFIED' : `⚠️ STUDENT ${String(st.status).toUpperCase()}`, 'Barcode scan — student identification.', `
+        <div class="who"><img src="${esc(st.photo || avatar)}" alt="" onerror="this.src='${avatar}'">
+          <div><div class="name">${esc(st.name)}</div><div class="cls">${esc([st.class_name, st.grade].filter(Boolean).join(' · '))}</div></div></div>
+        <dl>
+          ${cell('STUDENT ID', st.id)}${cell('FILE NUMBER', st.file_number)}
+          ${cell('STATUS', st.status || 'Active')}${cell('CLASS', st.class_name)}
+          ${cell('GRADE', st.grade)}${cell('CARD NO.', card?.card_number)}
+          ${cell('CARD STATUS', card?.status)}${cell('CARD TYPE', card ? typeOf(card) : '')}
+        </dl>
+        <dl>
+          <div style="grid-column:1/-1"><dt>EMERGENCY INFORMATION</dt>
+          <dd>${canSeeEmergency ? esc(st.emergency_name || '—') + '<br>' + esc(st.emergency_phone || '—') : '🔒 Restricted — your role does not have permission to view emergency information.'}</dd></div>
+        </dl>
+        <div class="foot">${esc(new Date().toLocaleString())}</div>`);
+      log('STUDENT_SCANNED', st, card?.card_number, 'Barcode scan');
+    } catch (e) {
+      console.error(e);
+      show('warn', '⚠️ COULD NOT LOOK UP STUDENT', 'The database could not be reached or you do not have access. Please try again.');
+    }
+  }
+
+  function run(raw) {
+    const p = parseScanned(raw);
+    if (!String(raw || '').trim()) return;
+    return p.kind === 'student' ? verifyStudent(p.value) : verify(p.value);
+  }
+
+  // ---- Camera scanner (BarcodeDetector for QR + barcode; jsQR fallback for QR) ----
+  let stream = null, timer = null, detector = null, canvas = null;
+  const loadJsQR = () => new Promise((ok, fail) => {
+    if (window.jsQR) return ok();
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+    s.onload = () => ok(); s.onerror = () => fail(new Error('QR reader failed to load'));
+    document.head.appendChild(s);
+  });
+  function stopScanner() {
+    if (timer) { clearInterval(timer); timer = null; }
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    $('scanVideo').srcObject = null; $('scanWrap').classList.add('hidden'); $('scanBtn').textContent = '📷 Scan with camera';
+  }
+  async function toggleScanner() {
+    if (stream) { stopScanner(); return; }
+    const video = $('scanVideo'), msg = $('scanMsg');
+    $('scanWrap').classList.remove('hidden'); msg.textContent = 'Starting camera…';
+    if (!navigator.mediaDevices?.getUserMedia) { msg.textContent = 'Camera is not available here (it needs https). Type the number instead.'; return; }
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+      video.srcObject = stream; await video.play();
+      detector = null;
+      if ('BarcodeDetector' in window) { try { detector = new BarcodeDetector({ formats: ['qr_code', 'code_128'] }); } catch (e) { detector = null; } }
+      if (!detector) await loadJsQR();
+      $('scanBtn').textContent = '⏹ Stop camera';
+      msg.textContent = detector ? 'Point the camera at the card QR or the student barcode.' : 'Point the camera at the card QR. (Barcode scanning needs Chrome — otherwise type the Student ID.)';
+      let busy = false;
+      timer = setInterval(async () => {
+        if (busy || !stream || video.readyState < 2) return; busy = true;
+        try {
+          let value = null;
+          if (detector) { const codes = await detector.detect(video); if (codes?.length) value = codes[0].rawValue; }
+          else {
+            const w = Math.min(640, video.videoWidth), h = Math.round(w * video.videoHeight / video.videoWidth);
+            canvas = canvas || document.createElement('canvas'); canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true }); ctx.drawImage(video, 0, 0, w, h);
+            const c = window.jsQR(ctx.getImageData(0, 0, w, h).data, w, h); if (c?.data) value = c.data;
+          }
+          if (value) { stopScanner(); $('manualInput').value = value; run(value); }
+        } catch (e) { /* keep scanning */ } finally { busy = false; }
+      }, 250);
+    } catch (e) {
+      stopScanner(); $('scanWrap').classList.remove('hidden');
+      $('scanMsg').textContent = e?.name === 'NotAllowedError' ? 'Camera permission was denied. Allow it in the browser, or type the number.' : 'Could not start the camera. Type the number instead.';
+    }
+  }
+  $('scanBtn').addEventListener('click', toggleScanner);
+  window.addEventListener('pagehide', stopScanner);
+
+  $('manual').addEventListener('submit', e => { e.preventDefault(); const v = $('manualInput').value.trim(); if (v) run(v); });
+  // Opened from a card QR (?c=...) -> verify at once; opened from the print page -> wait for a scan or typed number.
+  const firstValue = new URLSearchParams(location.search).get('c');
+  if (firstValue) run(firstValue);
+</script>
+</body>
+</html>
