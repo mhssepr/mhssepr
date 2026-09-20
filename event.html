@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Events & Church Calendar — MHSS ERP</title>
+<style>
+:root{--bg:#f5f3ee;--panel:#fff;--panel2:#faf9f6;--text:#1f211f;--muted:#73756f;--line:#e6e1d6;--gold:#b8923d;--gold2:#d4b66c;--green:#315d4b;--red:#9d4848;--shadow:0 20px 55px rgba(30,28,20,.08);--radius:20px}
+:root[data-theme=dark]{--bg:#111310;--panel:#191c18;--panel2:#151815;--text:#f2f0e8;--muted:#a5a79e;--line:#30342e;--shadow:0 20px 55px rgba(0,0,0,.35)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% -10%,rgba(184,146,61,.12),transparent 35%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:flex;min-height:100vh}.main{margin-left:0;width:100%;padding:26px;min-width:0}.topbar{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:22px}.title h1{margin:0;font-size:28px;letter-spacing:-.03em}.title p{margin:5px 0 0;color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 13px;box-shadow:0 5px 18px rgba(0,0,0,.03)}.btn.primary{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:transparent;color:#201a0e;font-weight:700}.btn.danger{color:var(--red)}.btn:disabled{opacity:.5;cursor:not-allowed}.grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:18px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}.calendar-head{padding:17px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.month-nav{display:flex;align-items:center;gap:9px}.month-nav h2{margin:0;min-width:210px;text-align:center;font-size:19px}.tiny{font-size:12px;color:var(--muted)}.weekdays,.days{display:grid;grid-template-columns:repeat(7,1fr)}.weekday{padding:11px 8px;text-align:center;font-size:11px;font-weight:800;color:var(--muted);border-bottom:1px solid var(--line)}.day{min-height:142px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:9px;position:relative;background:var(--panel)}.day:nth-child(7n){border-right:0}.day.muted{background:var(--panel2);opacity:.52}.day.today{box-shadow:inset 0 0 0 2px rgba(184,146,61,.65)}.day-number{font-weight:800;font-size:14px}.day-gc{font-size:10px;color:var(--muted);margin-top:1px}.event-chip{margin-top:7px;padding:6px 7px;border-radius:9px;background:rgba(184,146,61,.12);border-left:3px solid var(--gold);font-size:11px;line-height:1.25;cursor:pointer}.event-chip .time{color:var(--muted);font-size:9px}.event-chip.green{border-left-color:var(--green);background:rgba(49,93,75,.10)}.event-chip.red{border-left-color:var(--red);background:rgba(157,72,72,.09)}.more{font-size:10px;color:var(--muted);margin-top:5px}.side{display:flex;flex-direction:column;gap:18px}.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{padding:15px;background:var(--panel);border:1px solid var(--line);border-radius:15px}.stat b{font-size:22px}.stat span{display:block;color:var(--muted);font-size:11px;margin-top:3px}.side-panel{padding:17px}.side-panel h3{margin:0 0 12px;font-size:15px}.filters{display:grid;gap:9px}.field{display:grid;gap:6px}.field label{font-size:11px;color:var(--muted);font-weight:700}.field input,.field select,.field textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:10px 11px;outline:none}.field textarea{min-height:82px;resize:vertical}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.viewbtn.active{background:rgba(184,146,61,.15);border-color:rgba(184,146,61,.45)}.agenda{padding:18px}.agenda-row{display:grid;grid-template-columns:110px 1fr auto;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);align-items:start}.agenda-date{font-weight:800}.agenda-date small{display:block;color:var(--muted);font-weight:500;margin-top:3px}.agenda-title{font-weight:800}.agenda-meta{color:var(--muted);font-size:11px;margin-top:5px}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;background:rgba(184,146,61,.12);font-size:10px;font-weight:800}.empty{padding:38px;text-align:center;color:var(--muted)}.year-grid{padding:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.mini-month{border:1px solid var(--line);border-radius:15px;padding:12px;background:var(--panel2);min-height:125px;cursor:pointer}.mini-month:hover{border-color:rgba(184,146,61,.5)}.mini-month h4{margin:0 0 6px}.mini-month p{margin:0;color:var(--muted);font-size:11px}.dotrow{display:flex;gap:4px;flex-wrap:wrap;margin-top:9px}.dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center;z-index:80;padding:18px}.modal-backdrop.open{display:flex}.modal{width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:0 30px 90px rgba(0,0,0,.3)}.modal-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-head h2{margin:0;font-size:18px}.modal-body{padding:20px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}.modal-foot{padding:15px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}.toast{position:fixed;right:22px;bottom:22px;z-index:100;background:var(--text);color:var(--bg);padding:12px 15px;border-radius:12px;box-shadow:var(--shadow);display:none}.toast.show{display:block}.import-note{font-size:11px;color:var(--muted);line-height:1.5}.hidden{display:none!important}@media(max-width:1050px){.grid{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.year-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){.main{margin-left:0;width:100%;padding:14px}.topbar{align-items:flex-start}.title h1{font-size:22px}.day{min-height:105px;padding:6px}.event-chip{font-size:9px;padding:5px}.month-nav h2{min-width:145px;font-size:16px}.side{display:block}.side-panel{margin-top:14px}.year-grid{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.agenda-row{grid-template-columns:85px 1fr}.agenda-row .badge{display:none}}
+
+/* =========================================================
+   STUDENTS.HTML VISUAL LANGUAGE — EVENTS PAGE
+   Styling only: preserves existing event/calendar functionality.
+========================================================= */
+.event-app-header{
+  position:sticky; top:0; z-index:30; width:100%; min-height:104px;
+  display:flex; align-items:center; justify-content:space-between; gap:28px;
+  padding:24px 32px; margin-bottom:22px;
+  background:var(--panel); border:1px solid var(--line); border-radius:18px;
+  box-shadow:0 8px 28px rgba(23,32,51,.05); backdrop-filter:blur(18px);
+}
+.event-brand{display:flex;align-items:center;gap:18px;min-width:0}
+.event-brand img{width:64px;height:64px;border-radius:16px;background:rgba(255,255,255,.05);padding:8px;border:1px solid var(--line);box-shadow:0 12px 28px rgba(184,146,46,.10);object-fit:contain;flex-shrink:0}
+.event-brand-copy{min-width:0}
+.event-brand-copy h1{margin:0;font-size:clamp(22px,2.4vw,34px);font-weight:800;letter-spacing:-.035em;line-height:1.12;color:var(--text)}
+.event-brand-copy p{margin:7px 0 0;color:var(--gold);font-weight:700;font-size:13px;line-height:1.45}
+.event-brand-copy .amharic{font-size:12px;margin-left:7px}
+.event-header-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.event-date-block{text-align:right;margin-right:5px;white-space:nowrap}
+.event-date-block p{margin:0;color:var(--muted);font-size:12px}
+.event-date-block strong{display:block;margin-top:3px;font-size:15px;color:var(--text)}
+.student-style-lang{display:flex;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+.student-style-lang button{border:0;background:transparent;font-size:12px;font-weight:800;letter-spacing:.03em;padding:6px 12px;border-radius:999px;color:var(--muted);cursor:pointer;transition:.25s}
+.student-style-lang button.active{background:var(--gold);color:#fff;box-shadow:0 4px 12px -3px rgba(184,146,46,.4)}
+.student-style-theme{position:relative;width:52px;height:30px;border-radius:999px;border:1px solid var(--line);background:var(--panel);cursor:pointer;padding:0;flex-shrink:0}
+.student-style-theme .knob{position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:var(--gold2);display:flex;align-items:center;justify-content:center;transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 6px rgba(0,0,0,.18);font-size:13px;color:#1a1a1a}
+html[data-theme="light"] .student-style-theme .knob{transform:translateX(22px)}
+.student-style-back{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:800;background:var(--panel);border:1px solid var(--line);color:var(--text);text-decoration:none;transition:.2s}
+.student-style-back:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px)}
+.event-actions-bar{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:22px;padding:2px 2px}
+.event-actions-bar .title h2{margin:0;font-size:22px;letter-spacing:-.025em;color:var(--text)}
+.event-actions-bar .title p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.event-actions-bar .actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:900px){.event-app-header{align-items:flex-start;flex-wrap:wrap}.event-header-controls{width:100%;justify-content:space-between}.event-date-block{display:none}}
+@media(max-width:600px){.event-app-header{position:relative;padding:16px;margin-bottom:16px;border-radius:16px;gap:14px}.event-brand{gap:12px}.event-brand img{width:48px;height:48px;border-radius:13px;padding:6px}.event-brand-copy h1{font-size:18px}.event-brand-copy p{font-size:10px;margin-top:4px}.event-brand-copy .amharic{display:block;margin:2px 0 0;font-size:9px}.event-header-controls{gap:7px}.student-style-lang button{padding:6px 9px}.student-style-back{padding:9px}.student-style-back .back-label{display:none}.event-actions-bar{display:block}.event-actions-bar .actions{margin-top:12px;justify-content:flex-start}.event-actions-bar .actions .btn{flex:1 1 auto}}
+</style>
+</head>
+<body>
+<div class="app">
+<main class="main">
+  <!-- STUDENTS-STYLE HEADER: visual styling only; event functionality/IDs preserved below -->
+  <header class="event-app-header glass-panel">
+    <div class="event-brand">
+      <img src="logo.png" alt="Logo" onerror="this.src='logo2.png'">
+      <div class="event-brand-copy">
+        <h1>Meserete Hiwot ERP System</h1>
+        <p>Events &amp; Church Calendar <span class="amharic">(ዝግጅቶች እና የቤተክርስቲያን ቀን መቁጠሪያ)</span></p>
+      </div>
+    </div>
+    <div class="event-header-controls">
+      <div class="event-date-block">
+        <p id="dateDisplay">Loading date...</p>
+        <strong>Admin Dashboard</strong>
+      </div>
+      <div class="student-style-lang" role="group" aria-label="Language switcher">
+        <button type="button" id="langBtnEn" aria-pressed="true">ENG</button>
+        <button type="button" id="langBtnAm" aria-pressed="false">አማ</button>
+      </div>
+      <button type="button" class="student-style-theme" id="themeToggleBtn" aria-label="Toggle light/dark theme" aria-pressed="false">
+        <span class="knob"><span id="themeIcon">☀</span></span>
+      </button>
+      <a href="dashboard.html" class="student-style-back" aria-label="Back to Dashboard">
+        <span>←</span><span class="back-label">Back to Dashboard</span>
+      </a>
+    </div>
+  </header>
+
+  <div class="event-actions-bar">
+    <div class="title"><h2 data-i18n="events">Events & Church Calendar</h2><p data-i18n="subtitle">Build teaching days, church programs and future-year schedules in one Ethiopian calendar.</p></div>
+    <div class="actions">
+      <button class="btn" id="importBtn">⇧ <span data-i18n="importExcel">Import Excel</span></button>
+      <input type="file" id="excelInput" accept=".xlsx,.xls" hidden>
+      <button class="btn" id="copyBtn">⧉ <span data-i18n="copyYear">Copy Previous Year</span></button>
+      <button class="btn" id="buildYearBtn">＋ <span data-i18n="buildYear">Build Year</span></button>
+      <button class="btn primary" id="newEventBtn">＋ <span data-i18n="newEvent">New Event</span></button>
+    </div>
+  </div>
+  <div class="grid">
+    <section class="panel">
+      <div class="calendar-head">
+        <div class="month-nav"><button class="btn" id="prevBtn">←</button><h2 id="monthTitle">—</h2><button class="btn" id="nextBtn">→</button></div>
+        <div class="toolbar"><button class="btn viewbtn active" data-view="month">Month</button><button class="btn viewbtn" data-view="agenda">Agenda</button><button class="btn viewbtn" data-view="year">Year</button></div>
+      </div>
+      <div id="calendarBody"></div>
+    </section>
+    <aside class="side">
+      <div class="stat-grid"><div class="stat"><b id="todayCount">0</b><span data-i18n="today">Today</span></div><div class="stat"><b id="weekCount">0</b><span data-i18n="thisWeek">This week</span></div><div class="stat"><b id="monthCount">0</b><span data-i18n="thisMonth">This month</span></div><div class="stat"><b id="yearCount">0</b><span data-i18n="thisYear">This year</span></div></div>
+      <div class="panel side-panel"><h3 data-i18n="calendarBuilder">Calendar Builder</h3><div class="filters">
+        <div class="field"><label data-i18n="year">Ethiopian Year</label><input id="yearInput" type="number" min="1" max="9999" value="2019"></div>
+        <div class="field"><label data-i18n="month">Month</label><select id="monthSelect"></select></div>
+        <div class="toolbar"><button class="btn primary" id="buildMonthBtn">＋ <span data-i18n="buildMonth">Build Month</span></button><button class="btn" id="todayBtn" data-i18n="todayBtn">Today</button></div>
+        <div class="import-note" data-i18n="builderNote">Build Month creates the calendar structure without forcing events. Build Year prepares all 13 Ethiopian months. You can then create, copy and edit programs.</div>
+      </div></div>
+      <div class="panel side-panel"><h3 data-i18n="filters">Filters</h3><div class="filters">
+        <div class="field"><label data-i18n="category">Category</label><select id="categoryFilter"><option value="">All</option><option>Church</option><option>Sunday School</option><option>Children</option><option>Begena</option><option>Administration</option><option>Special</option></select></div>
+        <div class="field"><label data-i18n="audience">Audience</label><select id="audienceFilter"><option value="">All</option><option>Everyone</option><option>Sunday School</option><option>Children</option><option>Begena New</option><option>Begena Existing</option><option>Teachers</option><option>Administrators</option></select></div>
+        <button class="btn" id="clearFilters" data-i18n="clearFilters">Clear filters</button>
+      </div></div>
+      <div class="panel side-panel"><h3 data-i18n="dataMode">Data mode</h3><div class="import-note" id="dataModeText">Connecting to Supabase…</div></div>
+    </aside>
+  </div>
+</main>
+</div>
+
+<div class="modal-backdrop" id="eventModal"><div class="modal">
+  <div class="modal-head"><h2 id="modalTitle">New Event</h2><button class="btn" id="closeModal">×</button></div>
+  <div class="modal-body"><form id="eventForm"><input type="hidden" id="eventId">
+    <div class="form-grid">
+      <div class="field"><label>ስም — Amharic</label><input id="titleAm" required></div>
+      <div class="field"><label>Title — English</label><input id="titleEn"></div>
+      <div class="field"><label>Ethiopian year</label><input id="eventYear" type="number" min="1" required></div>
+      <div class="field"><label>Ethiopian month</label><select id="eventMonth"></select></div>
+      <div class="field"><label>Ethiopian day</label><input id="eventDay" type="number" min="1" max="30" required></div>
+      <div class="field"><label>Start time</label><input id="startTime" type="time"></div>
+      <div class="field"><label>End time</label><input id="endTime" type="time"></div>
+      <div class="field"><label>Category</label><select id="eventCategory"><option>Church</option><option>Sunday School</option><option>Children</option><option>Begena</option><option>Administration</option><option>Special</option></select></div>
+      <div class="field"><label>Audience</label><select id="eventAudience"><option>Everyone</option><option>Sunday School</option><option>Children</option><option>Begena New</option><option>Begena Existing</option><option>Teachers</option><option>Administrators</option></select></div>
+      <div class="field"><label>Status</label><select id="eventStatus"><option>Scheduled</option><option>Completed</option><option>Postponed</option><option>Cancelled</option></select></div>
+      <div class="field"><label>Location</label><input id="location"></div>
+      <div class="field full"><label>Description — Amharic</label><textarea id="descriptionAm"></textarea></div>
+      <div class="field full"><label>Description — English</label><textarea id="descriptionEn"></textarea></div>
+      <div class="field full"><label><input id="allDay" type="checkbox"> All day event</label></div>
+    </div>
+  </form></div>
+  <div class="modal-foot"><button class="btn danger hidden" id="deleteEvent">Delete</button><button class="btn" id="cancelModal">Cancel</button><button class="btn primary" id="saveEvent">Save Event</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { supabase } from './supabaseClient.js';
+
+const MONTHS=['መስከረም','ጥቅምት','ኅዳር','ታኅሣሥ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜን'];
+const MONTHS_EN=['Meskerem','Tikimt','Hidar','Tahsas','Tir','Yekatit','Megabit','Miazia','Ginbot','Sene','Hamle','Nehase','Pagumen'];
+const WEEK_AM=['ሰኞ','ማክሰኞ','ረቡዕ','ሐሙስ','ዓርብ','ቅዳሜ','እሁድ'];
+const WEEK_EN=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+let state={year:2019,month:1,view:'month',events:[],built:{},editing:null,online:false,lang:localStorage.getItem('mh_lang_pref')==='am'?'am':'en'};
+const $=id=>document.getElementById(id);
+function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>$('toast').classList.remove('show'),2800)}
+function theme(){document.documentElement.setAttribute('data-theme',localStorage.getItem('mh_theme_pref')==='dark'?'dark':'light')}
+theme();
+const T={en:{management:'Management',dashboard:'Dashboard',office:'Office Management',finance:'Financial Management',students:'Student Management',attendance:'Attendance Management',begena:'Begena Management',equipment:'Equipment Management',events:'Events & Church Calendar',tools:'Tools',theme:'Theme',subtitle:'Build teaching days, church programs and future-year schedules in one Ethiopian calendar.',importExcel:'Import Excel',copyYear:'Copy Previous Year',buildYear:'Build Year',newEvent:'New Event',today:'Today',thisWeek:'This week',thisMonth:'This month',thisYear:'This year',calendarBuilder:'Calendar Builder',year:'Ethiopian Year',month:'Month',buildMonth:'Build Month',todayBtn:'Today',builderNote:'Build Month creates the calendar structure without forcing events. Build Year prepares all 13 Ethiopian months. You can then create, copy and edit programs.',filters:'Filters',category:'Category',audience:'Audience',clearFilters:'Clear filters',dataMode:'Data mode'},am:{management:'አስተዳደር',dashboard:'ዳሽቦርድ',office:'የቢሮ አስተዳደር',finance:'የገንዘብ አስተዳደር',students:'የተማሪዎች አስተዳደር',attendance:'የክትትል አስተዳደር',begena:'የበገና አስተዳደር',equipment:'የመሳሪያ አስተዳደር',events:'ዝግጅቶች እና የቤተክርስቲያን ቀን መቁጠሪያ',tools:'መሳሪያዎች',theme:'ገጽታ',subtitle:'የትምህርት ቀናትን፣ የቤተክርስቲያን ፕሮግራሞችን እና የወደፊት ዓመታትን በአንድ የኢትዮጵያ ቀን መቁጠሪያ ያስተዳድሩ።',importExcel:'Excel አስገባ',copyYear:'ያለፈውን ዓመት ቅዳ',buildYear:'ዓመት ገንባ',newEvent:'አዲስ ዝግጅት',today:'ዛሬ',thisWeek:'በዚህ ሳምንት',thisMonth:'በዚህ ወር',thisYear:'በዚህ ዓመት',calendarBuilder:'የቀን መቁጠሪያ ገንቢ',year:'የኢትዮጵያ ዓመት',month:'ወር',buildMonth:'ወር ገንባ',todayBtn:'ዛሬ',builderNote:'ወር ገንባ የቀን መቁጠሪያውን ይዘረጋል እንጂ ዝግጅቶችን በግድ አይፈጥርም። ዓመት ገንባ ሁሉንም 13 ወራት ያዘጋጃል።',filters:'ማጣሪያዎች',category:'ምድብ',audience:'ተሳታፊ',clearFilters:'ማጣሪያ አጽዳ',dataMode:'የመረጃ ሁኔታ'}};
+function applyLang(){document.querySelectorAll('[data-i18n]').forEach(e=>{const k=e.dataset.i18n;e.textContent=T[state.lang][k]||e.textContent});if($('langText'))$('langText').textContent=state.lang==='am'?'English':'አማርኛ'}
+applyLang();
+function updateHeaderDate(){
+  const now=new Date();
+  const am=state.lang==='am';
+  const eth=gregToEth(now);
+  const day=am?WEEK_AM[(now.getDay()+6)%7]:WEEK_EN[(now.getDay()+6)%7];
+  $('dateDisplay').textContent=`${day} · ${eth.year}/${eth.month}/${eth.day}`;
+}
+function syncHeaderControls(){
+  const am=state.lang==='am';
+  $('langBtnEn').classList.toggle('active',!am);
+  $('langBtnAm').classList.toggle('active',am);
+  $('langBtnEn').setAttribute('aria-pressed',String(!am));
+  $('langBtnAm').setAttribute('aria-pressed',String(am));
+  $('themeToggleBtn').setAttribute('aria-pressed',String(localStorage.getItem('mh_theme_pref')==='dark'));
+  $('themeIcon').textContent=localStorage.getItem('mh_theme_pref')==='dark'?'☾':'☀';
+  updateHeaderDate();
+}
+$('langBtnEn').onclick=()=>{state.lang='en';localStorage.setItem('mh_lang_pref','en');applyLang();syncHeaderControls();render()};
+$('langBtnAm').onclick=()=>{state.lang='am';localStorage.setItem('mh_lang_pref','am');applyLang();syncHeaderControls();render()};
+$('themeToggleBtn').onclick=()=>{const n=localStorage.getItem('mh_theme_pref')==='dark'?'light':'dark';localStorage.setItem('mh_theme_pref',n);theme();syncHeaderControls()};
+syncHeaderControls();
+function ethToJd(y,m,d){return 1724221+365*(y-1)+Math.floor(y/4)+30*(m-1)+d-1}
+function gregToJd(y,m,d){const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045}
+function jdToEth(jd){const y=Math.floor((4*(jd-1724221)+1463)/1461);const m=1+Math.floor((jd-ethToJd(y,1,1))/30);const d=jd-ethToJd(y,m,1)+1;return {year:y,month:m,day:d}}
+function gregToEth(dt){return jdToEth(gregToJd(dt.getFullYear(),dt.getMonth()+1,dt.getDate()))}
+function ethToday(){return gregToEth(new Date())}
+function isLeap(y){return y%4===3}
+function daysInMonth(y,m){return m===13?(isLeap(y)?6:5):30}
+function monthStartWeekday(y,m){const e=ethToGregorian(y,m,1);return (e.getDay()+6)%7}
+function ethToGregorian(y,m,d){const jd=ethToJd(y,m,d);let lo=new Date(1900,0,1),hi=new Date(2300,0,1);for(let i=0;i<30;i++){const mid=new Date((lo.getTime()+hi.getTime())/2);const j=gregToJd(mid.getFullYear(),mid.getMonth()+1,mid.getDate());if(j<jd)lo=new Date(mid.getTime()+86400000);else hi=mid}return lo}
+function dateKey(y,m,d){return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+function monthLabel(y,m){return state.lang==='am'?`${MONTHS[m-1]} ${y} ዓ.ም.`:`${MONTHS_EN[m-1]} ${y} E.C.`}
+function initSelects(){
+  $('monthSelect').innerHTML=MONTHS.map((m,i)=>`<option value="${i+1}">${m} / ${MONTHS_EN[i]}</option>`).join('');
+  $('eventMonth').innerHTML=MONTHS.map((m,i)=>`<option value="${i+1}">${m} / ${MONTHS_EN[i]}</option>`).join('');
+  $('monthSelect').value=state.month;$('yearInput').value=state.year;
+}
+initSelects();
+
+async function loadData(){
+  try{
+    const {data,error}=await supabase.from('mhss_calendar_events').select('*').order('ethiopian_year').order('ethiopian_month').order('ethiopian_day');
+    if(error)throw error;state.events=(data||[]).map(normalizeEvent);state.online=true;$('dataModeText').textContent='Supabase connected — calendar data is persistent.';
+    const {data:ys}=await supabase.from('mhss_calendar_years').select('*');(ys||[]).forEach(y=>{state.built[y.ethiopian_year]=y.built_months||[]});
+  }catch(e){state.online=false;state.events=JSON.parse(localStorage.getItem('mhss_calendar_events')||'[]');$('dataModeText').textContent='Local fallback mode — run the supplied SQL schema to enable Supabase persistence.'}
+  const t=ethToday(); if(!state.year||state.year===2019&&state.events.length===0){state.year=t.year;state.month=t.month;$('yearInput').value=state.year;$('monthSelect').value=state.month}
+  render();
+}
+function normalizeEvent(e){return {...e,year:Number(e.ethiopian_year),month:Number(e.ethiopian_month),day:Number(e.ethiopian_day),titleAm:e.title_am||'',titleEn:e.title_en||'',descAm:e.description_am||'',descEn:e.description_en||''}}
+function displayTitle(e){return state.lang==='am'?(e.titleAm||e.titleEn||'—'):(e.titleEn||e.titleAm||'—')}
+function filteredEvents(){const c=$('categoryFilter').value,a=$('audienceFilter').value;return state.events.filter(e=>e.year===state.year&&e.month===state.month&&(!c||e.category===c)&&(!a||e.audience===a))}
+function eventFor(y,m,d){const c=$('categoryFilter').value,a=$('audienceFilter').value;return state.events.filter(e=>e.year===y&&e.month===m&&e.day===d&&(!c||e.category===c)&&(!a||e.audience===a))}
+function render(){
+  $('monthTitle').textContent=monthLabel(state.year,state.month);$('yearInput').value=state.year;$('monthSelect').value=state.month;
+  document.querySelectorAll('.viewbtn').forEach(b=>b.classList.toggle('active',b.dataset.view===state.view));
+  if(state.view==='month')renderMonth();else if(state.view==='agenda')renderAgenda();else renderYear();updateStats();
+}
+function renderMonth(){
+  const start=monthStartWeekday(state.year,state.month),days=daysInMonth(state.year,state.month),prevM=state.month===1?13:state.month-1,prevY=state.month===1?state.year-1:state.year,prevD=daysInMonth(prevY,prevM),cells=[];
+  for(let i=0;i<start;i++){const d=prevD-start+i+1;cells.push(`<div class="day muted"><div class="day-number">${d}</div></div>`)}
+  const today=ethToday();
+  for(let d=1;d<=days;d++){const ev=eventFor(state.year,state.month,d);const isToday=today.year===state.year&&today.month===state.month&&today.day===d;cells.push(`<div class="day ${isToday?'today':''}" data-day="${d}"><div class="day-number">${d}</div><div class="day-gc">${ethToGregorian(state.year,state.month,d).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>${ev.slice(0,3).map(e=>`<div class="event-chip ${e.status==='Cancelled'?'red':e.status==='Completed'?'green':''}" data-id="${e.id||''}"><div class="time">${e.start_time?e.start_time+' ':''}${e.status&&e.status!=='Scheduled'?'· '+e.status:''}</div><div>${escapeHtml(displayTitle(e))}</div></div>`).join('')}${ev.length>3?`<div class="more">+${ev.length-3} more</div>`:''}</div>`)}
+  while(cells.length<42)cells.push(`<div class="day muted"></div>`);
+  $('calendarBody').innerHTML=`<div class="weekdays">${(state.lang==='am'?WEEK_AM:WEEK_EN).map(x=>`<div class="weekday">${x}</div>`).join('')}</div><div class="days">${cells.join('')}</div>`;
+  $('calendarBody').querySelectorAll('.day[data-day]').forEach(d=>d.addEventListener('dblclick',()=>openNew(Number(d.dataset.day))));
+  $('calendarBody').querySelectorAll('.event-chip').forEach(c=>c.addEventListener('click',e=>{e.stopPropagation();openEdit(c.dataset.id)}));
+}
+function renderAgenda(){const ev=filteredEvents().sort((a,b)=>a.day-b.day||(a.start_time||'').localeCompare(b.start_time||''));$('calendarBody').innerHTML=ev.length?`<div class="agenda">${ev.map(e=>`<div class="agenda-row"><div class="agenda-date">${MONTHS[e.month-1]} ${e.day}<small>${e.start_time||'All day'}</small></div><div><div class="agenda-title">${escapeHtml(displayTitle(e))}</div><div class="agenda-meta">${escapeHtml(e.category||'')} · ${escapeHtml(e.audience||'')} ${e.location?'· '+escapeHtml(e.location):''}</div></div><span class="badge">${escapeHtml(e.status||'Scheduled')}</span></div>`).join('')}</div>`:`<div class="empty">No events match the current filters.</div>`}
+function renderYear(){const y=state.year;$('calendarBody').innerHTML=`<div class="year-grid">${MONTHS.map((m,i)=>{const n=state.events.filter(e=>e.year===y&&e.month===i+1).length;return `<div class="mini-month" data-m="${i+1}"><h4>${m}</h4><p>${MONTHS_EN[i]} · ${n} event${n===1?'':'s'}</p><div class="dotrow">${Array.from({length:Math.min(n,18)},()=>'<i class="dot"></i>').join('')}</div></div>`}).join('')}</div>`;$('calendarBody').querySelectorAll('.mini-month').forEach(x=>x.onclick=()=>{state.month=Number(x.dataset.m);state.view='month';render()})}
+function updateStats(){const t=ethToday();const all=state.events;const inMonth=all.filter(e=>e.year===state.year&&e.month===state.month);$('monthCount').textContent=inMonth.length;$('yearCount').textContent=all.filter(e=>e.year===state.year).length;$('todayCount').textContent=all.filter(e=>e.year===t.year&&e.month===t.month&&e.day===t.day).length;const idx=monthStartWeekday(t.year,t.month)+t.day-1;const from=Math.max(1,t.day-(idx%7));$('weekCount').textContent=all.filter(e=>e.year===t.year&&e.month===t.month&&e.day>=from&&e.day<=Math.min(daysInMonth(t.year,t.month),from+6)).length}
+function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function openModal(){ $('eventModal').classList.add('open') } function closeModal(){ $('eventModal').classList.remove('open');state.editing=null }
+function openNew(day=1){state.editing=null;$('modalTitle').textContent=state.lang==='am'?'አዲስ ዝግጅት':'New Event';$('eventId').value='';$('titleAm').value='';$('titleEn').value='';$('eventYear').value=state.year;$('eventMonth').value=state.month;$('eventDay').value=day;$('startTime').value='';$('endTime').value='';$('eventCategory').value='Sunday School';$('eventAudience').value='Everyone';$('eventStatus').value='Scheduled';$('location').value='';$('descriptionAm').value='';$('descriptionEn').value='';$('allDay').checked=false;$('deleteEvent').classList.add('hidden');openModal()}
+function openEdit(id){const e=state.events.find(x=>String(x.id)===String(id));if(!e)return;state.editing=e;$('modalTitle').textContent=state.lang==='am'?'ዝግጅት አስተካክል':'Edit Event';$('eventId').value=e.id;$('titleAm').value=e.titleAm;$('titleEn').value=e.titleEn;$('eventYear').value=e.year;$('eventMonth').value=e.month;$('eventDay').value=e.day;$('startTime').value=e.start_time||'';$('endTime').value=e.end_time||'';$('eventCategory').value=e.category||'Sunday School';$('eventAudience').value=e.audience||'Everyone';$('eventStatus').value=e.status||'Scheduled';$('location').value=e.location||'';$('descriptionAm').value=e.descAm||'';$('descriptionEn').value=e.descEn||'';$('allDay').checked=!!e.is_all_day;$('deleteEvent').classList.remove('hidden');openModal()}
+async function saveEvent(){const payload={title_am:$('titleAm').value.trim(),title_en:$('titleEn').value.trim(),ethiopian_year:+$('eventYear').value,ethiopian_month:+$('eventMonth').value,ethiopian_day:+$('eventDay').value,start_time:$('allDay').checked?null:$('startTime').value||null,end_time:$('allDay').checked?null:$('endTime').value||null,category:$('eventCategory').value,audience:$('eventAudience').value,status:$('eventStatus').value,location:$('location').value.trim(),description_am:$('descriptionAm').value.trim(),description_en:$('descriptionEn').value.trim(),is_all_day:$('allDay').checked};if(!payload.title_am&&!payload.title_en)return toast('Add an Amharic or English title.');
+  if(state.online){let res;if(state.editing)res=await supabase.from('mhss_calendar_events').update(payload).eq('id',state.editing.id).select().single();else res=await supabase.from('mhss_calendar_events').insert(payload).select().single();if(res.error)return toast(res.error.message);if(state.editing)state.events=state.events.map(e=>e.id===state.editing.id?normalizeEvent(res.data):e);else state.events.push(normalizeEvent(res.data))}else{const e=normalizeEvent({...payload,id:crypto.randomUUID(),created_at:new Date().toISOString()});if(state.editing)state.events=state.events.map(x=>x.id===state.editing.id?e:x);else state.events.push(e);localStorage.setItem('mhss_calendar_events',JSON.stringify(state.events))}
+  state.year=payload.ethiopian_year;state.month=payload.ethiopian_month;closeModal();render();toast('Event saved.')}
+async function deleteEvent(){if(!state.editing)return;if(!confirm('Delete this event?'))return;if(state.online){const {error}=await supabase.from('mhss_calendar_events').delete().eq('id',state.editing.id);if(error)return toast(error.message)}state.events=state.events.filter(e=>e.id!==state.editing.id);if(!state.online)localStorage.setItem('mhss_calendar_events',JSON.stringify(state.events));closeModal();render();toast('Event deleted.')}
+async function buildMonth(){const y=+$('yearInput').value,m=+$('monthSelect').value;if(state.online){const {data:existing}=await supabase.from('mhss_calendar_years').select('*').eq('ethiopian_year',y).maybeSingle();let months=existing?.built_months||[];if(!months.includes(m))months=[...months,m].sort((a,b)=>a-b);const payload={ethiopian_year:y,built_months:months,is_current:y===ethToday().year,updated_at:new Date().toISOString()};const res=existing?await supabase.from('mhss_calendar_years').update(payload).eq('id',existing.id):await supabase.from('mhss_calendar_years').insert(payload);if(res.error)return toast(res.error.message)}state.built[y]=[...(state.built[y]||[]),m];state.year=y;state.month=m;render();toast(`${MONTHS[m-1]} ${y} built.`)}
+async function buildYear(){const y=+$('yearInput').value;if(state.online){const {data:existing}=await supabase.from('mhss_calendar_years').select('*').eq('ethiopian_year',y).maybeSingle();const payload={ethiopian_year:y,built_months:[1,2,3,4,5,6,7,8,9,10,11,12,13],is_current:y===ethToday().year,updated_at:new Date().toISOString()};const res=existing?await supabase.from('mhss_calendar_years').update(payload).eq('id',existing.id):await supabase.from('mhss_calendar_years').insert(payload);if(res.error)return toast(res.error.message)}state.built[y]=[1,2,3,4,5,6,7,8,9,10,11,12,13];state.year=y;state.month=1;render();toast(`Year ${y} is ready.`)}
+async function copyPreviousYear(){const y=state.year,prev=y-1;if(!state.online){const cloned=state.events.filter(e=>e.year===prev).map(e=>({...e,id:crypto.randomUUID(),year:y,ethiopian_year:y,created_at:new Date().toISOString()}));state.events.push(...cloned);localStorage.setItem('mhss_calendar_events',JSON.stringify(state.events));return render(),toast(`${cloned.length} events copied.`)}const src=await supabase.from('mhss_calendar_events').select('*').eq('ethiopian_year',prev);if(src.error)return toast(src.error.message);if(!src.data?.length)return toast(`No events found for ${prev}.`);const rows=src.data.map(({id,created_at,updated_at,created_by,updated_by,...e})=>({...e,ethiopian_year:y}));const ins=await supabase.from('mhss_calendar_events').insert(rows).select();if(ins.error)return toast(ins.error.message);state.events.push(...(ins.data||[]).map(normalizeEvent));render();toast(`${ins.data?.length||0} events copied from ${prev}.`)}
+$('prevBtn').onclick=()=>{if(state.month===1){state.month=13;state.year--}else state.month--;render()};$('nextBtn').onclick=()=>{if(state.month===13){state.month=1;state.year++}else state.month++;render()};$('todayBtn').onclick=()=>{const t=ethToday();state.year=t.year;state.month=t.month;state.view='month';render()};$('yearInput').onchange=e=>{state.year=+e.target.value||2019;render()};$('monthSelect').onchange=e=>{state.month=+e.target.value;render()};$('categoryFilter').onchange=render;$('audienceFilter').onchange=render;$('clearFilters').onclick=()=>{$('categoryFilter').value='';$('audienceFilter').value='';render()};document.querySelectorAll('.viewbtn').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;render()});$('newEventBtn').onclick=()=>openNew(1);$('closeModal').onclick=closeModal;$('cancelModal').onclick=closeModal;$('saveEvent').onclick=saveEvent;$('deleteEvent').onclick=deleteEvent;$('buildMonthBtn').onclick=buildMonth;$('buildYearBtn').onclick=buildYear;$('copyBtn').onclick=copyPreviousYear;
+
+// Excel import: preserves the four source sections from the supplied 2019 E.C. workbook.
+$('importBtn').onclick=()=>$('excelInput').click();$('excelInput').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const XLSX=await import('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm');const buf=await f.arrayBuffer();const wb=XLSX.read(buf,{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null});const sections=[{start:1,name:'Sunday School',aud:'Sunday School'},{start:19,name:'Children',aud:'Children'},{start:37,name:'Begena New',aud:'Begena New'},{start:55,name:'Begena Existing',aud:'Begena Existing'}];let out=[];for(const sec of sections){for(let c=sec.start;c<sec.start+18;c++){for(let r=0;r<rows.length;r++){const v=rows[r]?.[c];if(v instanceof Date){const y=v.getFullYear(),m=v.getMonth()+1,d=v.getDate();if(y<2000)continue;let texts=[];for(let rr=r+1;rr<Math.min(rows.length,r+7);rr++){const x=rows[rr]?.[c];if(x!==null&&x!==undefined&&String(x).trim()&&!(/^[0-9]+\.?[0-9]*$/.test(String(x).trim())))texts.push(String(x).trim())}const title=texts.find(x=>!/^ከ/.test(x))||`${sec.name} teaching day`;const times=texts.filter(x=>/^ከ/.test(x)).join(' ');out.push({title_am:title,title_en:'',ethiopian_year:y,ethiopian_month:m,ethiopian_day:d,start_time:null,end_time:null,category:sec.name==='Sunday School'?'Sunday School':sec.name==='Children'?'Children':'Begena',audience:sec.aud,status:'Scheduled',location:'',description_am:times,is_all_day:false})}}}}// de-dupe
+const seen=new Set();out=out.filter(x=>{const k=[x.audience,x.ethiopian_year,x.ethiopian_month,x.ethiopian_day,x.title_am].join('|');if(seen.has(k))return false;seen.add(k);return true});if(state.online){const res=await supabase.from('mhss_calendar_events').insert(out).select();if(res.error)throw res.error;state.events.push(...res.data.map(normalizeEvent))}else{state.events.push(...out.map(x=>normalizeEvent({...x,id:crypto.randomUUID()})));localStorage.setItem('mhss_calendar_events',JSON.stringify(state.events))}state.year=2019;state.month=1;render();toast(`${out.length} events imported from Excel.`)}catch(err){toast('Excel import failed: '+err.message)}e.target.value=''};
+
+loadData();
+</script>
+</body></html>

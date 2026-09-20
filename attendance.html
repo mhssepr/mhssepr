@@ -55,6 +55,13 @@
         .status-btn.selected.late { background: rgba(234,179,8,0.25) !important; border-color: #eab308 !important; color: #facc15 !important; }
         .status-btn.selected.absent { background: rgba(239,68,68,0.25) !important; border-color: #ef4444 !important; color: #f87171 !important; }
         .status-btn.selected.permission { background: rgba(59,130,246,0.25) !important; border-color: #3b82f6 !important; color: #60a5fa !important; } /* Permission Action Style */
+        /* Attendance Reason Center */
+        .absence-reason-badge{display:inline-flex;align-items:center;gap:5px;margin-top:4px;padding:3px 7px;border-radius:999px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);color:#ef4444;font-size:9px;font-weight:900;max-width:100%;}
+        .reason-center-card{width:min(720px,100%);max-height:calc(100vh - 32px);overflow:auto;border:1px solid rgba(184,146,46,.30);border-radius:26px;background:linear-gradient(145deg,var(--surface),var(--surface-soft));box-shadow:0 30px 90px rgba(0,0,0,.38);}
+        .reason-center-row{display:grid;grid-template-columns:48px minmax(0,1fr) 190px;gap:10px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:15px;background:var(--surface-soft);}
+        .reason-center-row img{width:40px;height:40px;border-radius:12px;object-fit:cover;border:1px solid rgba(212,175,55,.28);}
+        @media(max-width:640px){.reason-center-row{grid-template-columns:44px minmax(0,1fr);}.reason-center-row select{grid-column:1/-1;width:100%;}.reason-center-card{border-radius:20px;}}
+
         /* Professional barcode scanner */
         .scanner-terminal{border:1px solid rgba(212,175,55,.22);background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border-radius:24px;padding:18px;box-shadow:0 20px 55px rgba(0,0,0,.16);}
         .scanner-status{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 12px;font-size:11px;font-weight:900;border:1px solid var(--border);}
@@ -1348,6 +1355,7 @@
                     <div class="attendance-lock-actions">
                         <button id="finalizeAttendanceBtn" type="button" onclick="finalizeAttendance()" class="attendance-lock-btn finalize">🔒 <span class="lang-text" data-en="Finalize Attendance" data-am="መገኘትን ያጠናቅቁ">Finalize Attendance</span></button>
                         <button id="unlockAttendanceBtn" type="button" onclick="unlockAttendance()" class="attendance-lock-btn unlock hidden">🔓 <span class="lang-text" data-en="Unlock Attendance" data-am="መገኘትን ይክፈቱ">Unlock Attendance</span></button>
+                        <button type="button" onclick="openAbsenceReasonCenter()" class="attendance-lock-btn" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.22);color:#ef4444;">📝 <span class="lang-text" data-en="Absence Reason Center" data-am="የአለመገኘት ምክንያት ማዕከል">Absence Reason Center</span></button>
                     </div>
                 </div>
 
@@ -2178,6 +2186,11 @@
         let dailyTimeTicker = null;
         let manualLateStudentId = null;
 
+        // Additive Attendance Reliability: duplicate protection + offline queue.
+        const ATTENDANCE_OFFLINE_QUEUE_KEY = 'mhss_attendance_offline_queue_v1';
+        const ATTENDANCE_OFFLINE_SCHEDULE_KEY = 'mhss_attendance_schedule_cache_v1';
+        let attendanceOfflineSyncing = false;
+
         const ATTENDANCE_TIMEZONE = 'Africa/Addis_Ababa';
 
         function ethiopiaNowParts() {
@@ -2565,6 +2578,7 @@
                     late_after_time:normalizeTimeHHMM(data.late_after_time),
                     close_time:normalizeTimeHHMM(data.close_time)
                 } : null;
+                if(dailyAttendanceSchedule) cacheAttendanceSchedule(dailyAttendanceSchedule);
                 renderDailyTimeCard();
                 showToast(currentLang==='en'?'Attendance stopped. It is now closed.':'መገኘት ቆሟል። አሁን ተዘግቷል።','success');
             }catch(err){
@@ -2577,6 +2591,16 @@
             return dailyAttendanceSchedule && dailyAttendanceSchedule.record_date===dateStr ? dailyAttendanceSchedule : null;
         }
 
+        function attendanceOfflineQueueRead(){try{return JSON.parse(localStorage.getItem(ATTENDANCE_OFFLINE_QUEUE_KEY)||'[]');}catch(e){return [];}}
+        function attendanceOfflineQueueWrite(rows){try{localStorage.setItem(ATTENDANCE_OFFLINE_QUEUE_KEY,JSON.stringify(rows||[]));}catch(e){console.warn('Offline attendance queue unavailable:',e);}}
+        function cacheAttendanceSchedule(schedule){if(!schedule?.class_name||!schedule?.record_date)return;try{const all=JSON.parse(localStorage.getItem(ATTENDANCE_OFFLINE_SCHEDULE_KEY)||'{}');all[`${schedule.class_name}__${schedule.record_date}`]=schedule;localStorage.setItem(ATTENDANCE_OFFLINE_SCHEDULE_KEY,JSON.stringify(all));}catch(e){}}
+        function getCachedAttendanceSchedule(className,dateStr){try{const all=JSON.parse(localStorage.getItem(ATTENDANCE_OFFLINE_SCHEDULE_KEY)||'{}');return all[`${className}__${dateStr}`]||null;}catch(e){return null;}}
+        function showAttendanceOfflineState(isOffline,queuedCount){let el=document.getElementById('attendanceOfflineIndicator');if(!el){el=document.createElement('div');el.id='attendanceOfflineIndicator';el.className='fixed top-3 right-3 z-[9999] px-3 py-2 rounded-full text-[10px] font-black border backdrop-blur-xl shadow-xl hidden';document.body.appendChild(el);}if(isOffline){el.className='fixed top-3 right-3 z-[9999] px-3 py-2 rounded-full text-[10px] font-black border border-yellow-500/30 bg-yellow-500/10 text-yellow-300 backdrop-blur-xl shadow-xl';el.textContent=`🟠 OFFLINE MODE${queuedCount?' · '+queuedCount+' QUEUED':''}`;el.classList.remove('hidden');}else if(queuedCount){el.className='fixed top-3 right-3 z-[9999] px-3 py-2 rounded-full text-[10px] font-black border border-blue-500/30 bg-blue-500/10 text-blue-300 backdrop-blur-xl shadow-xl';el.textContent=`🔄 SYNCING · ${queuedCount}`;el.classList.remove('hidden');}else el.classList.add('hidden');}
+        function queueAttendanceOffline(row){const queue=attendanceOfflineQueueRead();const key=`${row.student_id}__${row.record_date}`;if(queue.some(x=>`${x.student_id}__${x.record_date}`===key))return false;queue.push({...row,queued_at:new Date().toISOString(),offline:true});attendanceOfflineQueueWrite(queue);showAttendanceOfflineState(true,queue.length);return true;}
+        async function syncOfflineAttendanceQueue(){if(attendanceOfflineSyncing||!navigator.onLine)return;const queue=attendanceOfflineQueueRead();if(!queue.length){showAttendanceOfflineState(false,0);return;}attendanceOfflineSyncing=true;showAttendanceOfflineState(false,queue.length);try{const client=await waitForSupabase();const remaining=[];for(const row of queue){try{const clean={student_id:row.student_id,class_name:row.class_name,record_date:row.record_date,status:row.status};['arrival_at','expected_start_time','late_threshold_time','late_minutes','late_reason','late_note','attendance_source'].forEach(k=>{if(row[k]!==undefined&&row[k]!==null)clean[k]=row[k];});const {data:existing,error:findErr}=await client.from('attendance_records').select('student_id,status').eq('student_id',row.student_id).eq('record_date',row.record_date).maybeSingle();if(findErr)throw findErr;if(existing)continue;const {error}=await client.from('attendance_records').insert([clean]);if(error)throw error;}catch(e){remaining.push(row);}}attendanceOfflineQueueWrite(remaining);showAttendanceOfflineState(false,remaining.length);if(!remaining.length)showToast(currentLang==='en'?'Offline attendance synchronized successfully.':'ከመስመር ውጭ የተመዘገበው መገኘት ተመሳስሏል።','success');if(currentClassStr)await loadAttendanceForClass(currentClassStr);renderDailyTable?.();}catch(e){showAttendanceOfflineState(!navigator.onLine,attendanceOfflineQueueRead().length);}finally{attendanceOfflineSyncing=false;}}
+        window.addEventListener('online',()=>{showToast(currentLang==='en'?'Connection restored. Synchronizing attendance…':'ግንኙነት ተመልሷል። መገኘት በማመሳሰል ላይ…','info');syncOfflineAttendanceQueue();});
+        window.addEventListener('offline',()=>showAttendanceOfflineState(true,attendanceOfflineQueueRead().length));
+
         function calculateSmartAttendance(schedule, arrivalDate=new Date()){
             if(!schedule) return null;
             const parts=new Intl.DateTimeFormat('en-CA',{timeZone:ATTENDANCE_TIMEZONE,hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(arrivalDate);
@@ -2586,7 +2610,7 @@
             const start=timeToSeconds(schedule.start_time), lateAfter=timeToSeconds(schedule.late_after_time), close=timeToSeconds(schedule.close_time);
             if(![start,lateAfter,close].every(Number.isFinite)) return {error:'invalid'};
             if(arrivalSeconds < start) return {status:'present',lateMinutes:0,arrivalSeconds};
-            if(arrivalSeconds <= lateAfter) return {status:'present',lateMinutes:0,arrivalSeconds};
+            if(arrivalSeconds < lateAfter) return {status:'present',lateMinutes:0,arrivalSeconds};
             if(arrivalSeconds >= close) return {error:'closed',arrivalSeconds};
             return {status:'late',lateMinutes:Math.max(0,Math.floor((arrivalSeconds-start)/60)),arrivalSeconds};
         }
@@ -2629,7 +2653,7 @@
             if(!schedule||!Number.isFinite(arr)){el.textContent='';return;}
             const start=timeToMinutes(schedule.start_time), lateAfter=timeToMinutes(schedule.late_after_time), close=timeToMinutes(schedule.close_time);
             const lateMinutes=Math.max(0,Math.floor(arr-start));
-            const isLate=arr>lateAfter;
+            const isLate=arr>=lateAfter;
             el.innerHTML=isLate
                 ? `🟡 <b>${currentLang==='en'?'LATE':'ያረፈደ'}</b> · ${currentLang==='en'?'Late by':'የዘገየበት'} <b>${lateMinutes} ${currentLang==='en'?'min':'ደቂቃ'}</b>`
                 : `🟢 <b>${currentLang==='en'?'Present':'ተገኝቷል'}</b> · ${currentLang==='en'?'This arrival is not late.':'ይህ የመድረሻ ሰዓት ያረፈደ አይደለም።'}`;
@@ -2691,6 +2715,13 @@
                 }
                 if (error) throw error;
                 mergeAttendanceRows(data);
+                // Load persisted absence reasons when the optional reason center table exists.
+                try {
+                    const reasonRes=await client.from('mhss_attendance_absence_reasons').select('student_id,record_date,reason,note').eq('class_name',className);
+                    if(!reasonRes.error){
+                        (reasonRes.data||[]).forEach(r=>setAbsenceReasonLocal(r.record_date,r.student_id,{reason:r.reason,note:r.note||''}));
+                    }
+                } catch(reasonLoadErr){ console.warn('Absence reason table not available yet:',reasonLoadErr); }
             } catch (err) {
                 console.error('Failed to load attendance from Supabase:', err);
                 showToast(currentLang === 'en' ? 'Could not load attendance from the database.' : 'የክትትል መረጃ ማምጣት አልተቻለም።', 'error');
@@ -2783,6 +2814,59 @@
             if(resolve) resolve(!!confirmed);
         }
         document.addEventListener('keydown',e=>{ if(e.key==='Escape' && attendanceConfirmResolver) closeAttendanceConfirm(false); });
+
+        async function isAttendanceAdminOrOwner(){const user=await getCurrentAuthUser();if(!user)return false;if(String(user.email||'').toLowerCase()===ATTENDANCE_OWNER_EMAIL)return true;try{const client=await waitForSupabase();const {data}=await client.from('mhss_user_profiles').select('role').eq('id',user.id).maybeSingle();const role=String(data?.role||'').toLowerCase();return role.includes('admin')||role.includes('super');}catch(e){return false;}}
+        function openPermissionReasonModal(studentId){const student=studentsData.find(x=>String(x.id)===String(studentId));if(!student)return Promise.resolve(null);let modal=document.getElementById('attendancePermissionModal');if(!modal){modal=document.createElement('div');modal.id='attendancePermissionModal';modal.className='late-modal-overlay no-print';modal.innerHTML=`<div class="late-modal-card p-5"><div class="flex items-center justify-between gap-3 mb-4"><div><div class="text-[10px] font-black tracking-[.16em] text-yellow-500 uppercase">Absence Reason Center</div><h3 class="text-lg font-black mt-1">Change Absent to Permission</h3></div><button type="button" onclick="closePermissionReasonModal(null)" class="icon-btn">✕</button></div><div id="attendancePermissionStudent" class="mb-4 p-3 rounded-xl border border-white/10 bg-white/5 text-sm font-bold"></div><label class="block text-xs font-bold mb-2">Reason</label><select id="attendancePermissionReason" class="w-full rounded-xl px-3 py-3 mb-4"><option value="">Select reason</option><option>Sick</option><option>Family reason</option><option>Transportation problem</option><option>Church activity</option><option>School / exam</option><option>Travel</option><option>Other</option></select><label class="block text-xs font-bold mb-2">Note</label><textarea id="attendancePermissionNote" rows="3" class="w-full rounded-xl px-3 py-3 mb-4" placeholder="Optional note"></textarea><div class="flex justify-end gap-2"><button type="button" onclick="closePermissionReasonModal(null)" class="px-4 py-2 rounded-xl border border-white/10">Cancel</button><button type="button" onclick="closePermissionReasonModal({reason:document.getElementById('attendancePermissionReason').value,note:document.getElementById('attendancePermissionNote').value.trim()})" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold">Save Permission</button></div></div>`;document.body.appendChild(modal);}document.getElementById('attendancePermissionStudent').textContent=`${student.name||'—'} · ${student.id||'—'}`;document.getElementById('attendancePermissionReason').value='';document.getElementById('attendancePermissionNote').value='';modal.classList.remove('hidden');document.body.classList.add('overflow-hidden');return new Promise(resolve=>{window._attendancePermissionResolver=resolve;});}
+        function closePermissionReasonModal(value){document.getElementById('attendancePermissionModal')?.classList.add('hidden');if(document.getElementById('manualLateModal')?.classList.contains('hidden')&&document.getElementById('dailyAttendanceTimeModal')?.classList.contains('hidden'))document.body.classList.remove('overflow-hidden');const r=window._attendancePermissionResolver;window._attendancePermissionResolver=null;if(r)r(value);}
+        async function changeAbsentToPermission(studentId){const key=dateKey(currentDate),current=(attendanceStore[key]||{})[studentId]||'';if(current!=='absent'){showToast(currentLang==='en'?'Only an Absent student can be changed to Permission here.':'እዚህ የቀረ ተማሪ ብቻ ወደ ፈቃድ ሊቀየር ይችላል።','error');return false;}if(!await isAttendanceAdminOrOwner()){showToast(currentLang==='en'?'Only an admin or owner can change Absent to Permission.':'አስተዳዳሪ ወይም ባለቤት ብቻ የቀረን ወደ ፈቃድ መቀየር ይችላል።','error');return false;}const result=await openPermissionReasonModal(studentId);if(!result?.reason){showToast(currentLang==='en'?'A permission reason is required.':'የፈቃድ ምክንያት ያስፈልጋል።','error');return false;}const student=studentsData.find(x=>String(x.id)===String(studentId));const saved=await markAttendance(studentId,currentClassStr,key,'permission',{late_reason:result.reason,late_note:result.note||null,attendance_source:'admin_correction',adminCorrection:true,preventOverwrite:false});if(saved){renderDailyTable();showToast(currentLang==='en'?`${student?.name||'Student'} changed to Permission.`:`${student?.name||'ተማሪ'} ወደ ፈቃድ ተቀይሯል።`,'success');}return saved;}
+
+        function absenceReasonLocalKey(dateStr,studentId){return `mhss_absence_reason__${currentClassStr||''}__${dateStr}__${studentId}`;}
+        function getAbsenceReasonLocal(dateStr,studentId){try{return JSON.parse(localStorage.getItem(absenceReasonLocalKey(dateStr,studentId))||'null');}catch(e){return null;}}
+        function setAbsenceReasonLocal(dateStr,studentId,value){try{localStorage.setItem(absenceReasonLocalKey(dateStr,studentId),JSON.stringify(value));}catch(e){}}
+        function absenceReasonOptions(){return currentLang==='en'
+            ? ['Sick','Family reason','Transportation problem','Church activity','School / exam','Travel','Emergency','Other']
+            : ['ሕመም','የቤተሰብ ምክንያት','የመጓጓዣ ችግር','የቤተክርስቲያን እንቅስቃሴ','ትምህርት / ፈተና','ጉዞ','አስቸኳይ ሁኔታ','ሌላ'];}
+        async function openAbsenceReasonCenter(){
+            if(!currentClassStr)return;
+            if(!await isAttendanceAdminOrOwner()){showToast(currentLang==='en'?'Only an admin or owner can manage absence reasons.':'አስተዳዳሪ ወይም ባለቤት ብቻ የአለመገኘት ምክንያት ማስተዳደር ይችላል።','error');return;}
+            const key=dateKey(currentDate), students=classStudents(), dayRecord=attendanceStore[key]||{};
+            const absent=students.filter(s=>dayRecord[s.id]==='absent');
+            let modal=document.getElementById('absenceReasonCenterModal');
+            if(!modal){
+                modal=document.createElement('div'); modal.id='absenceReasonCenterModal'; modal.className='late-modal-overlay no-print';
+                modal.innerHTML=`<div class="reason-center-card p-5"><div class="flex items-center justify-between gap-3 mb-4"><div><div class="text-[10px] font-black tracking-[.16em] text-red-500 uppercase">Attendance Reason Center</div><h3 class="text-lg font-black mt-1">${currentLang==='en'?'Absence Reasons':'የአለመገኘት ምክንያቶች'}</h3><p class="text-xs text-gray-500 mt-1">${currentLang==='en'?'Record why each absent student was absent.':'ለእያንዳንዱ የቀረ ተማሪ የአለመገኘቱን ምክንያት ይመዝግቡ።'}</p></div><button type="button" onclick="closeAbsenceReasonCenter()" class="icon-btn">✕</button></div><div id="absenceReasonCenterList" class="grid gap-2"></div><div class="flex justify-end gap-2 mt-4"><button type="button" onclick="closeAbsenceReasonCenter()" class="px-4 py-2 rounded-xl border border-white/10">${currentLang==='en'?'Close':'ዝጋ'}</button><button type="button" onclick="saveAbsenceReasons()" class="px-4 py-2 rounded-xl bg-red-500 text-white font-black">${currentLang==='en'?'Save Reasons':'ምክንያቶችን አስቀምጥ'}</button></div></div>`;
+                document.body.appendChild(modal);
+            }
+            const opts=absenceReasonOptions();
+            const list=document.getElementById('absenceReasonCenterList');
+            if(!absent.length){list.innerHTML=`<div class="text-center py-10 text-gray-500 text-sm">${currentLang==='en'?'No absent students for this date.':'ለዚህ ቀን የቀሩ ተማሪዎች የሉም።'}</div>`;}
+            else list.innerHTML=absent.map(s=>{const old=getAbsenceReasonLocal(key,s.id);return `<div class="reason-center-row"><img src="${getPhotoUrl(s)}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1e293b&color=FFD700'"><div class="min-w-0"><div class="font-bold truncate">${escapeHtml(s.name)}</div><div class="text-[10px] text-gray-500 font-mono">${escapeHtml(s.id)}</div></div><div class="grid gap-1.5"><select data-reason-student="${escapeHtml(s.id)}" class="w-full rounded-xl px-3 py-2 text-xs"><option value="">${currentLang==='en'?'No reason recorded':'ምክንያት አልተመዘገበም'}</option>${opts.map(x=>`<option ${old?.reason===x?'selected':''}>${escapeHtml(x)}</option>`).join('')}</select><input data-note-student="${escapeHtml(s.id)}" class="w-full rounded-xl px-3 py-2 text-[10px]" placeholder="${currentLang==='en'?'Optional note':'አማራጭ ማስታወሻ'}" value="${escapeHtml(old?.note||'')}"></div></div>`;}).join('');
+            modal.classList.remove('hidden'); document.body.classList.add('overflow-hidden');
+        }
+        function closeAbsenceReasonCenter(){document.getElementById('absenceReasonCenterModal')?.classList.add('hidden');document.body.classList.remove('overflow-hidden');}
+        async function saveAbsenceReasons(){
+            const key=dateKey(currentDate), modal=document.getElementById('absenceReasonCenterModal'); if(!modal)return;
+            const selects=[...modal.querySelectorAll('[data-reason-student]')];
+            if(!selects.length){closeAbsenceReasonCenter();return;}
+            try{
+                const client=await waitForSupabase(); const user=await getCurrentAuthUser();
+                for(const sel of selects){const studentId=sel.dataset.reasonStudent,reason=sel.value,note=modal.querySelector(`[data-note-student="${CSS.escape(studentId)}"]`)?.value||''; if(!reason){
+                        localStorage.removeItem(absenceReasonLocalKey(key,studentId));
+                        await client.from('mhss_attendance_absence_reasons').delete().eq('student_id',studentId).eq('record_date',key);
+                        continue;
+                    }
+                    const payload={student_id:studentId,class_name:currentClassStr,record_date:key,reason,note:note||null,created_by:user?.id||null,updated_by:user?.id||null};
+                    const {error}=await client.from('mhss_attendance_absence_reasons').upsert([payload],{onConflict:'student_id,record_date'}); if(error)throw error;
+                    setAbsenceReasonLocal(key,studentId,{reason,note});
+                }
+            }catch(e){
+                // Keep the center usable even before the optional reason table is created.
+                selects.forEach(sel=>{const studentId=sel.dataset.reasonStudent,reason=sel.value,note=modal.querySelector(`[data-note-student="${CSS.escape(studentId)}"]`)?.value||'';if(reason)setAbsenceReasonLocal(key,studentId,{reason,note});});
+                showToast(currentLang==='en'?'Reasons saved locally. Create the reason table to sync them to Supabase.':'ምክንያቶቹ በዚህ መሣሪያ ተቀምጠዋል። ወደ Supabase ለማመሳሰል የምክንያት ሰንጠረዡን ይፍጠሩ።','success');
+                renderDailyTable(); closeAbsenceReasonCenter(); return;
+            }
+            renderDailyTable(); closeAbsenceReasonCenter(); showToast(currentLang==='en'?'Absence reasons saved.':'የአለመገኘት ምክንያቶች ተቀምጠዋል።','success');
+        }
 
         async function finalizeAttendance() {
             if (!currentClassStr) return;
@@ -2889,7 +2973,7 @@
                 return false;
             }
 
-            if (attendanceSession && attendanceSession.status === 'locked' && attendanceSession.class_name === className && attendanceSession.record_date === dateStr) {
+            if (attendanceSession && attendanceSession.status === 'locked' && attendanceSession.class_name === className && attendanceSession.record_date === dateStr && !meta.adminCorrection) {
                 showToast(currentLang === 'en' ? 'This attendance session is finalized and locked.' : 'ይህ የመገኘት መረጃ ተጠናቅቆ ተቆልፏል።', 'error');
                 return false;
             }
@@ -2936,6 +3020,10 @@
                     attendanceStore[dateStr][studentId] = previousStatus;
                 } else if (attendanceStore[dateStr]) {
                     delete attendanceStore[dateStr][studentId];
+                }
+                if(meta.offlineCapable && (navigator.onLine===false || /network|fetch|failed|connection|offline/i.test(String(err?.message||'')))){
+                    const queued=queueAttendanceOffline({student_id:studentId,class_name:className,record_date:dateStr,status,arrival_at:meta.arrival_at||null,expected_start_time:meta.expected_start_time||null,late_threshold_time:meta.late_threshold_time||null,late_minutes:meta.late_minutes??null,late_reason:meta.late_reason||null,late_note:meta.late_note||null,attendance_source:meta.attendance_source||'barcode'});
+                    if(queued){attendanceStore[dateStr]=attendanceStore[dateStr]||{};attendanceStore[dateStr][studentId]=status;attendanceMetaStore[dateStr]=attendanceMetaStore[dateStr]||{};attendanceMetaStore[dateStr][studentId]={arrival_at:meta.arrival_at||null,expected_start_time:meta.expected_start_time||null,late_threshold_time:meta.late_threshold_time||null,late_minutes:meta.late_minutes??null,late_reason:meta.late_reason||null,late_note:meta.late_note||null,attendance_source:meta.attendance_source||'barcode'};showToast(currentLang==='en'?'Saved offline. It will synchronize when connection returns.':'ከመስመር ውጭ ተቀምጧል። ግንኙነት ሲመለስ ይመሳሰላል።','success');return true;}
                 }
                 showToast(currentLang === 'en' ? 'Could not save attendance to the database.' : 'ክትትሉን ማስቀመጥ አልተቻለም።', 'error');
                 return false;
@@ -3760,6 +3848,7 @@
         async function setStatus(studentId, status) {
             const key = dateKey(currentDate);
             const currentStatus = (attendanceStore[key] || {})[studentId] || '';
+            if(isAttendanceLocked() && status==='permission') return changeAbsentToPermission(studentId);
             // Clicking the already-selected status a second time clears it.
             if (currentStatus === status) {
                 const cleared = await clearAttendance(studentId, currentClassStr, key);
@@ -3812,18 +3901,20 @@
                 const arrivalLabel=meta.arrival_at ? formatEthiopiaTimestamp(meta.arrival_at) : (meta.arrival_time ? formatTime12(meta.arrival_time.slice(0,5)) : '');
                 const lateDetail=status==='late' && (arrivalLabel || meta.late_minutes!==null)
                     ? `<div class="late-detail">🕐 ${escapeHtml(arrivalLabel||'—')} · ${escapeHtml(meta.late_minutes!==null&&meta.late_minutes!==undefined?`${meta.late_minutes} min late`:'Late')}</div>` : '';
+                const absenceReason = status==='absent' ? getAbsenceReasonLocal(key,s.id) : null;
+                const absenceReasonBadge = absenceReason ? `<div class="absence-reason-badge">📝 ${escapeHtml(absenceReason.reason)}${absenceReason.note?` · ${escapeHtml(absenceReason.note)}`:''}</div>` : '';
                 tbody.innerHTML += `
                     <tr class="row-in border-t border-white/5 hover:bg-white/5 transition">
                         <td class="p-4"><img src="${getPhotoUrl(s)}" onclick='openStudentProfile(${JSON.stringify(s.id)})' title="${currentLang === 'en' ? 'View student profile' : 'የተማሪ መገለጫ ይመልከቱ'}" class="w-11 h-11 rounded-full object-cover gold-ring student-photo-click" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1e293b&color=FFD700'"></td>
                         <td class="p-4"><span class="id-chip text-yellow-400 font-mono text-xs px-2 py-0.5 rounded-full">${escapeHtml(s.id)}</span></td>
-                        <td class="p-4 amharic font-semibold whitespace-nowrap">${escapeHtml(s.name)}${lateDetail}</td>
+                        <td class="p-4 amharic font-semibold whitespace-nowrap">${escapeHtml(s.name)}${lateDetail}${absenceReasonBadge}</td>
                         <td class="p-4 text-gray-400">${escapeHtml(s.phone || '-')}</td>
                         <td class="p-4 min-w-[320px]">
                             <div class="flex justify-center gap-1.5 md:gap-2 flex-wrap">
                                 <button ${isAttendanceLocked() ? 'disabled' : ''} onclick="setStatus('${s.id}','present')" class="status-btn present px-2 md:px-3 py-1.5 rounded-lg text-xs font-bold border border-green-500/30 bg-green-500/5 text-green-400 ${status === 'present' ? 'selected present' : ''}">✔ ${txtP}</button>
                                 <button ${isAttendanceLocked() ? 'disabled' : ''} onclick="setStatus('${s.id}','late')" class="status-btn late px-2 md:px-3 py-1.5 rounded-lg text-xs font-bold border border-yellow-500/30 bg-yellow-500/5 text-yellow-400 ${status === 'late' ? 'selected late' : ''}">⏰ ${txtL}</button>
                                 <button ${isAttendanceLocked() ? 'disabled' : ''} onclick="setStatus('${s.id}','absent')" class="status-btn absent px-2 md:px-3 py-1.5 rounded-lg text-xs font-bold border border-red-500/30 bg-red-500/5 text-red-400 ${status === 'absent' ? 'selected absent' : ''}">✘ ${txtA}</button>
-                                <button ${isAttendanceLocked() ? 'disabled' : ''} onclick="setStatus('${s.id}','permission')" class="status-btn permission px-2 md:px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-500/30 bg-blue-500/5 text-blue-400 ${status === 'permission' ? 'selected permission' : ''}">🛡️ ${txtPerm}</button>
+                                <button ${(isAttendanceLocked() && status !== 'absent') ? 'disabled' : ''} onclick="setStatus('${s.id}','permission')" class="status-btn permission px-2 md:px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-500/30 bg-blue-500/5 text-blue-400 ${status === 'permission' ? 'selected permission' : ''}">🛡️ ${txtPerm}</button>
                             </div>
                         </td>
                     </tr>`;
@@ -4285,9 +4376,13 @@
                         close_time:normalizeTimeHHMM(data.close_time)
                     } : null;
                 }catch(scheduleErr){
-                    scannerStatus('ready','READY TO SCAN',global); playScannerBeep('error');
-                    scannerFeedback(feedbackId,'error','⚠','SCHEDULE UNAVAILABLE','Configure the daily attendance time for this class/date before scanning.',student);
-                    addScannerHistory('err',student.name,'Daily schedule unavailable'); scannerBusy=false; return;
+                    scanSchedule=getCachedAttendanceSchedule(student.className,selectedDateKey);
+                    if(!scanSchedule){
+                        scannerStatus('ready','READY TO SCAN',global); playScannerBeep('error');
+                        scannerFeedback(feedbackId,'error','⚠','SCHEDULE UNAVAILABLE','Configure the daily attendance time for this class/date before scanning.',student);
+                        addScannerHistory('err',student.name,'Daily schedule unavailable'); scannerBusy=false; return;
+                    }
+                    scannerStatus('ready','OFFLINE MODE',global);
                 }
             }
             if(!scanSchedule){
@@ -4323,7 +4418,7 @@
                 expected_start_time:scanSchedule.start_time,
                 late_threshold_time:scanSchedule.late_after_time,
                 late_minutes:scanStatus==='late'?smart.lateMinutes:0,
-                attendance_source:'barcode',preventOverwrite:true
+                attendance_source:'barcode',preventOverwrite:true,offlineCapable:true
             };
             scannerStatus('busy','SAVING...',global);
             const saved=await markAttendance(student.id,student.className,selectedDateKey,scanStatus,scanMeta);
@@ -4397,9 +4492,15 @@
         }
         function statusMark(status) {
             const labels = currentLang === 'en' ? {present:'Present',late:'Late',absent:'Absent',permission:'Permission'} : {present:'ተገኝቷል',late:'ያረፈደ',absent:'የቀረ',permission:'ፈቃድ'};
+            const icons = {
+                present: `<svg viewBox="0 0 24 24" aria-hidden="true" class="w-5 h-5 mx-auto"><path d="M5 12.5 9.5 17 19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+                absent: `<svg viewBox="0 0 24 24" aria-hidden="true" class="w-5 h-5 mx-auto"><path d="M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`,
+                late: `<svg viewBox="0 0 24 24" aria-hidden="true" class="w-5 h-5 mx-auto"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+                permission: `<svg viewBox="0 0 24 24" aria-hidden="true" class="w-5 h-5 mx-auto"><path d="M7 3.5h7l3 3V20.5H7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3.5v4h3M9.5 13l1.7 1.7 3.5-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+            };
             if (labels[status]) {
                 const cls = status === 'present' ? 'text-green-400' : status === 'late' ? 'text-yellow-400' : status === 'absent' ? 'text-red-400' : 'text-blue-400';
-                return `<span class="${cls} font-bold ${currentLang === 'am' ? 'amharic' : ''}">${labels[status]}</span>`;
+                return `<span class="${cls} inline-flex items-center justify-center font-bold" title="${labels[status]}" aria-label="${labels[status]}">${icons[status]}</span>`;
             }
             return '<span class="text-gray-600">-</span>';
         }
@@ -4856,6 +4957,9 @@
             document.getElementById('advancedAnalyticsBody').innerHTML=rows.map(x=>{let lateMin=0;Object.keys(attendanceMetaStore).forEach(d=>{if(d>=sinceKey&& (attendanceStore[d]||{})[x.s.id]==='late')lateMin+=Number((attendanceMetaStore[d]||{})[x.s.id]?.late_minutes)||0;});const marked=x.c.present+x.c.late+x.c.absent;const latePct=marked?Math.round(x.c.late/marked*100):0;const avg=x.c.late?Math.round(lateMin/x.c.late):0;return `<tr class="border-t border-white/5"><td class="p-4 font-semibold amharic">${escapeHtml(x.s.name)}</td><td class="p-4 text-center font-bold text-yellow-500">${x.rate}%</td><td class="p-4 text-center text-green-500">${x.c.present}</td><td class="p-4 text-center text-yellow-500">${x.c.late}</td><td class="p-4 text-center text-yellow-500">${latePct}%</td><td class="p-4 text-center text-yellow-500">${avg} min</td><td class="p-4 text-center text-red-500">${x.c.absent}</td><td class="p-4 text-center text-blue-500">${x.c.permission}</td></tr>`;}).join('');
         }
 
+        // Attendance reliability boot — additive only.
+        showAttendanceOfflineState(navigator.onLine===false,attendanceOfflineQueueRead().length);
+        if(navigator.onLine)setTimeout(()=>syncOfflineAttendanceQueue(),1200);
     </script>
 <script>
 (function(){

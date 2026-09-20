@@ -817,6 +817,10 @@ html[data-theme="dark"] #mainContent .section-title{
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 1-5.34 5.34L4 17l3 3 5.36-5.36a4 4 0 0 1 5.34-5.34L21 6l-3-3-3.3 3.3Z"/></svg>
       <span data-i18n="navEquipmentMgmt">Equipment Management</span>
     </a>
+    <a href="event.html" class="nav-link" data-rbac-module="events">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M8 3v3M16 3v3M3 9.5h18"/><path d="M8 13h3M8 16h5"/></svg>
+      <span data-i18n="navEventsMgmt">Events &amp; Church Calendar</span>
+    </a>
 
     <p class="nav-group-label" data-i18n="navInsights">Insights</p>
     <a href="report.html" class="nav-link" data-rbac-module="reports">
@@ -1214,6 +1218,13 @@ html[data-theme="dark"] #mainContent .section-title{
           <p class="mc-stat" id="modEquipmentStat">Loading…</p>
           <span class="mc-open">Open Module →</span>
         </a>
+        <a href="event.html" class="module-card" data-rbac-module="events">
+          <div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M8 3v3M16 3v3M3 9.5h18"/><path d="M8 13h3M8 16h5"/></svg></div>
+          <h3 data-i18n="navEventsMgmt">Events &amp; Church Calendar</h3>
+          <p class="mc-desc" data-i18n="eventsModuleDesc">Church events, teaching days and calendar planning</p>
+          <p class="mc-stat" id="modEventsStat" data-i18n="eventsModuleStat">Open calendar</p>
+          <span class="mc-open">Open Module →</span>
+        </a>
         <a href="report.html" class="module-card" data-rbac-module="reports">
           <div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></div>
           <h3>Reports &amp; Analytics</h3>
@@ -1357,7 +1368,7 @@ const translations = {
     navCommand: 'Command Center', navDashboard: 'Dashboard', navManagement: 'Management',
     navOffice: 'Office Management', navFinance: 'Financial Management', navStudents: 'Students',
     navStudentsMgmt: 'Student Management', navAttendanceMgmt: 'Attendance Management',
-    navBegenaMgmt: 'Begena Management', navEquipmentMgmt: 'Equipment Management',
+    navBegenaMgmt: 'Begena Management', navEquipmentMgmt: 'Equipment Management', navEventsMgmt: 'Events & Church Calendar',
     financeOverview: 'Financial Overview', financeOpen: 'Open Finance →',
     finNetBalance: 'Net Balance', finIncome: 'Total Income', finExpense: 'Total Expense', finBankBalance: 'Bank + Cash',
     navAttendance: 'Attendance', navBegena: 'Begena', navEquipment: 'Equipment',
@@ -1366,14 +1377,14 @@ const translations = {
     kpiStudents: 'Total Students', kpiAttendance: 'Attendance Today', kpiAssets: 'Active Assets', kpiOffice: 'Office Correspondence',
     quickActions: 'Quick Actions', qaRegisterStudent: 'Register Student', qaRecordAttendance: 'Record Attendance',
     qaAddEquipment: 'Add Equipment', qaComposeLetter: 'Compose Letter', qaGenerateReport: 'Generate Report',
-    needsAttention: 'Needs Attention', analytics: 'Analytics', modules: 'Module Control Center', recentActivity: 'Recent Activity',
+    needsAttention: 'Needs Attention', analytics: 'Analytics', modules: 'Module Control Center', recentActivity: 'Recent Activity', eventsModuleDesc:'Church events, teaching days and calendar planning', eventsModuleStat:'Open calendar',
     navNotifications: 'Notifications', navSystemHealth: 'System Health Monitor', navAuditTrail: 'Audit Trail', roleAdministrator:'Administrator', roleSuperAdmin:'Super Admin', roleTeacher:'Teacher', roleStudent:'Student', roleFinance:'Finance', roleOffice:'Office Staff', roleAttendance:'Attendance Staff', roleEquipment:'Equipment Staff', roleUser:'User', mobileHome:'Home', mobileStudents:'Students', mobileAttendance:'Attendance', mobileProfile:'Profile', mobileMore:'More',
   },
   am: {
     navCommand: 'የትዕዛዝ ማዕከል', navDashboard: 'ዳሽቦርድ', navManagement: 'አስተዳደር',
     navOffice: 'የቢሮ አስተዳደር', navFinance: 'የገንዘብ አስተዳደር', navStudents: 'ተማሪዎች',
     navStudentsMgmt: 'የተማሪዎች አስተዳደር', navAttendanceMgmt: 'የክትትል አስተዳደር',
-    navBegenaMgmt: 'የበገና አስተዳደር', navEquipmentMgmt: 'የመሳሪያ አስተዳደር',
+    navBegenaMgmt: 'የበገና አስተዳደር', navEquipmentMgmt: 'የመሳሪያ አስተዳደር', navEventsMgmt: 'ዝግጅቶች እና የቤተክርስቲያን ቀን መቁጠሪያ',
     financeOverview: 'የፋይናንስ አጠቃላይ እይታ', financeOpen: 'ፋይናንስ ክፈት →',
     finNetBalance: 'የተጣራ ሂሳብ', finIncome: 'ጠቅላላ ገቢ', finExpense: 'ጠቅላላ ወጪ', finBankBalance: 'የባንክ/ጥሬ ገንዘብ',
     navAttendance: 'ክትትል', navBegena: 'በገና', navEquipment: 'መሳሪያዎች',
@@ -1382,7 +1393,7 @@ const translations = {
     kpiStudents: 'ጠቅላላ ተማሪዎች', kpiAttendance: 'የዛሬ ክትትል', kpiAssets: 'ንቁ ንብረቶች', kpiOffice: 'የቢሮ ደብዳቤዎች',
     quickActions: 'ፈጣን እርምጃዎች', qaRegisterStudent: 'ተማሪ መዝግብ', qaRecordAttendance: 'ክትትል መዝግብ',
     qaAddEquipment: 'መሳሪያ ጨምር', qaComposeLetter: 'ደብዳቤ ጻፍ', qaGenerateReport: 'ሪፖርት ፍጠር',
-    needsAttention: 'ትኩረት የሚሹ', analytics: 'ትንታኔ', modules: 'የሞጁል መቆጣጠሪያ ማዕከል', recentActivity: 'የቅርብ ጊዜ እንቅስቃሴ',
+    needsAttention: 'ትኩረት የሚሹ', analytics: 'ትንታኔ', modules: 'የሞጁል መቆጣጠሪያ ማዕከል', recentActivity: 'የቅርብ ጊዜ እንቅስቃሴ', eventsModuleDesc:'የቤተክርስቲያን ዝግጅቶች፣ የትምህርት ቀናት እና የቀን መቁጠሪያ እቅድ', eventsModuleStat:'የቀን መቁጠሪያ ክፈት',
     navNotifications: 'ማሳወቂያዎች', navSystemHealth: 'የስርዓት ጤና መቆጣጠሪያ', navAuditTrail: 'የኦዲት መዝገብ', roleAdministrator:'አስተዳዳሪ', roleSuperAdmin:'ሱፐር አስተዳዳሪ', roleTeacher:'መምህር', roleStudent:'ተማሪ', roleFinance:'ፋይናንስ', roleOffice:'የቢሮ ሰራተኛ', roleAttendance:'የክትትል ሰራተኛ', roleEquipment:'የመሳሪያ ሰራተኛ', roleUser:'ተጠቃሚ', mobileHome:'ዋና', mobileStudents:'ተማሪዎች', mobileAttendance:'ክትትል', mobileProfile:'መገለጫ', mobileMore:'ተጨማሪ',
   },
 };
@@ -2016,7 +2027,7 @@ function updateUI() {
 }
 
 function applyRBACToDashboard(rbac) {
-  const modules = ['office','finance','students','attendance','begena','equipment','reports'];
+  const modules = ['office','finance','students','attendance','begena','equipment','events','reports'];
   document.querySelectorAll('[data-rbac-module]').forEach((el) => {
     const moduleName = el.dataset.rbacModule;
     const allowed = rbac?.isSuperAdmin || hasModuleAccess(moduleName);
@@ -2166,6 +2177,7 @@ const commandData = [
   { category: 'Modules', icon: ICONS.attendance, title: 'Attendance', subtitle: 'Open Attendance module', href: 'attendance.html', keywords: 'attendance present absent roll call' },
   { category: 'Modules', icon: ICONS.begena, title: 'Begena', subtitle: 'Open Begena module', href: 'begena.html', keywords: 'begena music instrument' },
   { category: 'Modules', icon: ICONS.equipment, title: 'Equipment', subtitle: 'Open Equipment module', href: 'equipment.html', keywords: 'equipment assets maintenance inventory' },
+  { category: 'Modules', icon: ICONS.attendance, title: 'Events & Church Calendar', subtitle: 'Open church calendar', href: 'event.html', keywords: 'events church calendar teaching days schedule' },
   { category: 'Modules', icon: ICONS.reports, title: 'Reports & Analytics', subtitle: 'Open Reports module', href: 'report.html', keywords: 'reports analytics insights export' },
   { category: 'Modules', icon: ICONS.settings, title: 'Settings', subtitle: 'Open Settings', href: 'dashboard.html#settings', keywords: 'settings preferences configuration' },
   { category: 'Quick Actions', icon: ICONS.action, title: 'Register Student', subtitle: 'Quick action', href: 'students.html', keywords: 'add new student enroll' },
