@@ -1217,7 +1217,7 @@
     async function lookupCardInSupabase(client,no,qrToken){
         const cols='id,name,class_name,grade,photo,status,id_card_number';
         const normalizedNo=String(no||'').trim().toUpperCase();
-        const normalizedToken=String(qrToken||'').trim().toUpperCase();
+        const normalizedToken='';
         const c=await client.from('mhss_student_id_cards').select('*').eq('card_number',normalizedNo).maybeSingle();
         if(c.error)throw c.error;
         let card=c.data||null,student=null,current=null;
@@ -1238,13 +1238,13 @@
             student=s.data||null;
             if(student){
                 const uid=await currentUserId(client),at=nowIso();
-                const token=normalizedToken||generateCardSecurityToken();
+                const token=null;
                 const existing=await client.from('mhss_student_id_cards').select('*').eq('student_id',student.id).eq('is_current',true).limit(1);
                 if(existing.error)throw existing.error;
                 if((existing.data||[]).length){ card=existing.data[0]; }
                 else{
                     const history=[{action:'CARD_REGISTRY_REPAIRED',at,cardNumber:normalizedNo,source:'verification',details:'Restored from students.id_card_number'}];
-                    const ins=await client.from('mhss_student_id_cards').insert([{student_id:student.id,card_number:normalizedNo,status:'Active',version:1,issued_at:at,is_current:true,history,security_token:token,created_by:uid,updated_by:uid}]).select('*').maybeSingle();
+                    const ins=await client.from('mhss_student_id_cards').insert([{student_id:student.id,card_number:normalizedNo,status:'Active',version:1,issued_at:at,is_current:true,history,security_token:null,created_by:uid,updated_by:uid}]).select('*').maybeSingle();
                     if(ins.error)throw ins.error;
                     card=ins.data||null;
                     try{addCardAudit('CARD_REGISTRY_REPAIRED',student,normalizedNo,'Physical card registry restored during verification');await logCardAuditDB(client,'CARD_REGISTRY_REPAIRED',student,normalizedNo,'verification','Physical card registry restored from students.id_card_number');}catch(e){console.warn('Repair audit warning:',e);}
@@ -1268,19 +1268,66 @@
     }
     function judgeCard(res,qrToken){
         const {card,student,current}=res;
-        if(qrToken){
-            if(!card) return {level:'invalid',title:'❌ QR CARD NOT FOUND',msg:'The QR contains a security token for this physical card, but the card is not registered in the MHSS physical-card registry.'};
-            if(card.security_token && String(card.security_token).toUpperCase()!==String(qrToken).toUpperCase()) return {level:'bad',title:'⛔ QR SECURITY CHECK FAILED',msg:'The QR security token does not match this card record. Treat the card as suspicious and verify manually.'};
-            if(!card.security_token) return {level:'warn',title:'⚠️ LEGACY QR — CARD FOUND',msg:'The card is registered, but this database record does not yet contain the QR security token. Reprint the card to upgrade its QR security.'};
+
+        // QR verification is intentionally based ONLY on the physical card
+        // number. No QR security token is required or compared.
+        if(!card&&!student){
+            return {
+                level:'invalid',
+                title:'❌ INVALID CARD',
+                msg:'This physical card number is not registered in the MHSS card registry.'
+            };
         }
-        if(!card&&!student)return {level:'invalid',title:'❌ INVALID CARD',msg:'This card number is not in the MHSS registry. Do not accept this card.'};
+
         const status=card?card.status:'Active';
-        if(card&&(card.is_current===false||status==='Replaced'))return {level:'bad',title:'❌ REPLACED CARD — DO NOT ACCEPT',msg:current?`This card was replaced. The current card is ${current.card_number}.`:'This card was replaced by a newer card.'};
-        if(status==='Lost'||status==='Damaged'||status==='Expired')return {level:'bad',title:`⛔ CARD ${status.toUpperCase()} — DO NOT ACCEPT`,msg:`This card is marked ${status}. Ask the student for the current card.`};
-        if(status==='Replacement Required')return {level:'warn',title:'⚠️ REPLACEMENT REQUIRED',msg:'This card must be replaced before it is used again.'};
-        if(!student)return {level:'warn',title:'⚠️ CARD FOUND — STUDENT RECORD MISSING',msg:'The card is registered but its student record could not be found.'};
-        if(student.status&&student.status!=='Active')return {level:'warn',title:`⚠️ CARD VALID — STUDENT ${String(student.status).toUpperCase()}`,msg:`The card is genuine, but this student is marked ${student.status}.`};
-        return {level:'ok',title:'✅ VALID CARD',msg:`Genuine, current MHSS student ID card — ${cardTypeLabel(card).toLowerCase()}.`};
+
+        if(card&&(card.is_current===false||status==='Replaced')){
+            return {
+                level:'bad',
+                title:'❌ REPLACED CARD — DO NOT ACCEPT',
+                msg:current
+                    ? `This physical card was replaced. The current card is ${current.card_number}.`
+                    : 'This physical card was replaced by a newer card.'
+            };
+        }
+
+        if(status==='Lost'||status==='Damaged'||status==='Expired'){
+            return {
+                level:'bad',
+                title:`⛔ CARD ${status.toUpperCase()} — DO NOT ACCEPT`,
+                msg:`This physical card is marked ${status}. Ask for the current card.`
+            };
+        }
+
+        if(status==='Replacement Required'){
+            return {
+                level:'warn',
+                title:'⚠️ REPLACEMENT REQUIRED',
+                msg:'This physical card must be replaced before it is used again.'
+            };
+        }
+
+        if(!student){
+            return {
+                level:'warn',
+                title:'⚠️ CARD FOUND — STUDENT RECORD MISSING',
+                msg:'The physical card is registered, but its linked student record could not be found.'
+            };
+        }
+
+        if(student.status&&student.status!=='Active'){
+            return {
+                level:'warn',
+                title:`⚠️ CARD VALID — STUDENT ${String(student.status).toUpperCase()}`,
+                msg:`The physical card is registered, but the student is marked ${student.status}.`
+            };
+        }
+
+        return {
+            level:'ok',
+            title:'✅ VALID CARD',
+            msg:`Genuine, current MHSS student ID card — ${cardTypeLabel(card).toLowerCase()}.`
+        };
     }
     function fmtCardDate(v){if(!v)return '—';const d=new Date(v);return isNaN(d)?'—':d.toLocaleString();}
     function renderVerification(no,res,j,source){
@@ -1304,7 +1351,7 @@
     function parseScannedValue(raw){
         const v=String(raw||'').trim();
         const secure=v.match(/^MHSS:QR:(\d+):([^:]+):([A-Z0-9]+)$/i);
-        if(secure)return {kind:'card',value:secure[2].trim().toUpperCase(),token:secure[3].trim().toUpperCase(),qrVersion:secure[1],legacySecureQr:true};
+        if(secure)return {kind:'card',value:normalizeCardNumber(secure[2]),cardOnlyQr:true,legacySecureQr:true};
         const qrCard=v.match(/^MHSS:CARD:(.+)$/i);
         if(qrCard)return {kind:'card',value:normalizeCardNumber(qrCard[1]),cardOnlyQr:true};
         const qrStudent=v.match(/^MHSS:STUDENT:(.+)$/i);
@@ -1362,7 +1409,7 @@
         try{
             if(parsed.kind==='student'){await runStudentScan(parsed.value);input.select();return;}
             const no=parsed.value;
-            const qrToken=parsed.token||'';
+            const qrToken=''; // Physical-card QR verification uses card number only.
             if(!CARD_NO_RE.test(no)){
                 result.textContent='❌ INVALID FORMAT';
                 body.innerHTML=renderVerification(no,{card:null,student:null},{level:'invalid',title:'❌ INVALID FORMAT',msg:'A card number looks like MHSS-XXXXXX. A Student ID looks like MHSS/EST/001.'},'database').replace('Checked against the live database · ','');
@@ -1372,7 +1419,7 @@
             let res,source='database',client=null;
             try{client=await waitForSupabase();res=await lookupCardInSupabase(client,no,qrToken);}
             catch(e){console.warn('Database verification failed, using local records:',e);source='local';res=lookupCardLocal(no);
-            if(qrToken && res.card && res.card.security_token && String(res.card.security_token).toUpperCase()!==qrToken.toUpperCase()){ /* judgeCard will flag it */ }}
+             }
             const j=judgeCard(res,qrToken);
             result.textContent=j.title;
             body.innerHTML=renderVerification(no,res,j,source);
