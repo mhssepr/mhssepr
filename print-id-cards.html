@@ -1215,53 +1215,53 @@
     async function lookupCardInSupabase(client,no,qrToken){
         const cols='id,name,class_name,grade,photo,status,id_card_number';
         const normalizedNo=String(no||'').trim().toUpperCase();
+        const normalizedToken=String(qrToken||'').trim().toUpperCase();
         const c=await client.from('mhss_student_id_cards').select('*').eq('card_number',normalizedNo).maybeSingle();
         if(c.error)throw c.error;
         let card=c.data||null,student=null,current=null;
         if(card){
-            const s=await client.from('students').select(cols).eq('id',card.student_id).maybeSingle();
-            if(s.error)throw s.error;
+            let s=await client.from('students').select(cols).eq('id',card.student_id).maybeSingle();
+            if(s.error || !s.data){
+                const byCard=await client.from('students').select(cols).eq('id_card_number',normalizedNo).maybeSingle();
+                if(!byCard.error && byCard.data) s=byCard;
+            }
             student=s.data||null;
             if(card.is_current===false||card.status==='Replaced'){
                 const cur=await client.from('mhss_student_id_cards').select('card_number,status,version,issued_at').eq('student_id',card.student_id).eq('is_current',true).maybeSingle();
-                if(cur.error)throw cur.error;
-                current=cur.data||null;
+                if(!cur.error) current=cur.data||null;
             }
         }else{
-            // Repair legacy cards that only have id_card_number on students.
             const s=await client.from('students').select(cols).eq('id_card_number',normalizedNo).maybeSingle();
             if(s.error)throw s.error;
             student=s.data||null;
             if(student){
-                const uid=await currentUserId(client), at=nowIso();
-                const token=String(qrToken||'').trim().toUpperCase()||generateCardSecurityToken();
+                const uid=await currentUserId(client),at=nowIso();
+                const token=normalizedToken||generateCardSecurityToken();
                 const existing=await client.from('mhss_student_id_cards').select('*').eq('student_id',student.id).eq('is_current',true).limit(1);
                 if(existing.error)throw existing.error;
-                if((existing.data||[]).length){
-                    card=existing.data[0];
-                }else{
-                    const history=[{action:'CARD_REGISTRY_REPAIRED',at,cardNumber:normalizedNo,source:'verification'}];
-                    let ins=await client.from('mhss_student_id_cards').insert([{student_id:student.id,card_number:normalizedNo,status:'Active',version:1,issued_at:at,is_current:true,history,security_token:token,created_by:uid,updated_by:uid}]).select('*').maybeSingle();
-                    if(ins.error && String(ins.error.message||'').toLowerCase().includes('security_token')){
-                        ins=await client.from('mhss_student_id_cards').insert([{student_id:student.id,card_number:normalizedNo,status:'Active',version:1,issued_at:at,is_current:true,history,created_by:uid,updated_by:uid}]).select('*').maybeSingle();
-                    }
+                if((existing.data||[]).length){ card=existing.data[0]; }
+                else{
+                    const history=[{action:'CARD_REGISTRY_REPAIRED',at,cardNumber:normalizedNo,source:'verification',details:'Restored from students.id_card_number'}];
+                    const ins=await client.from('mhss_student_id_cards').insert([{student_id:student.id,card_number:normalizedNo,status:'Active',version:1,issued_at:at,is_current:true,history,security_token:token,created_by:uid,updated_by:uid}]).select('*').maybeSingle();
                     if(ins.error)throw ins.error;
                     card=ins.data||null;
                     try{addCardAudit('CARD_REGISTRY_REPAIRED',student,normalizedNo,'Physical card registry restored during verification');await logCardAuditDB(client,'CARD_REGISTRY_REPAIRED',student,normalizedNo,'verification','Physical card registry restored from students.id_card_number');}catch(e){console.warn('Repair audit warning:',e);}
                 }
-                if(card && qrToken && !card.security_token){
-                    try{const u=await client.from('mhss_student_id_cards').update({security_token:token,updated_by:uid}).eq('id',card.id);if(!u.error)card.security_token=token;}catch(e){console.warn('QR token sync warning:',e);}
+                if(card && normalizedToken && !card.security_token){
+                    const u=await client.from('mhss_student_id_cards').update({security_token:normalizedToken,updated_by:uid}).eq('id',card.id);
+                    if(!u.error)card.security_token=normalizedToken;
                 }
             }
         }
         return {card,student,current};
     }
     function lookupCardLocal(no){
-        const rs=getCardRegistry(),recs=Object.values(rs);
-        let e=recs.find(r=>String(r.cardNumber).toUpperCase()===no);
-        if(e){const st=studentsData.find(s=>s.id===e.studentId);return {card:{card_number:e.cardNumber,student_id:e.studentId,status:e.status,version:e.version||1,is_current:e.status!=='Replaced',issued_at:e.issuedAt,replaced_at:e.replacedAt||null,previous_card_number:e.previousCardNumber||null,security_token:e.securityToken||null,history:e.history||[]},student:st?{id:st.id,name:st.name,class_name:st.className,photo:st.photo}:null,current:null};}
-        e=recs.find(r=>String(r.previousCardNumber||'').toUpperCase()===no);
-        if(e){const st=studentsData.find(s=>s.id===e.studentId);return {card:{card_number:no,student_id:e.studentId,status:'Replaced',is_current:false,version:Math.max(1,(Number(e.version)||2)-1),history:[]},student:st?{id:st.id,name:st.name,class_name:st.className,photo:st.photo}:null,current:{card_number:e.cardNumber,status:e.status,version:e.version}};}
+        const rs=getCardRegistry(),recs=Object.values(rs),normalized=String(no||'').toUpperCase();
+        function findLocalStudent(studentId,cardNumber){return studentsData.find(s=>String(s.id||'').toUpperCase()===String(studentId||'').toUpperCase()||String(s.studentId||'').toUpperCase()===String(studentId||'').toUpperCase()||String(s.idCardNumber||s.id_card_number||'').toUpperCase()===String(cardNumber||'').toUpperCase())||null;}
+        let e=recs.find(r=>String(r.cardNumber||'').toUpperCase()===normalized);
+        if(e){const st=findLocalStudent(e.studentId,e.cardNumber);return {card:{card_number:e.cardNumber,student_id:e.studentId,status:e.status,version:e.version||1,is_current:e.status!=='Replaced',issued_at:e.issuedAt,replaced_at:e.replacedAt||null,previous_card_number:e.previousCardNumber||null,security_token:e.securityToken||null,history:e.history||[]},student:st?{id:st.id||st.studentId,name:st.name,class_name:st.className||st.class_name,photo:st.photo,status:st.status,id_card_number:st.idCardNumber||st.id_card_number}:null,current:null};}
+        e=recs.find(r=>String(r.previousCardNumber||'').toUpperCase()===normalized);
+        if(e){const st=findLocalStudent(e.studentId,e.previousCardNumber);return {card:{card_number:no,student_id:e.studentId,status:'Replaced',is_current:false,version:Math.max(1,(Number(e.version)||2)-1),history:[]},student:st?{id:st.id||st.studentId,name:st.name,class_name:st.className||st.class_name,photo:st.photo,status:st.status,id_card_number:st.idCardNumber||st.id_card_number}:null,current:{card_number:e.cardNumber,status:e.status,version:e.version}};}
         return {card:null,student:null,current:null};
     }
     function judgeCard(res,qrToken){
