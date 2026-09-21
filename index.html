@@ -1849,7 +1849,7 @@
                 }, 650);
 
                 setTimeout(() => {
-                    window.location.replace('/dashboard');
+                    window.location.replace('dashboard.html');
                 }, 1350);
 
             } catch (err) {
@@ -1876,7 +1876,7 @@
         function redirectToDashboard() {
             if (redirecting) return;
             redirecting = true;
-            window.location.replace('/dashboard');
+            window.location.replace('dashboard.html');
         }
 
         async function protectLoginPage() {
