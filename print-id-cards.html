@@ -1409,7 +1409,7 @@
         try{
             if(parsed.kind==='student'){await runStudentScan(parsed.value);input.select();return;}
             const no=parsed.value;
-            const qrToken=''; // Physical-card QR verification uses card number only.
+            const qrToken=''; // Scan and typing both verify by physical card number only.
             if(!CARD_NO_RE.test(no)){
                 result.textContent='❌ INVALID FORMAT';
                 body.innerHTML=renderVerification(no,{card:null,student:null},{level:'invalid',title:'❌ INVALID FORMAT',msg:'A card number looks like MHSS-XXXXXX. A Student ID looks like MHSS/EST/001.'},'database').replace('Checked against the live database · ','');
@@ -1439,7 +1439,36 @@
         const v=document.getElementById('cardScanVideo'),w=document.getElementById('cardScanWrap'),b=document.getElementById('cardScanBtn');
         if(v)v.srcObject=null;if(w)w.classList.add('hidden');if(b)b.textContent='📷 Scan with camera';
     }
-    function handleScannedValue(value){stopCardScanner();const i=document.getElementById('verifyCardInput');i.value=value;runCardVerification();}
+    function handleScannedValue(value){
+        stopCardScanner();
+        const input=document.getElementById('verifyCardInput');
+        const raw=String(value||'').trim();
+
+        // IMPORTANT: camera QR scanning must behave EXACTLY like typing the
+        // physical card number. Decode the QR here and put only MHSS-XXXXXX
+        // into the same verification input, then call the same verifier.
+        const parsed=parseScannedValue(raw);
+
+        if(parsed.kind==='card' && parsed.value){
+            const cardNo=normalizeCardNumber(parsed.value);
+            input.value=cardNo;
+            input.dispatchEvent(new Event('input',{bubbles:true}));
+            runCardVerification();
+            return;
+        }
+
+        // Student barcodes continue through the same input/verifier path.
+        if(parsed.kind==='student' && parsed.value){
+            input.value=String(parsed.value).trim();
+            input.dispatchEvent(new Event('input',{bubbles:true}));
+            runCardVerification();
+            return;
+        }
+
+        input.value=raw;
+        input.dispatchEvent(new Event('input',{bubbles:true}));
+        runCardVerification();
+    }
     async function toggleCardScanner(){
         if(cardScanStream){stopCardScanner();return;}
         const wrap=document.getElementById('cardScanWrap'),video=document.getElementById('cardScanVideo'),msg=document.getElementById('cardScanMsg'),btn=document.getElementById('cardScanBtn');
@@ -1452,7 +1481,9 @@
             if('BarcodeDetector' in window){try{cardScanDetector=new BarcodeDetector({formats:['qr_code','code_128']});}catch(e){cardScanDetector=null;}}
             if(!cardScanDetector)await loadJsQR();
             btn.textContent='⏹ Stop camera';
-            msg.textContent=cardScanDetector?'Point the camera at the QR code or the barcode.':'Point the camera at the QR code. (Barcode scanning needs Chrome — otherwise type the Student ID.)';
+            msg.textContent=cardScanDetector
+                ? 'Scan the QR/card barcode. The scanned card number will be verified exactly like typing it.'
+                : 'Point the camera at the QR code. The scanned card number will be verified exactly like typing it.';
             let busy=false;
             cardScanTimer=setInterval(async()=>{
                 if(busy||!cardScanStream||video.readyState<2)return;busy=true;
