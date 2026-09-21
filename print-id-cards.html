@@ -1069,9 +1069,10 @@
         } catch (e) { }
     }
 
-    // QR v2: the QR no longer exposes the student ID or private data.
-    // It carries a random card-security token + card number. Verification is always live.
-    const CARD_QR_VERSION = '2';
+    // Physical-card QR: the QR contains ONLY the physical MHSS card number.
+    // It does NOT contain the permanent Student ID. Live verification uses
+    // mhss_student_id_cards.card_number as the authoritative record.
+    const CARD_QR_VERSION = '3';
     const cardTokenSyncInFlight = new Set();
     function generateCardSecurityToken(){
         try{ if(window.crypto?.randomUUID) return window.crypto.randomUUID().replace(/-/g,'').toUpperCase(); }catch(e){}
@@ -1085,8 +1086,7 @@
     }
     function buildCardQrPayload(s,rec){
         const no=String(rec?.cardNumber||s?.idCardNumber||'').trim().toUpperCase();
-        const token=getCardSecurityToken(rec);
-        return `MHSS:QR:${CARD_QR_VERSION}:${no}:${token}`;
+        return `MHSS:CARD:${no}`;
     }
     async function syncCardSecurityToken(s,rec){
         if(!s||!rec?.cardNumber||!rec?.securityToken)return;
@@ -1118,7 +1118,9 @@
             el.outerHTML = qr.createSvgTag({ scalable: true, margin: 0 });
             const created = document.getElementById(qrId);
             if (created) { created.setAttribute('aria-label', 'Secure student verification QR code'); created.setAttribute('data-qr-version',CARD_QR_VERSION); created.style.width = '52px'; created.style.height = '52px'; }
-            syncCardSecurityToken(s,cardRec);
+            // QR verification is based on the physical card number.
+            // No Student ID or QR security token is embedded in the QR.
+            // The database card record remains the authority for status/currentness.
         } catch (e) { console.warn('Could not render student QR code:', e); }
     }
 
@@ -1267,7 +1269,7 @@
     function judgeCard(res,qrToken){
         const {card,student,current}=res;
         if(qrToken){
-            if(!card) return {level:'invalid',title:'❌ QR CARD NOT FOUND',msg:'The QR contains a security token, but this physical card is not registered.'};
+            if(!card) return {level:'invalid',title:'❌ QR CARD NOT FOUND',msg:'The QR contains a security token for this physical card, but the card is not registered in the MHSS physical-card registry.'};
             if(card.security_token && String(card.security_token).toUpperCase()!==String(qrToken).toUpperCase()) return {level:'bad',title:'⛔ QR SECURITY CHECK FAILED',msg:'The QR security token does not match this card record. Treat the card as suspicious and verify manually.'};
             if(!card.security_token) return {level:'warn',title:'⚠️ LEGACY QR — CARD FOUND',msg:'The card is registered, but this database record does not yet contain the QR security token. Reprint the card to upgrade its QR security.'};
         }
@@ -1289,7 +1291,7 @@
         let html=`<div class="rounded-xl p-4 border" style="border-color:${colors[j.level]}"><div class="font-black text-sm" style="color:${tc[j.level]}">${escapeHtml(j.title)}</div><div class="text-xs mt-1" style="color:var(--text-muted)">${escapeHtml(j.msg)}</div>`;
         if(card||student){
             html+=`<div class="flex gap-3 mt-4 items-center"><img src="${getPhotoUrl({photo:student&&student.photo,name:(student&&student.name)||'Student'})}" alt="" style="width:64px;height:64px;border-radius:12px;object-fit:cover;flex-shrink:0"><div><div class="text-sm font-bold">${escapeHtml((student&&student.name)||'Student record not found')}</div><div class="text-[10px] mt-1" style="color:var(--text-muted)">${escapeHtml([student&&student.class_name,student&&student.grade].filter(Boolean).join(' · '))}</div></div></div>`;
-            html+=`<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-3 border-t" style="border-color:var(--border)">${cell('CARD NUMBER',(card&&card.card_number)||no)}${cell('STUDENT ID',(card&&card.student_id)||(student&&student.id)||'—')}${cell('CARD STATUS',card?card.status:'Active')}${cell('CARD TYPE',cardTypeLabel(card))}${cell('VERSION','V'+((card&&card.version)||1))}${cell('ISSUED',fmtCardDate(card&&card.issued_at))}${card&&card.replaced_at?cell('REPLACED ON',fmtCardDate(card.replaced_at)):''}${card&&card.previous_card_number?cell('PREVIOUS CARD',card.previous_card_number):''}${student&&student.status?cell('STUDENT STATUS',student.status):''}</div>`;
+            html+=`<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-3 border-t" style="border-color:var(--border)">${cell('CARD NUMBER',(card&&card.card_number)||no)}${cell('PERMANENT STUDENT ID',(card&&card.student_id)||(student&&student.id)||'—')}${cell('CARD STATUS',card?card.status:'Active')}${cell('CARD TYPE',cardTypeLabel(card))}${cell('VERSION','V'+((card&&card.version)||1))}${cell('ISSUED',fmtCardDate(card&&card.issued_at))}${card&&card.replaced_at?cell('REPLACED ON',fmtCardDate(card.replaced_at)):''}${card&&card.previous_card_number?cell('PREVIOUS CARD',card.previous_card_number):''}${student&&student.status?cell('STUDENT STATUS',student.status):''}</div>`;
             const h=card&&Array.isArray(card.history)?card.history.slice(-5).reverse():[];
             if(h.length)html+=`<div class="mt-4 pt-3 border-t" style="border-color:var(--border)"><div class="text-[9px] mb-1" style="color:var(--text-muted)">RECENT CARD HISTORY</div>${h.map(x=>`<div class="text-[10px]">${escapeHtml(x.action||'')} · ${escapeHtml(fmtCardDate(x.at))}${x.cardNumber?' · '+escapeHtml(x.cardNumber):''}</div>`).join('')}</div>`;
         }else{
@@ -1302,9 +1304,9 @@
     function parseScannedValue(raw){
         const v=String(raw||'').trim();
         const secure=v.match(/^MHSS:QR:(\d+):([^:]+):([A-Z0-9]+)$/i);
-        if(secure)return {kind:'card',value:secure[2].trim().toUpperCase(),token:secure[3].trim().toUpperCase(),qrVersion:secure[1]};
+        if(secure)return {kind:'card',value:secure[2].trim().toUpperCase(),token:secure[3].trim().toUpperCase(),qrVersion:secure[1],legacySecureQr:true};
         const qrCard=v.match(/^MHSS:CARD:(.+)$/i);
-        if(qrCard)return {kind:'card',value:qrCard[1].trim().toUpperCase(),legacyQr:true};
+        if(qrCard)return {kind:'card',value:normalizeCardNumber(qrCard[1]),cardOnlyQr:true};
         const qrStudent=v.match(/^MHSS:STUDENT:(.+)$/i);
         if(qrStudent)return {kind:'student',value:qrStudent[1].trim()};
         try{
