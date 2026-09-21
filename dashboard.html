@@ -4,6 +4,9 @@
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Meserete Hiwot — Enterprise Management System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1029,7 +1032,7 @@ html[data-theme="dark"] #mainContent .section-title{
     <section class="kpi-grid" aria-label="Key performance indicators">
       <article class="kpi-card" id="kpiStudentsCard" data-state="loading">
         <div class="kpi-top">
-          <span class="kpi-label" data-i18n="kpiStudents">Total Students</span>
+          <span class="kpi-label" data-i18n="kpiStudents">Active Students</span>
           <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/></svg></div>
         </div>
         <div class="kpi-skeleton"><div class="skel-bar w-80"></div><div class="skel-bar w-40"></div></div>
@@ -1617,15 +1620,45 @@ function animateNumber(el, target) {
 ===================================================================== */
 async function loadStudentStats() {
   setCardState('kpiStudentsCard', 'loading');
+
   try {
-    const { count, error } = await supabase.from('students').select('id', { count: 'exact', head: true });
-    if (error) throw error;
-    state.students = { total: count || 0 };
-    animateNumber($('kpiStudentsValue'), state.students.total);
-    $('kpiStudentsSub').textContent = 'enrolled students';
-    $('anStuTotal').textContent = state.students.total.toLocaleString();
-    $('modStudentsStat').textContent = `${state.students.total.toLocaleString()} students`;
+    /*
+     * IMPORTANT:
+     * Do not calculate this KPI from a client-side array or a paginated
+     * students query. Different browsers/devices can then show different
+     * numbers depending on what rows were loaded/cached.
+     *
+     * The dashboard now asks Supabase for the exact database count.
+     * "Active" is matched case-insensitively through two supported values
+     * used by the MHSS student system.
+     */
+    const [activeResult, totalResult] = await Promise.all([
+      supabase
+        .from('students')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['Active', 'active']),
+      supabase
+        .from('students')
+        .select('id', { count: 'exact', head: true })
+    ]);
+
+    if (activeResult.error) throw activeResult.error;
+    if (totalResult.error) throw totalResult.error;
+
+    const active = Number(activeResult.count || 0);
+    const total = Number(totalResult.count || 0);
+
+    state.students = { active, total };
+
+    // Dashboard KPI = ACTIVE students, not a browser-local/paginated total.
+    animateNumber($('kpiStudentsValue'), active);
+    $('kpiStudentsSub').textContent = `${total.toLocaleString()} total enrolled`;
+    $('anStuTotal').textContent = active.toLocaleString();
+    $('modStudentsStat').textContent = `${active.toLocaleString()} active students`;
+
     setCardState('kpiStudentsCard', 'loaded');
+
+    console.info('[Dashboard] Student counts:', { active, total });
   } catch (err) {
     console.error('[Dashboard] loadStudentStats failed:', err);
     state.students = null;
