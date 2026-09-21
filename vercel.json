@@ -1,4 +1,62 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/students",
+      "destination": "/students.html"
+    },
+    {
+      "source": "/attendance",
+      "destination": "/attendance.html"
+    },
+    {
+      "source": "/office",
+      "destination": "/office.html"
+    },
+    {
+      "source": "/finance",
+      "destination": "/finance.html"
+    },
+    {
+      "source": "/begena",
+      "destination": "/begena.html"
+    },
+    {
+      "source": "/equipment",
+      "destination": "/equipment.html"
+    },
+    {
+      "source": "/event",
+      "destination": "/event.html"
+    },
+    {
+      "source": "/notifications",
+      "destination": "/notifications.html"
+    },
+    {
+      "source": "/report",
+      "destination": "/report.html"
+    },
+    {
+      "source": "/print-id-cards",
+      "destination": "/print-id-cards.html"
+    },
+    {
+      "source": "/system-health",
+      "destination": "/system-health.html"
+    },
+    {
+      "source": "/audit-trail",
+      "destination": "/audit-trail.html"
+    },
+    {
+      "source": "/user-roles",
+      "destination": "/user-roles.html"
+    }
+  ]
 }
