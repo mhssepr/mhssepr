@@ -6,8 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Print Student ID Cards - Meserete Hiwot ERP</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Ethiopic+Lisan:wght@400;700&family=Noto+Sans+Ethiopic:wght@400;500;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@400;500;600;700&family=Ethiopic+Lisan:wght@400;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+Ethiopic:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@400;500;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
@@ -260,7 +260,7 @@
     .id-filter-select { width:100%; min-height:42px; border-radius:10px; padding:0 10px; background:var(--input-bg); color:var(--text-main); border:1px solid var(--input-border); font-size:13px; font-weight:600; }
     .id-filter-select:focus { outline:none; border-color:var(--gold); }
     .id-filter-help { font-size:10px; line-height:1.45; color:var(--text-muted); margin-top:6px; }
-    .mode-btn { border:1px solid var(--border); background:var(--surface); color:var(--text); transition:.15s; }
+    .mode-btn { border:1px solid var(--border); background:var(--surface); color:var(--text-main); transition:.15s; }
     .mode-btn.active { background:var(--gold); color:#111827; border-color:var(--gold); }
     .mode-btn:disabled { opacity:.45; cursor:not-allowed; }
     .feature-btn { border:1px solid var(--border); background:var(--surface); color:var(--text-main); transition:.15s; }
@@ -635,7 +635,7 @@
     const KNOWN_UI_AM = {
         'Group / Division':'ምድብ / ክፍል','All Groups / ሁሉም ምድቦች':'ሁሉም ምድቦች','Class / Grade':'ክፍል / ደረጃ','Select a Class / Grade':'ክፍል / ደረጃ ይምረጡ',
         'Search name or ID...':'ስም ወይም መታወቂያ ፈልግ...','Missing Photos':'ፎቶ የሌላቸው','Show All':'ሁሉንም አሳይ','No students found.':'ተማሪዎች አልተገኙም።',
-        'ID Card Security Center':'የመታወቂያ ካርድ ደህንነት ማዕከል','Verify Barcode':'ባርኮድ አረጋግጥ','Card History':'የካርድ ታሪክ','Card Profile':'የካርድ መገለጫ','New Replacement Request':'አዲስ የመተኪያ ጥያቄ','Card Replacement Center':'የካርድ መተኪያ ማዕከል','Audit / Print History':'የኦዲት / ህትመት ታሪክ',
+        'ID Card Security Center':'የመታወቂያ ካርድ ደህንነት ማዕከል','Replacement Center':'መተኪያ ማዕከል','Active':'ንቁ','Printed':'ታትሟል','Student ID is permanent. MHSS number identifies the physical card.':'የተማሪ መታወቂያ ቋሚ ነው። የMHSS ቁጥር አካላዊ ካርዱን ይለያል።','Barcode = permanent Student ID (Attendance and other scan workflows). Physical card verification uses the MHSS card number.':'ባርኮድ = ቋሚ የተማሪ መታወቂያ (ለመገኘት እና ለሌሎች የስካን ሥራዎች)። አካላዊ ካርድን ማረጋገጥ የMHSS ካርድ ቁጥርን ይጠቀማል።','Verify Barcode':'ባርኮድ አረጋግጥ','Card History':'የካርድ ታሪክ','Card Profile':'የካርድ መገለጫ','New Replacement Request':'አዲስ የመተኪያ ጥያቄ','Card Replacement Center':'የካርድ መተኪያ ማዕከል','Audit / Print History':'የኦዲት / ህትመት ታሪክ',
         'Print Settings':'የህትመት ቅንብሮች','Manual Two-Sided Printing':'በእጅ ባለሁለት ገጽ ማተሚያ','Re-feed / flip method':'የመመለሻ / መገልበጫ ዘዴ','Print mode':'የህትመት ሁኔታ','Front + Back':'ፊት + ጀርባ','Front Only':'ፊት ብቻ','Back Only':'ጀርባ ብቻ',
         'Print FRONT pages.':'የፊት ገጾችን ያትሙ።','Show Cutting Guides':'የመቁረጫ መስመር አሳይ','Remember print settings':'የህትመት ቅንብሮችን አስታውስ','Individual Preview':'የግል ቅድመ እይታ','Previous':'ቀዳሚ','Next':'ቀጣይ',
         'Verify':'አረጋግጥ','Waiting for a printed card scan…':'የታተመ ካርድ ስካን እየጠበቀ ነው…','Scan Student ID Barcode':'የተማሪ መታወቂያ ባርኮድ ስካን ያድርጉ','Admin replacement request management':'የአስተዳዳሪ መተኪያ ጥያቄ አስተዳደር',
@@ -650,7 +650,13 @@
         nodes.forEach(node => {
             const parent=node.parentElement; if(!parent || ['SCRIPT','STYLE'].includes(parent.tagName) || parent.closest('.idcard')) return;
             const raw=node.nodeValue; const trimmed=raw.trim();
-            const replacement = currentLang === 'am' ? KNOWN_UI_AM[trimmed] : (reverse && reverse[trimmed]);
+            const lookup = t => currentLang === 'am' ? KNOWN_UI_AM[t] : (reverse && reverse[t]);
+            let replacement = lookup(trimmed);
+            if(!replacement){
+                // Labels that start with an emoji/symbol, e.g. "🔎 Verify Barcode".
+                const pm = trimmed.match(/^([^\p{L}\p{N}]+)\s*(.+)$/u);
+                if(pm){ const r2 = lookup(pm[2].trim()); if(r2) replacement = pm[1] + ' ' + r2; }
+            }
             if(replacement) node.nodeValue=raw.replace(trimmed,replacement);
         });
     }
@@ -792,6 +798,7 @@
         previewPageIndex = 0;
         renderStudentList();
         renderPreview();
+        updateCardSecurityStats();
     }
 
     function clearStudentSelection() {
@@ -1111,7 +1118,7 @@
     function getStudentCardRecord(s){return ensureCardRecord(s);}
     function getStudentStatus(s){const rec=ensureCardRecord(s);return rec.status||studentStatusMap[s.id]||'Not Printed';}
     function setStudentStatus(id,value){const s=studentsData.find(x=>x.id===id);if(!s)return;const r=getCardRegistry(),rec=ensureCardRecord(s),old=rec.status;rec.status=value;rec.history=Array.isArray(rec.history)?rec.history:[];rec.history.push({action:'STATUS_CHANGED',from:old,to:value,at:nowIso(),cardNumber:rec.cardNumber});r[id]=rec;saveCardRegistry(r);studentStatusMap[id]=value;localStorage.setItem('mh_id_card_statuses',JSON.stringify(studentStatusMap));addCardAudit('STATUS_CHANGED',s,rec.cardNumber,old+' → '+value);syncStatusToSupabase(s,rec,old,value);renderStudentList();updateCardSecurityStats();}
-    function updateCardSecurityStats(){const rs=Object.values(getCardRegistry()),a=document.getElementById('cardActiveCount'),l=document.getElementById('cardLostCount'),p=document.getElementById('cardPrintedCount');if(a)a.textContent=rs.filter(r=>r.status==='Active').length;if(l)l.textContent=rs.filter(r=>r.status==='Lost'||r.status==='Replacement Required').length;if(p)p.textContent=rs.filter(r=>r.status==='Printed').length;}
+    function updateCardSecurityStats(){try{if(Array.isArray(studentsData))studentsData.forEach(s=>{if(s&&s.idCardNumber)ensureCardRecord(s);});}catch(e){}const rs=Object.values(getCardRegistry()),a=document.getElementById('cardActiveCount'),l=document.getElementById('cardLostCount'),p=document.getElementById('cardPrintedCount');if(a)a.textContent=rs.filter(r=>r.status==='Active').length;if(l)l.textContent=rs.filter(r=>r.status==='Lost'||r.status==='Replacement Required').length;if(p)p.textContent=rs.filter(r=>r.status==='Printed').length;}
     async function replaceSelectedCard(){const s=getSelectedStudentsOrdered()[0];if(!s){alert('Select one student first.');return;}const r=getCardRegistry(),old=ensureCardRecord(s),oldNo=old.cardNumber;if(!confirm(`Replace physical card ${oldNo} for ${s.name}? The old card will become REPLACED and a new MHSS number will be issued.`))return;const at=nowIso();old.status='Replaced';old.replacedAt=at;old.history.push({action:'REPLACED',at,cardNumber:oldNo});const newNo=await uniqueCardNumberDB(r);const rec={cardNumber:newNo,studentId:s.id,status:'Active',issuedAt:at,version:(Number(old.version)||1)+1,previousCardNumber:oldNo,history:[{action:'REISSUED',at,cardNumber:newNo,previousCardNumber:oldNo}]};r[s.id]=rec;saveCardRegistry(r);addCardAudit('CARD_REPLACED',s,newNo,'Previous card: '+oldNo);syncReplacementToSupabase(s,old,rec);cardPrintMode='replacement';localStorage.setItem('mh_id_card_print_mode','replacement');renderStudentList();renderPreview();updateCardSecurityStats();alert(`New card issued: ${newNo}\nOld card: ${oldNo} — REPLACED`);}
     function verifyCardByBarcode(){
         stopCardScanner();
@@ -1232,7 +1239,7 @@
             return;
         }
         const cr=await client.from('mhss_student_id_cards').select('card_number,status,version,previous_card_number,issued_at').eq('student_id',st.id).eq('is_current',true).maybeSingle();
-        const card=cr.data||null,active=!st.status||st.status==='Active';
+        const card=cr.data||(st.id_card_number?{card_number:st.id_card_number,status:'Active',version:1}:null),active=!st.status||st.status==='Active';
         const cell=(l,v)=>`<div><div class="text-[9px]" style="color:var(--text-muted)">${l}</div><div class="font-bold text-xs break-all">${escapeHtml(v||'—')}</div></div>`;
         const canSee=!!window.__mhCanSeeEmergency;
         result.textContent=active?'🪪 STUDENT IDENTIFIED':`⚠️ STUDENT ${String(st.status).toUpperCase()}`;
