@@ -523,6 +523,14 @@
   import { supabase } from './supabaseClient.js';
   import { initializeRBAC, hasModuleAccess, isSuperAdmin } from './mhss-rbac.js';
 
+  // Make the SAME Supabase client immediately available to the verification
+  // center. Previously the page imported the client here, but the verifier
+  // waited for a second dynamic import at the bottom of the page. That race
+  // could make verification fall back to localStorage and show
+  // "STUDENT RECORD MISSING" even though the card itself was valid.
+  window.supabase = supabase;
+  window.dispatchEvent(new CustomEvent('supabase-ready'));
+
   (async () => {
     try {
       const rbac = await initializeRBAC({ supabase });
@@ -1222,6 +1230,9 @@
         if(c.error)throw c.error;
         let card=c.data||null,student=null,current=null;
         if(card){
+            // The card registry stores the permanent Student ID in student_id.
+            // Resolve the student using that ID first, then use the physical
+            // card number as a compatibility fallback for older records.
             let s=await client.from('students').select(cols).eq('id',card.student_id).maybeSingle();
             if(s.error || !s.data){
                 const byCard=await client.from('students').select(cols).eq('id_card_number',normalizedNo).maybeSingle();
