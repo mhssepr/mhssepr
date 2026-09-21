@@ -371,7 +371,7 @@
             <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3 card-security-panel">
                 <div class="flex items-center justify-between gap-2"><div><h3 class="text-sm font-bold">🛡️ ID Card Security Center</h3><p class="text-[10px] mt-1" style="color:var(--text-muted)">Student ID is permanent. MHSS number identifies the physical card.</p></div><span class="text-[9px] font-bold px-2 py-1 rounded-full" style="background:rgba(200,158,58,.12);color:var(--gold)">MHSS V2</span></div>
                 <div class="grid grid-cols-3 gap-2 text-center"><div class="rounded-lg p-2" style="background:rgba(200,158,58,.07)"><div id="cardActiveCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Active</div></div><div class="rounded-lg p-2" style="background:rgba(239,68,68,.07)"><div id="cardLostCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Lost</div></div><div class="rounded-lg p-2" style="background:rgba(59,130,246,.07)"><div id="cardPrintedCount" class="text-lg font-black">0</div><div class="text-[9px]" style="color:var(--text-muted)">Printed</div></div></div>
-                <div class="card-security-actions"><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="verifyCardByBarcode()">🔎 Verify Barcode</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openCardHistory()">📜 Card History</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openSelectedCardProfile()">👤 Card Profile</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openReplacementCenter().then(renderReplacementRequestForm)">♻️ New Replacement Request</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openReplacementCenter()">🪪 Replacement Center</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="exportCardAudit()">🧾 Audit / Print History</button></div>
+                <div class="card-security-actions"><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="verifyCardByBarcode({camera:true})">🔎 Verify Barcode</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openCardHistory()">📜 Card History</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openSelectedCardProfile()">👤 Card Profile</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openReplacementCenter().then(renderReplacementRequestForm)">♻️ New Replacement Request</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="openReplacementCenter()">🪪 Replacement Center</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-[11px] font-bold" onclick="exportCardAudit()">🧾 Audit / Print History</button></div>
                 <p class="text-[9px] leading-relaxed" style="color:var(--text-muted)">Barcode = permanent Student ID (Attendance and other scan workflows). Physical card verification uses the MHSS card number.</p>
             </div>
 
@@ -512,7 +512,7 @@
 <!-- ID Card History / Verification -->
 <div id="replacementCenterModal" class="modal-backdrop" onclick="if(event.target===this) closeReplacementCenter()"><div class="modal-card card-history-modal"><div class="p-4 md:p-5 flex items-center justify-between gap-3 border-b" style="border-color:var(--border)"><div><div class="font-bold" data-i18n="replacementCenterTitle">🪪 Card Replacement Center</div><div id="replacementCenterSubtitle" class="text-xs mt-1" style="color:var(--text-muted)">Admin replacement request management</div></div><button type="button" onclick="closeReplacementCenter()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button></div><div class="p-4"><div id="replacementCenterBody"></div></div></div></div>
 
-<div id="cardHistoryModal" class="modal-backdrop" onclick="if(event.target===this) closeCardHistory()"><div class="modal-card card-history-modal"><div class="p-4 md:p-5 flex items-center justify-between gap-3 border-b" style="border-color:var(--border)"><div><div id="cardHistoryTitle" class="font-bold">🛡️ ID Card Security Center</div><div id="cardVerifyResult" class="text-xs mt-1" style="color:var(--text-muted)"></div></div><button type="button" onclick="closeCardHistory()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button></div><div class="p-4"><div id="cardVerifyBox" class="hidden mb-4"><div class="text-xs font-bold mb-2">Scan the student barcode, or type the physical card number / Student ID</div><div class="flex gap-2"><input id="verifyCardInput" class="lux-input flex-1 px-3 py-2 rounded-xl text-sm" placeholder="MHSS-XXXXXX or MHSS/EST/001" autocomplete="off"><button type="button" onclick="runCardVerification()" class="gold-btn px-4 py-2 rounded-xl text-sm font-bold">Verify</button></div><div class="mt-2"><button id="cardScanBtn" type="button" onclick="toggleCardScanner()" class="feature-btn px-3 py-2 rounded-xl text-xs font-bold">📷 Scan with camera</button></div><div id="cardScanWrap" class="hidden mt-3"><div style="position:relative;border-radius:12px;overflow:hidden;background:#000"><video id="cardScanVideo" playsinline muted style="width:100%;max-height:260px;object-fit:cover;display:block"></video><div style="position:absolute;inset:16%;border:2px solid rgba(255,215,0,.85);border-radius:12px;pointer-events:none"></div></div><div id="cardScanMsg" class="text-[10px] mt-1" style="color:var(--text-muted)"></div></div></div><div id="cardHistoryBody"></div></div></div></div>
+<div id="cardHistoryModal" class="modal-backdrop" onclick="if(event.target===this) closeCardHistory()"><div class="modal-card card-history-modal"><div class="p-4 md:p-5 flex items-center justify-between gap-3 border-b" style="border-color:var(--border)"><div><div id="cardHistoryTitle" class="font-bold">🛡️ ID Card Security Center</div><div id="cardVerifyResult" class="text-xs mt-1" style="color:var(--text-muted)"></div></div><button type="button" onclick="closeCardHistory()" class="feature-btn px-3 py-2 rounded-lg font-bold">✕</button></div><div class="p-4"><div id="cardVerifyBox" class="hidden mb-4"><div id="cardScanWrap" class="hidden mb-3"><div style="position:relative;border-radius:14px;overflow:hidden;background:#000"><video id="cardScanVideo" playsinline muted style="width:100%;height:min(40vh,260px);object-fit:cover;display:block"></video><div style="position:absolute;inset:14%;border:2px solid rgba(255,215,0,.9);border-radius:14px;pointer-events:none"></div><div id="cardScanFlash" style="position:absolute;inset:0;background:rgba(34,197,94,.55);opacity:0;transition:opacity .35s;pointer-events:none"></div></div><div id="cardScanMsg" class="text-[10px] mt-1" style="color:var(--text-muted)"></div></div><div class="flex items-center justify-between gap-2 mb-2"><div class="text-xs font-bold">Or type the physical card number / Student ID</div><button id="cardScanBtn" type="button" onclick="toggleCardScanner()" class="feature-btn px-3 py-1.5 rounded-xl text-[11px] font-bold">📷 Start camera</button></div><div class="flex gap-2"><input id="verifyCardInput" class="lux-input flex-1 px-3 py-2 rounded-xl text-sm" placeholder="MHSS-XXXXXX or MHSS/EST/001" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();runCardVerification();}"><button type="button" onclick="runCardVerification()" class="gold-btn px-4 py-2 rounded-xl text-sm font-bold">Verify</button></div></div><div id="cardHistoryBody"></div></div></div></div>
 
 <!-- Hidden area used for the real, full-size print output -->
 <div id="realPrintArea"></div>
@@ -1079,6 +1079,25 @@
         } catch (e) { }
     }
 
+    // ---- QR security tokens (mhss_student_id_cards.security_token) ----
+    let cardTokenMap={};
+    async function loadCardTokens(){
+        try{
+            const client=await waitForSupabase(),map={},step=1000;let from=0;
+            for(;;){
+                const q=await client.from('mhss_student_id_cards').select('card_number,security_token').eq('is_current',true).not('security_token','is',null).order('card_number').range(from,from+step-1);
+                if(q.error)throw q.error;
+                (q.data||[]).forEach(r=>{map[String(r.card_number).toUpperCase()]=String(r.security_token).toUpperCase();});
+                if(!q.data||q.data.length<step)break;from+=step;
+            }
+            const changed=JSON.stringify(map)!==JSON.stringify(cardTokenMap);
+            cardTokenMap=map;return changed;
+        }catch(e){console.warn('QR security tokens could not be loaded:',e);return false;}
+    }
+    function refreshCardTokens(){
+        return loadCardTokens().then(ch=>{if(ch){try{renderPreview();}catch(e){}}return ch;});
+    }
+
     function renderIdCardQR(s, uid) {
         const qrId = `idCardQrSvg${uid ? '-' + uid : ''}`;
         const el = document.getElementById(qrId);
@@ -1088,7 +1107,8 @@
         if (!cardNumber) return;
         try {
             const qr = qrcode(0, 'M');
-            qr.addData(`MHSS:CARD:${cardNumber}`);
+            const tok = cardTokenMap[cardNumber] || '';
+            qr.addData(tok ? `MHSS:CARD:${cardNumber}:${tok}` : `MHSS:CARD:${cardNumber}`);
             qr.make();
             el.outerHTML = qr.createSvgTag({ scalable: true, margin: 0 });
             const created = document.getElementById(qrId);
@@ -1122,6 +1142,7 @@
 
     // Card stats come from the DATABASE (same on every device). localStorage is only a fallback if offline.
     async function updateCardSecurityStats(){
+        refreshCardTokens();
         try{
             const client=await waitForSupabase();
             const cnt=async(sts)=>{const q=await client.from('mhss_student_id_cards').select('id',{count:'exact',head:true}).eq('is_current',true).in('status',sts);if(q.error)throw q.error;return q.count||0;};
@@ -1131,7 +1152,7 @@
         }catch(e){console.warn('Card stats: database unavailable, using local data',e);updateCardSecurityStatsLocal();}
     }
     async function replaceSelectedCard(){const s=getSelectedStudentsOrdered()[0];if(!s){alert('Select one student first.');return;}const r=getCardRegistry(),old=ensureCardRecord(s),oldNo=old.cardNumber;if(!confirm(`Replace physical card ${oldNo} for ${s.name}? The old card will become REPLACED and a new MHSS number will be issued.`))return;const at=nowIso();old.status='Replaced';old.replacedAt=at;old.history.push({action:'REPLACED',at,cardNumber:oldNo});const newNo=await uniqueCardNumberDB(r);const rec={cardNumber:newNo,studentId:s.id,status:'Active',issuedAt:at,version:(Number(old.version)||1)+1,previousCardNumber:oldNo,history:[{action:'REISSUED',at,cardNumber:newNo,previousCardNumber:oldNo}]};r[s.id]=rec;saveCardRegistry(r);addCardAudit('CARD_REPLACED',s,newNo,'Previous card: '+oldNo);syncReplacementToSupabase(s,old,rec);cardPrintMode='replacement';localStorage.setItem('mh_id_card_print_mode','replacement');renderStudentList();renderPreview();updateCardSecurityStats();alert(`New card issued: ${newNo}\nOld card: ${oldNo} — REPLACED`);}
-    function verifyCardByBarcode(){
+    function verifyCardByBarcode(opts){
         stopCardScanner();
         const modal=document.getElementById('cardHistoryModal');
         const box=document.getElementById('cardVerifyBox');
@@ -1139,12 +1160,15 @@
         const result=document.getElementById('cardVerifyResult');
         const body=document.getElementById('cardHistoryBody');
         const input=document.getElementById('verifyCardInput');
-        if(title) title.textContent='🔎 ID Card Verification';
-        if(result) result.textContent='Scan the student barcode or enter the physical card number / Student ID manually.';
+        const useCam=!!(opts&&opts.camera);
+        if(title) title.textContent='🪪 ID Card Verification';
+        if(result) result.textContent=useCam?'Point the camera at the card QR code, or type the number below.':'Scan the student barcode or enter the physical card number / Student ID manually.';
         if(body) body.innerHTML='';
+        if(input) input.value='';
         if(box) box.classList.remove('hidden');
         if(modal) modal.classList.add('open');
-        setTimeout(()=>{ if(input){ input.value=''; input.focus(); } },80);
+        if(useCam){ setTimeout(startCardScanner,30); }
+        else setTimeout(()=>{ if(input) input.focus(); },80);
     }
     // ==========================================
     // CARD VERIFICATION — Supabase (mhss_student_id_cards) is the source of truth,
@@ -1160,21 +1184,26 @@
     async function logCardAuditDB(client,action,student,cardNumber,stage,details){try{const uid=await currentUserId(client);const {error}=await client.from('mhss_student_id_card_audit').insert([{action,student_id:(student&&(student.id||student.student_id))||null,student_name:(student&&student.name)||null,card_number:cardNumber||null,stage:stage||null,details:details||null,created_by:uid}]);if(error)console.warn('Card audit save failed:',error);return error||null;}catch(e){console.warn('Card audit save failed:',e);return e;}}
     async function lookupCardInSupabase(client,no){
         const cols='id,name,class_name,grade,photo,status,id_card_number';
-        const c=await client.from('mhss_student_id_cards').select('*').eq('card_number',no).maybeSingle();
+        // Card row and student row are fetched at the same time (one round trip instead of two).
+        const [c,fast]=await Promise.all([
+            client.from('mhss_student_id_cards').select('*').eq('card_number',no).maybeSingle(),
+            client.from('students').select(cols).eq('id_card_number',no).maybeSingle()
+        ]);
         if(c.error)throw c.error;
         let card=c.data||null,student=null,current=null;
         if(card){
-            const s=await client.from('students').select(cols).eq('id',card.student_id).maybeSingle();
-            student=s.data||null;
-            if(card.is_current===false||card.status==='Replaced'){
-                const cur=await client.from('mhss_student_id_cards').select('card_number,status,version,issued_at').eq('student_id',card.student_id).eq('is_current',true).maybeSingle();
-                current=cur.data||null;
-            }
+            if(fast&&!fast.error&&fast.data&&fast.data.id===card.student_id)student=fast.data;
+            const needCurrent=card.is_current===false||card.status==='Replaced';
+            const [s,cur]=await Promise.all([
+                student?Promise.resolve(null):client.from('students').select(cols).eq('id',card.student_id).maybeSingle(),
+                needCurrent?client.from('mhss_student_id_cards').select('card_number,status,version,issued_at').eq('student_id',card.student_id).eq('is_current',true).maybeSingle():Promise.resolve(null)
+            ]);
+            if(s)student=s.data||null;
+            if(cur)current=cur.data||null;
         }else{
             // Number exists on the student record but the card row is missing.
-            const s=await client.from('students').select(cols).eq('id_card_number',no).maybeSingle();
-            if(s.error)throw s.error;
-            student=s.data||null;
+            if(fast.error)throw fast.error;
+            student=fast.data||null;
         }
         return {card,student,current};
     }
@@ -1218,8 +1247,8 @@
     // Reads what a scanner/camera/keyboard produced: a QR URL, a card number, or a Student ID (barcode).
     function parseScannedValue(raw){
         const v=String(raw||'').trim();
-        const qrCard=v.match(/^MHSS:CARD:(.+)$/i);
-        if(qrCard)return {kind:'card',value:qrCard[1].trim().toUpperCase()};
+        const qrCard=v.match(/^MHSS:CARD:([^:\s]+)(?::([A-Za-z0-9]+))?$/i);
+        if(qrCard)return {kind:'card',value:qrCard[1].trim().toUpperCase(),token:qrCard[2]?qrCard[2].toUpperCase():''};
         const qrStudent=v.match(/^MHSS:STUDENT:(.+)$/i);
         if(qrStudent)return {kind:'student',value:qrStudent[1].trim()};
         try{
@@ -1262,78 +1291,122 @@
         addCardAudit('STUDENT_SCANNED',{id:st.id,name:st.name},card&&card.card_number,'Barcode scan');
         logCardAuditDB(client,'STUDENT_SCANNED',{id:st.id,name:st.name},card&&card.card_number,'barcode','Barcode scan');
     }
-    async function runCardVerification(){
+    // QR security code check. Set QR_STRICT_TOKEN=true to show a warning for old QR codes that have no code.
+    const QR_STRICT_TOKEN=false;
+    function applyQrTokenCheck(j,res,parsed,source,fromScan,raw){
+        if(source!=='database'||!res.card||parsed.kind!=='card')return j;
+        const dbTok=String(res.card.security_token||'').toUpperCase();
+        if(!dbTok)return j;
+        if(parsed.token){
+            if(parsed.token!==dbTok)return {level:'bad',title:'\u274C FAKE / TAMPERED QR \u2014 DO NOT ACCEPT',msg:'The security code inside this QR does not match this card in the database. This QR was not printed by the school system.'};
+            return Object.assign({},j,{msg:j.msg+' \uD83D\uDD12 QR security code verified.'});
+        }
+        if(fromScan&&/^MHSS:CARD:/i.test(raw)){
+            if(QR_STRICT_TOKEN&&j.level==='ok')return {level:'warn',title:'\u26A0\uFE0F OLD QR \u2014 NO SECURITY CODE',msg:'The card number is valid, but this QR has no security code. Reprint this card to upgrade it.'};
+            return Object.assign({},j,{msg:j.msg+' \u26A0 Old QR without a security code \u2014 it upgrades when this card is printed again.'});
+        }
+        return j;
+    }
+    async function runCardVerification(rawOverride){
         if(cardVerifyBusy)return;
+        const fromScan=typeof rawOverride==='string';
         const input=document.getElementById('verifyCardInput'),result=document.getElementById('cardVerifyResult'),body=document.getElementById('cardHistoryBody');
-        const raw=String(input.value||'').trim();
+        const raw=String(fromScan?rawOverride:(input.value||'')).trim();
         if(!raw){result.textContent='Enter or scan a card number.';body.innerHTML='';input.focus();return;}
         const parsed=parseScannedValue(raw);
+        if(fromScan&&input)input.value=parsed.value;   // show only the card number / Student ID, never the QR security code
         cardVerifyBusy=true;
         try{
-            if(parsed.kind==='student'){await runStudentScan(parsed.value);input.select();return;}
+            if(parsed.kind==='student'){await runStudentScan(parsed.value);if(!fromScan)input.select();return;}
             const no=parsed.value;
             if(!CARD_NO_RE.test(no)){
-                result.textContent='❌ INVALID FORMAT';
-                body.innerHTML=renderVerification(no,{card:null,student:null},{level:'invalid',title:'❌ INVALID FORMAT',msg:'A card number looks like MHSS-XXXXXX. A Student ID looks like MHSS/EST/001.'},'database').replace('Checked against the live database · ','');
-                input.select();return;
+                result.textContent='\u274C INVALID FORMAT';
+                body.innerHTML=renderVerification(no,{card:null,student:null},{level:'invalid',title:'\u274C INVALID FORMAT',msg:'A card number looks like MHSS-XXXXXX. A Student ID looks like MHSS/EST/001.'},'database').replace('Checked against the live database \u00B7 ','');
+                if(!fromScan)input.select();return;
             }
-            result.textContent='Checking…';
+            result.textContent='Checking\u2026';
             let res,source='database',client=null;
             try{client=await waitForSupabase();res=await lookupCardInSupabase(client,no);}
             catch(e){console.warn('Database verification failed, using local records:',e);source='local';res=lookupCardLocal(no);}
-            const j=judgeCard(res);
+            let j=judgeCard(res);
+            j=applyQrTokenCheck(j,res,parsed,source,fromScan,raw);
             result.textContent=j.title;
             body.innerHTML=renderVerification(no,res,j,source);
             const stu=res.student||{id:res.card&&res.card.student_id,name:null};
-            const action=(res.card||res.student)?'CARD_VERIFIED':'CARD_VERIFY_FAILED',details=`${j.title}${source==='local'?' (local records)':''}`;
+            const action=(res.card||res.student)?'CARD_VERIFIED':'CARD_VERIFY_FAILED',details=`${j.title}${source==='local'?' (local records)':''}${fromScan?' [camera]':''}`;
             addCardAudit(action,stu&&stu.id?{id:stu.id,name:stu.name}:null,no,details);
             if(client&&source==='database')logCardAuditDB(client,action,stu,no,'verification',details);
-            input.select();
+            if(!fromScan)input.select();
         }finally{cardVerifyBusy=false;}
     }
-    // ---- Camera scanner: Student barcode / physical card number where browser BarcodeDetector supports it. ----
-    let cardScanStream=null,cardScanTimer=null,cardScanDetector=null,cardScanCanvas=null;
+    // ---- Camera scanner (fast): frame-by-frame, keeps running so many cards can be scanned one after another. ----
+    let cardScanStream=null,cardScanRun=0,cardScanCanvas=null,cardScanBusy=false,cardScanLast={v:'',t:0};
     function loadJsQR(){return new Promise((ok,fail)=>{if(window.jsQR)return ok();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';s.onload=()=>ok();s.onerror=()=>fail(new Error('Could not load the camera barcode reader'));document.head.appendChild(s);});}
     function stopCardScanner(){
-        if(cardScanTimer){clearInterval(cardScanTimer);cardScanTimer=null;}
+        cardScanRun++;cardScanBusy=false;cardScanLast={v:'',t:0};
         if(cardScanStream){cardScanStream.getTracks().forEach(t=>t.stop());cardScanStream=null;}
         const v=document.getElementById('cardScanVideo'),w=document.getElementById('cardScanWrap'),b=document.getElementById('cardScanBtn');
-        if(v)v.srcObject=null;if(w)w.classList.add('hidden');if(b)b.textContent='📷 Scan with camera';
+        if(v)v.srcObject=null;if(w)w.classList.add('hidden');if(b)b.textContent='\uD83D\uDCF7 Start camera';
     }
-    function handleScannedValue(value){stopCardScanner();const i=document.getElementById('verifyCardInput');i.value=value;runCardVerification();}
-    async function toggleCardScanner(){
-        if(cardScanStream){stopCardScanner();return;}
+    function onCardScanned(value){
+        const now=Date.now();
+        if(cardScanLast.v===value&&now-cardScanLast.t<2500){cardScanLast.t=now;return;}   // same card still in front of the camera
+        if(cardVerifyBusy)return;
+        cardScanLast={v:value,t:now};
+        try{if(navigator.vibrate)navigator.vibrate(40);}catch(e){}
+        const f=document.getElementById('cardScanFlash');if(f){f.style.opacity='1';setTimeout(()=>{f.style.opacity='0';},160);}
+        runCardVerification(value);
+    }
+    function handleScannedValue(value){onCardScanned(value);}
+    async function startCardScanner(){
+        if(cardScanStream)return;
+        const run=++cardScanRun;
         const wrap=document.getElementById('cardScanWrap'),video=document.getElementById('cardScanVideo'),msg=document.getElementById('cardScanMsg'),btn=document.getElementById('cardScanBtn');
-        msg.textContent='Starting camera…';wrap.classList.remove('hidden');
+        if(!wrap||!video)return;
+        msg.textContent='Starting camera\u2026';wrap.classList.remove('hidden');
         if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg.textContent='Camera is not available here (it needs https). Type the number instead.';return;}
+        // Native detector (fastest) where the browser has it; otherwise jsQR, which is downloaded while the camera starts.
+        let detector=null;
+        if('BarcodeDetector' in window){try{detector=new BarcodeDetector({formats:['qr_code','code_128']});}catch(e){detector=null;}}
+        const jsqrReady=detector?Promise.resolve():loadJsQR().catch(()=>null);
         try{
-            cardScanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
-            video.srcObject=cardScanStream;await video.play();
-            cardScanDetector=null;
-            if('BarcodeDetector' in window){try{cardScanDetector=new BarcodeDetector({formats:['qr_code','code_128']});}catch(e){cardScanDetector=null;}}
-            if(!cardScanDetector)await loadJsQR();
-            btn.textContent='⏹ Stop camera';
-            msg.textContent=cardScanDetector?'Point the camera at the QR code or the barcode.':'Point the camera at the QR code. (Barcode scanning needs Chrome — otherwise type the Student ID.)';
-            let busy=false;
-            cardScanTimer=setInterval(async()=>{
-                if(busy||!cardScanStream||video.readyState<2)return;busy=true;
-                try{
-                    let value=null;
-                    if(cardScanDetector){const codes=await cardScanDetector.detect(video);if(codes&&codes.length)value=codes[0].rawValue;}
-                    else{
-                        const w=Math.min(640,video.videoWidth),h=Math.round(w*video.videoHeight/video.videoWidth);
-                        cardScanCanvas=cardScanCanvas||document.createElement('canvas');cardScanCanvas.width=w;cardScanCanvas.height=h;
-                        const ctx=cardScanCanvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(video,0,0,w,h);
-                        const c=window.jsQR(ctx.getImageData(0,0,w,h).data,w,h);if(c&&c.data)value=c.data;
-                    }
-                    if(value)handleScannedValue(value);
-                }catch(e){}finally{busy=false;}
-            },250);
+            const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
+            if(run!==cardScanRun){stream.getTracks().forEach(t=>t.stop());return;}   // popup was closed while the camera was starting
+            cardScanStream=stream;video.srcObject=stream;
+            try{const tr=stream.getVideoTracks()[0],caps=tr.getCapabilities?tr.getCapabilities():null;if(caps&&caps.focusMode&&caps.focusMode.indexOf('continuous')>-1)await tr.applyConstraints({advanced:[{focusMode:'continuous'}]});}catch(e){}
+            await video.play();
+            await jsqrReady;
+            if(run!==cardScanRun)return;
+            if(!detector&&!window.jsQR){msg.textContent='Could not load the QR reader. Type the number instead.';return;}
+            btn.textContent='\u23F9 Stop camera';
+            msg.textContent=detector?'Point the camera at the QR code or the barcode.':'Point the camera at the QR code. (Barcode scanning needs Chrome \u2014 otherwise type the Student ID.)';
+            const tick=async()=>{
+                if(run!==cardScanRun||!cardScanStream)return;
+                if(!cardScanBusy&&video.readyState>=2&&video.videoWidth){
+                    cardScanBusy=true;
+                    try{
+                        let value=null;
+                        if(detector){const codes=await detector.detect(video);if(codes&&codes.length)value=codes[0].rawValue;}
+                        else{
+                            const w=Math.min(640,video.videoWidth),h=Math.round(w*video.videoHeight/video.videoWidth);
+                            cardScanCanvas=cardScanCanvas||document.createElement('canvas');
+                            if(cardScanCanvas.width!==w)cardScanCanvas.width=w;if(cardScanCanvas.height!==h)cardScanCanvas.height=h;
+                            const ctx=cardScanCanvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(video,0,0,w,h);
+                            const c=window.jsQR(ctx.getImageData(0,0,w,h).data,w,h,{inversionAttempts:'dontInvert'});if(c&&c.data)value=c.data;
+                        }
+                        if(value)onCardScanned(value);
+                    }catch(e){}finally{cardScanBusy=false;}
+                }
+                if(run!==cardScanRun)return;
+                if(video.requestVideoFrameCallback)video.requestVideoFrameCallback(tick);else requestAnimationFrame(tick);
+            };
+            tick();
         }catch(e){
             console.warn('Camera error:',e);stopCardScanner();
             wrap.classList.remove('hidden');msg.textContent=(e&&e.name==='NotAllowedError')?'Camera permission was denied. Allow it in the browser, or type the number.':'Could not start the camera. Type the number instead.';
         }
     }
+    function toggleCardScanner(){if(cardScanStream)stopCardScanner();else startCardScanner();}
     // ---- Keep the database in step with what happens on this page ----
     async function uniqueCardNumberDB(reg){
         try{const client=await waitForSupabase();
@@ -2138,6 +2211,7 @@
     async function printStage(stage) {
         const pages = getPrintPagesForStage(stage);
         if (!pages.length) return false;
+        await loadCardTokens();   // make sure every printed QR carries its current security code
         const guides = document.getElementById('cuttingGuidesToggle').checked;
         const area = document.getElementById('realPrintArea');
         area.innerHTML = pages.map((p, idx) => renderPageHTML(p, `real${stage}${idx}_`, guides)).join('');
