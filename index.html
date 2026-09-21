@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#05070c" />
@@ -1848,7 +1849,7 @@
                 }, 650);
 
                 setTimeout(() => {
-                    window.location.replace('dashboard.html');
+                    window.location.replace('/dashboard');
                 }, 1350);
 
             } catch (err) {
@@ -1875,7 +1876,7 @@
         function redirectToDashboard() {
             if (redirecting) return;
             redirecting = true;
-            window.location.replace('dashboard.html');
+            window.location.replace('/dashboard');
         }
 
         async function protectLoginPage() {

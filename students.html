@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meserete Hiwot ERP - Students</title>
@@ -1532,7 +1533,7 @@ html[data-theme="dark"] .view-lux-modal{
             </button>
 
             <!-- Back to Dashboard -->
-            <a href="dashboard.html" class="back-dash-btn" aria-label="Back to Dashboard">
+            <a href="/dashboard" class="back-dash-btn" aria-label="Back to Dashboard">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                 <span class="label" data-i18n="backToDashboard">Back to Dashboard</span>
             </a>
@@ -4758,7 +4759,7 @@ html[data-theme="dark"] .view-lux-modal{
         // class currently open on this Students page.
         function openIdCardPrintPage() {
             if (!currentClassStr) { alert('No class selected.'); return; }
-            window.location.href = 'print-id-cards.html?class=' + encodeURIComponent(currentClassStr);
+            window.location.href = '/print-id-cards?class=' + encodeURIComponent(currentClassStr);
         }
 
         async function downloadStudentPdf(s) {
