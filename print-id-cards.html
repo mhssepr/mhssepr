@@ -1118,7 +1118,18 @@
     function getStudentCardRecord(s){return ensureCardRecord(s);}
     function getStudentStatus(s){const rec=ensureCardRecord(s);return rec.status||studentStatusMap[s.id]||'Not Printed';}
     function setStudentStatus(id,value){const s=studentsData.find(x=>x.id===id);if(!s)return;const r=getCardRegistry(),rec=ensureCardRecord(s),old=rec.status;rec.status=value;rec.history=Array.isArray(rec.history)?rec.history:[];rec.history.push({action:'STATUS_CHANGED',from:old,to:value,at:nowIso(),cardNumber:rec.cardNumber});r[id]=rec;saveCardRegistry(r);studentStatusMap[id]=value;localStorage.setItem('mh_id_card_statuses',JSON.stringify(studentStatusMap));addCardAudit('STATUS_CHANGED',s,rec.cardNumber,old+' → '+value);syncStatusToSupabase(s,rec,old,value);renderStudentList();updateCardSecurityStats();}
-    function updateCardSecurityStats(){try{if(Array.isArray(studentsData))studentsData.forEach(s=>{if(s&&s.idCardNumber)ensureCardRecord(s);});}catch(e){}const rs=Object.values(getCardRegistry()),a=document.getElementById('cardActiveCount'),l=document.getElementById('cardLostCount'),p=document.getElementById('cardPrintedCount');if(a)a.textContent=rs.filter(r=>r.status==='Active').length;if(l)l.textContent=rs.filter(r=>r.status==='Lost'||r.status==='Replacement Required').length;if(p)p.textContent=rs.filter(r=>r.status==='Printed').length;}
+    function updateCardSecurityStatsLocal(){try{if(Array.isArray(studentsData))studentsData.forEach(s=>{if(s&&s.idCardNumber)ensureCardRecord(s);});}catch(e){}const rs=Object.values(getCardRegistry()),a=document.getElementById('cardActiveCount'),l=document.getElementById('cardLostCount'),p=document.getElementById('cardPrintedCount');if(a)a.textContent=rs.filter(r=>r.status==='Active').length;if(l)l.textContent=rs.filter(r=>r.status==='Lost'||r.status==='Replacement Required').length;if(p)p.textContent=rs.filter(r=>r.status==='Printed').length;}
+
+    // Card stats come from the DATABASE (same on every device). localStorage is only a fallback if offline.
+    async function updateCardSecurityStats(){
+        try{
+            const client=await waitForSupabase();
+            const cnt=async(sts)=>{const q=await client.from('mhss_student_id_cards').select('id',{count:'exact',head:true}).eq('is_current',true).in('status',sts);if(q.error)throw q.error;return q.count||0;};
+            const [a,l,p]=await Promise.all([cnt(['Active']),cnt(['Lost','Replacement Required']),cnt(['Printed'])]);
+            const ea=document.getElementById('cardActiveCount'),el=document.getElementById('cardLostCount'),ep=document.getElementById('cardPrintedCount');
+            if(ea)ea.textContent=a;if(el)el.textContent=l;if(ep)ep.textContent=p;
+        }catch(e){console.warn('Card stats: database unavailable, using local data',e);updateCardSecurityStatsLocal();}
+    }
     async function replaceSelectedCard(){const s=getSelectedStudentsOrdered()[0];if(!s){alert('Select one student first.');return;}const r=getCardRegistry(),old=ensureCardRecord(s),oldNo=old.cardNumber;if(!confirm(`Replace physical card ${oldNo} for ${s.name}? The old card will become REPLACED and a new MHSS number will be issued.`))return;const at=nowIso();old.status='Replaced';old.replacedAt=at;old.history.push({action:'REPLACED',at,cardNumber:oldNo});const newNo=await uniqueCardNumberDB(r);const rec={cardNumber:newNo,studentId:s.id,status:'Active',issuedAt:at,version:(Number(old.version)||1)+1,previousCardNumber:oldNo,history:[{action:'REISSUED',at,cardNumber:newNo,previousCardNumber:oldNo}]};r[s.id]=rec;saveCardRegistry(r);addCardAudit('CARD_REPLACED',s,newNo,'Previous card: '+oldNo);syncReplacementToSupabase(s,old,rec);cardPrintMode='replacement';localStorage.setItem('mh_id_card_print_mode','replacement');renderStudentList();renderPreview();updateCardSecurityStats();alert(`New card issued: ${newNo}\nOld card: ${oldNo} — REPLACED`);}
     function verifyCardByBarcode(){
         stopCardScanner();
