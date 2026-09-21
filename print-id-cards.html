@@ -1195,7 +1195,7 @@
             openReplacementCenter();
         }catch(e){console.error(e);alert('Could not report the card incident:\n'+replacementErrorText(e));}
     }
-    function verifyCardByBarcode(){
+    function verifyCardByBarcode(prefill){
         stopCardScanner();
         const modal=document.getElementById('cardHistoryModal');
         const box=document.getElementById('cardVerifyBox');
@@ -1208,7 +1208,7 @@
         if(body) body.innerHTML='';
         if(box) box.classList.remove('hidden');
         if(modal) modal.classList.add('open');
-        setTimeout(()=>{ if(input){ input.value=''; input.focus(); } },80);
+        setTimeout(()=>{ if(input){ input.value=(typeof prefill==='string')?prefill:''; input.focus(); } },80);
     }
     // ==========================================
     // CARD VERIFICATION — Supabase (mhss_student_id_cards) is the source of truth,
@@ -1223,50 +1223,63 @@
     async function currentUserId(client){try{const u=await client.auth.getUser();return (u&&u.data&&u.data.user&&u.data.user.id)||null;}catch(e){return null;}}
     async function logCardAuditDB(client,action,student,cardNumber,stage,details){try{const uid=await currentUserId(client);const {error}=await client.from('mhss_student_id_card_audit').insert([{action,student_id:(student&&(student.id||student.student_id))||null,student_name:(student&&student.name)||null,card_number:cardNumber||null,stage:stage||null,details:details||null,created_by:uid}]);if(error)console.warn('Card audit save failed:',error);return error||null;}catch(e){console.warn('Card audit save failed:',e);return e;}}
     async function lookupCardInSupabase(client,no,qrToken){
-        const cols='id,name,class_name,grade,photo,status,id_card_number';
         const normalizedNo=String(no||'').trim().toUpperCase();
-        const normalizedToken='';
+        const warnings=[];
+        // select('*') on purpose: naming individual columns made the WHOLE lookup fail
+        // (and show "STUDENT RECORD MISSING") if any one of them was missing or unreadable.
+        // The real database error is now kept and shown instead of being swallowed.
+        const getStudent=async(field,value)=>{
+            const raw=String(value||'').trim();
+            const vals=[...new Set([raw,raw.toUpperCase()])].filter(Boolean);
+            if(!vals.length)return null;
+            const r=await client.from('students').select('*').in(field,vals).limit(1);
+            if(r.error){console.warn('Student lookup failed ('+field+'):',r.error);warnings.push('Student lookup failed: '+(r.error.message||r.error));return null;}
+            return (r.data&&r.data[0])||null;
+        };
         const c=await client.from('mhss_student_id_cards').select('*').eq('card_number',normalizedNo).maybeSingle();
         if(c.error)throw c.error;
-        let card=c.data||null,student=null,current=null;
+        let card=c.data||null,student=null,current=null,mismatch=false;
         if(card){
             // The card registry stores the permanent Student ID in student_id.
-            // Resolve the student using that ID first, then use the physical
-            // card number as a compatibility fallback for older records.
-            let s=await client.from('students').select(cols).eq('id',card.student_id).maybeSingle();
-            if(s.error || !s.data){
-                const byCard=await client.from('students').select(cols).eq('id_card_number',normalizedNo).maybeSingle();
-                if(!byCard.error && byCard.data) s=byCard;
-            }
-            student=s.data||null;
+            // Fall back to students.id_card_number for older records.
+            student=(await getStudent('id',card.student_id))||(await getStudent('id_card_number',normalizedNo));
             if(card.is_current===false||card.status==='Replaced'){
-                const cur=await client.from('mhss_student_id_cards').select('card_number,status,version,issued_at').eq('student_id',card.student_id).eq('is_current',true).maybeSingle();
-                if(!cur.error) current=cur.data||null;
+                const cur=await client.from('mhss_student_id_cards').select('card_number,status,version,issued_at').eq('student_id',card.student_id).eq('is_current',true).limit(1);
+                if(cur.error)warnings.push('Could not look up the current card: '+(cur.error.message||cur.error));
+                else current=(cur.data&&cur.data[0])||null;
             }
         }else{
-            const s=await client.from('students').select(cols).eq('id_card_number',normalizedNo).maybeSingle();
-            if(s.error)throw s.error;
-            student=s.data||null;
+            student=await getStudent('id_card_number',normalizedNo);
             if(student){
-                const uid=await currentUserId(client),at=nowIso();
-                const token=null;
                 const existing=await client.from('mhss_student_id_cards').select('*').eq('student_id',student.id).eq('is_current',true).limit(1);
                 if(existing.error)throw existing.error;
-                if((existing.data||[]).length){ card=existing.data[0]; }
-                else{
+                const cur=(existing.data||[])[0]||null;
+                if(cur&&String(cur.card_number||'').toUpperCase()!==normalizedNo){
+                    // The scanned number is on the student file, but the card registry says a
+                    // DIFFERENT card is the student's current card. The scanned card is NOT the
+                    // registered card, so it must never be reported as valid.
+                    mismatch=true;current=cur;card=null;
+                }else{
+                    // Registry row is missing: restore it from students.id_card_number.
+                    const uid=await currentUserId(client),at=nowIso();
                     const history=[{action:'CARD_REGISTRY_REPAIRED',at,cardNumber:normalizedNo,source:'verification',details:'Restored from students.id_card_number'}];
-                    const ins=await client.from('mhss_student_id_cards').insert([{student_id:student.id,card_number:normalizedNo,status:'Active',version:1,issued_at:at,is_current:true,history,security_token:null,created_by:uid,updated_by:uid}]).select('*').maybeSingle();
-                    if(ins.error)throw ins.error;
-                    card=ins.data||null;
-                    try{addCardAudit('CARD_REGISTRY_REPAIRED',student,normalizedNo,'Physical card registry restored during verification');await logCardAuditDB(client,'CARD_REGISTRY_REPAIRED',student,normalizedNo,'verification','Physical card registry restored from students.id_card_number');}catch(e){console.warn('Repair audit warning:',e);}
-                }
-                if(card && normalizedToken && !card.security_token){
-                    const u=await client.from('mhss_student_id_cards').update({security_token:normalizedToken,updated_by:uid}).eq('id',card.id);
-                    if(!u.error)card.security_token=normalizedToken;
+                    let repaired=null;
+                    try{
+                        const ins=await client.from('mhss_student_id_cards').insert([{student_id:student.id,card_number:normalizedNo,status:'Active',version:1,issued_at:at,is_current:true,history,security_token:null,created_by:uid,updated_by:uid}]).select('*').maybeSingle();
+                        if(ins.error)throw ins.error;
+                        repaired=ins.data||null;
+                        try{addCardAudit('CARD_REGISTRY_REPAIRED',student,normalizedNo,'Physical card registry restored during verification');await logCardAuditDB(client,'CARD_REGISTRY_REPAIRED',student,normalizedNo,'verification','Physical card registry restored from students.id_card_number');}catch(e){console.warn('Repair audit warning:',e);}
+                    }catch(e){
+                        // Saving the repair is a bonus. A viewer without insert permission (RLS), or a
+                        // race with another scan, must NOT turn a valid card into "INVALID CARD".
+                        console.warn('Card registry repair was not saved:',e);
+                        warnings.push('Card registry row could not be restored ('+((e&&e.message)||e)+'). Result is based on the student file.');
+                    }
+                    card=repaired||{card_number:normalizedNo,student_id:student.id,status:'Active',version:1,is_current:true,issued_at:null,history:[]};
                 }
             }
         }
-        return {card,student,current};
+        return {card,student,current,mismatch,warnings};
     }
     function lookupCardLocal(no){
         const rs=getCardRegistry(),recs=Object.values(rs),normalized=String(no||'').toUpperCase();
@@ -1290,6 +1303,15 @@
             };
         }
 
+        // Scanned number exists on the student file but is not the registered current card.
+        if(res.mismatch&&!card){
+            return {
+                level:'bad',
+                title:'⛔ NOT THE CURRENT CARD — DO NOT ACCEPT',
+                msg:`This card number is not the registered card for this student.${current?` The registered current card is ${current.card_number}.`:''} Ask the student for the current card and report this to an administrator.`
+            };
+        }
+
         const status=card?card.status:'Active';
 
         if(card&&(card.is_current===false||status==='Replaced')){
@@ -1310,6 +1332,16 @@
             };
         }
 
+        // A brand-new replacement card is issued as 'Replacement Required' and only becomes
+        // Active after "Activate after Print". Say that, instead of telling staff to replace it again.
+        if(status==='Replacement Required'&&card&&card.is_current!==false&&(Number(card.version)>1||card.previous_card_number)){
+            return {
+                level:'warn',
+                title:'⏳ NEW REPLACEMENT CARD — NOT ACTIVATED YET',
+                msg:`This is the replacement for ${card.previous_card_number||'the previous card'}. It becomes valid when an administrator presses "Activate after Print" in the Card Replacement Center.`
+            };
+        }
+
         if(status==='Replacement Required'){
             return {
                 level:'warn',
@@ -1322,11 +1354,11 @@
             return {
                 level:'warn',
                 title:'⚠️ CARD FOUND — STUDENT RECORD MISSING',
-                msg:'The physical card is registered, but its linked student record could not be found.'
+                msg:'The physical card is registered, but its linked student record could not be found.'+((res.warnings&&res.warnings.length)?' Database said: '+res.warnings.join(' | '):'')
             };
         }
 
-        if(student.status&&student.status!=='Active'){
+        if(student.status&&String(student.status).trim().toLowerCase()!=='active'){
             return {
                 level:'warn',
                 title:`⚠️ CARD VALID — STUDENT ${String(student.status).toUpperCase()}`,
@@ -1349,12 +1381,13 @@
         let html=`<div class="rounded-xl p-4 border" style="border-color:${colors[j.level]}"><div class="font-black text-sm" style="color:${tc[j.level]}">${escapeHtml(j.title)}</div><div class="text-xs mt-1" style="color:var(--text-muted)">${escapeHtml(j.msg)}</div>`;
         if(card||student){
             html+=`<div class="flex gap-3 mt-4 items-center"><img src="${getPhotoUrl({photo:student&&student.photo,name:(student&&student.name)||'Student'})}" alt="" style="width:64px;height:64px;border-radius:12px;object-fit:cover;flex-shrink:0"><div><div class="text-sm font-bold">${escapeHtml((student&&student.name)||'Student record not found')}</div><div class="text-[10px] mt-1" style="color:var(--text-muted)">${escapeHtml([student&&student.class_name,student&&student.grade].filter(Boolean).join(' · '))}</div></div></div>`;
-            html+=`<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-3 border-t" style="border-color:var(--border)">${cell('CARD NUMBER',(card&&card.card_number)||no)}${cell('PERMANENT STUDENT ID',(card&&card.student_id)||(student&&student.id)||'—')}${cell('CARD STATUS',card?card.status:'Active')}${cell('CARD TYPE',cardTypeLabel(card))}${cell('VERSION','V'+((card&&card.version)||1))}${cell('ISSUED',fmtCardDate(card&&card.issued_at))}${card&&card.replaced_at?cell('REPLACED ON',fmtCardDate(card.replaced_at)):''}${card&&card.previous_card_number?cell('PREVIOUS CARD',card.previous_card_number):''}${student&&student.status?cell('STUDENT STATUS',student.status):''}</div>`;
+            html+=`<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-3 border-t" style="border-color:var(--border)">${cell('CARD NUMBER',(card&&card.card_number)||no)}${cell('PERMANENT STUDENT ID',(card&&card.student_id)||(student&&student.id)||'—')}${cell('CARD STATUS',card?card.status:(res.mismatch?'Not the registered card':'Active'))}${cell('CARD TYPE',card?cardTypeLabel(card):(res.mismatch?'—':cardTypeLabel(card)))}${cell('VERSION','V'+((card&&card.version)||1))}${cell('ISSUED',fmtCardDate(card&&card.issued_at))}${card&&card.replaced_at?cell('REPLACED ON',fmtCardDate(card.replaced_at)):''}${card&&card.previous_card_number?cell('PREVIOUS CARD',card.previous_card_number):''}${student&&student.status?cell('STUDENT STATUS',student.status):''}</div>`;
             const h=card&&Array.isArray(card.history)?card.history.slice(-5).reverse():[];
             if(h.length)html+=`<div class="mt-4 pt-3 border-t" style="border-color:var(--border)"><div class="text-[9px] mb-1" style="color:var(--text-muted)">RECENT CARD HISTORY</div>${h.map(x=>`<div class="text-[10px]">${escapeHtml(x.action||'')} · ${escapeHtml(fmtCardDate(x.at))}${x.cardNumber?' · '+escapeHtml(x.cardNumber):''}</div>`).join('')}</div>`;
         }else{
             html+=`<div class="text-xs mt-3" style="color:var(--text-muted)">Card number checked: <b>${escapeHtml(no||'—')}</b></div>`;
         }
+        if(res.warnings&&res.warnings.length)html+=`<div class="text-[10px] mt-3" style="color:#f59e0b">⚠️ ${res.warnings.map(escapeHtml).join('<br>')}</div>`;
         html+=`<div class="text-[9px] mt-3" style="color:var(--text-muted)">${source==='database'?'Checked against the live database · ':'⚠️ Database unavailable — checked this browser\'s local records only · '}${escapeHtml(new Date().toLocaleString())}</div></div>`;
         return html;
     }
@@ -1430,6 +1463,7 @@
             let res,source='database',client=null;
             try{client=await waitForSupabase();res=await lookupCardInSupabase(client,no,qrToken);}
             catch(e){console.warn('Database verification failed, using local records:',e);source='local';res=lookupCardLocal(no);
+                res.warnings=['Database error: '+((e&&e.message)||e)];
              }
             const j=judgeCard(res,qrToken);
             result.textContent=j.title;
@@ -1500,15 +1534,22 @@
                 if(busy||!cardScanStream||video.readyState<2)return;busy=true;
                 try{
                     let value=null;
-                    if(cardScanDetector){const codes=await cardScanDetector.detect(video);if(codes&&codes.length)value=codes[0].rawValue;}
-                    else{
+                    if(cardScanDetector){
+                        try{const codes=await cardScanDetector.detect(video);if(codes&&codes.length)value=codes[0].rawValue;}
+                        catch(de){
+                            // BarcodeDetector exists but cannot decode here (common on desktop Chrome): switch to jsQR instead of failing silently.
+                            console.warn('BarcodeDetector failed, switching to jsQR:',de);cardScanDetector=null;
+                            try{await loadJsQR();}catch(le){msg.textContent='The camera reader could not be loaded. Type the card number instead.';}
+                        }
+                    }
+                    if(!value&&!cardScanDetector&&window.jsQR&&video.videoWidth){
                         const w=Math.min(640,video.videoWidth),h=Math.round(w*video.videoHeight/video.videoWidth);
                         cardScanCanvas=cardScanCanvas||document.createElement('canvas');cardScanCanvas.width=w;cardScanCanvas.height=h;
                         const ctx=cardScanCanvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(video,0,0,w,h);
-                        const c=window.jsQR(ctx.getImageData(0,0,w,h).data,w,h);if(c&&c.data)value=c.data;
+                        const c=window.jsQR(ctx.getImageData(0,0,w,h).data,w,h,{inversionAttempts:'attemptBoth'});if(c&&c.data)value=c.data;
                     }
                     if(value)handleScannedValue(value);
-                }catch(e){}finally{busy=false;}
+                }catch(e){console.warn('Scan frame error:',e);}finally{busy=false;}
             },250);
         }catch(e){
             console.warn('Camera error:',e);stopCardScanner();
@@ -2464,7 +2505,7 @@
     if (requestedVerification) {
         window.addEventListener('load', () => {
             setTimeout(() => {
-                verifyCardByBarcode();
+                verifyCardByBarcode(requestedVerification);
                 const input = document.getElementById('verifyCardInput');
                 if (input) {
                     input.value = requestedVerification;
