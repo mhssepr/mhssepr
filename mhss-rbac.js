@@ -43,8 +43,17 @@ const CONFIG = {
 // absent. 'reports' is left as-is — it predates this fix, isn't wired to
 // any module list on the backend or in user-roles.html, and removing it
 // isn't part of this bug.
-const MODULES = ['office', 'finance', 'students', 'attendance', 'begena', 'equipment', 'id_print', 'reports'];
-
+const MODULES = [
+  'office',
+  'finance',
+  'students',
+  'attendance',
+  'begena',
+  'equipment',
+  'id_print',
+  'reports',
+  'events'
+];
 // Module-level cache so every page that imports this file shares one
 // resolved state, and calling initializeRBAC() more than once (e.g. a
 // stray duplicate call) never re-runs the DB round trip.

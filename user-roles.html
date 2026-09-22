@@ -168,6 +168,7 @@ html[data-theme="light"] .theme-toggle .knob{transform:translateX(22px);}
 <label class="module"><input type="checkbox" data-module="attendance"> <span data-i18n="modAttendance">Attendance Management</span></label>
 <label class="module"><input type="checkbox" data-module="begena"> <span data-i18n="modBegena">Begena Management</span></label>
 <label class="module"><input type="checkbox" data-module="equipment"> <span data-i18n="modEquipment">Equipment Management</span></label>
+<label class="module"><input type="checkbox" data-module="events"> <span data-i18n="modEvents">Event Management</span></label>
 <label class="module"><input type="checkbox" data-module="id_print"> <span data-i18n="modIdPrint">Student ID Card Printing</span></label>
 </div><small style="display:block;color:var(--muted);font-size:10px;margin-top:9px">For Custom roles, each module is independent. Student Management and Student ID Card Printing have separate permissions. System Access controls View access; Add, Edit, Delete and Print/Export are controlled below.</small></div>
 <div class="section" id="roleTypeSection"><h4 data-i18n="roleTypeHeading">Role Type</h4>
@@ -206,6 +207,7 @@ import { initializeRBAC, isSuperAdmin } from './mhss-rbac.js';
 const MODULES = [
   ['office','Office Management','የቢሮ አስተዳደር'],['finance','Finance Management','የገንዘብ አስተዳደር'],['students','Student Management','የተማሪ አስተዳደር'],
   ['attendance','Attendance Management','የክትትል አስተዳደር'],['begena','Begena Management','የበገና አስተዳደር'],['equipment','Equipment Management','የመሳሪያ አስተዳደር'],
+  ['events','Event Management','የዝግጅት አስተዳደር'],
   ['id_print','Student ID Card Printing','የተማሪ መታወቂያ ካርድ ማተሚያ']
 ];
 function moduleLabel(code){ const m=MODULES.find(x=>x[0]===code); if(!m) return code; return currentLang==='am'?m[2]:m[1]; }
@@ -419,7 +421,7 @@ function collectPayload(){
   if(role==='full_access'){
     permissions=permissions.map(p=>({...p,view:true,add:true,edit:true,delete:true,print_export:true}));
   } else if(role==='manage'){
-    permissions=permissions.map(p=>({...p,view:true,add:true,edit:true,print_export:true}));
+    permissions=permissions.map(p=>({...p,view:true,add:true,edit:true,delete:true,print_export:true}));
   } else if(role==='view_only'){
     permissions=permissions.map(p=>({...p,view:true}));
   } else if(role==='custom'){
@@ -457,6 +459,26 @@ async function callAdmin(action,payload){
   if(!res.ok) throw new Error(body.error||`Request failed (${res.status})`);
   return body;
 }
+
+async function persistUserPermissions(userId, permissions){
+  const rows=(permissions||[]).map(p=>({
+    user_id:userId,
+    module:p.module,
+    view:!!p.view,
+    add:!!p.add,
+    edit:!!p.edit,
+    delete:!!p.delete,
+    print_export:!!p.print_export
+  }));
+  // Remove stale module rows first, then insert the complete current matrix.
+  // This avoids relying on an upsert constraint that may differ between
+  // existing MHSS database versions.
+  const {error:delError}=await supabase.from('mhss_user_permissions').delete().eq('user_id',userId);
+  if(delError) throw new Error(`Could not clear old module permissions: ${delError.message}`);
+  if(!rows.length) return;
+  const {error:insError}=await supabase.from('mhss_user_permissions').insert(rows);
+  if(insError) throw new Error(`Could not save module permissions: ${insError.message}`);
+}
 function passwordIsStrong(p){return p.length>=8&&/[A-Za-z]/.test(p)&&/\d/.test(p)&&/[^A-Za-z0-9]/.test(p);}
 function accountInitials(name){return (String(name||'User').trim().split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('')||'U').toUpperCase()}
 function renderFormPhoto(url,name){const el=$('fPhotoPreview');if(!el)return;if(url){el.innerHTML='<img src="'+String(url).replace(/"/g,'&quot;')+'" alt="Profile photo">'}else el.textContent=accountInitials(name)}
@@ -485,14 +507,25 @@ $('userForm').addEventListener('submit',async e=>{
       } else {
         const clean={...payload}; delete clean.profile_photo_url; delete clean.phone;
         await callAdmin('update_user',{user_id:editingId,...clean});
+        // The Edge Function is responsible for the user/profile update, but we
+        // also persist the module matrix here so custom module access cannot be
+        // silently lost (especially Event Management).
+        await persistUserPermissions(editingId, payload.permissions);
       }
     } else {
       const photo=payload.profile_photo_url||'';
       const result=await callAdmin('create_user',payload);
+      let newId=result?.user_id||result?.user?.id||result?.data?.user_id||'';
+      if(!newId){
+        const lookup=await supabase.from('mhss_user_profiles').select('user_id').eq('email',payload.email).maybeSingle();
+        if(lookup.error) throw lookup.error;
+        newId=lookup.data?.user_id||'';
+      }
+      if(!newId) throw new Error('User was created, but the new user ID could not be resolved. Refresh User Roles and try again.');
+      await persistUserPermissions(newId, payload.permissions);
       if(photo){
-        let newId=result?.user_id||result?.user?.id||result?.data?.user_id||'';
-        if(!newId){ const lookup=await supabase.from('mhss_user_profiles').select('user_id').eq('email',payload.email).maybeSingle(); if(!lookup.error) newId=lookup.data?.user_id||''; }
-        if(newId){ const {error:photoError}=await supabase.from('mhss_user_profiles').update({profile_photo_url:photo}).eq('user_id',newId); if(photoError) console.warn('[User Roles] profile photo save failed:',photoError); }
+        const {error:photoError}=await supabase.from('mhss_user_profiles').update({profile_photo_url:photo}).eq('user_id',newId);
+        if(photoError) console.warn('[User Roles] profile photo save failed:',photoError);
       }
     }
     closeModal();toast(editingId?'User updated successfully.':'User created successfully.');await loadUsers();
@@ -526,7 +559,19 @@ $('backBtn').onclick=()=>location.href='dashboard.html';
 $('systemAccessSection').addEventListener('change',e=>{
   const control=e.target.closest('[data-module]');
   if(!control)return;
+  // Apply the click to the underlying view permission FIRST.
   syncPermissionView(control.dataset.module,control.checked);
+  // Module checkboxes only take effect for Custom role — collectPayload() ignores
+  // them entirely for full_access/manage/view_only and rebuilds permissions from
+  // the role template instead. So switch to Custom automatically once the
+  // permission table already reflects this click, otherwise the checked module
+  // is silently dropped on save (this was causing "No modules" to show up after
+  // saving even though a module box had been checked).
+  if($('fRole').value!=='custom'){
+    $('fRole').value='custom';
+    $('customSection').classList.remove('hidden');
+    toast('Switched to Custom role so individual module access can be saved.');
+  }
   normalizeCustomPermissions();
 });
 
@@ -568,6 +613,7 @@ const translations = {
     fWorkLabel:'Sunday School Work', systemAccess:'System Access',
     modOffice:'Office Management', modFinance:'Finance Management', modStudents:'Student Management',
     modAttendance:'Attendance Management', modBegena:'Begena Management', modEquipment:'Equipment Management',
+    modEvents:'Event Management',
     modIdPrint:'Student ID Card Printing',
     roleTypeHeading:'Role Type', roleTypeLabel:'Role Type', statusLabel:'Status',
     customPerms:'Custom Permissions', permModule:'Module', permView:'View', permAdd:'Add', permEdit:'Edit', permDelete:'Delete', permPrint:'Print/Export',
@@ -590,6 +636,7 @@ const translations = {
     fWorkLabel:'የሰንበት ት/ቤት ስራ', systemAccess:'የስርዓት መዳረሻ',
     modOffice:'የቢሮ አስተዳደር', modFinance:'የገንዘብ አስተዳደር', modStudents:'የተማሪ አስተዳደር',
     modAttendance:'የክትትል አስተዳደር', modBegena:'የበገና አስተዳደር', modEquipment:'የመሳሪያ አስተዳደር',
+    modEvents:'የዝግጅት አስተዳደር',
     modIdPrint:'የተማሪ መታወቂያ ካርድ ማተሚያ',
     roleTypeHeading:'የሚና አይነት', roleTypeLabel:'የሚና አይነት', statusLabel:'ሁኔታ',
     customPerms:'ብጁ ፍቃዶች', permModule:'ሞጁል', permView:'ይመልከቱ', permAdd:'ጨምር', permEdit:'አርትዕ', permDelete:'ሰርዝ', permPrint:'አትም/ላክ',
