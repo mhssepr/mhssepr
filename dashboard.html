@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" class="app-booting">
 <head>
+<script src="./mhss-global.js"></script>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -695,6 +696,9 @@
   html[data-owner="true"] .owner-admin-settings-card{display:none !important;}
   .avatar img,.single-avatar img,.single-profile-avatar img,.profile-photo-preview img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;}
   .rbac-loading{opacity:.55;pointer-events:none;}
+  /* Prevent the wrong account/role from flashing before Supabase + RBAC resolve. */
+  html.app-booting body{visibility:hidden !important;}
+  html.app-ready body{visibility:visible !important;}
 /* MOBILE LIQUID NAV — isolated to mobile; PC layout untouched */
 .mobile-liquid-nav{display:none}
 @media(max-width:1023px){
@@ -732,6 +736,42 @@
 #mainContent .quick-btn:hover{transform:translateY(-2px);border-color:rgba(190,150,55,.35);box-shadow:0 10px 25px rgba(0,0,0,.06);}
 #mainContent .analytics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
 #mainContent .analytics-card{border:1px solid var(--border,#e5e7eb);border-radius:22px;background:rgba(255,255,255,.78);box-shadow:0 12px 34px rgba(0,0,0,.05);padding:20px;}
+#mainContent .id-card-dashboard{margin-top:20px;border:1px solid rgba(190,150,55,.22);border-radius:24px;background:linear-gradient(135deg,rgba(255,253,247,.98),rgba(248,246,239,.94));box-shadow:0 16px 42px rgba(0,0,0,.06);padding:22px;}
+#mainContent .id-card-dashboard-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;}
+#mainContent .id-card-dashboard-title{display:flex;align-items:center;gap:12px;}
+#mainContent .id-card-dashboard-icon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:rgba(190,150,55,.12);color:#a27a22;border:1px solid rgba(190,150,55,.18);font-size:22px;}
+#mainContent .id-card-dashboard-title h2{margin:0;font-size:17px;font-weight:800;letter-spacing:-.02em;}
+#mainContent .id-card-dashboard-title p{margin:3px 0 0;font-size:12px;color:var(--muted);}
+#mainContent .id-card-dashboard-actions{display:flex;gap:8px;flex-wrap:wrap;}
+#mainContent .id-card-dashboard-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:11px;font-weight:800;text-decoration:none;}
+#mainContent .id-card-dashboard-actions a.primary{background:var(--gold);border-color:var(--gold);color:#111;}
+#mainContent .id-card-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
+#mainContent .id-card-stat{border:1px solid var(--border);border-radius:17px;background:rgba(255,255,255,.68);padding:15px;min-width:0;}
+#mainContent .id-card-stat-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+#mainContent .id-card-stat-label{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+#mainContent .id-card-stat-value{font-size:27px;font-weight:850;line-height:1.1;margin-top:7px;letter-spacing:-.04em;}
+#mainContent .id-card-stat-sub{font-size:11px;color:var(--muted);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#mainContent .id-card-progress-wrap{margin-top:15px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.55);padding:15px;}
+#mainContent .id-card-progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;font-weight:800;}
+#mainContent .id-card-progress-track{height:9px;border-radius:999px;background:rgba(127,127,127,.16);overflow:hidden;margin-top:10px;}
+#mainContent .id-card-progress-bar{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--gold),#d6b66d);transition:width .45s ease;}
+#mainContent .id-card-progress-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;font-size:10px;color:var(--muted);}
+#mainContent .id-card-progress-meta b{display:block;color:var(--text);font-size:12px;margin-top:2px;}
+#mainContent .id-card-activity{margin-top:15px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.55);padding:15px;}
+#mainContent .id-card-activity-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+#mainContent .id-card-activity-head strong{font-size:12px;}
+#mainContent .id-card-activity-list{display:grid;gap:7px;}
+#mainContent .id-card-activity-item{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;padding:9px 10px;border-radius:12px;background:rgba(127,127,127,.055);}
+#mainContent .id-card-activity-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(190,150,55,.10);}
+#mainContent .id-card-activity-main{min-width:0;}
+#mainContent .id-card-activity-main b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#mainContent .id-card-activity-main span{display:block;font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#mainContent .id-card-activity-time{font-size:9px;color:var(--muted);white-space:nowrap;}
+html[data-theme="dark"] #mainContent .id-card-dashboard{background:linear-gradient(135deg,rgba(39,35,27,.98),rgba(24,25,28,.96));border-color:rgba(201,164,92,.25);box-shadow:0 16px 42px rgba(0,0,0,.30);}
+html[data-theme="dark"] #mainContent .id-card-stat,html[data-theme="dark"] #mainContent .id-card-progress-wrap,html[data-theme="dark"] #mainContent .id-card-activity{background:rgba(255,255,255,.035);border-color:#2A2E37;}
+@media(max-width:1100px){#mainContent .id-card-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:700px){#mainContent .id-card-dashboard{padding:17px;border-radius:20px;}#mainContent .id-card-dashboard-head{align-items:flex-start;flex-direction:column;}#mainContent .id-card-stat-grid{grid-template-columns:1fr 1fr;}#mainContent .id-card-progress-meta{grid-template-columns:1fr 1fr;}}
+@media(max-width:430px){#mainContent .id-card-stat-grid{grid-template-columns:1fr;}#mainContent .id-card-progress-meta{grid-template-columns:1fr 1fr;}}
 /* Dark mode — dashboard statistics use the dark theme surface, never white */
 html[data-theme="dark"] #mainContent .welcome-row,
 html[data-theme="dark"] #mainContent .kpi-card,
@@ -806,7 +846,7 @@ html[data-theme="dark"] #mainContent .section-title{
     </a>
     <a href="print-id-cards.html" class="nav-link" data-rbac-module="id_print" id="idCardPrintNav" aria-label="Student ID Card Management">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="2.2"/><path d="M13 9h5M13 12h5M6 15h12"/></svg>
-      <span>Student ID Cards</span>
+      <span data-i18n="navStudentIdCards">Student ID Cards Management</span>
     </a>
     <a href="attendance.html" class="nav-link" data-rbac-module="attendance">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 3v3M16 3v3"/><path d="m8.5 14 2 2 4-4"/></svg>
@@ -822,7 +862,7 @@ html[data-theme="dark"] #mainContent .section-title{
     </a>
     <a href="event.html" class="nav-link" data-rbac-module="events">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M8 3v3M16 3v3M3 9.5h18"/><path d="M8 13h3M8 16h5"/></svg>
-      <span data-i18n="navEventsMgmt">Events &amp; Church Calendar</span>
+      <span data-i18n="navEventsMgmt">Sunday School Calendar Management</span>
     </a>
 
     <p class="nav-group-label" data-i18n="navInsights">Insights</p>
@@ -834,7 +874,7 @@ html[data-theme="dark"] #mainContent .section-title{
     <p class="nav-group-label" data-i18n="navSystem">System</p>
     <a href="user-roles.html" id="userRolesNav" class="nav-link super-admin-only" data-super-admin-only="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M17 8h4M19 6v4"/></svg>
-      <span>User Roles</span>
+      <span data-i18n="navUserRoles">User Role Management</span>
     </a>
     <a href="system-health.html" id="systemHealthNav" class="nav-link super-admin-only" data-super-admin-only="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l2-6 4 12 2-6h6"/><circle cx="12" cy="12" r="9"/></svg><span data-i18n="navSystemHealth">System Health Monitor</span></a>
     <a href="audit-trail.html" id="auditTrailNav" class="nav-link super-admin-only" data-super-admin-only="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span data-i18n="navAuditTrail">Audit Trail</span></a>
@@ -1107,6 +1147,50 @@ html[data-theme="dark"] #mainContent .section-title{
       <div class="kpi-error"><span>Unable to load finance data</span><button class="retry-btn" data-retry="finance" type="button">Retry</button></div>
     </section>
 
+    <!-- STUDENT ID CARD INTELLIGENCE -->
+    <section class="id-card-dashboard" id="idCardDashboard" data-rbac-module="id_print">
+      <div class="id-card-dashboard-head">
+        <div class="id-card-dashboard-title">
+          <div class="id-card-dashboard-icon">🪪</div>
+          <div>
+            <h2 data-i18n="idCardDashboardTitle">Student ID Card Intelligence</h2>
+            <p data-i18n="idCardDashboardSub">Live printing, verification and card-status overview</p>
+          </div>
+        </div>
+        <div class="id-card-dashboard-actions">
+          <a href="print-id-cards.html" class="primary" data-i18n="idCardOpenCenter">Open ID Card Center →</a>
+          <a href="report.html" data-i18n="idCardOpenReports">View Reports →</a>
+        </div>
+      </div>
+
+      <div class="id-card-stat-grid">
+        <div class="id-card-stat"><div class="id-card-stat-top"><span class="id-card-stat-label" data-i18n="idCardTotal">Total Cards</span><span>🪪</span></div><div class="id-card-stat-value" id="idCardTotal">—</div><div class="id-card-stat-sub" data-i18n="idCardCurrentRecords">Current card records</div></div>
+        <div class="id-card-stat"><div class="id-card-stat-top"><span class="id-card-stat-label" data-i18n="idCardPrinted">Printed</span><span>🖨️</span></div><div class="id-card-stat-value" id="idCardPrinted">—</div><div class="id-card-stat-sub" id="idCardPrintedSub">—</div></div>
+        <div class="id-card-stat"><div class="id-card-stat-top"><span class="id-card-stat-label" data-i18n="idCardNotPrinted">Not Printed</span><span>⏳</span></div><div class="id-card-stat-value" id="idCardNotPrinted">—</div><div class="id-card-stat-sub" data-i18n="idCardWaitingPrint">Students waiting for printing</div></div>
+        <div class="id-card-stat"><div class="id-card-stat-top"><span class="id-card-stat-label" data-i18n="idCardVerified">Verified</span><span>✓</span></div><div class="id-card-stat-value" id="idCardVerified">—</div><div class="id-card-stat-sub" id="idCardVerifiedSub">—</div></div>
+        <div class="id-card-stat"><div class="id-card-stat-top"><span class="id-card-stat-label" data-i18n="idCardPendingVerify">Pending Verification</span><span>🔍</span></div><div class="id-card-stat-value" id="idCardPendingVerify">—</div><div class="id-card-stat-sub" data-i18n="idCardPrintedNotConfirmed">Printed but not confirmed</div></div>
+        <div class="id-card-stat"><div class="id-card-stat-top"><span class="id-card-stat-label" data-i18n="idCardActive">Active</span><span>🟢</span></div><div class="id-card-stat-value" id="idCardActive">—</div><div class="id-card-stat-sub" data-i18n="idCardActiveSub">Current active cards</div></div>
+        <div class="id-card-stat"><div class="id-card-stat-top"><span class="id-card-stat-label" data-i18n="idCardLost">Lost / Replacement</span><span>🔄</span></div><div class="id-card-stat-value" id="idCardLost">—</div><div class="id-card-stat-sub" data-i18n="idCardLostSub">Lost or replacement required</div></div>
+        <div class="id-card-stat"><div class="id-card-stat-top"><span class="id-card-stat-label" data-i18n="idCardVerifyFailed">Verify Failed</span><span>⚠️</span></div><div class="id-card-stat-value" id="idCardVerifyFailed">—</div><div class="id-card-stat-sub" data-i18n="idCardFailedSub">Failed verification events</div></div>
+      </div>
+
+      <div class="id-card-progress-wrap">
+        <div class="id-card-progress-head"><span data-i18n="idCardPrintingProgress">ID Card Printing Progress</span><b id="idCardPrintPct">0%</b></div>
+        <div class="id-card-progress-track"><div class="id-card-progress-bar" id="idCardPrintBar"></div></div>
+        <div class="id-card-progress-meta">
+          <div><span data-i18n="idCardProgressPrinted">Printed</span><b id="idCardProgressPrinted">0</b></div>
+          <div><span data-i18n="idCardProgressNotPrinted">Not Printed</span><b id="idCardProgressNotPrinted">0</b></div>
+          <div><span data-i18n="idCardProgressVerified">Verified</span><b id="idCardProgressVerified">0</b></div>
+          <div><span data-i18n="idCardProgressPending">Pending</span><b id="idCardProgressPending">0</b></div>
+        </div>
+      </div>
+
+      <div class="id-card-activity">
+        <div class="id-card-activity-head"><strong data-i18n="idCardRecentActivity">Recent ID Card Activity</strong><span class="id-card-stat-sub" data-i18n="idCardLiveFromDatabase">Live from database</span></div>
+        <div class="id-card-activity-list" id="idCardActivityList"><div class="id-card-stat-sub" data-i18n="idCardLoading">Loading ID card activity…</div></div>
+      </div>
+    </section>
+
     <!-- QUICK ACTIONS -->
     <section class="quick-actions">
       <h2 class="section-title" data-i18n="quickActions">Quick Actions</h2>
@@ -1223,7 +1307,7 @@ html[data-theme="dark"] #mainContent .section-title{
         </a>
         <a href="event.html" class="module-card" data-rbac-module="events">
           <div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M8 3v3M16 3v3M3 9.5h18"/><path d="M8 13h3M8 16h5"/></svg></div>
-          <h3 data-i18n="navEventsMgmt">Events &amp; Church Calendar</h3>
+          <h3 data-i18n="navEventsMgmt">Sunday School Calendar Management</h3>
           <p class="mc-desc" data-i18n="eventsModuleDesc">Church events, teaching days and calendar planning</p>
           <p class="mc-stat" id="modEventsStat" data-i18n="eventsModuleStat">Open calendar</p>
           <span class="mc-open">Open Module →</span>
@@ -1372,8 +1456,8 @@ const translations = {
   en: {
     navCommand: 'Command Center', navDashboard: 'Dashboard', navManagement: 'Management',
     navOffice: 'Office Management', navFinance: 'Financial Management', navStudents: 'Students',
-    navStudentsMgmt: 'Student Management', navAttendanceMgmt: 'Attendance Management',
-    navBegenaMgmt: 'Begena Management', navEquipmentMgmt: 'Equipment Management', navEventsMgmt: 'Events & Church Calendar',
+    navStudentsMgmt: 'Student Management', navStudentIdCards: 'Student ID Cards Management', navUserRoles: 'User Role Management', navAttendanceMgmt: 'Attendance Management',
+    navBegenaMgmt: 'Begena Management', navEquipmentMgmt: 'Equipment Management', navEventsMgmt: 'Sunday School Calendar Management',
     financeOverview: 'Financial Overview', financeOpen: 'Open Finance →',
     finNetBalance: 'Net Balance', finIncome: 'Total Income', finExpense: 'Total Expense', finBankBalance: 'Bank + Cash',
     navAttendance: 'Attendance', navBegena: 'Begena', navEquipment: 'Equipment',
@@ -1383,13 +1467,14 @@ const translations = {
     quickActions: 'Quick Actions', qaRegisterStudent: 'Register Student', qaRecordAttendance: 'Record Attendance',
     qaAddEquipment: 'Add Equipment', qaComposeLetter: 'Compose Letter', qaGenerateReport: 'Generate Report',
     needsAttention: 'Needs Attention', analytics: 'Analytics', modules: 'Module Control Center', recentActivity: 'Recent Activity', eventsModuleDesc:'Church events, teaching days and calendar planning', eventsModuleStat:'Open calendar',
+    idCardDashboardTitle:'Student ID Card Intelligence', idCardDashboardSub:'Live printing, verification and card-status overview', idCardOpenCenter:'Open ID Card Center →', idCardOpenReports:'View Reports →', idCardTotal:'Total Cards', idCardCurrentRecords:'Current card records', idCardPrinted:'Printed', idCardNotPrinted:'Not Printed', idCardWaitingPrint:'Students waiting for printing', idCardVerified:'Verified', idCardPendingVerify:'Pending Verification', idCardPrintedNotConfirmed:'Printed but not confirmed', idCardActive:'Active', idCardActiveSub:'Current active cards', idCardLost:'Lost / Replacement', idCardLostSub:'Lost or replacement required', idCardVerifyFailed:'Verify Failed', idCardFailedSub:'Failed verification events', idCardPrintingProgress:'ID Card Printing Progress', idCardProgressPrinted:'Printed', idCardProgressNotPrinted:'Not Printed', idCardProgressVerified:'Verified', idCardProgressPending:'Pending', idCardRecentActivity:'Recent ID Card Activity', idCardLiveFromDatabase:'Live from database', idCardLoading:'Loading ID card activity…',
     navNotifications: 'Notifications', navSystemHealth: 'System Health Monitor', navAuditTrail: 'Audit Trail', roleAdministrator:'Administrator', roleSuperAdmin:'Super Admin', roleTeacher:'Teacher', roleStudent:'Student', roleFinance:'Finance', roleOffice:'Office Staff', roleAttendance:'Attendance Staff', roleEquipment:'Equipment Staff', roleUser:'User', mobileHome:'Home', mobileStudents:'Students', mobileAttendance:'Attendance', mobileProfile:'Profile', mobileMore:'More',
   },
   am: {
     navCommand: 'የትዕዛዝ ማዕከል', navDashboard: 'ዳሽቦርድ', navManagement: 'አስተዳደር',
     navOffice: 'የቢሮ አስተዳደር', navFinance: 'የገንዘብ አስተዳደር', navStudents: 'ተማሪዎች',
-    navStudentsMgmt: 'የተማሪዎች አስተዳደር', navAttendanceMgmt: 'የክትትል አስተዳደር',
-    navBegenaMgmt: 'የበገና አስተዳደር', navEquipmentMgmt: 'የመሳሪያ አስተዳደር', navEventsMgmt: 'ዝግጅቶች እና የቤተክርስቲያን ቀን መቁጠሪያ',
+    navStudentsMgmt: 'የተማሪዎች አስተዳደር', navStudentIdCards: 'የተማሪ መታወቂያ ካርዶች አስተዳደር', navUserRoles: 'የተጠቃሚ ሚናዎች አስተዳደር', navAttendanceMgmt: 'የክትትል አስተዳደር',
+    navBegenaMgmt: 'የበገና አስተዳደር', navEquipmentMgmt: 'የመሳሪያ አስተዳደር', navEventsMgmt: 'የሰንበት ትምህርት ቤት ቀን መቁጠሪያ አስተዳደር',
     financeOverview: 'የፋይናንስ አጠቃላይ እይታ', financeOpen: 'ፋይናንስ ክፈት →',
     finNetBalance: 'የተጣራ ሂሳብ', finIncome: 'ጠቅላላ ገቢ', finExpense: 'ጠቅላላ ወጪ', finBankBalance: 'የባንክ/ጥሬ ገንዘብ',
     navAttendance: 'ክትትል', navBegena: 'በገና', navEquipment: 'መሳሪያዎች',
@@ -1399,6 +1484,7 @@ const translations = {
     quickActions: 'ፈጣን እርምጃዎች', qaRegisterStudent: 'ተማሪ መዝግብ', qaRecordAttendance: 'ክትትል መዝግብ',
     qaAddEquipment: 'መሳሪያ ጨምር', qaComposeLetter: 'ደብዳቤ ጻፍ', qaGenerateReport: 'ሪፖርት ፍጠር',
     needsAttention: 'ትኩረት የሚሹ', analytics: 'ትንታኔ', modules: 'የሞጁል መቆጣጠሪያ ማዕከል', recentActivity: 'የቅርብ ጊዜ እንቅስቃሴ', eventsModuleDesc:'የቤተክርስቲያን ዝግጅቶች፣ የትምህርት ቀናት እና የቀን መቁጠሪያ እቅድ', eventsModuleStat:'የቀን መቁጠሪያ ክፈት',
+    idCardDashboardTitle:'የተማሪ መታወቂያ ካርድ ትንታኔ', idCardDashboardSub:'የህትመት፣ የማረጋገጫ እና የካርድ ሁኔታ ቀጥታ አጠቃላይ እይታ', idCardOpenCenter:'የመታወቂያ ካርድ ማዕከል ክፈት →', idCardOpenReports:'ሪፖርቶችን ይመልከቱ →', idCardTotal:'ጠቅላላ ካርዶች', idCardCurrentRecords:'ያሉ የካርድ መዝገቦች', idCardPrinted:'የታተሙ', idCardNotPrinted:'ያልታተሙ', idCardWaitingPrint:'ህትመት የሚጠብቁ ተማሪዎች', idCardVerified:'የተረጋገጡ', idCardPendingVerify:'ማረጋገጫ የሚጠብቁ', idCardPrintedNotConfirmed:'የታተሙ ግን ያልተረጋገጡ', idCardActive:'ንቁ', idCardActiveSub:'አሁን ያሉ ንቁ ካርዶች', idCardLost:'የጠፉ / ምትክ', idCardLostSub:'የጠፉ ወይም ምትክ የሚፈልጉ', idCardVerifyFailed:'ማረጋገጫ አልተሳካም', idCardFailedSub:'ያልተሳኩ የማረጋገጫ ክስተቶች', idCardPrintingProgress:'የመታወቂያ ካርድ ህትመት ሂደት', idCardProgressPrinted:'የታተሙ', idCardProgressNotPrinted:'ያልታተሙ', idCardProgressVerified:'የተረጋገጡ', idCardProgressPending:'በመጠባበቅ ላይ', idCardRecentActivity:'የቅርብ ጊዜ የመታወቂያ እንቅስቃሴ', idCardLiveFromDatabase:'ከዳታቤዝ ቀጥታ', idCardLoading:'የመታወቂያ እንቅስቃሴ በመጫን ላይ…',
     navNotifications: 'ማሳወቂያዎች', navSystemHealth: 'የስርዓት ጤና መቆጣጠሪያ', navAuditTrail: 'የኦዲት መዝገብ', roleAdministrator:'አስተዳዳሪ', roleSuperAdmin:'ሱፐር አስተዳዳሪ', roleTeacher:'መምህር', roleStudent:'ተማሪ', roleFinance:'ፋይናንስ', roleOffice:'የቢሮ ሰራተኛ', roleAttendance:'የክትትል ሰራተኛ', roleEquipment:'የመሳሪያ ሰራተኛ', roleUser:'ተጠቃሚ', mobileHome:'ዋና', mobileStudents:'ተማሪዎች', mobileAttendance:'ክትትል', mobileProfile:'መገለጫ', mobileMore:'ተጨማሪ',
   },
 };
@@ -1590,7 +1676,7 @@ async function loadUserIdentity() {
 /* =====================================================================
    8. Dashboard data state + card state helper
 ===================================================================== */
-const state = { students: null, assets: null, attendance: null, office: null, finance: null };
+const state = { students: null, assets: null, attendance: null, office: null, finance: null, idCards: null };
 
 function formatCurrency(n) {
   return 'ETB ' + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1723,6 +1809,105 @@ async function loadOfficeStats() {
     setCardState('kpiOfficeCard', 'error');
     ['anOffIncoming', 'anOffOutgoing', 'anOffPending', 'anOffOverdue'].forEach((id) => { $(id).textContent = 'Unable to load'; });
     $('modOfficeStat').textContent = 'Unable to load';
+  }
+}
+
+async function loadIdCardStats() {
+  const section = $('idCardDashboard');
+  if (!section) return;
+  try {
+    const [{ data: cards, error: cardsError }, { count: studentCount, error: studentError }] = await Promise.all([
+      supabase.from('mhss_student_id_cards').select('id,student_id,status,card_number,version,is_current,updated_at').eq('is_current', true),
+      supabase.from('students').select('id', { count: 'exact', head: true })
+    ]);
+    if (cardsError) throw cardsError;
+    if (studentError) throw studentError;
+
+    const rows = Array.isArray(cards) ? cards : [];
+    const totalStudents = Number(studentCount || 0);
+    const totalCards = rows.length;
+    const printed = rows.filter(r => r.status === 'Printed').length;
+    const active = rows.filter(r => r.status === 'Active').length;
+    const lostReplacement = rows.filter(r => ['Lost', 'Replacement Required'].includes(r.status)).length;
+    const notPrinted = Math.max(0, totalStudents - printed);
+
+    let verified = 0;
+    let verifyFailed = 0;
+    let recent = [];
+    try {
+      const auditRes = await supabase.from('mhss_student_id_card_audit')
+        .select('action,student_id,student_name,card_number,stage,details,created_at')
+        .order('created_at', { ascending: false }).limit(1000);
+      if (auditRes.error) throw auditRes.error;
+      const audits = Array.isArray(auditRes.data) ? auditRes.data : [];
+      const currentPrintedStudentIds = new Set(rows.filter(r => r.status === 'Printed' && r.student_id).map(r => String(r.student_id)));
+      const verifiedIds = new Set(audits.filter(a => ['POST_PRINT_CONFIRMED', 'POST_PRINT_VERIFIED', 'PRINT_VERIFIED'].includes(a.action) && a.student_id && currentPrintedStudentIds.has(String(a.student_id))).map(a => String(a.student_id)));
+      verified = verifiedIds.size;
+      verifyFailed = audits.filter(a => a.action === 'POST_PRINT_VERIFY_FAILED').length;
+      recent = audits.slice(0, 6);
+    } catch (auditErr) {
+      console.warn('[Dashboard] ID card audit stats unavailable:', auditErr);
+      recent = [];
+    }
+
+    const pendingVerify = Math.max(0, printed - verified);
+    const printPct = totalStudents ? Math.min(100, Math.round((printed / totalStudents) * 1000) / 10) : 0;
+    const lang = localStorage.getItem('mh_lang_pref') === 'am' ? 'am' : 'en';
+    const fmt = n => Number(n || 0).toLocaleString();
+
+    state.idCards = { totalStudents, totalCards, printed, notPrinted, verified, pendingVerify, active, lostReplacement, verifyFailed, printPct };
+
+    animateNumber($('idCardTotal'), totalCards);
+    animateNumber($('idCardPrinted'), printed);
+    animateNumber($('idCardNotPrinted'), notPrinted);
+    animateNumber($('idCardVerified'), verified);
+    animateNumber($('idCardPendingVerify'), pendingVerify);
+    animateNumber($('idCardActive'), active);
+    animateNumber($('idCardLost'), lostReplacement);
+    animateNumber($('idCardVerifyFailed'), verifyFailed);
+
+    $('idCardPrintedSub').textContent = lang === 'am' ? `${fmt(printed)} ከ ${fmt(totalStudents)} ተማሪዎች` : `${fmt(printed)} of ${fmt(totalStudents)} students`;
+    $('idCardVerifiedSub').textContent = lang === 'am' ? `${fmt(verified)} የተረጋገጡ ልዩ ተማሪዎች` : `${fmt(verified)} uniquely verified students`;
+    $('idCardPrintPct').textContent = `${printPct}%`;
+    $('idCardPrintBar').style.width = `${printPct}%`;
+    $('idCardProgressPrinted').textContent = fmt(printed);
+    $('idCardProgressNotPrinted').textContent = fmt(notPrinted);
+    $('idCardProgressVerified').textContent = fmt(verified);
+    $('idCardProgressPending').textContent = fmt(pendingVerify);
+
+    const activity = $('idCardActivityList');
+    if (activity) {
+      if (!recent.length) {
+        activity.innerHTML = `<div class="id-card-stat-sub">${lang === 'am' ? 'እስካሁን የካርድ እንቅስቃሴ የለም።' : 'No ID card audit activity yet.'}</div>`;
+      } else {
+        const actionLabel = action => ({
+          POST_PRINT_CONFIRMED: lang === 'am' ? 'ከህትመት በኋላ ተረጋግጧል' : 'Post-print confirmed',
+          POST_PRINT_VERIFIED: lang === 'am' ? 'ከህትመት በኋላ ተረጋግጧል' : 'Post-print verified',
+          POST_PRINT_VERIFY_FAILED: lang === 'am' ? 'የማረጋገጫ ሙከራ አልተሳካም' : 'Verification failed',
+          PRINT_VERIFIED: lang === 'am' ? 'ካርድ ታትሞ ተረጋግጧል' : 'Card printed and verified',
+          PRINT_JOB_SENT: lang === 'am' ? 'የህትመት ስራ ተልኳል' : 'Print job sent',
+          CARD_REPLACED: lang === 'am' ? 'ካርድ ተተክቷል' : 'Card replaced',
+          REPLACEMENT_REQUESTED: lang === 'am' ? 'የምትክ ጥያቄ ተልኳል' : 'Replacement requested',
+          REPLACEMENT_COMPLETED: lang === 'am' ? 'ምትክ ካርድ ተጠናቋል' : 'Replacement completed'
+        }[action] || String(action || 'ID Card Activity').replaceAll('_', ' '));
+        activity.innerHTML = recent.map(a => {
+          const name = a.student_name || a.student_id || a.card_number || (lang === 'am' ? 'የካርድ እንቅስቃሴ' : 'ID card activity');
+          const label = actionLabel(a.action);
+          const detail = a.card_number ? `${label} · ${a.card_number}` : label;
+          const when = a.created_at ? new Date(a.created_at).toLocaleString(lang === 'am' ? 'am-ET' : 'en-US', { dateStyle:'short', timeStyle:'short' }) : '—';
+          return `<div class="id-card-activity-item"><span class="id-card-activity-dot"></span><div class="id-card-activity-main"><b>${esc(name)}</b><span>${esc(detail)}</span></div><span class="id-card-activity-time">${esc(when)}</span></div>`;
+        }).join('');
+      }
+    }
+    setCardState('idCardDashboard', 'loaded');
+  } catch (err) {
+    console.error('[Dashboard] loadIdCardStats failed:', err);
+    state.idCards = null;
+    const ids = ['idCardTotal','idCardPrinted','idCardNotPrinted','idCardVerified','idCardPendingVerify','idCardActive','idCardLost','idCardVerifyFailed'];
+    ids.forEach(id => { const el=$(id); if(el) el.textContent='—'; });
+    const activity = $('idCardActivityList');
+    if(activity) activity.innerHTML = `<div class="id-card-stat-sub">${localStorage.getItem('mh_lang_pref') === 'am' ? 'የመታወቂያ ካርድ መረጃ መጫን አልተቻለም።' : 'Unable to load ID card statistics.'}</div>`;
+    setCardState('idCardDashboard', 'error');
   }
 }
 
@@ -2049,7 +2234,8 @@ function applyRBACToDashboard(rbac) {
     analyticsStudents: 'students',
     analyticsAttendance: 'attendance',
     analyticsEquipment: 'equipment',
-    analyticsOffice: 'office'
+    analyticsOffice: 'office',
+    idCardDashboard: 'id_print'
   };
   Object.entries(visibilityMap).forEach(([id, moduleName]) => {
     const el = $(id);
@@ -2110,13 +2296,14 @@ async function loadDashboard() {
     loadAttendanceStats(),
     loadOfficeStats(),
     loadFinanceStats(),
+    loadIdCardStats(),
   ]);
   updateUI();
   updateSystemStatus(results);
   updateLastUpdated();
 }
 
-const retryMap = { students: loadStudentStats, assets: loadAssetStats, attendance: loadAttendanceStats, office: loadOfficeStats, finance: loadFinanceStats };
+const retryMap = { students: loadStudentStats, assets: loadAssetStats, attendance: loadAttendanceStats, office: loadOfficeStats, finance: loadFinanceStats, idCards: loadIdCardStats };
 document.querySelectorAll('[data-retry]').forEach((btn) => {
   btn.addEventListener('click', async () => {
     const key = btn.dataset.retry;
@@ -2140,15 +2327,26 @@ $('refreshBtn').addEventListener('click', async () => {
    12. Boot sequence
 ===================================================================== */
 (async function init() {
+  // Do not render account/role UI until the authenticated user and RBAC are known.
   const session = await checkAuth();
   if (!session) return;
-  await loadUserIdentity();
+
   const rbac = await initializeDashboardRBAC();
-  if (!rbac) return;
+  if (!rbac || !rbac.user) {
+    window.location.replace('/');
+    return;
+  }
+
+  // Resolve the real profile only after RBAC has identified the session user.
+  await loadUserIdentity();
+
+  // Release the boot curtain only after the correct identity + permissions are painted.
+  document.documentElement.classList.remove('app-booting');
+  document.documentElement.classList.add('app-ready');
+
   await loadDashboard();
   // Gentle auto-refresh every 5 minutes; avoids excessive Supabase requests.
   setInterval(loadDashboard, 5 * 60 * 1000);
-  // The dashboard now uses the single functional Messaging Center notification button above.
   loadDashboardNotifications();
   startNotifPolling();
 })();

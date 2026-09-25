@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="./mhss-global.js"></script>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -2496,7 +2497,7 @@
             const body=document.getElementById('studentHistoryBody'), empty=document.getElementById('studentHistoryEmpty');
             empty.classList.toggle('hidden', payments.length>0);
             body.innerHTML=payments.map(p=>`<tr class="border-t border-white/5"><td class="p-3 text-xs">${escapeHtml(p.ec_paid_date || p.paid_date || '—')}</td><td class="p-3 text-xs">${escapeHtml(p.plan || '—')}</td><td class="p-3 text-xs">${escapeHtml(p.period || '—')}</td><td class="p-3 text-right font-bold text-green-500">${formatCurrency(p.amount)}</td><td class="p-3 text-xs">${escapeHtml(p.method || '—')}</td><td class="p-3 text-xs font-mono">${escapeHtml(p.transaction_ref_id || '—')}</td><td class="p-3 text-xs">${escapeHtml(p.receiver || 'ኢየሩሳሌም ሀዲሽ')}</td></tr>`).join('');
-            const m=document.getElementById('studentHistoryModal'); m.classList.remove('hidden'); setTimeout(()=>m.classList.remove('modal-hidden-state'),10);
+            const m=document.getElementById('studentHistoryModal'); m.classList.remove('hidden'); requestAnimationFrame(()=>m.classList.remove('modal-hidden-state'));
         }
         function closeStudentPaymentHistory(){ const m=document.getElementById('studentHistoryModal'); m.classList.add('modal-hidden-state'); setTimeout(()=>m.classList.add('hidden'),280); }
 
@@ -2701,7 +2702,7 @@
         $('studentScanVerification')?.classList.add('hidden');
         $('studentScanActions')?.classList.add('hidden');
         m.classList.remove('hidden');
-        setTimeout(()=>m.classList.remove('modal-hidden-state'),10);
+        requestAnimationFrame(()=>m.classList.remove('modal-hidden-state'));
         setScanStatus('Scanner ready — scan the barcode and press Enter.','ስካነሩ ዝግጁ ነው — ባርኮዱን ስካን ያድርጉ እና Enter ይጫኑ።');
         requestAnimationFrame(()=>{try{$('studentFinanceManualId').focus({preventScroll:true});}catch(e){$('studentFinanceManualId').focus();}});
     };

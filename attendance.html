@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="./mhss-global.js"></script>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -4356,9 +4357,10 @@
                 const labels={present:'Present',late:'Late',absent:'Absent',permission:'Permission'};
                 scannerFeedback(feedbackId,'warning','⚠','ATTENDANCE ALREADY EXISTS',`<b>${escapeHtml(student.name)}</b> is already marked <b>${labels[existing]||existing}</b> for ${escapeHtml(scannerDateContext().ec)} E.C. The scan did not change the status.<br><span class="text-yellow-300">Scanned at ${escapeHtml(ethiopiaTime(new Date()))} — Ethiopia</span>`,student);
                 addScannerHistory('warn',student.name,`Already ${labels[existing]||existing}`);
-                await loadScannerReliability(selectedDateKey);
-                await refreshScanHistoryIfOpen(selectedDateKey);
                 refreshScannerCounters();
+                // Analytics/history refresh stays in the background so the scanner is immediately ready for the next scan.
+                void loadScannerReliability(selectedDateKey);
+                void refreshScanHistoryIfOpen(selectedDateKey);
                 scannerBusy=false; return;
             }
             // Resolve the daily schedule for the student's class. Global Scan
@@ -4433,14 +4435,15 @@
             const lateLine=scanStatus==='late'?`<br><span class="text-yellow-300">Late by <b>${smart.lateMinutes} minutes</b></span>`:'';
             scannerFeedback(feedbackId,scanStatus==='late'?'warning':'success',scanStatus==='late'?'⏰':'✓',statusTitle,`<b>${escapeHtml(student.name)}</b> · ${escapeHtml(student.id)}<br>Class: <b>${escapeHtml(student.className)}</b> · ${escapeHtml(scannerDateContext().ec)} E.C.<br><span class="${scanStatus==='late'?'text-yellow-300':'text-green-300'}">Arrival ${escapeHtml(ethiopiaTime(scanMoment))} — Ethiopia</span>${lateLine}`,student);
             addScannerHistory(scanStatus==='late'?'warn':'ok',student.name,scanStatus==='late'?`Marked Late · ${smart.lateMinutes} min`:'Marked Present');
-            await logSuccessfulBarcodeScan(student,selectedDateKey,scanStatus,scanMeta);
-            await loadScannerReliability(selectedDateKey);
-            await refreshScanHistoryIfOpen(selectedDateKey);
+            // Keep audit logging and analytics non-blocking: attendance is already saved locally + in Supabase.
+            void logSuccessfulBarcodeScan(student,selectedDateKey,scanStatus,scanMeta);
             refreshScannerCounters();
+            void loadScannerReliability(selectedDateKey);
+            void refreshScanHistoryIfOpen(selectedDateKey);
             if(currentClassStr===student.className && currentView==='daily') renderDailyTable();
             showToast(`${student.name} ${scanStatus==='late'?'marked Late':'marked Present'}`,'success');
             scannerBusy=false;
-            setTimeout(()=>{const inputId=global?'globalScanInput':'scanInput';const input=document.getElementById(inputId);if(input&&!document.getElementById(global?'globalScanModal':'scanModal').classList.contains('hidden')){if(global){input.value='';}else{primeScanInput(inputId);}input.focus();}},80);
+            requestAnimationFrame(()=>{const inputId=global?'globalScanInput':'scanInput';const input=document.getElementById(inputId);if(input&&!document.getElementById(global?'globalScanModal':'scanModal').classList.contains('hidden')){if(global){input.value='';}else{primeScanInput(inputId);}input.focus();}});
         }
         async function handleClassBarcodeScan(scannedId){return processBarcodeScan(scannedId,currentClassStr,'scanFeedback',false);}
         // Manual entry helper: the class ID-card format is "<idPrefix>-NN" (e.g. "MHSS-Q1-01").
@@ -4458,7 +4461,7 @@
             const modal=document.getElementById('scanModal'); modal.classList.remove('hidden'); requestAnimationFrame(()=>modal.classList.remove('modal-hidden-state'));
             updateScannerContext(); loadScannerReliability(dateKey(currentDate)); scannerStatus('ready','READY TO SCAN');
             scannerFeedback('scanFeedback','','📷','READY TO SCAN','Connect your USB/Bluetooth scanner and scan a student ID.');
-            primeScanInput('scanInput');setTimeout(()=>{const input=document.getElementById('scanInput');input.focus();primeScanInput('scanInput');},100);
+            primeScanInput('scanInput');requestAnimationFrame(()=>{const input=document.getElementById('scanInput');if(input){primeScanInput('scanInput');input.focus({preventScroll:true});}});
         }
         function closeScanModal(){const m=document.getElementById('scanModal');m.classList.add('modal-hidden-state');setTimeout(()=>m.classList.add('hidden'),280);}
         function handleScanSubmit(){
@@ -4474,7 +4477,7 @@
             const modal=document.getElementById('globalScanModal'); modal.classList.remove('hidden'); requestAnimationFrame(()=>modal.classList.remove('modal-hidden-state'));
             loadScannerReliability(dateKey(currentDate)); scannerStatus('ready','READY TO SCAN',true);
             scannerFeedback('globalScanFeedback','','📷','READY TO SCAN','Waiting for a registered student barcode.');
-            const input=document.getElementById('globalScanInput');input.value='';setTimeout(()=>input.focus(),100);
+            const input=document.getElementById('globalScanInput');input.value='';requestAnimationFrame(()=>input.focus({preventScroll:true}));
         }
         function closeGlobalScanModal(){const m=document.getElementById('globalScanModal');m.classList.add('modal-hidden-state');setTimeout(()=>m.classList.add('hidden'),280);}
         function handleGlobalScanSubmit(){const input=document.getElementById('globalScanInput');const raw=input.value.trim();if(!raw)return;input.value='';processBarcodeScan(raw,null,'globalScanFeedback',true);setTimeout(()=>input.focus(),100);}

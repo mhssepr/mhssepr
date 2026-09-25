@@ -5,24 +5,15 @@
 // the four functions dashboard.html and user-roles.html already import:
 //
 //   initializeRBAC({ supabase })   -> Promise<RBACState|null>
-//   hasModuleAccess(module, action?) -> boolean   (action defaults to 'view')
+//   hasModuleAccess(module, action?) -> boolean
 //   isSuperAdmin()                 -> boolean
-//   getRBAC()                      -> RBACState|null (last resolved snapshot)
+//   getRBAC()                     -> RBACState|null
 //
-// SCHEMA ASSUMPTION (no SQL file was provided, so this is inferred
-// directly from the real queries already in your user-roles.html):
-//
-//   table: mhss_user_profiles
-//     user_id (uuid, PK, = auth.users.id)
-//     name, email, sunday_school_work, role_type, status, created_at
-//
-//   table: mhss_user_permissions
-//     user_id (uuid, FK -> mhss_user_profiles.user_id)
-//     module (text: office | finance | students | attendance | begena | equipment | reports)
-//     view, add, edit, delete, print_export (bool)
-//
-// If your actual table/column names differ, change ONLY the CONFIG
-// block below — nothing else in this file needs to change.
+// IMPORTANT:
+// - Preserves the existing MHSS database schema.
+// - Preserves the existing ES-module exports.
+// - Prevents stale RBAC state from surviving a user change.
+// - Resolves the authenticated Supabase session BEFORE building RBAC.
 // =====================================================================
 
 const SUPER_ADMIN_EMAIL = 'mhssepr@gmail.com';
@@ -36,13 +27,10 @@ const CONFIG = {
   moduleColumn: 'module',
 };
 
-// FIX: 'id_print' (Student ID Card Printing) was missing here. This list
-// drives emptyPermissionSet()/fullPermissionSet() and applyRoleTypeDefaults()
-// below, so without it a preset-role user (full_access/manage/view_only)
-// would never get id_print defaulted client-side if the DB row were ever
-// absent. 'reports' is left as-is — it predates this fix, isn't wired to
-// any module list on the backend or in user-roles.html, and removing it
-// isn't part of this bug.
+// =====================================================================
+// MODULES
+// =====================================================================
+
 const MODULES = [
   'office',
   'finance',
@@ -54,11 +42,21 @@ const MODULES = [
   'reports',
   'events'
 ];
-// Module-level cache so every page that imports this file shares one
-// resolved state, and calling initializeRBAC() more than once (e.g. a
-// stray duplicate call) never re-runs the DB round trip.
+
+// =====================================================================
+// RBAC CACHE
+// =====================================================================
+
 let _rbacState = null;
 let _initPromise = null;
+
+// Tracks which authenticated user the cached state belongs to.
+// This prevents one user's RBAC state from being reused for another user.
+let _rbacUserId = null;
+
+// =====================================================================
+// HELPERS
+// =====================================================================
 
 function normalizeEmail(email) {
   return (email || '').trim().toLowerCase();
@@ -66,193 +64,556 @@ function normalizeEmail(email) {
 
 function emptyPermissionSet() {
   const set = {};
+
   MODULES.forEach((m) => {
-    set[m] = { view: false, add: false, edit: false, delete: false, print_export: false };
+    set[m] = {
+      view: false,
+      add: false,
+      edit: false,
+      delete: false,
+      print_export: false
+    };
   });
+
   return set;
 }
 
 function fullPermissionSet() {
   const set = {};
+
   MODULES.forEach((m) => {
-    set[m] = { view: true, add: true, edit: true, delete: true, print_export: true };
+    set[m] = {
+      view: true,
+      add: true,
+      edit: true,
+      delete: true,
+      print_export: true
+    };
   });
+
   return set;
 }
 
-function buildState({ user, isSuperAdminFlag, profile, permissions }) {
+// =====================================================================
+// STATE
+// =====================================================================
+
+function buildState({
+  user,
+  isSuperAdminFlag,
+  profile,
+  permissions
+}) {
   return {
     user,
-    // user-roles.html gates entry on `r?.allowed && isSuperAdmin()`. `allowed`
-    // simply means "RBAC resolved successfully for a valid session" — the
-    // super-admin gate itself is `isSuperAdmin()`. Reaching this point always
-    // means resolution succeeded, so this is always true here.
+
+    // RBAC was resolved successfully for this authenticated session.
     allowed: true,
+
     email: user?.email || null,
+
     isSuperAdmin: !!isSuperAdminFlag,
+
     profile: profile || null,
-    roleType: profile?.role_type || (isSuperAdminFlag ? 'full_access' : null),
-    status: profile?.status || (isSuperAdminFlag ? 'active' : 'inactive'),
+
+    roleType:
+      profile?.role_type ||
+      (isSuperAdminFlag ? 'full_access' : null),
+
+    status:
+      profile?.status ||
+      (isSuperAdminFlag ? 'active' : 'inactive'),
+
     permissions,
+
+    // Useful for dashboard boot/identity checks.
+    userId: user?.id || null,
+
+    initializedAt: Date.now()
   };
 }
 
-// Expands a role_type (full_access / manage / view_only) across every
-// module that doesn't already have an explicit permissions row, matching
-// the Role Type behavior defined in user-roles.html's collectPayload().
-// A 'custom' role_type is left untouched — its explicit rows already are
-// the source of truth.
-function applyRoleTypeDefaults(profile, permissions) {
-  if (!profile?.role_type || profile.role_type === 'custom') return permissions;
+// =====================================================================
+// ROLE TYPE DEFAULTS
+// =====================================================================
+
+function applyRoleTypeDefaults(
+  profile,
+  permissions
+) {
+  if (
+    !profile?.role_type ||
+    profile.role_type === 'custom'
+  ) {
+    return permissions;
+  }
 
   MODULES.forEach((m) => {
-    const row = permissions[m];
-    const hasExplicitRow = row && (row.view || row.add || row.edit || row.delete || row.print_export);
-    if (hasExplicitRow) return; // an explicit row always wins
 
-    if (profile.role_type === 'full_access') {
-      permissions[m] = { view: true, add: true, edit: true, delete: true, print_export: true };
-    } else if (profile.role_type === 'manage') {
-      permissions[m] = { view: true, add: true, edit: true, delete: false, print_export: true };
-    } else if (profile.role_type === 'view_only') {
-      permissions[m] = { view: true, add: false, edit: false, delete: false, print_export: false };
+    const row = permissions[m];
+
+    const hasExplicitRow =
+      row &&
+      (
+        row.view ||
+        row.add ||
+        row.edit ||
+        row.delete ||
+        row.print_export
+      );
+
+    // Explicit DB permission always wins.
+    if (hasExplicitRow) {
+      return;
+    }
+
+    if (
+      profile.role_type === 'full_access'
+    ) {
+
+      permissions[m] = {
+        view: true,
+        add: true,
+        edit: true,
+        delete: true,
+        print_export: true
+      };
+
+    } else if (
+      profile.role_type === 'manage'
+    ) {
+
+      permissions[m] = {
+        view: true,
+        add: true,
+        edit: true,
+        delete: false,
+        print_export: true
+      };
+
+    } else if (
+      profile.role_type === 'view_only'
+    ) {
+
+      permissions[m] = {
+        view: true,
+        add: false,
+        edit: false,
+        delete: false,
+        print_export: false
+      };
     }
   });
 
   return permissions;
 }
 
-async function fetchProfileAndPermissions(supabase, authUser) {
+// =====================================================================
+// PROFILE + PERMISSIONS
+// =====================================================================
+
+async function fetchProfileAndPermissions(
+  supabase,
+  authUser
+) {
   let profile = null;
 
   try {
-    const { data: byId, error: byIdError } = await supabase
+
+    // ---------------------------------------------------------------
+    // Primary lookup: auth user UUID
+    // ---------------------------------------------------------------
+
+    const {
+      data: byId,
+      error: byIdError
+    } = await supabase
       .from(CONFIG.profilesTable)
       .select('*')
-      .eq(CONFIG.profileIdColumn, authUser.id)
+      .eq(
+        CONFIG.profileIdColumn,
+        authUser.id
+      )
       .maybeSingle();
 
-    if (byIdError) console.error('[RBAC] profile lookup by id failed:', byIdError.message);
+    if (byIdError) {
+      console.error(
+        '[RBAC] profile lookup by id failed:',
+        byIdError.message
+      );
+    }
+
     profile = byId || null;
 
-    // Fallback for setups that link the profile row by email instead of uid.
-    if (!profile && authUser.email) {
-      const { data: byEmail, error: byEmailError } = await supabase
+    // ---------------------------------------------------------------
+    // Fallback: email
+    // ---------------------------------------------------------------
+
+    if (
+      !profile &&
+      authUser.email
+    ) {
+
+      const {
+        data: byEmail,
+        error: byEmailError
+      } = await supabase
         .from(CONFIG.profilesTable)
         .select('*')
-        .eq(CONFIG.profileEmailColumn, authUser.email)
+        .eq(
+          CONFIG.profileEmailColumn,
+          authUser.email
+        )
         .maybeSingle();
-      if (byEmailError) console.error('[RBAC] profile lookup by email failed:', byEmailError.message);
+
+      if (byEmailError) {
+        console.error(
+          '[RBAC] profile lookup by email failed:',
+          byEmailError.message
+        );
+      }
+
       profile = byEmail || null;
     }
+
   } catch (err) {
-    console.error('[RBAC] Unexpected error loading profile:', err);
+
+    console.error(
+      '[RBAC] Unexpected error loading profile:',
+      err
+    );
   }
 
-  const permissions = emptyPermissionSet();
-  const permissionKey = profile?.[CONFIG.profileIdColumn] ?? authUser.id;
+  // ---------------------------------------------------------------
+  // Permissions
+  // ---------------------------------------------------------------
+
+  const permissions =
+    emptyPermissionSet();
+
+  const permissionKey =
+    profile?.[CONFIG.profileIdColumn] ??
+    authUser.id;
 
   try {
-    const { data: permRows, error: permError } = await supabase
+
+    const {
+      data: permRows,
+      error: permError
+    } = await supabase
       .from(CONFIG.permissionsTable)
       .select('*')
-      .eq(CONFIG.permissionIdColumn, permissionKey);
+      .eq(
+        CONFIG.permissionIdColumn,
+        permissionKey
+      );
 
     if (permError) {
-      console.error('[RBAC] permissions lookup failed:', permError.message);
-    } else if (Array.isArray(permRows)) {
+
+      console.error(
+        '[RBAC] permissions lookup failed:',
+        permError.message
+      );
+
+    } else if (
+      Array.isArray(permRows)
+    ) {
+
       permRows.forEach((row) => {
-        const moduleName = row[CONFIG.moduleColumn];
-        if (!moduleName) return;
+
+        const moduleName =
+          row[CONFIG.moduleColumn];
+
+        if (!moduleName) {
+          return;
+        }
+
+        // Only known modules.
+        if (
+          !MODULES.includes(moduleName)
+        ) {
+          return;
+        }
+
         permissions[moduleName] = {
           view: !!row.view,
           add: !!row.add,
           edit: !!row.edit,
           delete: !!row.delete,
-          print_export: !!row.print_export,
+          print_export: !!row.print_export
         };
       });
     }
+
   } catch (err) {
-    console.error('[RBAC] Unexpected error loading permissions:', err);
+
+    console.error(
+      '[RBAC] Unexpected error loading permissions:',
+      err
+    );
   }
 
-  applyRoleTypeDefaults(profile, permissions);
-  return { profile, permissions };
+  // Apply preset role defaults after DB permissions.
+  applyRoleTypeDefaults(
+    profile,
+    permissions
+  );
+
+  return {
+    profile,
+    permissions
+  };
 }
 
-export async function initializeRBAC({ supabase }) {
-  // Coalesce concurrent/duplicate calls onto a single in-flight request.
-  if (_initPromise) return _initPromise;
+// =====================================================================
+// INITIALIZE RBAC
+// =====================================================================
+
+export async function initializeRBAC({
+  supabase
+}) {
+
+  // ---------------------------------------------------------------
+  // Prevent duplicate simultaneous DB requests.
+  // ---------------------------------------------------------------
+
+  if (_initPromise) {
+    return _initPromise;
+  }
+
+  // ---------------------------------------------------------------
+  // Start a completely new resolution.
+  // Clear stale state first.
+  // ---------------------------------------------------------------
 
   _initPromise = (async () => {
-    try {
-      const { data, error: sessionError } = await supabase.auth.getSession();
-      const session = data?.session;
 
-      if (sessionError || !session?.user) {
+    try {
+
+      /*
+       * VERY IMPORTANT:
+       *
+       * Always resolve the CURRENT Supabase session first.
+       *
+       * This prevents a previous user's RBAC state from being
+       * accidentally displayed while the new user's session loads.
+       */
+
+      const {
+        data,
+        error: sessionError
+      } = await supabase.auth.getSession();
+
+      const session =
+        data?.session || null;
+
+      const authUser =
+        session?.user || null;
+
+      // -------------------------------------------------------------
+      // No authenticated user
+      // -------------------------------------------------------------
+
+      if (
+        sessionError ||
+        !authUser
+      ) {
+
         _rbacState = null;
+        _rbacUserId = null;
+
         return null;
       }
 
-      const authUser = session.user;
-      const email = normalizeEmail(authUser.email);
+      // -------------------------------------------------------------
+      // Current authenticated user
+      // -------------------------------------------------------------
 
-      if (email === SUPER_ADMIN_EMAIL) {
-        // Super Admin is granted full access unconditionally. This check
-        // happens BEFORE any database lookup, so a missing profile row,
-        // a bad permissions row, or a DB error can never lock this
-        // account out, downgrade it, or hide User Roles from it.
+      const email =
+        normalizeEmail(
+          authUser.email
+        );
+
+      const currentUserId =
+        authUser.id;
+
+      // -------------------------------------------------------------
+      // If a different user is now logged in,
+      // destroy the previous cached state first.
+      // -------------------------------------------------------------
+
+      if (
+        _rbacUserId &&
+        _rbacUserId !== currentUserId
+      ) {
+
+        _rbacState = null;
+      }
+
+      _rbacUserId =
+        currentUserId;
+
+      // -------------------------------------------------------------
+      // SUPER ADMIN
+      // -------------------------------------------------------------
+      //
+      // Preserve your existing behavior:
+      // mhssepr@gmail.com gets complete access.
+      //
+      // But the state is now associated with the CURRENT auth user,
+      // so it cannot leak into another user's session.
+      // -------------------------------------------------------------
+
+      if (
+        email === SUPER_ADMIN_EMAIL
+      ) {
+
         _rbacState = buildState({
           user: authUser,
+
           isSuperAdminFlag: true,
+
           profile: null,
-          permissions: fullPermissionSet(),
+
+          permissions:
+            fullPermissionSet()
         });
+
         return _rbacState;
       }
 
-      const { profile, permissions } = await fetchProfileAndPermissions(supabase, authUser);
+      // -------------------------------------------------------------
+      // NORMAL USER
+      // -------------------------------------------------------------
 
-      // A disabled account is authenticated but has no module access.
-      const isDisabled = !!profile && profile.status && profile.status !== 'active';
+      const {
+        profile,
+        permissions
+      } =
+        await fetchProfileAndPermissions(
+          supabase,
+          authUser
+        );
+
+      // -------------------------------------------------------------
+      // Disabled/inactive account
+      // -------------------------------------------------------------
+
+      const isDisabled =
+        !!profile &&
+        !!profile.status &&
+        profile.status !== 'active';
 
       _rbacState = buildState({
         user: authUser,
+
         isSuperAdminFlag: false,
+
         profile,
-        permissions: isDisabled ? emptyPermissionSet() : permissions,
+
+        permissions:
+          isDisabled
+            ? emptyPermissionSet()
+            : permissions
       });
+
       return _rbacState;
+
     } catch (err) {
-      console.error('[RBAC] initializeRBAC failed:', err);
+
+      console.error(
+        '[RBAC] initializeRBAC failed:',
+        err
+      );
+
       _rbacState = null;
+      _rbacUserId = null;
+
       return null;
+
+    } finally {
+
+      /*
+       * Important:
+       * Allow a later refresh/login to perform a new resolution.
+       */
+      _initPromise = null;
     }
+
   })();
 
   return _initPromise;
 }
 
+// =====================================================================
+// GET CURRENT RBAC
+// =====================================================================
+
 export function getRBAC() {
   return _rbacState;
 }
+
+// =====================================================================
+// SUPER ADMIN CHECK
+// =====================================================================
 
 export function isSuperAdmin() {
   return !!_rbacState?.isSuperAdmin;
 }
 
-export function hasModuleAccess(moduleName, action = 'view') {
-  if (!moduleName) return false;
-  if (_rbacState?.isSuperAdmin) return true;
-  const perm = _rbacState?.permissions?.[moduleName];
+// =====================================================================
+// MODULE ACCESS
+// =====================================================================
+
+export function hasModuleAccess(
+  moduleName,
+  action = 'view'
+) {
+
+  if (!moduleName) {
+    return false;
+  }
+
+  // Super Admin gets everything.
+  if (
+    _rbacState?.isSuperAdmin
+  ) {
+    return true;
+  }
+
+  const perm =
+    _rbacState
+      ?.permissions
+      ?.[
+        moduleName
+      ];
+
   return !!perm?.[action];
 }
 
-// Not used by the existing pages today, but exposed in case you ever want
-// to force a re-read (e.g. right after User Roles saves a change to the
-// currently-logged-in account) without a full page reload.
+// =====================================================================
+// RESET RBAC
+// =====================================================================
+
 export function resetRBAC() {
+
   _rbacState = null;
+
+  _rbacUserId = null;
+
   _initPromise = null;
 }
+
+// =====================================================================
+// OPTIONAL: CLEAR WHEN SUPABASE SIGNS OUT
+// =====================================================================
+//
+// This does NOT create another auth listener.
+// dashboard.html can continue using its existing listener.
+//
+// You can call:
+//
+//   resetRBAC();
+//
+// after signOut if needed.
+// =====================================================================

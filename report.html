@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="./mhss-global.js"></script>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -320,6 +321,50 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
 }
 </style>
 
+<style>
+.report-feature-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.report-feature-card{display:flex;align-items:center;gap:11px;text-align:left;padding:14px;border:1px solid var(--report-border);background:var(--report-card);color:var(--report-text);border-radius:18px;cursor:pointer;transition:.25s ease;min-height:78px}
+.report-feature-card:hover{transform:translateY(-2px);border-color:var(--report-accent);box-shadow:0 12px 30px rgba(15,23,42,.10)}
+.report-feature-card .rf-icon{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--report-accent-soft);flex:0 0 auto;font-size:20px}
+.report-feature-card b{display:block;font-size:.78rem;font-weight:900}
+.report-feature-card small{display:block;margin-top:3px;font-size:.62rem;color:var(--report-muted);line-height:1.35}
+.report-feature-panel{display:none}.report-feature-focus{animation:reportFeatureFocus 1.2s ease}@keyframes reportFeatureFocus{0%,100%{box-shadow:0 0 0 transparent}35%{box-shadow:0 0 0 4px var(--report-accent)}}
+.report-feature-panel.open{display:block}
+.rf-dashboard-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.rf-stat{border:1px solid var(--report-border);background:var(--report-card);border-radius:16px;padding:13px}
+.rf-stat .k{font-size:.62rem;color:var(--report-muted);text-transform:uppercase;letter-spacing:.04em}
+.rf-stat .v{font-size:1.25rem;font-weight:900;margin-top:5px}
+.rf-chart-row{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:12px}
+.rf-mini-card{border:1px solid var(--report-border);background:var(--report-card);border-radius:18px;padding:14px}
+.rf-mini-title{font-size:.7rem;font-weight:900;margin-bottom:9px}
+.rf-bar{height:9px;border-radius:999px;background:rgba(127,127,127,.14);overflow:hidden}
+.rf-bar span{display:block;height:100%;background:var(--report-accent);border-radius:999px}
+.rf-id-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.rf-pill{border:1px solid var(--report-border);background:var(--report-bg);border-radius:10px;padding:7px 10px;font-size:.7rem;font-weight:800;cursor:pointer}
+@media(max-width:1000px){.report-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rf-stat{min-width:0}.rf-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rf-chart-row{grid-template-columns:1fr}}
+@media(max-width:600px){.report-feature-grid{grid-template-columns:1fr}.rf-dashboard-grid{grid-template-columns:1fr}}
+</style>
+<style>
+/* ===== ETHIOPIAN REPORT DATE PICKER ===== */
+.ec-date-popover{position:fixed;z-index:99999;width:min(360px,calc(100vw - 24px));padding:14px;border:1px solid var(--report-border);background:var(--report-card);color:var(--report-text);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.22);backdrop-filter:blur(18px)}
+.ec-date-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.ec-date-nav{display:flex;gap:6px}
+.ec-date-nav button,.ec-date-action{border:1px solid var(--report-border);background:var(--report-bg);color:var(--report-text);border-radius:9px;padding:6px 9px;font-weight:800;cursor:pointer}
+.ec-date-nav button:hover,.ec-date-action:hover{border-color:var(--report-accent);color:var(--report-accent)}
+.ec-date-title{font-size:.9rem;font-weight:900;text-align:center;flex:1}
+.ec-date-week,.ec-date-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.ec-date-week span{font-size:.62rem;color:var(--report-muted);text-align:center;font-weight:800;padding:5px 0}
+.ec-day{border:1px solid transparent;background:transparent;color:var(--report-text);border-radius:9px;padding:8px 2px;font-size:.74rem;cursor:pointer}
+.ec-day:hover{background:var(--report-accent-soft);border-color:var(--report-accent)}
+.ec-day.selected{background:var(--report-accent);color:#fff;font-weight:900}
+.ec-day.today{box-shadow:inset 0 0 0 1px var(--report-accent);font-weight:900}
+.ec-date-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--report-border)}
+.ec-date-hint{font-size:.66rem;color:var(--report-muted)}
+</style>
+<style>
+/* ===== GLOBAL REPORT CENTER ===== */
+.global-report-builder{display:grid;grid-template-columns:1.1fr 1.1fr 1fr 1fr;gap:14px}.global-report-builder .wide{grid-column:span 2}.global-report-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.global-report-actions button{border:1px solid var(--report-border);background:var(--report-card);color:var(--report-text);padding:9px 13px;border-radius:11px;font-size:12px;font-weight:800;transition:.2s}.global-report-actions button:hover{border-color:var(--report-accent);color:var(--report-accent);transform:translateY(-1px)}.global-report-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.global-report-stat{border:1px solid var(--report-border);background:var(--report-card);border-radius:16px;padding:15px;min-width:0}.global-report-stat .v{font-size:1.35rem;font-weight:900;margin-top:4px}.global-report-stat .l{font-size:.68rem;color:var(--report-muted);text-transform:uppercase;letter-spacing:.06em}#globalReportTable{width:100%;border-collapse:collapse}#globalReportTable th,#globalReportTable td{padding:11px 13px;border-bottom:1px solid var(--report-border);vertical-align:top}#globalReportTable th{font-size:10px;color:var(--report-muted);text-transform:uppercase;letter-spacing:.06em;text-align:left}#globalReportTable td{font-size:12px}.global-report-empty{padding:42px 15px;text-align:center;color:var(--report-muted)}@media(max-width:900px){.global-report-builder{grid-template-columns:1fr 1fr}.global-report-builder .wide{grid-column:span 2}.global-report-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.global-report-builder{grid-template-columns:1fr}.global-report-builder .wide{grid-column:span 1}.global-report-stat-grid{grid-template-columns:1fr 1fr}#globalReportTable thead{display:none}#globalReportTable tbody,#globalReportTable tr,#globalReportTable td{display:block;width:100%}#globalReportTable tr{padding:10px 0;border-bottom:1px solid var(--report-border)}#globalReportTable td{border:0;padding:4px 10px!important}#globalReportTable td::before{content:attr(data-label);display:inline-block;min-width:86px;color:var(--report-muted);font-size:9px;text-transform:uppercase;font-weight:800;margin-right:6px}}
+</style>
 </head>
 <body class="min-h-screen flex flex-col relative overflow-x-hidden">
 
@@ -525,17 +570,42 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
 
 <!-- ============ REPORT GENERATOR TAB ============ -->
         <div id="reportsTab" class="hidden">
+            <!-- GLOBAL REPORT CENTER: all MHSS modules -->
+            <section class="glass-panel-gold rounded-3xl p-6 mb-6 no-print">
+                <div class="flex flex-wrap items-start justify-between gap-4 mb-5"><div><p class="section-title mb-1">🌐 <span data-i18n="globalReportCenter">Global Report Center</span></p><h2 class="text-2xl font-bold" data-i18n="allModulesInOneReport">Reports from every MHSS module in one place</h2><p class="text-xs text-gray-500 mt-1" data-i18n="globalReportCenterDesc">Students, attendance, finance, events, equipment, office, users and audit activity are combined from live Supabase records.</p></div><div class="global-report-actions"><button onclick="globalQuickRange('month')" data-i18n="thisMonth">This Month</button><button onclick="globalQuickRange('year')" data-i18n="thisYear">This Year</button><button onclick="globalQuickRange('all')" data-i18n="allTime">All Time</button><button onclick="loadLiveData()">↻ <span data-i18n="refresh">Refresh</span></button></div></div>
+                <div id="executiveReportDashboard" class="report-feature-grid mb-5">
+                    <button type="button" class="report-feature-card" onclick="selectGlobalFeature('executive')"><span class="rf-icon">📊</span><span><b data-i18n="executiveDashboard">Executive Report Dashboard</b><small data-i18n="executiveDashboardDesc">Live overview of students, attendance, programs and finance</small></span></button>
+                    <button type="button" class="report-feature-card" onclick="selectGlobalFeature('attendance')"><span class="rf-icon">🕘</span><span><b data-i18n="attendanceIntelligence">Attendance Intelligence</b><small data-i18n="attendanceIntelligenceDesc">Attendance trends, present, late, absent and rates</small></span></button>
+                    <button type="button" class="report-feature-card" onclick="selectGlobalFeature('idcards')"><span class="rf-icon">🎓</span><span><b data-i18n="studentIdCardCenter">Student ID Card Center</b><small data-i18n="studentIdCardCenterDesc">Search, preview and print student cards</small></span></button>
+                    <button type="button" class="report-feature-card" onclick="selectGlobalFeature('builder')"><span class="rf-icon">🛠️</span><span><b data-i18n="advancedCustomBuilder">Advanced Custom Report Builder</b><small data-i18n="advancedCustomBuilderDesc">Build filtered reports from live MHSS data</small></span></button>
+                </div>
+                <div id="globalExecutivePanel" class="report-feature-panel mb-5"></div>
+                <div class="global-report-builder mb-5">
+                    <div class="wide"><label class="block text-xs text-gray-400 mb-1" data-i18n="reportModule">Report Module</label><select id="globalReportType" onchange="renderGlobalReport()" class="lux-input w-full rounded-lg p-2.5 text-sm outline-none"><option value="all" data-i18n="allModules">All Modules</option><option value="students" data-i18n="studentsReport">Students</option><option value="student_id_cards" data-i18n="studentIdCardsReport">Student ID Cards</option><option value="attendance" data-i18n="attendanceReport">Attendance</option><option value="finance" data-i18n="financeReport">Finance</option><option value="events" data-i18n="eventsReport">Events</option><option value="equipment" data-i18n="equipmentReport">Equipment</option><option value="office" data-i18n="officeReport">Office</option><option value="users" data-i18n="usersReport">Users</option><option value="audit" data-i18n="auditReport">Audit Trail</option></select></div>
+                    <div><label class="block text-xs text-gray-400 mb-1" data-i18n="from">From</label><input type="text" id="globalStartEc" readonly placeholder="2019-01-01" onclick="openGlobalEcDatePicker('globalStart')" class="lux-input w-full rounded-lg p-2.5 text-sm outline-none cursor-pointer" aria-label="Ethiopian start date"><input type="hidden" id="globalStart"></div><div><label class="block text-xs text-gray-400 mb-1" data-i18n="to">To</label><input type="text" id="globalEndEc" readonly placeholder="2019-13-05" onclick="openGlobalEcDatePicker('globalEnd')" class="lux-input w-full rounded-lg p-2.5 text-sm outline-none cursor-pointer" aria-label="Ethiopian end date"><input type="hidden" id="globalEnd"></div><div><label class="block text-xs text-gray-400 mb-1" data-i18n="search">Search</label><input type="search" id="globalSearch" oninput="renderGlobalReport()" placeholder="Search records..." class="lux-input w-full rounded-lg p-2.5 text-sm outline-none"></div>
+                </div>
+                <div class="global-report-stat-grid mb-5"><div class="global-report-stat"><div class="l" data-i18n="matchingRecords">Matching Records</div><div id="globalCount" class="v">0</div></div><div class="global-report-stat"><div class="l" data-i18n="income">Income</div><div id="globalIncome" class="v text-green-400">0 ETB</div></div><div class="global-report-stat"><div class="l" data-i18n="expenses">Expenses</div><div id="globalExpense" class="v text-red-400">0 ETB</div></div><div class="global-report-stat"><div class="l" data-i18n="students">Students</div><div id="globalStudents" class="v">0</div></div></div>
+                <div class="flex flex-wrap justify-between items-center gap-3 mb-3"><p class="text-xs text-gray-500"><span data-i18n="liveDataSources">🔗 Live Data Sources:</span> <span id="globalReportStatus" class="text-green-400 font-semibold">LIVE</span></p><div class="global-report-actions"><button onclick="exportGlobalExcel()">📊 <span data-i18n="exportExcel">Export Excel/CSV</span></button><button onclick="setReportOutputLanguage('en')">🇬🇧 <span data-i18n="exportEnglish">English Output</span></button><button onclick="setReportOutputLanguage('am')">🇪🇹 <span data-i18n="exportAmharic">Amharic Output</span></button><button onclick="printGlobalReport()">🖨️ <span data-i18n="printReport">Print Report</span></button></div></div>
+                <div class="overflow-x-auto rounded-2xl border border-[var(--report-border)]"><table id="globalReportTable"><thead><tr><th data-i18n="date">Date</th><th data-i18n="sourceLabel">Source</th><th data-i18n="categoryLabel">Category</th><th data-i18n="description">Description</th><th data-i18n="type">Type</th><th data-i18n="amountEtb">Value</th></tr></thead><tbody id="globalReportBody"></tbody></table><div id="globalReportEmpty" class="global-report-empty hidden" data-i18n="noRecordsMatch">No records match this filter.</div></div>
+            </section>
+
             <!-- Custom Report Builder -->
             <div class="glass-panel-gold rounded-3xl p-6 mb-6 no-print">
                 <p class="section-title mb-4">🛠️ <span data-i18n="customReportBuilder">Custom Report Builder</span></p>
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                     <div>
                         <label class="block text-xs text-gray-400 mb-1" data-i18n="from">From</label>
-                        <input type="date" id="rbStart" onchange="renderReportTable()" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                        <div class="relative">
+                            <input type="text" id="rbStartEc" readonly placeholder="2019-01-01" onclick="openEcDatePicker('rbStart')" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none cursor-pointer" aria-label="Ethiopian start date">
+                            <input type="hidden" id="rbStart">
+                        </div>
                     </div>
                     <div>
                         <label class="block text-xs text-gray-400 mb-1" data-i18n="to">To</label>
-                        <input type="date" id="rbEnd" onchange="renderReportTable()" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                        <div class="relative">
+                            <input type="text" id="rbEndEc" readonly placeholder="2019-13-05" onclick="openEcDatePicker('rbEnd')" class="lux-input w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none cursor-pointer" aria-label="Ethiopian end date">
+                            <input type="hidden" id="rbEnd">
+                        </div>
                     </div>
                     <div>
                         <label class="block text-xs text-gray-400 mb-1" data-i18n="sourceLabel">Source</label>
@@ -610,7 +680,8 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
     <div id="toastContainer" class="fixed bottom-6 right-6 z-[60] flex flex-col gap-2 no-print"></div>
 
     <!-- Hidden printable report sheet -->
-    <div id="printArea"></div>
+    <div id="ecDatePicker" class="ec-date-popover hidden" aria-hidden="true"></div><div id="globalEcDatePicker" class="ec-date-popover hidden" aria-hidden="true"></div>
+<div id="printArea"></div>
 
     <!-- SHARED LIGHT / DARK THEME -->
     <script>
@@ -718,6 +789,31 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             date: { en: 'Date', am: 'ቀን' },
             description: { en: 'Description', am: 'መግለጫ' },
             amountEtb: { en: 'Amount (ETB)', am: 'መጠን (ብር)' },
+            globalReportCenter: { en: 'Global Report Center', am: 'ዓለም አቀፍ የሪፖርት ማዕከል' }, allModulesInOneReport: { en: 'Reports from every MHSS module in one place', am: 'ከሁሉም የMHSS ሞጁሎች ሪፖርቶች በአንድ ቦታ' }, globalReportCenterDesc: { en: 'Students, attendance, finance, events, equipment, office, users and audit activity are combined from live Supabase records.', am: 'ተማሪዎች፣ ተገኝነት፣ ፋይናንስ፣ ክስተቶች፣ እቃዎች፣ ቢሮ፣ ተጠቃሚዎች እና የኦዲት እንቅስቃሴ ከቀጥታ የSupabase መረጃ ይጣመራሉ።' }, reportModule: { en: 'Report Module', am: 'የሪፖርት ሞጁል' }, allModules: { en: 'All Modules', am: 'ሁሉም ሞጁሎች' }, studentsReport: { en: 'Students', am: 'ተማሪዎች' }, attendanceReport: { en: 'Attendance', am: 'ተገኝነት' }, financeReport: { en: 'Finance', am: 'ፋይናንስ' }, eventsReport: { en: 'Events', am: 'ክስተቶች' }, equipmentReport: { en: 'Equipment', am: 'እቃዎች' }, officeReport: { en: 'Office', am: 'ቢሮ' }, usersReport: { en: 'Users', am: 'ተጠቃሚዎች' }, auditReport: { en: 'Audit Trail', am: 'የኦዲት መዝገብ' }, matchingRecords: { en: 'Matching Records', am: 'የሚዛመዱ መዝገቦች' }, printReport: { en: 'Print Report', am: 'ሪፖርት አትም' }, students: { en: 'Students', am: 'ተማሪዎች' }, studentIdCardsReport: { en: 'Student ID Cards', am: 'የተማሪ መታወቂያ ካርዶች' }, studentIdCardTitle: { en: 'Student ID Card', am: 'የተማሪ መታወቂያ' }, chooseEcDate: { en: 'Choose Ethiopian date', am: 'የኢትዮጵያ ቀን ይምረጡ' }, today: { en: 'Today', am: 'ዛሬ' }, studentId: { en: 'Student ID', am: 'የተማሪ መለያ' }, grade: { en: 'Grade', am: 'ክፍል' }, gender: { en: 'Gender', am: 'ጾታ' }, statusLabel: { en: 'Status', am: 'ሁኔታ' }, printIdCards: { en: 'Print ID Cards', am: 'መታወቂያ ካርዶችን አትም' }, search: { en: 'Search', am: 'ፈልግ' },
+            executiveDashboard: {en:'Executive Report Dashboard',am:'የአስተዳደር ሪፖርት ዳሽቦርድ'},
+            executiveDashboardDesc: {en:'Live overview of students, attendance, programs and finance',am:'የተማሪ፣ የመገኘት፣ የፕሮግራም እና የፋይናንስ የቀጥታ አጠቃላይ እይታ'},
+            attendanceIntelligence: {en:'Attendance Intelligence',am:'የመገኘት ኢንተሊጀንስ'},
+            attendanceIntelligenceDesc: {en:'Attendance trends, present, late, absent and rates',am:'የመገኘት አዝማሚያ፣ ተገኝቷል፣ ዘግይቷል፣ ቀሪ እና መጠን'},
+            studentIdCardCenter: {en:'Student ID Card Center',am:'የተማሪ መታወቂያ ማዕከል'},
+            studentIdCardCenterDesc: {en:'Search, preview and print student cards',am:'የተማሪ መታወቂያዎችን ፈልግ፣ ቅድመ እይታ እና አትም'},
+            advancedCustomBuilder: {en:'Advanced Custom Report Builder',am:'የላቀ የሪፖርት ገንቢ'},
+            advancedCustomBuilderDesc: {en:'Build filtered reports from live MHSS data',am:'ከቀጥታ MHSS መረጃ የተጣሩ ሪፖርቶችን ገንባ'},
+            attendanceRate: {en:'Attendance Rate',am:'የመገኘት መጠን'},
+            present: {en:'Present',am:'ተገኝቷል'},
+            late: {en:'Late',am:'ዘግይቷል'},
+            absent: {en:'Absent',am:'ቀሪ'},
+            excused: {en:'Excused',am:'ፈቃድ'},
+            totalStudents: {en:'Total Students',am:'ጠቅላላ ተማሪዎች'},
+            activeStudents: {en:'Active Students',am:'ንቁ ተማሪዎች'},
+            attendanceRecords: {en:'Attendance Records',am:'የመገኘት መዝገቦች'},
+            programs: {en:'Programs',am:'ፕሮግራሞች'},
+            financeBalance: {en:'Finance Balance',am:'የፋይናንስ ቀሪ'},
+            noAttendanceData: {en:'No attendance data available',am:'የመገኘት መረጃ የለም'},
+            idCardSearch: {en:'Search students for ID cards',am:'ለመታወቂያ ተማሪዎችን ፈልግ'},
+            printSelectedCards: {en:'Print Selected',am:'የተመረጡትን አትም'},
+            printAllCards: {en:'Print All Cards',am:'ሁሉንም ካርዶች አትም'},
+            exportEnglish: {en:'English Output',am:'የእንግሊዝኛ ውጤት'},
+            exportAmharic: {en:'Amharic Output',am:'የአማርኛ ውጤት'},
             noRecordsMatch: { en: 'No records match this filter.', am: 'ከዚህ ማጣሪያ ጋር የሚስማማ መዝገብ የለም።' },
             noRecordsToExport: { en: 'No records to export.', am: 'ለማውጣት መዝገብ የለም።' },
             excelUnavailable: { en: 'Excel library is not available.', am: 'የExcel ላይብረሪ አይገኝም።' },
@@ -790,6 +886,8 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
         }
 
         let financeTx = [];
+        let globalReportRows = [];
+        let globalSourceData = { students:[], attendance:[], events:[], equipment:[], office:[], users:[], audit:[], loans:[], maintenance:[] };
         let live = {
             students: [],
             begenaStudents: [],
@@ -853,67 +951,183 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
 
         async function loadLiveData() {
             const results = await Promise.all([
-                get('finance_transactions', '*', 'date'),
-                get('student_payments', '*', 'paid_date'),
-                get('begena_student_payments', '*', 'paid_date'),
-                get('students', 'id,name,class_name', 'created_at'),
-                get('Begena_students', 'id,name,grade', 'created_at'),
-                get('attendance_records', 'student_id,class_name,record_date,status', 'record_date'),
-                get('Begena_Attendance', 'student_id,attendance_date,status', 'attendance_date'),
-                get('assets', '*', 'created_at'),
-                get('office_letters', '*', 'created_at'),
-                get('finance_bank_accounts', '*', 'created_at')
+                get('finance_transactions', '*', 'date'), get('student_payments', '*', 'paid_date'), get('begena_student_payments', '*', 'paid_date'),
+                get('students', 'id,name,class_name,gender,grade,status,created_at', 'created_at'), get('Begena_students', 'id,name,grade,status,created_at', 'created_at'),
+                get('attendance_records', 'student_id,class_name,record_date,status', 'record_date'), get('Begena_Attendance', 'student_id,attendance_date,status', 'attendance_date'),
+                get('assets', '*', 'created_at'), get('office_letters', '*', 'created_at'), get('finance_bank_accounts', '*', 'created_at'),
+                get('mhss_calendar_events', '*', 'created_at'), get('loans', '*', 'created_at'), get('maintenance_logs', '*', 'created_at'),
+                get('mhss_user_profiles', 'user_id,name,email,role_type,status,created_at', 'created_at'), get('mhss_audit_logs', '*', 'occurred_at')
             ]);
-
-            const [
-                finance, studentPayments, begenaPayments, students, begenaStudents,
-                attendance, begenaAttendance, assets, officeLetters, bankAccounts
-            ] = results;
-
-            live = {
-                students: students.data,
-                begenaStudents: begenaStudents.data,
-                attendance: attendance.data,
-                begenaAttendance: begenaAttendance.data,
-                assets: assets.data,
-                officeLetters: officeLetters.data,
-                bankAccounts: bankAccounts.data
-            };
-
-            financeTx = [];
-
-            // Financial page records — these are the authoritative income/expense records.
-            finance.data.forEach(r => {
-                addTransaction(
-                    'financial', r, r.category || 'General',
-                    r.description || r.payer_name || r.receiver || 'Financial transaction',
-                    r.date, r.amount, r.type === 'expense' ? 'expense' : 'income'
-                );
-            });
-
-            // Sunday School payments — linked to the students/payment page.
-            studentPayments.data.forEach(r => {
-                addTransaction(
-                    'sunday_school', r,
-                    r.plan || r.period || 'Student Payment',
-                    `${r.student_name || 'Student'}${r.period ? ' · ' + r.period : ''}`,
-                    r.paid_date, r.amount, 'income'
-                );
-            });
-
-            // Begena payments — linked to the Begena payment module.
-            begenaPayments.data.forEach(r => {
-                addTransaction(
-                    'begena', r,
-                    r.period || 'Begena Payment',
-                    `${r.student_name || 'Student'}${r.period ? ' · ' + r.period : ''}`,
-                    r.paid_date, r.amount, 'income'
-                );
-            });
-
-            renderDashboard();
-            renderReportTable();
+            const [finance,studentPayments,begenaPayments,students,begenaStudents,attendance,begenaAttendance,assets,officeLetters,bankAccounts,events,loans,maintenance,users,audit]=results;
+            live={students:students.data,begenaStudents:begenaStudents.data,attendance:attendance.data,begenaAttendance:begenaAttendance.data,assets:assets.data,officeLetters:officeLetters.data,bankAccounts:bankAccounts.data};
+            globalSourceData={students:students.data,begenaStudents:begenaStudents.data,attendance:[...attendance.data,...begenaAttendance.data],events:events.data,equipment:assets.data,office:officeLetters.data,users:users.data,audit:audit.data,loans:loans.data,maintenance:maintenance.data};
+            financeTx=[];
+            finance.data.forEach(r=>addTransaction('financial',r,r.category||'General',r.description||r.payer_name||r.receiver||'Financial transaction',r.date,r.amount,r.type==='expense'?'expense':'income'));
+            studentPayments.data.forEach(r=>addTransaction('sunday_school',r,r.plan||r.period||'Student Payment',`${r.student_name||'Student'}${r.period?' · '+r.period:''}`,r.paid_date,r.amount,'income'));
+            begenaPayments.data.forEach(r=>addTransaction('begena',r,r.period||'Begena Payment',`${r.student_name||'Student'}${r.period?' · '+r.period:''}`,r.paid_date,r.amount,'income'));
+            buildGlobalReportRows(); renderDashboard(); renderReportTable(); renderGlobalReport(); if($('globalExecutivePanel')?.classList.contains('open')) renderExecutiveReportDashboard();
         }
+        function normalizeDate(v){const m=String(v||'').match(/\d{4}-\d{2}-\d{2}/);return m?m[0]:'';}
+        function buildGlobalReportRows(){const rows=[];const push=(source,row,date,category,description,type,value=null)=>rows.push({source,date:normalizeDate(date)||new Date().toISOString().slice(0,10),category:String(category||'—'),description:String(description||'—'),type:String(type||'Record'),value:value==null?'—':value});globalSourceData.students.forEach(r=>push('students',r,r.created_at,'Student',`${r.name||'Student'}${r.class_name?' · '+r.class_name:''}`,r.status||'Active'));globalSourceData.attendance.forEach(r=>push('attendance',r,r.record_date||r.attendance_date,r.class_name||'Attendance',`Student ${r.student_id||'—'}`,r.status||'Recorded'));financeTx.forEach(r=>push('finance',r,r.date,r.category,r.description,r.type,r.type==='expense'?-r.amount:r.amount));globalSourceData.events.forEach(r=>push('events',r,r.date||r.event_date||r.start_date||r.created_at,r.type||r.category||'Event',r.title||r.name||r.description||'Event','Event'));globalSourceData.equipment.forEach(r=>push('equipment',r,r.created_at,r.category||r.status||'Equipment',r.name||r.assetName||r.assetId||'Equipment',r.status||'Asset',r.value||r.cost||null));globalSourceData.office.forEach(r=>push('office',r,r.created_at,r.type||r.category||'Office',r.subject||r.title||r.reference_no||'Office record',r.status||'Record'));globalSourceData.users.forEach(r=>push('users',r,r.created_at,r.role_type||'User',`${r.name||'User'} · ${r.email||''}`.trim(),r.status||'User'));globalSourceData.audit.forEach(r=>push('audit',r,r.occurred_at,r.table_name||'Audit',`${r.actor_email||'Unknown'} · ${r.record_id||'—'}`,r.action||'Audit'));globalReportRows=rows.sort((a,b)=>String(b.date).localeCompare(String(a.date)));}
+        const GLOBAL_LABELS={students:'Students',attendance:'Attendance',finance:'Finance',events:'Events',equipment:'Equipment',office:'Office',users:'Users',audit:'Audit'};
+        function globalFilteredRows(){const type=$('globalReportType')?.value||'all',start=$('globalStart')?.value||'',end=$('globalEnd')?.value||'',q=($('globalSearch')?.value||'').trim().toLowerCase();return globalReportRows.filter(r=>(type==='all'||r.source===type)&&(!start||r.date>=start)&&(!end||r.date<=end)&&(!q||`${r.source} ${r.category} ${r.description} ${r.type}`.toLowerCase().includes(q)));}
+        function getStudentIdCardRows(){
+            const sunday=(globalSourceData.students||[]).map(r=>({...r,_source:'Sunday School'}));
+            const begena=(globalSourceData.begenaStudents||[]).map(r=>({...r,_source:'Begena'}));
+            return [...sunday,...begena].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+        }
+        function renderStudentIdCards(){
+            const body=$('globalReportBody'), table=$('globalReportTable'), empty=$('globalReportEmpty');
+            if(!body||!table)return;
+            const students=getStudentIdCardRows();
+            table.classList.add('hidden');
+            empty.classList.add('hidden');
+            let wrap=$('studentIdCardsWrap');
+            if(!wrap){
+                wrap=document.createElement('div');
+                wrap.id='studentIdCardsWrap';
+                wrap.className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4';
+                table.parentNode.insertBefore(wrap,table);
+            }
+            const q=($('globalSearch')?.value||'').trim().toLowerCase();
+            const filtered=students.filter(s=>!q||`${s.name||''} ${s.id||''} ${s.class_name||''} ${s.grade||''} ${s._source}`.toLowerCase().includes(q));
+            wrap.innerHTML=filtered.map(s=>`
+                <div class="rounded-2xl border border-[var(--report-border)] bg-[var(--report-card)] p-4 shadow-sm">
+                    <div class="flex items-center gap-3 pb-3 border-b border-[var(--report-border)]">
+                        <div class="w-14 h-14 rounded-xl grid place-items-center bg-[var(--report-accent-soft)] border border-[var(--report-border)] text-xl">🎓</div>
+                        <div class="min-w-0"><div class="font-black truncate">${esc(s.name||'Student')}</div><div class="text-xs text-gray-500">${esc(s._source)}</div></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-3 text-xs">
+                        <div><div class="text-gray-500">${esc(t('studentId'))}</div><div class="font-bold break-all">${esc(s.id||'—')}</div></div>
+                        <div><div class="text-gray-500">${esc(t('grade'))}</div><div class="font-bold">${esc(s.grade||s.class_name||'—')}</div></div>
+                        <div><div class="text-gray-500">${esc(t('gender'))}</div><div class="font-bold">${esc(s.gender||'—')}</div></div>
+                        <div><div class="text-gray-500">${esc(t('statusLabel'))}</div><div class="font-bold">${esc(s.status||'—')}</div></div>
+                    </div>
+                </div>`).join('');
+            if(!filtered.length) wrap.innerHTML=`<div class="col-span-full global-report-empty">${esc(t('noRecordsMatch'))}</div>`;
+            $('globalCount').textContent=filtered.length.toLocaleString();
+            $('globalIncome').textContent='—';
+            $('globalExpense').textContent='—';
+            $('globalStudents').textContent=filtered.length.toLocaleString();
+        }
+        function selectGlobalFeature(feature){
+            const panel=$('globalExecutivePanel');
+            if(!panel)return;
+            panel.classList.add('open');
+            if(feature==='executive') renderExecutiveReportDashboard();
+            else if(feature==='attendance') renderAttendanceIntelligence();
+            else if(feature==='idcards'){ $('globalReportType').value='student_id_cards'; renderGlobalReport(); panel.innerHTML=''; panel.classList.remove('open'); document.getElementById('globalReportType')?.scrollIntoView({behavior:'smooth',block:'center'}); }
+            else if(feature==='builder'){
+                const builder=document.querySelector('[data-i18n="customReportBuilder"]')?.closest('.glass-panel-gold');
+                panel.innerHTML=''; panel.classList.remove('open');
+                builder?.scrollIntoView({behavior:'smooth',block:'center'});
+                builder?.classList.add('report-feature-focus');
+                setTimeout(()=>builder?.classList.remove('report-feature-focus'),1200);
+            }
+        }
+        function renderExecutiveReportDashboard(){
+            const students=getStudentIdCardRows();
+            const attendance=globalSourceData.attendance||[];
+            const active=students.filter(s=>String(s.status||'').toLowerCase()!=='inactive').length;
+            const present=attendance.filter(a=>['present','late'].includes(String(a.status||'').toLowerCase())).length;
+            const late=attendance.filter(a=>String(a.status||'').toLowerCase()==='late').length;
+            const absent=attendance.filter(a=>String(a.status||'').toLowerCase()==='absent').length;
+            const rate=attendance.length?Math.round((present/attendance.length)*100):0;
+            const programs=[...new Set(students.map(s=>s.program||s.program_name||s.class_name).filter(Boolean))].length;
+            const balance=financeTx.reduce((s,r)=>s+(r.type==='expense'?-Number(r.amount||0):Number(r.amount||0)),0);
+            $('globalExecutivePanel').innerHTML=`<div class="rf-dashboard-grid">
+                <div class="rf-stat"><div class="k">${esc(t('totalStudents'))}</div><div class="v">${students.length.toLocaleString()}</div></div>
+                <div class="rf-stat"><div class="k">${esc(t('activeStudents'))}</div><div class="v">${active.toLocaleString()}</div></div>
+                <div class="rf-stat"><div class="k">${esc(t('attendanceRate'))}</div><div class="v">${rate}%</div></div>
+                <div class="rf-stat"><div class="k">${esc(t('programs'))}</div><div class="v">${programs.toLocaleString()}</div></div>
+                <div class="rf-stat"><div class="k">${esc(t('financeBalance'))}</div><div class="v">${money(balance)}</div></div>
+            </div>
+            <div class="rf-chart-row">
+                <div class="rf-mini-card"><div class="rf-mini-title">${esc(t('attendanceIntelligence'))}</div>
+                    <div class="text-xs text-gray-500 mb-2">${esc(t('present'))}: ${present} · ${esc(t('late'))}: ${late} · ${esc(t('absent'))}: ${absent}</div>
+                    <div class="rf-bar"><span style="width:${Math.min(100,rate)}%"></span></div>
+                </div>
+                <div class="rf-mini-card"><div class="rf-mini-title">${esc(t('studentIdCardCenter'))}</div>
+                    <div class="text-xs text-gray-500">${students.length.toLocaleString()} ${esc(t('students'))}</div>
+                    <div class="rf-id-actions"><button class="rf-pill" onclick="selectGlobalFeature('idcards')">${esc(t('studentIdCardsReport'))}</button><button class="rf-pill" onclick="printStudentIdCards()">${esc(t('printAllCards'))}</button></div>
+                </div>
+            </div>`;
+        }
+        function renderAttendanceIntelligence(){
+            const attendance=globalSourceData.attendance||[];
+            const norm=s=>String(s||'').toLowerCase();
+            const present=attendance.filter(a=>norm(a.status)==='present').length;
+            const late=attendance.filter(a=>norm(a.status)==='late').length;
+            const absent=attendance.filter(a=>norm(a.status)==='absent').length;
+            const excused=attendance.filter(a=>['excused','permission'].includes(norm(a.status))).length;
+            const total=attendance.length;
+            const rate=total?Math.round(((present+late)/total)*100):0;
+            $('globalExecutivePanel').innerHTML=`<div class="rf-dashboard-grid">
+                <div class="rf-stat"><div class="k">${esc(t('attendanceRate'))}</div><div class="v">${rate}%</div></div>
+                <div class="rf-stat"><div class="k">${esc(t('present'))}</div><div class="v">${present.toLocaleString()}</div></div>
+                <div class="rf-stat"><div class="k">${esc(t('late'))}</div><div class="v">${late.toLocaleString()}</div></div>
+                <div class="rf-stat"><div class="k">${esc(t('absent'))}</div><div class="v">${absent.toLocaleString()}</div></div>
+                <div class="rf-stat"><div class="k">${esc(t('excused'))}</div><div class="v">${excused.toLocaleString()}</div></div>
+            </div>
+            <div class="rf-mini-card mt-3"><div class="rf-mini-title">${esc(t('attendanceRecords'))}: ${total.toLocaleString()}</div>
+                ${total?`<div class="text-xs text-gray-500 mb-2">${rate}% ${esc(t('attendanceRate'))}</div><div class="rf-bar"><span style="width:${rate}%"></span></div>`:`<div class="text-xs text-gray-500">${esc(t('noAttendanceData'))}</div>`}
+            </div>`;
+        }
+        function buildLocalizedGlobalRows(){
+            const rows=globalFilteredRows();
+            return rows.map(r=>({...r,
+                sourceLabel:t(GLOBAL_LABELS[r.source]==='Students'?'studentsReport':GLOBAL_LABELS[r.source].toLowerCase()+'Report')||GLOBAL_LABELS[r.source]||r.source
+            }));
+        }
+        function renderGlobalReport(){if(($('globalReportType')?.value||'all')==='student_id_cards'){renderStudentIdCards();return;}$('globalReportTable')?.classList.remove('hidden');$('studentIdCardsWrap')?.remove();const rows=globalFilteredRows(),body=$('globalReportBody'),empty=$('globalReportEmpty');if(!body)return;body.innerHTML=rows.map(r=>`<tr><td data-label="${esc(t('date'))}">${esc(r.date)}</td><td data-label="${esc(t('sourceLabel'))}"><span class="id-chip px-2 py-1 rounded-full text-xs font-semibold">${esc(GLOBAL_LABELS[r.source]||r.source)}</span></td><td data-label="${esc(t('categoryLabel'))}">${esc(r.category)}</td><td data-label="${esc(t('description'))}">${esc(r.description)}</td><td data-label="${esc(t('type'))}">${esc(r.type)}</td><td data-label="${esc(t('amountEtb'))}" class="font-semibold">${typeof r.value==='number'?(r.value>=0?'+':'')+r.value.toLocaleString()+' ETB':esc(r.value)}</td></tr>`).join('');empty.classList.toggle('hidden',rows.length>0);$('globalCount').textContent=rows.length.toLocaleString();const income=rows.filter(r=>r.source==='finance'&&typeof r.value==='number'&&r.value>0).reduce((s,r)=>s+r.value,0),expense=Math.abs(rows.filter(r=>r.source==='finance'&&typeof r.value==='number'&&r.value<0).reduce((s,r)=>s+r.value,0));$('globalIncome').textContent=money(income);$('globalExpense').textContent=money(expense);$('globalStudents').textContent=globalSourceData.students.length.toLocaleString();if($('globalReportStatus'))$('globalReportStatus').textContent=`${rows.length.toLocaleString()} ${t('recordsSuffix')} · ${t('live')}`;}
+        function globalQuickRange(period){const now=new Date();if(period==='all'){$('globalStart').value='';$('globalEnd').value='';$('globalStartEc').value='';$('globalEndEc').value='';}else if(period==='month'){const r=ethiopianMonthRange(now);$('globalStart').value=r.start.toISOString().slice(0,10);$('globalEnd').value=r.end.toISOString().slice(0,10);$('globalStartEc').value=ethiopianInputValue(r.start);$('globalEndEc').value=ethiopianInputValue(r.end);}else{const e=gregorianToEthiopian(now);const start=ethiopianToGregorian(e.year,1,1),end=ethiopianToGregorian(e.year+1,1,1);end.setDate(end.getDate()-1);$('globalStart').value=start.toISOString().slice(0,10);$('globalEnd').value=end.toISOString().slice(0,10);$('globalStartEc').value=ethiopianInputValue(start);$('globalEndEc').value=ethiopianInputValue(end);}renderGlobalReport();}
+        function exportGlobalExcel(){
+            const rows=globalFilteredRows();
+            if(!rows.length)return toast(t('noRecordsToExport'),'info');
+            if(!window.XLSX)return toast(t('excelUnavailable'),'error');
+            const am=currentLang==='am';
+            const data=rows.map(r=>({
+                [am?'ቀን':'Date']:r.date,
+                [am?'ምንጭ':'Source']:GLOBAL_LABELS[r.source]||r.source,
+                [am?'ምድብ':'Category']:r.category,
+                [am?'መግለጫ':'Description']:r.description,
+                [am?'አይነት':'Type']:r.type,
+                [am?'ዋጋ':'Value']:r.value
+            }));
+            const wb=XLSX.utils.book_new(),ws=XLSX.utils.json_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb,ws,am?'የMHSS አጠቃላይ ሪፖርት':'MHSS Global Report');
+            const ec=ethiopianLabel(new Date(),true);
+            XLSX.writeFile(wb,`MHSS-Global-Report-${ec}-${am?'AM':'EN'}.xlsx`);
+        }
+        function setReportOutputLanguage(lang){
+            currentLang=lang;
+            localStorage.setItem('mh_report_lang',lang);
+            setLanguage(lang);
+            renderGlobalReport();
+        }
+        function printStudentIdCards(){
+            const students=getStudentIdCardRows().filter(s=>{
+                const q=($('globalSearch')?.value||'').trim().toLowerCase();
+                return !q||`${s.name||''} ${s.id||''} ${s.class_name||''} ${s.grade||''} ${s._source}`.toLowerCase().includes(q);
+            });
+            $('printArea').innerHTML=`<style>
+                .id-print-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12mm}
+                .id-card-print{border:1.5px solid #c9a227;border-radius:12px;padding:10mm;background:#fff;color:#111;break-inside:avoid;min-height:58mm}
+                .id-card-top{display:flex;gap:8mm;align-items:center;border-bottom:1px solid #ddd;padding-bottom:5mm;margin-bottom:4mm}
+                .id-card-logo{width:18mm;height:18mm;object-fit:contain}
+                .id-card-name{font-size:15px;font-weight:800;margin:0}
+                .id-card-sub{font-size:9px;color:#666;margin-top:2px}
+                .id-card-row{display:grid;grid-template-columns:1fr 1fr;gap:4mm;font-size:9px}
+                .id-card-row b{display:block;font-size:10px}
+            </style>
+            <div class="print-header"><img src="logo.png" onerror="this.style.display='none'"><div><h2>${esc(t('studentIdCardsReport'))}</h2><p>${esc(ethiopianLabel(new Date(),true))}</p></div></div>
+            <div class="id-print-grid">${students.map(s=>`<div class="id-card-print">
+                <div class="id-card-top"><img class="id-card-logo" src="logo.png" onerror="this.style.display='none'"><div><p class="id-card-name">${esc(s.name||'Student')}</p><div class="id-card-sub">${esc(s._source||'MHSS')}</div></div></div>
+                <div class="id-card-row"><div>${esc(t('studentId'))}<b>${esc(s.id||'—')}</b></div><div>${esc(t('grade'))}<b>${esc(s.grade||s.class_name||'—')}</b></div><div>${esc(t('gender'))}<b>${esc(s.gender||'—')}</b></div><div>${esc(t('statusLabel'))}<b>${esc(s.status||'—')}</b></div></div>
+            </div>`).join('')}</div>`;
+            setTimeout(()=>window.print(),100);
+        }
+        function printGlobalReport(){if(($('globalReportType')?.value||'all')==='student_id_cards'){printStudentIdCards();return;}const rows=globalFilteredRows();$('printArea').innerHTML=`<div class="print-header"><img src="logo.png" onerror="this.style.display='none'"><div><h2>${esc(currentLang==='am'?'የMHSS አጠቃላይ ሪፖርት':'MHSS Global Report')}</h2><p>${esc(ethiopianLabel(new Date(),true))}</p></div></div><table class="print-table"><thead><tr><th>${esc(t('date'))}</th><th>${esc(t('sourceLabel'))}</th><th>${esc(t('categoryLabel'))}</th><th>${esc(t('description'))}</th><th>${esc(t('type'))}</th><th>${esc(t('amountEtb'))}</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(GLOBAL_LABELS[r.source]||r.source)}</td><td>${esc(r.category)}</td><td>${esc(r.description)}</td><td>${esc(r.type)}</td><td>${esc(typeof r.value==='number'?r.value.toLocaleString()+' ETB':r.value)}</td></tr>`).join('')}</tbody></table>`;window.print();}
 
         function setHeaderDate() {
             const gc = new Date();
@@ -1205,7 +1419,7 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
                     <div><h2>${esc(t('liveReportTitle'))}</h2><p>${esc(t('generatedOn'))} ${new Date().toLocaleString()}</p></div>
                 </div>
                 <div class="print-meta">
-                    <span>${esc(t('period'))} ${esc($('rbStart').value || t('all'))} ${currentLang==='am'?'እስከ':'to'} ${esc($('rbEnd').value || t('all'))}</span>
+                    <span>${esc(t('period'))} ${esc($('rbStartEc').value || t('all'))} ${currentLang==='am'?'እስከ':'to'} ${esc($('rbEndEc').value || t('all'))}</span>
                     <span>${esc(t('income'))}: ${income.toLocaleString()} ETB | ${esc(t('expenseWord'))}: ${expense.toLocaleString()} ETB | ${esc(t('net'))}: ${(income-expense).toLocaleString()} ETB</span>
                 </div>
                 <table class="print-table">
@@ -1246,9 +1460,9 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
 
         // Inline handlers in the existing HTML need global functions.
         Object.assign(window, {
-            switchTab, jumpToFilteredReport, quickReport, setLanguage,
-            renderTrendChart, renderReportTable, renderExecutiveIntelligence, exportReportExcel,
-            exportReportPdf, toggleExecutiveMode, toggleSchedule
+            switchTab, jumpToFilteredReport, quickReport, setLanguage, loadLiveData,
+            renderTrendChart, renderReportTable, renderGlobalReport, globalQuickRange, exportGlobalExcel, printGlobalReport,
+            renderExecutiveIntelligence, exportReportExcel, exportReportPdf, toggleExecutiveMode, toggleSchedule, openEcDatePicker, closeEcDatePicker, selectEcDate, openGlobalEcDatePicker, closeGlobalEcDatePicker, selectGlobalEcDate, printStudentIdCards
         });
 
         // Keep the page synchronized with the same Supabase database used by the other modules.
@@ -1354,40 +1568,188 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             $('smartNet').className='insight-value '+(income-expense>=0?'text-green-400':'text-red-400');
         }
 
-        // Ethiopian calendar helpers: Gregorian is retained internally for database filtering; all month labels and quick periods use Ethiopian calendar.
+        // Ethiopian calendar helpers: Gregorian is retained internally for database filtering.
+        // The visible report dates are true Ethiopian calendar dates.
         const ETH_MONTHS = ['መስከረም','ጥቅምት','ኅዳር','ታኅሣሥ','ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','ጳጉሜን'];
-        function gregorianToEthiopian(date){
+        const ETH_WEEKDAYS = ['ሰኞ','ማክሰኞ','ረቡዕ','ሐሙስ','ዓርብ','ቅዳሜ','እሁድ'];
+        const ETH_EPOCH = 1724221;
+
+        function gregorianToJdn(date){
             const d=new Date(date); d.setHours(0,0,0,0);
-            const gYear=d.getFullYear(), gMonth=d.getMonth()+1, gDay=d.getDate();
-            const a=Math.floor((14-gMonth)/12), y=gYear+4800-a, m=gMonth+12*a-3;
-            const jd=gDay+Math.floor((153*m+2)/5)+365*y+Math.floor(y/4)-Math.floor(y/100)+Math.floor(y/400)-32045;
-            const jdn=jd; const eYear=Math.floor((4*(jdn-1723856)+1463)/1461);
-            const eMonth=1+Math.floor((jdn-(1723856+365*(eYear-1)+Math.floor(eYear/4)))/30);
-            const eDay=jdn-(1723856+365*(eYear-1)+Math.floor(eYear/4)+30*(eMonth-1))+1;
-            return {year:eYear,month:eMonth,day:eDay};
+            const Y=d.getFullYear(), M=d.getMonth()+1, D=d.getDate();
+            const a=Math.floor((14-M)/12), y=Y+4800-a, m=M+12*a-3;
+            return D+Math.floor((153*m+2)/5)+365*y+Math.floor(y/4)-Math.floor(y/100)+Math.floor(y/400)-32045;
+        }
+        function jdnToGregorian(jdn){
+            const a=jdn+32044, b=Math.floor((4*a+3)/146097), c=a-Math.floor(146097*b/4);
+            const d=Math.floor((4*c+3)/1461), e=c-Math.floor(1461*d/4), m=Math.floor((5*e+2)/153);
+            const day=e-Math.floor((153*m+2)/5)+1;
+            const month=m+3-12*Math.floor(m/10);
+            const year=100*b+d-4800+Math.floor(m/10);
+            return new Date(year,month-1,day);
+        }
+        function gregorianToEthiopian(date){
+            const jdn=gregorianToJdn(date);
+            const year=Math.floor((4*(jdn-ETH_EPOCH)+1463)/1461);
+            const month=1+Math.floor((jdn-(ETH_EPOCH+365*(year-1)+Math.floor(year/4)))/30);
+            const day=jdn-(ETH_EPOCH+365*(year-1)+Math.floor(year/4)+30*(month-1))+1;
+            return {year,month,day};
+        }
+        function ethiopianToGregorian(year,month,day){
+            const jdn=ETH_EPOCH+365*(year-1)+Math.floor(year/4)+30*(month-1)+day-1;
+            return jdnToGregorian(jdn);
         }
         function ethiopianLabel(date,withDay=false){
-            const e=gregorianToEthiopian(date); return withDay ? `${e.day} ${ETH_MONTHS[e.month-1]} ${e.year}` : `${ETH_MONTHS[e.month-1]} ${e.year}`;
+            const e=gregorianToEthiopian(date);
+            return withDay ? `${e.day} ${ETH_MONTHS[e.month-1]} ${e.year}` : `${ETH_MONTHS[e.month-1]} ${e.year}`;
+        }
+        function ethiopianInputValue(date){
+            const e=gregorianToEthiopian(date);
+            return `${e.year}-${String(e.month).padStart(2,'0')}-${String(e.day).padStart(2,'0')}`;
+        }
+        function parseEcDate(value){
+            const m=String(value||'').trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if(!m) return null;
+            const year=Number(m[1]), month=Number(m[2]), day=Number(m[3]);
+            const max=month===13?((year%4===3)?6:5):(month>=1&&month<=12?30:0);
+            if(year<1||month<1||month>13||day<1||day>max) return null;
+            return {year,month,day,date:ethiopianToGregorian(year,month,day)};
         }
         function ethiopianMonthRange(date=new Date()){
             const e=gregorianToEthiopian(date);
-            const start=new Date(date); start.setHours(0,0,0,0);
-            // Find Gregorian date corresponding to Ethiopian month start by walking locally; max 31 days.
-            for(let i=0;i<35;i++){ const x=new Date(start); x.setDate(x.getDate()-i); const ex=gregorianToEthiopian(x); if(ex.year===e.year&&ex.month===e.month&&ex.day===1){ const end=new Date(x); end.setDate(end.getDate()+(e.month===13?5:30)-1); return {start:x,end}; }}
-            return null;
+            const start=ethiopianToGregorian(e.year,e.month,1);
+            const days=e.month===13?((e.year%4===3)?6:5):30;
+            const end=ethiopianToGregorian(e.year,e.month,days);
+            return {start,end};
         }
+
+        let ecPickerTarget='rbStart', ecPickerYear=null, ecPickerMonth=null;
+        function openEcDatePicker(target){
+            ecPickerTarget=target;
+            const current=$(target)?.value ? parseEcDate($(target).value) : null;
+            const today=gregorianToEthiopian(new Date());
+            const base=current || today;
+            ecPickerYear=base.year; ecPickerMonth=base.month;
+            renderEcDatePicker();
+        }
+        let globalEcPickerTarget='globalStart', globalEcPickerYear=null, globalEcPickerMonth=null;
+        function openGlobalEcDatePicker(target){
+            globalEcPickerTarget=target;
+            const current=$(target)?.value ? parseEcDate($(target).value) : null;
+            const today=gregorianToEthiopian(new Date());
+            const base=current || today;
+            globalEcPickerYear=base.year; globalEcPickerMonth=base.month;
+            renderGlobalEcDatePicker();
+        }
+        function closeGlobalEcDatePicker(){
+            const p=$('globalEcDatePicker'); if(!p)return;
+            p.classList.add('hidden'); p.setAttribute('aria-hidden','true');
+        }
+        function globalEcPickerMove(delta){
+            globalEcPickerMonth+=delta;
+            if(globalEcPickerMonth<1){globalEcPickerMonth=13;globalEcPickerYear--;}
+            if(globalEcPickerMonth>13){globalEcPickerMonth=1;globalEcPickerYear++;}
+            renderGlobalEcDatePicker();
+        }
+        function renderGlobalEcDatePicker(){
+            const p=$('globalEcDatePicker'); if(!p)return;
+            const targetInput=$(globalEcPickerTarget+'Ec'), targetValue=$(globalEcPickerTarget)?.value;
+            const selected=parseEcDate(targetValue);
+            const today=gregorianToEthiopian(new Date());
+            const days=globalEcPickerMonth===13?((globalEcPickerYear%4===3)?6:5):30;
+            const first=ethiopianToGregorian(globalEcPickerYear,globalEcPickerMonth,1);
+            const firstDay=(first.getDay()+6)%7;
+            const cells=[];
+            for(let i=0;i<firstDay;i++) cells.push('<span></span>');
+            for(let day=1;day<=days;day++){
+                const isSelected=selected&&selected.year===globalEcPickerYear&&selected.month===globalEcPickerMonth&&selected.day===day;
+                const isToday=today.year===globalEcPickerYear&&today.month===globalEcPickerMonth&&today.day===day;
+                cells.push(`<button type="button" class="ec-day${isSelected?' selected':''}${isToday?' today':''}" onclick="selectGlobalEcDate(${globalEcPickerYear},${globalEcPickerMonth},${day})">${day}</button>`);
+            }
+            p.innerHTML=`<div class="ec-date-head"><div class="ec-date-nav"><button type="button" onclick="globalEcPickerMove(-1)">‹</button></div><div class="ec-date-title">${ETH_MONTHS[globalEcPickerMonth-1]} ${globalEcPickerYear}</div><div class="ec-date-nav"><button type="button" onclick="globalEcPickerMove(1)">›</button></div></div>
+                <div class="ec-date-week">${ETH_WEEKDAYS.map(x=>`<span>${x}</span>`).join('')}</div>
+                <div class="ec-date-grid">${cells.join('')}</div>
+                <div class="ec-date-footer"><span class="ec-date-hint">${esc(t('chooseEcDate'))}</span><button type="button" class="ec-date-action" onclick="selectGlobalEcDate(${today.year},${today.month},${today.day})">${esc(t('today'))}</button></div>`;
+            if(targetInput){
+                const r=targetInput.getBoundingClientRect();
+                p.style.left=Math.max(12,Math.min(window.innerWidth-p.offsetWidth-12,r.left))+'px';
+                p.style.top=(r.bottom+8)+'px';
+            }
+            p.classList.remove('hidden'); p.setAttribute('aria-hidden','false');
+        }
+        function selectGlobalEcDate(year,month,day){
+            const g=ethiopianToGregorian(year,month,day);
+            const iso=`${g.getFullYear()}-${String(g.getMonth()+1).padStart(2,'0')}-${String(g.getDate()).padStart(2,'0')}`;
+            if($(globalEcPickerTarget)) $(globalEcPickerTarget).value=iso;
+            if($(globalEcPickerTarget+'Ec')) $(globalEcPickerTarget+'Ec').value=`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            closeGlobalEcDatePicker();
+            renderGlobalReport();
+        }
+        function closeEcDatePicker(){
+            const p=$('ecDatePicker'); if(!p)return;
+            p.classList.add('hidden'); p.setAttribute('aria-hidden','true');
+        }
+        function ecPickerMove(delta){
+            ecPickerMonth+=delta;
+            if(ecPickerMonth<1){ecPickerMonth=13;ecPickerYear--;}
+            if(ecPickerMonth>13){ecPickerMonth=1;ecPickerYear++;}
+            renderEcDatePicker();
+        }
+        function renderEcDatePicker(){
+            const p=$('ecDatePicker'); if(!p)return;
+            const targetInput=$(ecPickerTarget+'Ec'), targetValue=$(ecPickerTarget)?.value;
+            const selected=parseEcDate(targetValue);
+            const today=gregorianToEthiopian(new Date());
+            const days=ecPickerMonth===13?((ecPickerYear%4===3)?6:5):30;
+            const first=ethiopianToGregorian(ecPickerYear,ecPickerMonth,1);
+            const firstDay=(first.getDay()+6)%7; // Monday=0
+            const title=`${ETH_MONTHS[ecPickerMonth-1]} ${ecPickerYear}`;
+            const cells=[];
+            for(let i=0;i<firstDay;i++) cells.push('<span></span>');
+            for(let day=1;day<=days;day++){
+                const isSelected=selected&&selected.year===ecPickerYear&&selected.month===ecPickerMonth&&selected.day===day;
+                const isToday=today.year===ecPickerYear&&today.month===ecPickerMonth&&today.day===day;
+                cells.push(`<button type="button" class="ec-day${isSelected?' selected':''}${isToday?' today':''}" onclick="selectEcDate(${ecPickerYear},${ecPickerMonth},${day})">${day}</button>`);
+            }
+            p.innerHTML=`<div class="ec-date-head"><div class="ec-date-nav"><button type="button" onclick="ecPickerMove(-1)">‹</button></div><div class="ec-date-title">${title}</div><div class="ec-date-nav"><button type="button" onclick="ecPickerMove(1)">›</button></div></div>
+                <div class="ec-date-week">${ETH_WEEKDAYS.map(x=>`<span>${x}</span>`).join('')}</div>
+                <div class="ec-date-grid">${cells.join('')}</div>
+                <div class="ec-date-footer"><span class="ec-date-hint">${esc(t('chooseEcDate'))}</span><button type="button" class="ec-date-action" onclick="selectEcDate(${today.year},${today.month},${today.day})">${esc(t('today'))}</button></div>`;
+            if(targetInput){
+                const r=targetInput.getBoundingClientRect();
+                p.style.left=Math.max(12,Math.min(window.innerWidth-p.offsetWidth-12,r.left))+'px';
+                p.style.top=(r.bottom+8)+'px';
+            }
+            p.classList.remove('hidden'); p.setAttribute('aria-hidden','false');
+        }
+        function selectEcDate(year,month,day){
+            const g=ethiopianToGregorian(year,month,day);
+            const iso=`${g.getFullYear()}-${String(g.getMonth()+1).padStart(2,'0')}-${String(g.getDate()).padStart(2,'0')}`;
+            if($(ecPickerTarget)) $(ecPickerTarget).value=iso;
+            if($(ecPickerTarget+'Ec')) $(ecPickerTarget+'Ec').value=`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            closeEcDatePicker();
+            renderReportTable();
+        }
+        document.addEventListener('click',e=>{
+            const p=$('ecDatePicker');
+            if(!p||p.classList.contains('hidden')) return;
+            if(!p.contains(e.target)&&e.target.id!=='rbStartEc'&&e.target.id!=='rbEndEc') closeEcDatePicker();
+            const gp=$('globalEcDatePicker'); if(gp&&!gp.classList.contains('hidden')&&!gp.contains(e.target)&&e.target.id!=='globalStartEc'&&e.target.id!=='globalEndEc') closeGlobalEcDatePicker();
+        });
+        window.addEventListener('resize',closeEcDatePicker);
+
 
         function quickReport(period) {
             const now=new Date(), pad=n=>String(n).padStart(2,'0');
-            if(period==='all'){ $('rbStart').value=''; $('rbEnd').value=''; }
+            if(period==='all'){ $('rbStart').value=''; $('rbEnd').value=''; $('rbStartEc').value=''; $('rbEndEc').value=''; }
             else if(period==='month'){
                 const r=ethiopianMonthRange(now);
-                if(r){ $('rbStart').value=r.start.toISOString().slice(0,10); $('rbEnd').value=r.end.toISOString().slice(0,10); }
+                if(r){ $('rbStart').value=r.start.toISOString().slice(0,10); $('rbEnd').value=r.end.toISOString().slice(0,10); $('rbStartEc').value=ethiopianInputValue(r.start); $('rbEndEc').value=ethiopianInputValue(r.end); }
             } else {
                 const e=gregorianToEthiopian(now);
-                const start=new Date(now); for(let i=0;i<370;i++){const x=new Date(start);x.setDate(x.getDate()-i);const ex=gregorianToEthiopian(x);if(ex.year===e.year&&ex.month===1&&ex.day===1){$('rbStart').value=x.toISOString().slice(0,10);break;}}
+                const start=new Date(now); for(let i=0;i<370;i++){const x=new Date(start);x.setDate(x.getDate()-i);const ex=gregorianToEthiopian(x);if(ex.year===e.year&&ex.month===1&&ex.day===1){$('rbStart').value=x.toISOString().slice(0,10); $('rbStartEc').value=ethiopianInputValue(x);break;}}
                 const next=new Date(now); next.setDate(next.getDate()+370); let found=null; for(let i=0;i<740;i++){const x=new Date(now);x.setDate(x.getDate()+i);const ex=gregorianToEthiopian(x);if(ex.year===e.year+1&&ex.month===1&&ex.day===1){found=x;break;}}
-                if(found){found.setDate(found.getDate()-1);$('rbEnd').value=found.toISOString().slice(0,10);}
+                if(found){found.setDate(found.getDate()-1);$('rbEnd').value=found.toISOString().slice(0,10);$('rbEndEc').value=ethiopianInputValue(found);}
             }
             switchTab('reports'); renderReportTable();
         }
@@ -1408,12 +1770,14 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
             // Re-render everything that generates its own text dynamically in JS.
             if (typeof renderDashboard === 'function') renderDashboard();
             if (typeof renderReportTable === 'function') renderReportTable();
+            if (typeof renderGlobalReport === 'function') renderGlobalReport();
             if (typeof refreshOrbitalStatuses === 'function') refreshOrbitalStatuses();
         }
 
         async function init() {
             setHeaderDate();
             restorePreferences();
+            const todayEc=new Date(); if($('rbStartEc')) $('rbStartEc').value=ethiopianInputValue(todayEc); if($('rbEndEc')) $('rbEndEc').value=ethiopianInputValue(todayEc); if($('globalStartEc')) $('globalStartEc').value=ethiopianInputValue(todayEc); if($('globalEndEc')) $('globalEndEc').value=ethiopianInputValue(todayEc);
             $('langBtnEn')?.addEventListener('click', () => setLanguage('en'));
             $('langBtnAm')?.addEventListener('click', () => setLanguage('am'));
             setLanguage(localStorage.getItem('mh_report_lang') === 'am' ? 'am' : 'en');
@@ -1443,6 +1807,21 @@ header,.cmd-header{background:var(--report-card)!important;border-bottom:1px sol
                 }
             }, 60000);
         }
+
+
+        // Inline report-card actions need these functions on window because this page uses a module script.
+        window.selectGlobalFeature = selectGlobalFeature;
+        window.renderExecutiveReportDashboard = renderExecutiveReportDashboard;
+        window.renderAttendanceIntelligence = renderAttendanceIntelligence;
+        window.printStudentIdCards = printStudentIdCards;
+        window.renderGlobalReport = renderGlobalReport;
+        window.openEcDatePicker = openEcDatePicker;
+        window.closeEcDatePicker = closeEcDatePicker;
+        window.selectEcDate = selectEcDate;
+        window.openGlobalEcDatePicker = openGlobalEcDatePicker;
+        window.closeGlobalEcDatePicker = closeGlobalEcDatePicker;
+        window.selectGlobalEcDate = selectGlobalEcDate;
+        window.setReportOutputLanguage = setReportOutputLanguage;
 
         init().catch(err => {
             console.error('[Report] initialization failed:', err);

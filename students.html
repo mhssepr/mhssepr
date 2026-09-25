@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="./mhss-global.js"></script>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -4618,7 +4619,7 @@ html[data-theme="dark"] .view-lux-modal{
             document.getElementById('scanModalScope').textContent = t('scanScopeGlobal');
             resetScanModalUI();
             openModal('scanIdModal');
-            setTimeout(() => document.getElementById('scanIdInput')?.focus(), 260);
+            requestAnimationFrame(() => document.getElementById('scanIdInput')?.focus({preventScroll:true}));
         }
 
         function openClassScanModal(className, idPrefix) {
@@ -4628,7 +4629,7 @@ html[data-theme="dark"] .view-lux-modal{
             document.getElementById('scanModalScope').textContent = `${t('scanScopeClass')} ${className}`;
             resetScanModalUI();
             openModal('scanIdModal');
-            setTimeout(() => document.getElementById('scanIdInput')?.focus(), 260);
+            requestAnimationFrame(() => document.getElementById('scanIdInput')?.focus({preventScroll:true}));
         }
 
         function closeScanIdModal() {
@@ -4669,6 +4670,30 @@ html[data-theme="dark"] .view-lux-modal{
                 scanModalBusy = false;
             }
         }
+
+        // Fast USB keyboard-wedge fallback: if the scanner loses focus, capture
+        // its rapid keystrokes while the scan modal is open and process on Enter.
+        let studentScannerBuffer = '';
+        let studentScannerLastKeyAt = 0;
+        document.addEventListener('keydown', function(e) {
+            const modal = document.getElementById('scanIdModal');
+            if (!modal || modal.classList.contains('hidden')) return;
+            const input = document.getElementById('scanIdInput');
+            if (e.target === input) return;
+            if (e.target?.tagName === 'TEXTAREA') return;
+            const now = Date.now();
+            if (now - studentScannerLastKeyAt > 100) studentScannerBuffer = '';
+            studentScannerLastKeyAt = now;
+            if (e.key === 'Enter' && studentScannerBuffer) {
+                e.preventDefault();
+                const value = studentScannerBuffer;
+                studentScannerBuffer = '';
+                if (input) input.value = value;
+                handleScanModalKeydown({key:'Enter',preventDefault:()=>{}});
+            } else if (e.key && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                studentScannerBuffer += e.key;
+            }
+        });
 
         // ==========================================
         // 10a-2. Profile print cards + PDF download

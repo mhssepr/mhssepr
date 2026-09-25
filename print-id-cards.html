@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="./mhss-global.js"></script>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -449,6 +450,10 @@
                     <button type="button" class="feature-btn px-3 py-2.5 rounded-xl text-xs font-bold" onclick="openPostPrintingVerification()" data-i18n="postPrintVerification">✓ Post-Printing Verification</button>
                     <button type="button" class="feature-btn px-3 py-2.5 rounded-xl text-xs font-bold" onclick="openSelectedPreview()" data-i18n="individualPreview">👁️ Individual Preview</button>
                 </div>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <button type="button" class="feature-btn px-3 py-2.5 rounded-xl text-xs font-bold" onclick="openVerificationQueue()">🟢 Print Queue → Verification Queue</button>
+                    <button type="button" class="feature-btn px-3 py-2.5 rounded-xl text-xs font-bold" onclick="openAutoVerificationMode()">📷 Auto-Verification Mode</button>
+                </div>
 
                 <label class="flex items-center justify-between text-sm cursor-pointer border-t pt-3" style="border-color:var(--border)">
                     <span data-i18n="cuttingGuides">Show Cutting Guides</span>
@@ -498,10 +503,10 @@
       <div class="rounded-xl p-4 border" style="border-color:var(--border);background:rgba(200,158,58,.055)">
         <div class="text-xs font-bold mb-2" data-i18n="scanStudentBarcode">Scan Student ID Barcode</div>
         <div class="flex gap-2">
-          <input id="postPrintVerifyInput" class="lux-input flex-1 px-3 py-2.5 rounded-xl text-sm" placeholder="Scan barcode or enter Student ID" autocomplete="off">
+          <input id="postPrintVerifyInput" class="lux-input flex-1 px-3 py-2.5 rounded-xl text-sm" placeholder="Scan physical card QR code" autocomplete="off">
           <button type="button" onclick="runPostPrintingVerification()" class="gold-btn px-4 py-2.5 rounded-xl text-sm font-bold">Verify</button>
         </div>
-        <div class="text-[10px] mt-2" style="color:var(--text-muted)">USB barcode scanners work as keyboard input. No camera is required.</div>
+        <div class="text-[10px] mt-2" style="color:var(--text-muted)">QR scanners work as keyboard input. Camera QR scanning is also supported.</div>
       </div>
       <div id="postPrintVerifyResult" class="text-xs" style="color:var(--text-muted)">Waiting for a printed card scan…</div>
       <div id="postPrintVerifyBody"></div>
@@ -1330,9 +1335,22 @@
             catch(e){console.warn('Database verification failed, using local records:',e);source='local';res=lookupCardLocal(no);}
             let j=judgeCard(res);
             j=applyQrTokenCheck(j,res,parsed,source,fromScan,raw);
+            // Physical QR scan is the final print proof. Only a current, valid QR
+            // from the live database can change the card to Printed.
+            let physicalPrinted=false;
+            if(fromScan && parsed.kind==='card' && source==='database' && j.level==='ok' && res.card && res.card.student_id){
+                try{physicalPrinted=await verifyPrintedCardInDatabase(client,res.card.student_id,res.card.card_number);}catch(e){console.warn('QR print verification could not be saved:',e);}
+                if(physicalPrinted){
+                    j=Object.assign({},j,{title:'✓ PRINT VERIFIED',msg:j.msg+' ✓ Physical QR scan confirmed this card was printed.',confidence:'HIGH'});
+                }
+            }
             result.textContent=j.title;
             body.innerHTML=renderVerification(no,res,j,source);
-            const stu=res.student||{id:res.card&&res.card.student_id,name:null};
+            if(fromScan && parsed.kind==='card' && source==='database'){
+                const conf=physicalPrinted?'🟢 HIGH CONFIDENCE — QR MATCH + CURRENT CARD + PHYSICAL PRINT VERIFIED':(j.level==='ok'?'🟡 MEDIUM CONFIDENCE — CARD MATCHED, PRINT NOT CONFIRMED':'🔴 LOW CONFIDENCE — VERIFICATION FAILED');
+                body.insertAdjacentHTML('afterbegin',`<div class="rounded-xl p-3 mb-3 border text-xs font-bold" style="border-color:${physicalPrinted?'rgba(34,197,94,.45)':j.level==='ok'?'rgba(245,158,11,.45)':'rgba(239,68,68,.45)'}">${conf}</div>`);
+            }
+            const stu=res.student||{id:res.card&&res.card.student_id};
             const action=(res.card||res.student)?'CARD_VERIFIED':'CARD_VERIFY_FAILED',details=`${j.title}${source==='local'?' (local records)':''}${fromScan?' [camera]':''}`;
             addCardAudit(action,stu&&stu.id?{id:stu.id,name:stu.name}:null,no,details);
             if(client&&source==='database')logCardAuditDB(client,action,stu,no,'verification',details);
@@ -1350,12 +1368,14 @@
     }
     function onCardScanned(value){
         const now=Date.now();
-        if(cardScanLast.v===value&&now-cardScanLast.t<2500){cardScanLast.t=now;return;}   // same card still in front of the camera
+        if(cardScanLast.v===value&&now-cardScanLast.t<900){cardScanLast.t=now;return;}   // same card still in front of the camera
         if(cardVerifyBusy)return;
         cardScanLast={v:value,t:now};
         try{if(navigator.vibrate)navigator.vibrate(40);}catch(e){}
         const f=document.getElementById('cardScanFlash');if(f){f.style.opacity='1';setTimeout(()=>{f.style.opacity='0';},160);}
-        runCardVerification(value);
+        runCardVerification(value).finally(()=>{
+            if(cardScanStream){const input=document.getElementById('verifyCardInput');if(input){input.value='';input.focus();}}
+        });
     }
     function handleScannedValue(value){onCardScanned(value);}
     async function startCardScanner(){
@@ -1367,7 +1387,7 @@
         if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg.textContent='Camera is not available here (it needs https). Type the number instead.';return;}
         // Native detector (fastest) where the browser has it; otherwise jsQR, which is downloaded while the camera starts.
         let detector=null;
-        if('BarcodeDetector' in window){try{detector=new BarcodeDetector({formats:['qr_code','code_128']});}catch(e){detector=null;}}
+        if('BarcodeDetector' in window){try{detector=new BarcodeDetector({formats:['qr_code']});}catch(e){detector=null;}}
         const jsqrReady=detector?Promise.resolve():loadJsQR().catch(()=>null);
         try{
             const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
@@ -1428,13 +1448,26 @@
             logCardAuditDB(client,'STATUS_CHANGED',s,rec.cardNumber,'status',from+' → '+to);
         }catch(e){console.warn('Card status was not saved to the database:',e);}
     }
-    async function syncPrintToSupabase(ids,stage){
+    async function syncPrintJobToSupabase(ids,stage){
         try{const client=await waitForSupabase(),uid=await currentUserId(client);
-            const u=await client.from('mhss_student_id_cards').update({status:'Printed',updated_by:uid}).in('student_id',ids).eq('is_current',true).in('status',['Active','Printed']);
-            if(u.error)throw u.error;
-            const rows=ids.map(id=>{const s=studentsData.find(x=>x.id===id);const rec=s?ensureCardRecord(s):null;return s&&rec&&rec.cardNumber?{action:'PRINTED',student_id:s.id,student_name:s.name,card_number:rec.cardNumber,stage,details:`${String(stage).toUpperCase()} print job`,created_by:uid}:null;}).filter(Boolean);
+            const rows=ids.map(id=>{const s=studentsData.find(x=>x.id===id);const rec=s?ensureCardRecord(s):null;return s&&rec&&rec.cardNumber?{action:'PRINT_JOB_SENT',student_id:s.id,student_name:s.name,card_number:rec.cardNumber,stage,details:`${String(stage).toUpperCase()} print job sent — awaiting physical scan verification`,created_by:uid}:null;}).filter(Boolean);
             if(rows.length){const a=await client.from('mhss_student_id_card_audit').insert(rows);if(a.error)throw a.error;}
-        }catch(e){console.warn('Print history was not saved to the database:',e);}
+        }catch(e){console.warn('Print job history was not saved to the database:',e);}
+    }
+    async function verifyPrintedCardInDatabase(client,studentId,cardNumber){
+        const uid=await currentUserId(client),at=nowIso();
+        const q=await client.from('mhss_student_id_cards').select('*').eq('student_id',studentId).eq('is_current',true).maybeSingle();
+        if(q.error)throw q.error;
+        const card=q.data;
+        if(!card||String(card.card_number||'').trim().toUpperCase()!==String(cardNumber||'').trim().toUpperCase()) return false;
+        // A card already confirmed as Printed stays Printed; never create duplicate verification events.
+        if(String(card.status||'')==='Printed') return true;
+        const history=[...(Array.isArray(card.history)?card.history:[]),{action:'PRINT_VERIFIED',at,cardNumber:card.card_number,method:'QR_SCAN'}];
+        const u=await client.from('mhss_student_id_cards').update({status:'Printed',history,updated_by:uid}).eq('id',card.id).eq('is_current',true);
+        if(u.error)throw u.error;
+        const a=await client.from('mhss_student_id_card_audit').insert([{action:'PRINT_VERIFIED',student_id:studentId,student_name:null,card_number:card.card_number,stage:'physical-scan',details:'Physical ID card QR scanned and verified after printing',created_by:uid}]);
+        if(a.error)throw a.error;
+        return true;
     }
     async function syncReplacementToSupabase(s,oldRec,newRec){
         try{const client=await waitForSupabase(),uid=await currentUserId(client);
@@ -1839,7 +1872,7 @@
     function openCardHistory(){document.getElementById('cardVerifyBox').classList.add('hidden');document.getElementById('cardHistoryTitle').textContent='📜 Card History & Audit Trail';document.getElementById('cardVerifyResult').textContent='Issuance, replacement, status and print actions.';const a=getCardAudit().slice().reverse();document.getElementById('cardHistoryBody').innerHTML=a.length?a.map(x=>`<div class="card-history-row"><div class="font-bold">${escapeHtml(x.action)}</div><div><b>${escapeHtml(x.cardNumber||'—')}</b> · ${escapeHtml(x.studentName||x.studentId||'—')}<div class="text-[9px] mt-1" style="color:var(--text-muted)">${escapeHtml(x.details||'')}</div></div><div style="color:var(--text-muted)">${escapeHtml(new Date(x.at).toLocaleString())}</div></div>`).join(''):'<div class="text-sm py-8 text-center" style="color:var(--text-muted)">No audit history yet.</div>';document.getElementById('cardHistoryModal').classList.add('open');}
     function closeCardHistory(){stopCardScanner();document.getElementById('cardHistoryModal').classList.remove('open');}
     function exportCardAudit(){const blob=new Blob([JSON.stringify(getCardAudit(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`MHSS-ID-Card-Audit-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);}
-    function recordPrintHistory(ids,stage){const r=getCardRegistry(),a=getCardAudit(),at=nowIso();ids.forEach(id=>{const s=studentsData.find(x=>x.id===id);if(!s)return;const rec=ensureCardRecord(s);rec.status='Printed';rec.history=Array.isArray(rec.history)?rec.history:[];rec.history.push({action:'PRINTED',stage,at,cardNumber:rec.cardNumber});r[id]=rec;a.push({action:'PRINTED',stage,studentId:s.id,studentName:s.name,cardNumber:rec.cardNumber,at,details:`${stage.toUpperCase()} print job`});});saveCardRegistry(r);saveCardAudit(a);syncPrintToSupabase(ids,stage);updateCardSecurityStats();}
+    function recordPrintHistory(ids,stage){const r=getCardRegistry(),a=getCardAudit(),at=nowIso();ids.forEach(id=>{const s=studentsData.find(x=>x.id===id);if(!s)return;const rec=ensureCardRecord(s);rec.status=rec.status==='Printed'?'Printed':'Active';rec.history=Array.isArray(rec.history)?rec.history:[];rec.history.push({action:'PRINT_JOB_SENT',stage,at,cardNumber:rec.cardNumber});r[id]=rec;a.push({action:'PRINT_JOB_SENT',stage,studentId:s.id,studentName:s.name,cardNumber:rec.cardNumber,at,details:`${stage.toUpperCase()} print job sent — awaiting physical scan verification`});});saveCardRegistry(r);syncPrintJobToSupabase(ids,stage);saveCardAudit(a);updateCardSecurityStats();}
 
     function hasStudentPhoto(s) {
         const p = String(s?.photo || '').trim();
@@ -1988,9 +2021,12 @@
         const status=card?.status||'Not Issued';
         const qrCardMismatch=!!scannedCardNumber && String(card?.card_number||'').trim().toUpperCase()!==String(scannedCardNumber).trim().toUpperCase();
         const valid=!!card && card.is_current!==false && !['Lost','Damaged','Expired','Replaced','Replacement Required'].includes(status) && !qrCardMismatch;
-        const printed=status==='Printed';
-        const title=valid?'✓ CARD VERIFIED':'✕ CARD NOT VALID';
-        const msg=!card?'No current physical card is registered for this student.':qrCardMismatch?`The scanned QR card number (${scannedCardNumber}) does not match the current card (${card.card_number||'—'}).`:!valid?`Current card status is ${status}. Do not accept this card.`:`The scanned physical card number matches the current student record.`;
+        let printed=status==='Printed';
+        if(valid && scannedCardNumber){
+            try{printed=await verifyPrintedCardInDatabase(client,st.id,card.card_number);}catch(e){console.warn('Physical print verification could not be saved:',e);printed=false;}
+        }
+        const title=valid?(printed?'✓ PRINT VERIFIED':'✓ CARD VERIFIED — PRINT NOT YET VERIFIED'):'✕ CARD NOT VALID';
+        const msg=!card?'No current physical card is registered for this student.':qrCardMismatch?`The scanned QR card number (${scannedCardNumber}) does not match the current card (${card.card_number||'—'}).`:!valid?`Current card status is ${status}. Do not accept this card.`:(printed?'The physical card was scanned and recorded as Printed.':'The card is valid, but its physical print has not yet been verified.');
         if(result)result.textContent=title;
         if(body){
             const border=valid?'rgba(34,197,94,.45)':'rgba(239,68,68,.45)';
@@ -2015,6 +2051,79 @@
         if(result)result.textContent=error?'⚠️ VERIFIED, BUT AUDIT SAVE WARNING':'✓ PRINTED CARD CONFIRMED';
         const note=document.createElement('div');note.className='rounded-xl p-3 mt-3 text-xs font-bold';note.style.cssText='border:1px solid rgba(34,197,94,.45);background:rgba(34,197,94,.08);color:#22c55e';note.textContent='✓ Post-print verification has been recorded in the card audit history.';document.getElementById('postPrintVerifyBody')?.appendChild(note);
     }
+    // ==========================================
+    // PRINT QUEUE → VERIFICATION QUEUE
+    // ==========================================
+    let verificationQueueRows=[];
+    function getQueueStatus(s){
+        const rec=ensureCardRecord(s);
+        const st=String(rec?.status||'Active');
+        if(st==='Printed')return 'Verified Printed';
+        const audit=getCardAudit().some(a=>a.studentId===s.id&&a.action==='PRINT_JOB_SENT');
+        return audit?'Waiting for Scan':'Not Printed';
+    }
+    async function loadVerificationQueue(){
+        const rows=studentsData.map(s=>({student:s,localStatus:getQueueStatus(s),card:ensureCardRecord(s)}));
+        try{
+            const client=await waitForSupabase();
+            const ids=studentsData.map(s=>s.id).filter(Boolean);
+            if(ids.length){
+                const q=await client.from('mhss_student_id_cards').select('student_id,card_number,status,is_current,version,updated_at').in('student_id',ids).eq('is_current',true);
+                if(!q.error){rows.forEach(r=>{const d=(q.data||[]).find(x=>String(x.student_id)===String(r.student.id));if(d)r.db=d;});}
+            }
+        }catch(e){console.warn('Verification queue database refresh failed:',e);}
+        verificationQueueRows=rows;
+        return rows;
+    }
+    function verificationQueueHtml(rows){
+        const counts={total:rows.length,printed:0,waiting:0,notPrinted:0};
+        rows.forEach(r=>{const st=String(r.db?.status||r.localStatus);if(st==='Printed'||st==='Verified Printed')counts.printed++;else if(r.localStatus==='Waiting for Scan')counts.waiting++;else counts.notPrinted++;});
+        const pct=counts.total?Math.round(counts.printed/counts.total*100):0;
+        const list=rows.filter(r=>String(r.db?.status||r.localStatus)!=='Printed'&&r.localStatus!=='Verified Printed');
+        return `<div class="rounded-2xl p-4 border" style="border-color:var(--border);background:rgba(200,158,58,.045)">
+          <div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="font-bold">🟢 Print Queue → Verification Queue</div><div class="text-[10px] mt-1" style="color:var(--text-muted)">Only a successful physical QR scan becomes Verified Printed.</div></div><div class="text-2xl font-black">${pct}%</div></div>
+          <div class="mt-3 h-2 rounded-full overflow-hidden" style="background:var(--border)"><div style="height:100%;width:${pct}%;background:currentColor;color:#22c55e;transition:width .25s"></div></div>
+          <div class="grid grid-cols-3 gap-2 mt-3 text-center"><div><div class="font-black text-lg">${counts.printed}</div><div class="text-[9px]" style="color:var(--text-muted)">VERIFIED PRINTED</div></div><div><div class="font-black text-lg">${counts.waiting}</div><div class="text-[9px]" style="color:var(--text-muted)">WAITING FOR SCAN</div></div><div><div class="font-black text-lg">${counts.notPrinted}</div><div class="text-[9px]" style="color:var(--text-muted)">NOT PRINTED</div></div></div>
+        </div>
+        <div class="flex gap-2 flex-wrap mt-3"><button type="button" class="gold-btn px-3 py-2 rounded-xl text-xs font-bold" onclick="openAutoVerificationMode()">📷 Start QR Verification</button><button type="button" class="feature-btn px-3 py-2 rounded-xl text-xs font-bold" onclick="showUnverifiedCards()">🔎 Find Unverified Cards</button></div>
+        <div id="verificationQueueList" class="mt-3 space-y-2">${list.length?list.map(r=>{const st=r.db?.status||r.localStatus;const no=r.db?.card_number||r.card?.cardNumber||'—';return `<div class="rounded-xl p-3 border flex items-center justify-between gap-3" style="border-color:var(--border)"><div><div class="font-bold text-xs">${escapeHtml(r.student.name||'—')}</div><div class="text-[9px]" style="color:var(--text-muted)">${escapeHtml(no)} · ${escapeHtml(st)}</div></div><span class="text-[9px] font-bold" style="color:${st==='Waiting for Scan'?'#f59e0b':'var(--text-muted)'}">${escapeHtml(st)}</span></div>`;}).join(''):'<div class="text-center text-xs py-6" style="color:#22c55e">✓ All loaded cards are physically verified.</div>'}</div>`;
+    }
+    async function openVerificationQueue(){
+        const modal=document.getElementById('cardHistoryModal');
+        const body=document.getElementById('cardHistoryBody');
+        const title=document.getElementById('cardHistoryTitle');
+        const result=document.getElementById('cardVerifyResult');
+        stopCardScanner();
+        document.getElementById('cardVerifyBox')?.classList.add('hidden');
+        if(title)title.textContent='🟢 Print Queue → Verification Queue';
+        if(result)result.textContent='Loading verification progress…';
+        if(body)body.innerHTML='<div class="text-center text-xs py-8">Loading…</div>';
+        modal?.classList.add('open');
+        const rows=await loadVerificationQueue();
+        if(result)result.textContent=`${rows.filter(r=>String(r.db?.status||r.localStatus)==='Printed').length} verified printed · ${rows.length} loaded`;
+        if(body)body.innerHTML=verificationQueueHtml(rows);
+    }
+    async function showUnverifiedCards(){
+        const rows=await loadVerificationQueue();
+        const un=rows.filter(r=>String(r.db?.status||r.localStatus)!=='Printed');
+        const body=document.getElementById('cardHistoryBody');
+        if(body)body.innerHTML=`<div class="rounded-xl p-4 border" style="border-color:var(--border)"><div class="font-bold">🔎 Unverified Cards (${un.length})</div><div class="text-[10px] mt-1" style="color:var(--text-muted)">These cards still need physical QR verification.</div>${un.length?`<div class="mt-3 space-y-2">${un.map(r=>`<div class="p-3 rounded-xl border" style="border-color:var(--border)"><b>${escapeHtml(r.student.name||'—')}</b><div class="text-[9px] mt-1" style="color:var(--text-muted)">${escapeHtml(r.db?.card_number||r.card?.cardNumber||'—')} · ${escapeHtml(r.db?.status||r.localStatus)}</div></div>`).join('')}</div>`:'<div class="text-sm py-6 text-center" style="color:#22c55e">✓ No unverified cards.</div>'}</div>`;
+    }
+    async function openAutoVerificationMode(){
+        const modal=document.getElementById('cardHistoryModal');
+        const box=document.getElementById('cardVerifyBox');
+        const title=document.getElementById('cardHistoryTitle');
+        const result=document.getElementById('cardVerifyResult');
+        const body=document.getElementById('cardHistoryBody');
+        if(title)title.textContent='📷 Auto-Verification Mode · QR Only';
+        if(result)result.textContent='Ready — scan a physical ID card QR code. The scanner stays active for the next card.';
+        if(body)body.innerHTML='<div class="rounded-xl p-3 border text-xs" style="border-color:rgba(34,197,94,.45)">🟢 FAST SCANNER ACTIVE · QR scan → verify → next scan</div>';
+        if(box)box.classList.remove('hidden');
+        modal?.classList.add('open');
+        const input=document.getElementById('verifyCardInput');if(input)input.value='';
+        setTimeout(()=>startCardScanner(),30);
+    }
+
     function savePrintSettings() {
         const remember = document.getElementById('rememberPrintSettings')?.checked ?? true;
         const data = {
@@ -2301,6 +2410,10 @@
         document.getElementById('realPrintArea').innerHTML = '';
         btn.disabled = false;
         btn.textContent = (I18N[currentLang] || I18N.en).printIdCardsBtn;
+    });
+
+    document.getElementById('postPrintVerifyInput')?.addEventListener('keydown',function(e){
+        if(e.key==='Enter'){e.preventDefault();runPostPrintingVerification();}
     });
 
     // ==========================================
